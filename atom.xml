@@ -4,7 +4,7 @@
   <subtitle><![CDATA[淘宝前端团队（FED）]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://taobaofed.org/"/>
-  <updated>2019-03-13T02:33:39.000Z</updated>
+  <updated>2019-03-13T02:43:07.000Z</updated>
   <id>http://taobaofed.org/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://taobaofed.org/blog/2019/03/13/fed-2019/"/>
     <id>http://taobaofed.org/blog/2019/03/13/fed-2019/</id>
     <published>2019-03-13T02:22:25.000Z</published>
-    <updated>2019-03-13T02:33:39.000Z</updated>
+    <updated>2019-03-13T02:43:07.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启"></p>
 <p>随着阿里巴巴 2019 年实习生招聘的启动，淘宝前端团队（Taobao FED）实习生内部推荐也已经拉开序幕。这是一个有着十多年历史与荣耀的团队，相信你已经从各个渠道听到过我们的名字。选择一家公司进行实习，对于大学生来说是一个关键的抉择；找到有潜力的实习生进行培养，对于一个团队来说更是求贤若渴。</p>
 <p>在这里，请让我向你介绍我的小伙伴们以及我们在做的一些事情。如果你感到有兴趣，并且认为自己足够优秀，不要吝啬你的才华，直接邮件简历给他们，也许他们将会成为你职业生涯的第一个老板，以及你全新人生阶段的良师益友。</p>
@@ -36,7 +36,7 @@
 <p>从支持双十一、双十二活动页面的搭建系统，到炙手可热的小程序搭建系统，前端技术-搭建服务团队承担着淘宝页面搭建服务的重任，实现可视化的方式从0到1搭建页面，配置页面动态数据，后期页面运维等一系列服务。不管你是爱好前端技术，还是热衷于 Nodejs 后台开发，搭建服务团队都期待你的加入！欢迎 2020 年毕业的祖国花朵投递简历至：<a href="mailto:butian.wth@taobao.com" target="_blank" rel="noopener">butian.wth@taobao.com</a></p>
 <p><img src="https://img.alicdn.com/tfs/TB1qLlFLMTqK1RjSZPhXXXfOFXa-750-150.jpg" alt="苏河"></p>
 <p>从手淘里的普通页面再到支撑万千页面生成的搭建平台，我们实现了从零到一的效率飞跃。从前端的性能平台再到前端的稳定性治理，我们定义了前端的新数据指标。从 PWA 的全面实践再到 Serverless 理念的引导落地，我们始终站在技术潮流的最前沿。我们是创新业务团队，在淘宝的大平台与前端的风口上尽情挥洒。2020 年毕业的同学，创新业务的未来，有你会更精彩。欢迎投递简历至：<a href="mailto:suhe.ly@taobao.com" target="_blank" rel="noopener">suhe.ly@taobao.com</a></p>
-<p><img src="https://img.alicdn.com/tfs/TB1V.VALSzqK1RjSZFLXXcn2XXa-750-150.jpg" alt="正豪"></p>
+<p><img src="https://img.alicdn.com/tfs/TB12rnzLFzqK1RjSZFoXXbfcXXa-750-150.jpg" alt="正豪"></p>
 <p>我们尝试 Weex 在跨端应用开发的最佳实践，推进 IDE 在工程链路中的集成，还有面向商家装修的中后台应用，面向 ISV 的开放平台。服务用户广，技术不设限，等你来挑战！欢迎投递简历至：<a href="mailto:zhenghao.zmw@taobao.com" target="_blank" rel="noopener">zhenghao.zmw@taobao.com</a></p>
 <p><img src="https://img.alicdn.com/tfs/TB198VFLOrpK1RjSZFhXXXSdXXa-750-150.jpg" alt="二同"></p>
 <p>2020 年毕业热爱图形渲染的你一定不要错过这班车，这里有一群致力于 WebGL/WebGPU 跨端标准化实现的小伙伴，诞生了为极致渲染而生的图形渲染引擎 GCanvas，正在面向 5G/IoT 发力创造新一代渲染框架的路上邀你同行，欢迎投递简历至：<a href="mailto:yuantong.xyt@alibaba-inc.com" target="_blank" rel="noopener">yuantong.xyt@alibaba-inc.com</a>。</p>
