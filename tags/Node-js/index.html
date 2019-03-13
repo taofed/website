@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Tag: node.js | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="用技术为体验提供无限可能">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Taobao FED | 淘宝前端团队">
+<meta property="og:url" content="http://taobaofed.org/tags/node-js/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="用技术为体验提供无限可能">
+<meta property="og:locale" content="zh-cn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Taobao FED | 淘宝前端团队">
+<meta name="twitter:description" content="用技术为体验提供无限可能">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><i class="icon fa fa-tag"></i>标签：<em>node.js</em></h1>
+            </div>
+            <div class="main-body-content">
+              
+  
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2016" class="archive-year"><i class="icon fa fa-calendar-o"></i>2016</a>
+        </div>
+        <div class="archives">
+    
+    
+    
+      <div class="article-row">
+    
+        
+  <article class="article article-summary">
+    <div class="article-summary-inner">
+      
+<a href="/blog/2016/04/09/node-web-framework-design/" class="thumbnail">
+  
+    <span style="background-image:url(http://gtms01.alicdn.com/tps/i1/TB146VMMpXXXXXqXXXXWPiOLXXX-900-500.jpeg
+)" alt="企业级 Node.js Web 应用解决方案设计的零零总总" class="thumbnail-image"></span>
+  
+</a>
+
+      <div class="article-meta">
+        <p class="category"><a class="article-category-link" href="/categories/Node-js/">Node.js</a></p>
+        <p class="date"><time datetime="2016-04-08T16:28:29.000Z" itemprop="datePublished">2016-04-09</time></p>
+      </div>
+      <h2 class="article-title">
+        <a href="/blog/2016/04/09/node-web-framework-design/" class="title">企业级 Node.js Web 应用解决方案设计的零零总总</a>
+      </h2>
+      <p class="article-excerpt">
+        
+        
+年前一直在忙着做新版 Midway 升级的事情，不少同学都知道 Midway 是淘宝的 Node.js Web 应用解决方案，目的是为了更好的做前后端分离，让前端同学开发更简单，生活更幸福（笑）。
+如今 Midway 5 正式发布了，横跨了几个月的开发个工作，期间带来的感慨，也算是史上最多。
+Midway 的诞生也有 2 年多的时间，我个人参与维护也有 1 年多，经历了从 v3 到 v5 的变化
+      </p>
+    </div>
+  </article>
+
+
+    
+  
+    
+    
+    
+    
+        
+  <article class="article article-summary">
+    <div class="article-summary-inner">
+      
+<a href="/blog/2016/04/01/what-can-we-learn-from-left-pad-event/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tps/TB1XPPdMXXXXXc0XVXXXXXXXXXX-900-500.jpg
+)" alt="从 left-pad 事件我们可以学到什么" class="thumbnail-image"></span>
+  
+</a>
+
+      <div class="article-meta">
+        <p class="category"><a class="article-category-link" href="/categories/Node-js/">Node.js</a></p>
+        <p class="date"><time datetime="2016-03-31T16:35:09.000Z" itemprop="datePublished">2016-04-01</time></p>
+      </div>
+      <h2 class="article-title">
+        <a href="/blog/2016/04/01/what-can-we-learn-from-left-pad-event/" class="title">从 left-pad 事件我们可以学到什么</a>
+      </h2>
+      <p class="article-excerpt">
+        
+        
+最近 NPM 圈发生了“一个 17 行代码的模块引发的血案”。left-pad 工具模块被作者从 NPM 上撤下，所有直接或者间接依赖这个模块的 NPM 包就忧伤的挂掉了，包括 babel 这样的热门项目。
+而其中的原因大概是这样：作者 Azer 写了一个叫 kik 的工具和某个公司同名了，这天公司的律师要求其删掉这个模块，把 kik 这个名字“让”给他们，作者不答应，律师就直接找 NPM 了，
+      </p>
+    </div>
+  </article>
+
+
+    
+      </div>
+    
+  
+    
+    
+    
+    
+      <div class="article-row">
+    
+        
+  <article class="article article-summary">
+    <div class="article-summary-inner">
+      
+<a href="/blog/2016/03/18/error-handling-in-koa/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tps/TB1WJcvLVXXXXX5XFXXXXXXXXXX-900-500.jpg
+)" alt="如何优雅的在 koa 中处理错误" class="thumbnail-image"></span>
+  
+</a>
+
+      <div class="article-meta">
+        <p class="category"><a class="article-category-link" href="/categories/Node-js/">Node.js</a></p>
+        <p class="date"><time datetime="2016-03-18T11:44:08.000Z" itemprop="datePublished">2016-03-18</time></p>
+      </div>
+      <h2 class="article-title">
+        <a href="/blog/2016/03/18/error-handling-in-koa/" class="title">如何优雅的在 koa 中处理错误</a>
+      </h2>
+      <p class="article-excerpt">
+        
+        
+
+软件开发时，有 80% 的代码在处理各种错误。 ——某著名开发者
+
+想让自己的代码健壮，错误处理是必不可少的。这篇文章将主要介绍 koa 框架中错误处理的实现（其实主要是 co 的实现），使用 koa 框架开发 web 应用时进行错误处理的一些方法。
+基础在 Node.js 中，错误处理的方法主要有下面几种：
+
+和其他同步语言类似的 throw / try / catch 方法
+callbac
+      </p>
+    </div>
+  </article>
+
+
+    
+  
+    
+    
+      
+        </div></div></section>
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2015" class="archive-year"><i class="icon fa fa-calendar-o"></i>2015</a>
+        </div>
+        <div class="archives">
+    
+    
+    
+      <div class="article-row">
+    
+        
+  <article class="article article-summary">
+    <div class="article-summary-inner">
+      
+<a href="/blog/2015/11/19/yield-and-delegating-yield/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tps/TB10eFhKFXXXXccXpXXXXXXXXXX-900-500.jpg
+)" alt="yield 和 yield*" class="thumbnail-image"></span>
+  
+</a>
+
+      <div class="article-meta">
+        <p class="category"><a class="article-category-link" href="/categories/Node-js/">Node.js</a></p>
+        <p class="date"><time datetime="2015-11-19T11:05:32.000Z" itemprop="datePublished">2015-11-19</time></p>
+      </div>
+      <h2 class="article-title">
+        <a href="/blog/2015/11/19/yield-and-delegating-yield/" class="title">yield 和 yield*</a>
+      </h2>
+      <p class="article-excerpt">
+        
+        
+最近在看 koa 的中间件实现时，总是看到 yield* next 这种用法，觉得很困惑。下面是学习成果。
+代理 yield我们先来看看原生语法中，代理 yield（delegating yield）的含义和用法。
+首先是下面的代码（普通的 yield）：
+123456789101112131415161718192021function* outer() &#123;    yield 'be
+      </p>
+    </div>
+  </article>
+
+
+    
+  
+  
+    </div></div></section>
+  
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
+�布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

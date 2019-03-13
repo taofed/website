@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>JSTracker：前端异常数据采集 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="JSTracker - 淘宝前端监控平台基本上服务器端的代码都是处于 7x24 小时的实时监控状态的，一旦有任何异常对应的开发同学就马上收到报警，并且第一时间处理。 但是对于前端来说，往往是实际用户那里的脚本报错后才知道页面出现异常，这时候已经是故障了。 为了让前端也能和后端一样，需要将线上的 JavaScript 代码监控起来，当用户端浏览器出现异前端第一时间被通知到。于是便有了淘宝前端的监控">
+<meta name="keywords" content="JSTracker,监控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JSTracker：前端异常数据采集">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/10/28/jstracker-how-to-collect-data/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="JSTracker - 淘宝前端监控平台基本上服务器端的代码都是处于 7x24 小时的实时监控状态的，一旦有任何异常对应的开发同学就马上收到报警，并且第一时间处理。 但是对于前端来说，往往是实际用户那里的脚本报错后才知道页面出现异常，这时候已经是故障了。 为了让前端也能和后端一样，需要将线上的 JavaScript 代码监控起来，当用户端浏览器出现异前端第一时间被通知到。于是便有了淘宝前端的监控">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1wsEtKXXXXXXTXXXXlzJZ8pXX-900-500.jpg">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB15K6KKXXXXXXTaXXXbb5uUFXX-1166-360.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB19rzGKXXXXXXAaXXX5JvL5XXX-966-459.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1cdz2KXXXXXXqXFXXusByLVXX-712-390.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1ROPIKXXXXXauaXXX58beWpXX-1172-322.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JSTracker：前端异常数据采集">
+<meta name="twitter:description" content="JSTracker - 淘宝前端监控平台基本上服务器端的代码都是处于 7x24 小时的实时监控状态的，一旦有任何异常对应的开发同学就马上收到报警，并且第一时间处理。 但是对于前端来说，往往是实际用户那里的脚本报错后才知道页面出现异常，这时候已经是故障了。 为了让前端也能和后端一样，需要将线上的 JavaScript 代码监控起来，当用户端浏览器出现异前端第一时间被通知到。于是便有了淘宝前端的监控">
+<meta name="twitter:image" content="http://gtms01.alicdn.com/tps/i1/TB1wsEtKXXXXXXTXXXXlzJZ8pXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-jstracker-how-to-collect-data" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      JSTracker：前端异常数据采集
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 溪夏</span>
+        
+        <span>发表于: <a href="/blog/2015/10/28/jstracker-how-to-collect-data/" class="article-date">
+  <time datetime="2015-10-28T07:11:43.000Z" itemprop="datePublished">2015-10-28</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms01.alicdn.com/tps/i1/TB1wsEtKXXXXXXTXXXXlzJZ8pXX-900-500.jpg" alt="JSTracker：前端异常数据采集"></p>
+<h2 id="JSTracker-淘宝前端监控平台"><a href="#JSTracker-淘宝前端监控平台" class="headerlink" title="JSTracker - 淘宝前端监控平台"></a>JSTracker - 淘宝前端监控平台</h2><p>基本上服务器端的代码都是处于 7x24 小时的实时监控状态的，一旦有任何异常对应的开发同学就马上收到报警，并且第一时间处理。 但是对于前端来说，往往是实际用户那里的脚本报错后才知道页面出现异常，这时候已经是故障了。</p>
+<p>为了让前端也能和后端一样，需要将线上的 JavaScript 代码监控起来，当用户端浏览器出现异前端第一时间被通知到。于是便有了淘宝前端的监控平台：JSTracker。</p>
+<h3 id="采集哪些数据"><a href="#采集哪些数据" class="headerlink" title="采集哪些数据"></a>采集哪些数据</h3><p>在解决怎么采集之前，还需要解决采集哪些数据，哪些数据是有用的？</p>
+<p>主要原则就是避开用户敏感字段，采集浏览器版本、操作系统版本、报错的 msg 信息等。</p>
+<h3 id="JavaScript-异常的时候捕获异常"><a href="#JavaScript-异常的时候捕获异常" class="headerlink" title="JavaScript 异常的时候捕获异常"></a>JavaScript 异常的时候捕获异常</h3><p>主动捕获异常方案主要是 onError 和 addEventListener，<br>onError 在 IE6 开始就支持了，所以 JSTracker 的主动采集是使用的 onError。</p>
+<p>onError 可以采集到 file、line、col 等信息，但是实际情况中却大部分收集到的是 script error。<br><img src="http://gtms03.alicdn.com/tps/i3/TB15K6KKXXXXXXTaXXXbb5uUFXX-1166-360.png" alt="收集到的 script error"></p>
+<p>原因是浏览器的同源性策略（CORS），在高级浏览器中如果浏览器捕获到了错误信息，如果 JS 文件所在的域名（如：g.alicdn.com）和当前的页面地址（如：<a href="http://www.taobao.com）是跨域的，那么浏览器会把" target="_blank" rel="noopener">www.taobao.com）是跨域的，那么浏览器会把</a> onError 中的 msg 替换为 script error，其余字段也会做替换。</p>
+<p>webkit 的源代码：<br><img src="http://gtms04.alicdn.com/tps/i4/TB19rzGKXXXXXXAaXXX5JvL5XXX-966-459.png" alt="webkit 的源代码"></p>
+<p>Script error 这个问题也是目前大家最诟病的一个问题：当报警发生之后，我们只知道有问题，但是很难知道哪里出了问题。</p>
+<p>其实是有解决方案的：</p>
+<ul>
+<li><p>首先 JavaScript 请求的 http 返回头上需要加上一个 Access-Control-Allow-Origin 头。<br><img src="http://gtms01.alicdn.com/tps/i1/TB1cdz2KXXXXXXqXFXXusByLVXX-712-390.png" alt="Access-Control-Allow-Origin 头"></p>
+</li>
+<li><p>在引入 JavaScript 文件的时候需要在 script 标签上添加 crossorigin 属性，在加这个属性前请一定确保上一条已经完成，否则 JavaScript 文件不会执行！！！。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=&quot;http://somremotesite.example/script.js&quot; crossorigin&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>这个解决方式看起来完美，但是要做的改造实在是太多了，目前还是主动上报为主。</p>
+<h3 id="主动上报异常"><a href="#主动上报异常" class="headerlink" title="主动上报异常"></a>主动上报异常</h3><p>onError 的方案会采集到全面的浏览器报错，但是太全了，出了刚才的 script error 问题，还会采集到。</p>
+<ul>
+<li>ISP 在页面中注入的脚本报错（我们的前端质量很高的，但是被这些牛氓们一弄，啥质量都没了）。</li>
+<li>插件问题（乱七八糟的插件也是一样的令人讨厌，注入奇怪的东西在页面中，引起报错）。</li>
+</ul>
+<p>为了让采集到的错误更有价值，需要暴露接口给让前端门自己在代码中上报异常（作为一名合格的代码工程师，一定要有抛异常的习惯呢）。</p>
+<p>现在我们提供了自定义上报的接口，没错就是这么简单，你不用担心 JSTracker 脚本有没有加载，只要在你的代码中直接用就行了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">window.JSTracker2 = window.JSTracker2 || [];</span><br><span class="line">try&#123;</span><br><span class="line">    //your code</span><br><span class="line">&#125;catch(e)&#123;</span><br><span class="line">    JSTracker2.push(&#123;</span><br><span class="line">      msg: &quot;xx_api_failed&quot;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>自己上报的错误对于定位也是很容易的：<br><img src="http://gtms02.alicdn.com/tps/i2/TB1ROPIKXXXXXauaXXX58beWpXX-1172-322.png" alt="自己上报的错误"></p>
+<h3 id="一些细节问题"><a href="#一些细节问题" class="headerlink" title="一些细节问题"></a>一些细节问题</h3><h4 id="在代码中使用-try-catch-是否对性能有影响"><a href="#在代码中使用-try-catch-是否对性能有影响" class="headerlink" title="在代码中使用 try catch 是否对性能有影响"></a>在代码中使用 try catch 是否对性能有影响</h4><p>try catch 对性能的影响微乎其微，但是一些用法会让性能受很大的影响， 参考这个实验：<a href="http://taobaofed.org/blog/2015/10/28/try-catch-runing-problem/">http://taobaofed.org/blog/2015/10/28/try-catch-runing-problem/</a></p>
+<p>总结下来就是：在 try 语句块中不要定义太多的变量，最好是只写一个函数调用，避免 try 运行中变量拷贝造成的性能损耗。类似的不只是 try，定义 function 也是一样的。</p>
+<h4 id="采集到的数据如何发出去"><a href="#采集到的数据如何发出去" class="headerlink" title="采集到的数据如何发出去"></a>采集到的数据如何发出去</h4><p>JSTracker 的数据发送了非常大，这块都交给后端帮我们处理，采集部分只需要关注准确无误的把数据发送出去。</p>
+<p>最初的简单的发送方案，直接用 GET 请求，将参数拼接在 URL 后面：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> url = <span class="string">'xxx'</span>;</span><br><span class="line"><span class="keyword">new</span> Image().src = url;</span><br></pre></td></tr></table></figure>
+<p>后来发现这样发送有一定概率丢失数据,当浏览器回收内存的时候这个请求是发不出去的，所以要将这个变量 hold住：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">var</span> win = <span class="built_in">window</span>;</span><br><span class="line"><span class="keyword">var</span> n = <span class="string">'jsFeImage_'</span> + _make_rnd(),</span><br><span class="line">  img = win[n] = <span class="keyword">new</span> Image();</span><br><span class="line">img.onload = img.onerror = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  win[n] = <span class="literal">null</span>;</span><br><span class="line">&#125;;</span><br><span class="line">img.src = src;</span><br></pre></td></tr></table></figure>
+<h4 id="随机数造成的数据丢失"><a href="#随机数造成的数据丢失" class="headerlink" title="随机数造成的数据丢失"></a>随机数造成的数据丢失</h4><p>我们为了防止缓存，经常会用毫秒的时间作为随机数（如：+new Date()），但是在极端情况下可能1ms就会发出两条 log，这样第二条 log 就会丢失。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var _make_rnd  = function()&#123;</span><br><span class="line">    return (+new Date()) + &apos;.r&apos; + Math.floor(Math.random() * 1000);</span><br><span class="line">  &#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="360浏览器识别"><a href="#360浏览器识别" class="headerlink" title="360浏览器识别"></a>360浏览器识别</h4><p>为了能更好的统计这个浏览器，需要识别360SE、360EE。众所周知 3Q 大战之后360的 UA 就和 Chrome 的一样，所以我们要用一些特别的方法识别它们。目前为止能够识别的方案，这个方案会随时更新，适应360的变化。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> is360 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="regexp">/UBrowser/i</span>.test(navigator.userAgent))&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="built_in">window</span>.scrollMaxX !== <span class="string">'undefined'</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> _track = <span class="string">'track'</span> <span class="keyword">in</span> <span class="built_in">document</span>.createElement(<span class="string">'track'</span>);</span><br><span class="line">    <span class="keyword">var</span> webstoreKeysLength = <span class="built_in">window</span>.chrome &amp;&amp; <span class="built_in">window</span>.chrome.webstore ? <span class="built_in">Object</span>.keys(<span class="built_in">window</span>.chrome.webstore).length : <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">window</span>.clientInformation &amp;&amp; <span class="built_in">window</span>.clientInformation.languages &amp;&amp; <span class="built_in">window</span>.clientInformation.languages.length &gt; <span class="number">2</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_track) &#123;</span><br><span class="line">      <span class="keyword">return</span> webstoreKeysLength &gt; <span class="number">1</span> ? <span class="string">' QIHU 360 EE'</span> : <span class="string">' QIHU 360 SE'</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">  &#125;<span class="keyword">catch</span>(e)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/10/28/jstracker-how-to-collect-data/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/10/28/jstracker-how-to-collect-data/" data-id="cjt6lbxz4005fjeu1bx3uxq3c" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/10/28/jstracker-how-to-collect-data/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JSTracker/">JSTracker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/监控/">监控</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/10/28/disaster-recovery-at-taobao-home-page/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          淘宝首页兜底容灾方案
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/10/28/try-catch-runing-problem/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">try catch 对代码运行的性能影响</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

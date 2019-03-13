@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>使用 JS 构建跨平台的原生应用：ListView 组件介绍 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="背景滚动列表 几乎是移动开发中用途最广的 UI 组件，其重要性不言而喻。由于平台差异性，React Native 中的滚动列表组件 ListView 并没有直接映射为 Android 中的 ListView 或 iOS 中的 UITableView，而是在 ScrollView 的基础上使用 JS 做了一次封装。这样，滚动体验部分由 Native 负责，而 React 部分则专注于组件何时渲染、">
+<meta name="keywords" content="ReactNative">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 JS 构建跨平台的原生应用：ListView 组件介绍">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/09/using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="背景滚动列表 几乎是移动开发中用途最广的 UI 组件，其重要性不言而喻。由于平台差异性，React Native 中的滚动列表组件 ListView 并没有直接映射为 Android 中的 ListView 或 iOS 中的 UITableView，而是在 ScrollView 的基础上使用 JS 做了一次封装。这样，滚动体验部分由 Native 负责，而 React 部分则专注于组件何时渲染、">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1rXyhKVXXXXXWXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1FIQOKFXXXXbnXpXX77KZTVXX-490-481.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1jtsVKFXXXXX5XpXXrUEkYFXX-845-642.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB12jQCKFXXXXbbXVXXzPklSXXX-410-601.gif">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1orwYKFXXXXXQXpXXVFqz1XXX-319-112.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 JS 构建跨平台的原生应用：ListView 组件介绍">
+<meta name="twitter:description" content="背景滚动列表 几乎是移动开发中用途最广的 UI 组件，其重要性不言而喻。由于平台差异性，React Native 中的滚动列表组件 ListView 并没有直接映射为 Android 中的 ListView 或 iOS 中的 UITableView，而是在 ScrollView 的基础上使用 JS 做了一次封装。这样，滚动体验部分由 Native 负责，而 React 部分则专注于组件何时渲染、">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1rXyhKVXXXXXWXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      使用 JS 构建跨平台的原生应用：ListView 组件介绍
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 乾秋</span>
+        
+        <span>发表于: <a href="/blog/2015/12/09/using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview/" class="article-date">
+  <time datetime="2015-12-09T10:12:46.000Z" itemprop="datePublished">2015-12-09</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1rXyhKVXXXXXWXVXXXXXXXXXX-900-500.jpg" alt="使用 JS 构建跨平台的原生应用：ListView 组件介绍"></p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><strong>滚动列表</strong> 几乎是移动开发中用途最广的 UI 组件，其重要性不言而喻。由于平台差异性，React Native 中的滚动列表组件 ListView 并没有直接映射为 Android 中的 ListView 或 iOS 中的 UITableView，而是在 <a href="facebook.github.io/react-native/docs/scrollview.html">ScrollView</a> 的基础上使用 JS 做了一次封装。这样，滚动体验部分由 Native 负责，而 React 部分则专注于组件何时渲染、如何渲染等问题。</p>
+<p><code>ListView</code> 的基本设计原则是  <strong>“数据和展现相隔离”</strong> ，如下图所示。给我们带来的好处就是，我们只需关注数据的组织方式，任何对数据的操作都会自动渲染出对应的展现。<br><img src="//gtms01.alicdn.com/tps/i1/TB1FIQOKFXXXXbnXpXX77KZTVXX-490-481.jpg" alt></p>
+<h1 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h1><p><code>ListView</code> 在创建时需要绑定数据源，类似于 Android 中的 Adaptor。数据源内部保存了展现需要的初始数据 _dataBlob ，它是一个纯粹的对象或数组。列表可以带 <code>SectionHeader</code> （即列表中某一段的标题部分）也可以不带，本质上相同。数据源默认的格式有三个维度：</p>
+<ul>
+<li>第一个维度是 <strong>sectionId</strong> ，标识属于哪一段， 可以手动指定或隐式地使用数组索引或对象的 key 值；</li>
+<li>第二个维度是 <strong>rowId</strong> ，标识某个数据段下的某一个行，同样可以手动指定或隐式地使用数组索引或对象的 key 值；</li>
+<li>第三个维度是具体的数据对象，根据实际的需要而定。</li>
+</ul>
+<p>需要注意的是，上面只是 <strong>默认的数据格式</strong>，如果它不符合实际的需求， <strong>完全可以使用自定义的数据结构</strong> 。唯一的区别就是需要额外指定给 ListView 数据源中哪些是 id，哪些是 rowData。</p>
+<p><img src="//gtms01.alicdn.com/tps/i1/TB1jtsVKFXXXXX5XpXXrUEkYFXX-845-642.jpg" alt></p>
+<p>DataSource 的构造函数接收以下几个参数：</p>
+<ul>
+<li><code>rowHasChanged</code>: 用于在数据变化的时候，计算出变化的部分，在更新时只渲染脏数据；</li>
+<li><code>sectionHeaderHasChanged</code>: 同理，在列表带分段标题时需要实现；</li>
+<li><code>getRowData/getSectionHeaderData</code>: 如果遵循默认的数据源格式，这两个方法就没有必要实现，用内部默认的即可；而当数据源格式是自定义时，需要手动实现这两个方法。</li>
+</ul>
+<p>如文档中一般介绍的那样，DataSource 的初始化一般在 getInitialState 方法中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">getInitialState: function() &#123;</span><br><span class="line">  var ds = new ListView.DataSource(&#123;rowHasChanged: (r1, r2) =&gt; r1 !== r2&#125;);</span><br><span class="line">  return &#123;</span><br><span class="line">    dataSource: ds.cloneWithRows([&apos;row 1&apos;, &apos;row 2&apos;]),</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在初次见到这种写法时，心中其实疑惑这里为什么不一次性把整个对象 new 出来，而要拆分为两步？</p>
+<p>首先，如前所述，DataSource 的构造函数里的参数<a href="https://github.com/facebook/react-native/blob/master/Libraries/CustomComponents/ListView/ListViewDataSource.js#L52" target="_blank" rel="noopener">只有四个</a>，并不能直接传入数据对象。其次，一个页面中的滚动列表常常要不时修改数据，比如：</p>
+<ul>
+<li>边滚动边添加列表元素；</li>
+<li>展现搜索结果时，当搜索条件变化后，列表对应的数据对象需要重置；</li>
+<li>对列表中的结果进行筛选、排序等操作。</li>
+</ul>
+<p>在这些情况下，数据源需要做调整，但上述写法可以使得我们在调整时，无需重新定义 rowHasChanged 等比较函数，只需变化真实的数据对象即可。</p>
+<h1 id="展现"><a href="#展现" class="headerlink" title="展现"></a>展现</h1><h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>数据源确定后，下一个工作就是列表的渲染。在渲染时发挥重要作用的是 <code>renderRow</code> 属性，它接收数据源中保存的数据对象，并通过返回值确定该行该如何进行展现。我们可以对所有行统一进行展现，也可以根据里面的字段做出不同的展现。在列表包含 sectionHeader 时，还需要实现 <code>renderSectionHeader</code> 方法。一个简单的例子如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">var postDemo = React.createClass(&#123;</span><br><span class="line">  getInitialState: function() &#123;</span><br><span class="line">    var ds = new ListView.DataSource(&#123;</span><br><span class="line">      rowHasChanged: (r1, r2) =&gt; r1 !== r2,</span><br><span class="line">      sectionHeaderHasChanged: (s1, s2) =&gt; s1 !== s2</span><br><span class="line">    &#125;);</span><br><span class="line">    var dataBlob = &#123;...&#125;</span><br><span class="line">    return &#123;</span><br><span class="line">      dataSource: ds.cloneWithRowsAndSections(dataBlob)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  renderRow: function(rowData, sectionId, rowId) &#123;</span><br><span class="line">    return (&lt;View style=&#123;styles.row&#125;&gt;</span><br><span class="line">       &lt;Image source=&#123;&#123;uri: &apos;http:&apos; + rowData.pic&#125;&#125;</span><br><span class="line">      style=&#123;styles.image&#125; /&gt;</span><br><span class="line">        &lt;View style=&#123;styles.rightSection&#125;&gt;</span><br><span class="line">          &lt;Text style=&#123;styles.title&#125;&gt;&#123;rowData.title&#125;&lt;/Text&gt;</span><br><span class="line">          &lt;Text style=&#123;styles.priceInfo&#125;&gt;当前价: &amp;yen;&#123;rowData.price&#125;&lt;/Text&gt;</span><br><span class="line">        &lt;/View&gt;</span><br><span class="line">      &lt;/View&gt;);</span><br><span class="line">  &#125;,</span><br><span class="line">  renderSectionHeader: function(sectionData, sectionId) &#123;</span><br><span class="line">    return (&lt;View&gt;</span><br><span class="line">      &lt;Text style=&#123;styles.sectionHeaderStyle&#125;&gt;&#123;sectionId&#125;&lt;/Text&gt;</span><br><span class="line">      &lt;/View&gt;);</span><br><span class="line">  &#125;,</span><br><span class="line">  render: function() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;ListView</span><br><span class="line">      style=&#123;styles.listview&#125;</span><br><span class="line">      dataSource=&#123;this.state.dataSource&#125;</span><br><span class="line">      renderSectionHeader=&#123;this.renderSectionHeader&#125;</span><br><span class="line">      renderRow=&#123;this.renderRow&#125;/&gt;</span><br><span class="line">      );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>Demo 运行的效果如下：</p>
+<p><img src="//gtms01.alicdn.com/tps/i1/TB12jQCKFXXXXbbXVXXzPklSXXX-410-601.gif" alt></p>
+<h2 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h2><p>除了简单的渲染之外，另外一个要考虑的问题就是 <strong>当数据量很大的时候如何分页加载</strong> 。这种情形分两种情况考虑：</p>
+<ol>
+<li>数据一次性拿到，边滚动边加载</li>
+<li>数据不是一次性拿到，而是有可能分屏取数据</li>
+</ol>
+<p>对于第一种情况，在 ListView 内部其实已经做了分页的处理：</p>
+<ul>
+<li>ListView 内部通过 <code>curRenderedRowsCount</code> 状态保存已渲染的行数；</li>
+<li>初始状态下，要加载的数据条数等于 <code>initialListSize</code>（默认为 10 条）；</li>
+<li>在滚动时检测当前滚动的位置和最底部的距离，如果小于 <code>scrollRenderAheadDistance</code> (默认为 1000)，就更新<code>curRenderedRowsCount</code> ，在它原有值基础上加 <code>pageSize</code> 个（默认为 1 条）；</li>
+<li>由于属性变化，触发了 ListView 重新的 render 。在渲染过程中，<code>curRenderedRowsCount</code> 起到截断数据的作用，React 的 diff 算法使得只有新加入的数据才会渲染到了界面上。</li>
+</ul>
+<p>整个过程类似于 Web 端懒加载机制，即 <strong>每次在和底部的距离达到一个阈值时，加载接下来的 pageSize 个数据</strong> 。</p>
+<p>对于第二种情况，ListView 提供了相关的属性：</p>
+<ul>
+<li><code>onEndReachedThreshold</code>，在滚动即将到达底部时触发；</li>
+<li><code>onEndReached</code>，在已经到达底部时触发；</li>
+</ul>
+<p>我们可以在这两个方法中调用接口去拿数据，取到数据后再更新数据源。</p>
+<h2 id="多列"><a href="#多列" class="headerlink" title="多列"></a>多列</h2><p>很多页面中的列表并非单列的，如手淘搜索结果页里，商品分两列并排展示。乍一看似乎要做出不少调整，但实际上只通过布局即可达到相关效果。ListView 并没有强制要求一个 rowData 在展示时一定要占满一行，在多列的情况下，我们适时调整每个 rowData 占据的宽度即可。</p>
+<p>由于 React Native 使用 Flexbox 进行布局，在实现多列时，主要用到的是 <code>flexWrap：wrap</code> 属性：它的效果类似于 float，即水平地排列每一项，当放不下时进行折行处理。在设置每行视图占据一半宽度后就达到了两列的效果，多列的类似。</p>
+<p><img src="//gtms01.alicdn.com/tps/i1/TB1orwYKFXXXXXQXpXXVFqz1XXX-319-112.png" alt></p>
+<p>具体示例可以参考<a href="https://github.com/facebook/react-native/blob/master/Examples/UIExplorer/ListViewGridLayoutExample.js" target="_blank" rel="noopener">ListViewGridLayoutExample</a>。</p>
+<h2 id="滚动"><a href="#滚动" class="headerlink" title="滚动"></a>滚动</h2><p>ListView 只是整合了数据和展现，但实际滚动的功能还是由 <code>ScrollView</code> 全权负责。ScrollView 实现完全和平台相关：在 iOS 上，它映射为 <code>RCTScrollView</code>；在  Android 上，它映射为 <code>RCTScrollView</code> 和 <code>AndroidHorizontalScrollView</code>。</p>
+<p>React Native 让不同端上的技术融合在了一起，同时也给开发人员提出了更高的要求。以 ScrollView 为例，大量的属性其实原封不动映射给了 <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIScrollView_Class/" target="_blank" rel="noopener">UIScrollView</a>，这就意味着如果想再深入地研究下去，必须对客户端相关技术有足够了解。无论是前端还是客户端，跳出自己熟悉的那片领域也许才是更进一步的关键。</p>
+<p>谈到滚动，有一点不得不说的就是 <strong>列表的无限加载</strong>，这牵涉到滚动的性能。</p>
+<p><a href="https://github.com/facebook/react-native/issues/499" target="_blank" rel="noopener">Github 上的这个 issue</a>对此展开了热烈的讨论。其中有人就提到，数据量很大情况下，ListView 在加载时所占用的 CPU 和内存会大大增加，滚动到最后就导致了应用 crash。</p>
+<p>为此，ListView 中新添加了一个实验性的属性： <strong>removeClippedSubviews</strong> ，它能在滚动时及时删掉列表中处于视窗的之外的行，以此达到降低内存消耗的目的。不幸的是，即使设置了这个属性，程序虽然各项占用减少了不少，但还是没避免崩溃的命运。处于好奇，我也在最新版的 ListView 基础上做了简单尝试，不断加载一个无限大的列表，但并没有出现崩溃的情况：</p>
+<ul>
+<li>即使加载了 3000、4000 行，Android 真机、iOS 真机和 iOS 模拟器上都没有崩溃；</li>
+<li>Android 上明显感到数据加载有 <strong>阶段性的延时</strong> ，即滚动一定程度后，再次滚动数据始终加载不出来或要等一段时间才加载出来，体验较差；iOS 相比要流畅的多；</li>
+</ul>
+<p>但不崩溃并非最终的目的，很多 React Native 使用者都在试图改进 ListView 的性能表现，相比于直接使用 Native 端的组件，ListView 性能还是差强人意，有很大优化空间。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>ListView 并没有创造出新的东西，它只是集各家所长，很好地将 React 的视图渲染和 Native 端很成熟的滚动机制融合在了一起，使用起来和其他组件无差，静态地定义展现、动态地组织数据，是给人带来的直观感受。本文仅对 ListView 基础用法作了简要介绍，更为细致的点还是要在实际使用的过程中去发现。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/09/using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/09/using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview/" data-id="cjt6lby1u00c8jeu1yzvew4pj" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/09/using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ReactNative/">ReactNative</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/10/nodejs-unit-tests/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Node.js 单元测试：我要写测试
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/08/efficient-node-dev-cli-setup/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">高效 Node.js 开发环境之命令行工具篇</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

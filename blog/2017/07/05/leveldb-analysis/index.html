@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>LevelDB 实现分析 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="LevelDB 介绍LevelDB 是由 Google 开发的 key-value 非关系型数据库存储系统，是基于 LSM(Log-Structured-Merge Tree) 的典型实现，LSM 的原理是：当读写数据库时，首先纪录读写操作到 Op log 文件中，然后再操作内存数据库，当达到 checkpoint 时，则写入磁盘，同时删除相应的 Op log 文件，后续重新生成新的内存文件和">
+<meta name="keywords" content="LevelDB">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LevelDB 实现分析">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/07/05/leveldb-analysis/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="LevelDB 介绍LevelDB 是由 Google 开发的 key-value 非关系型数据库存储系统，是基于 LSM(Log-Structured-Merge Tree) 的典型实现，LSM 的原理是：当读写数据库时，首先纪录读写操作到 Op log 文件中，然后再操作内存数据库，当达到 checkpoint 时，则写入磁盘，同时删除相应的 Op log 文件，后续重新生成新的内存文件和">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1R1S4SXXXXXaRXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1AMqNSXXXXXczXFXXXXXXXXXX-851-479.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1IRGFSXXXXXbsXVXXXXXXXXXX-405-79.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1aoiISXXXXXX4XVXXXXXXXXXX-941-359.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1n.yuSXXXXXacaXXXXXXXXXXX-345-228.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1C9DXSXXXXXcyXXXXXXXXXXXX-197-140.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1X9qPSXXXXXbwXFXXXXXXXXXX-435-67.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB11UGqSXXXXXaEaXXXXXXXXXXX-819-359.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LevelDB 实现分析">
+<meta name="twitter:description" content="LevelDB 介绍LevelDB 是由 Google 开发的 key-value 非关系型数据库存储系统，是基于 LSM(Log-Structured-Merge Tree) 的典型实现，LSM 的原理是：当读写数据库时，首先纪录读写操作到 Op log 文件中，然后再操作内存数据库，当达到 checkpoint 时，则写入磁盘，同时删除相应的 Op log 文件，后续重新生成新的内存文件和">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1R1S4SXXXXXaRXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-leveldb-analysis" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      LevelDB 实现分析
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 胡帅</span>
+        
+        <span>发表于: <a href="/blog/2017/07/05/leveldb-analysis/" class="article-date">
+  <time datetime="2017-07-04T17:32:29.000Z" itemprop="datePublished">2017-07-05</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1R1S4SXXXXXaRXpXXXXXXXXXX-900-500.jpg" alt="LevelDB 实现分析"></p>
+<h3 id="LevelDB-介绍"><a href="#LevelDB-介绍" class="headerlink" title="LevelDB 介绍"></a>LevelDB 介绍</h3><p>LevelDB 是由 Google 开发的 key-value 非关系型数据库存储系统，是基于 LSM(Log-Structured-Merge Tree) 的典型实现，LSM 的原理是：当读写数据库时，首先纪录读写操作到 Op log 文件中，然后再操作内存数据库，当达到 checkpoint 时，则写入磁盘，同时删除相应的 Op log 文件，后续重新生成新的内存文件和 Op log 文件。</p>
+<p>LevelDB 内部采用了内存缓存机制，也就是在写数据库时，首先会存储在内存中，内存的存储结构采用了 skip list 结构，待达到 checkpoint 时，才进行落盘操作，保证了数据库的高效运转。</p>
+<h3 id="LevelDB-总体架构"><a href="#LevelDB-总体架构" class="headerlink" title="LevelDB 总体架构"></a>LevelDB 总体架构</h3><p><img src="https://gw.alicdn.com/tfs/TB1AMqNSXXXXXczXFXXXXXXXXXX-851-479.png" alt="resources structure"></p>
+<p>如上图所示，整个 LevelDB 由以下几部分组成：</p>
+<ol>
+<li>Write(k,v)，对外的接口</li>
+<li>Op log，操作日志记录文件</li>
+<li>memtable，数据库存储的内存结构</li>
+<li>Immutable memtable，待落盘的数据库内存数据</li>
+<li>sstable，落盘后的磁盘存储结构</li>
+<li>manifest，LevelDB 元信息清单，包括数据库的配置信息和中间使用的文件列表</li>
+<li>current，当前正在使用的文件清单</li>
+</ol>
+<p>整体结构清晰紧凑，非常容易理解。</p>
+<h3 id="对外接口"><a href="#对外接口" class="headerlink" title="对外接口"></a>对外接口</h3> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">DB() &#123; &#125;;</span><br><span class="line">virtual ~DB();</span><br><span class="line">static Status Open(const Options&amp; options,</span><br><span class="line">                   const std::string&amp; name,</span><br><span class="line">                   DB** dbptr);</span><br><span class="line">virtual Status Put(const WriteOptions&amp; options,</span><br><span class="line">                   const Slice&amp; key,</span><br><span class="line">                   const Slice&amp; value) = 0;</span><br><span class="line">virtual Status Delete(const WriteOptions&amp; options, const Slice&amp; key) = 0;</span><br><span class="line">virtual Status Write(const WriteOptions&amp; options, WriteBatch* updates) = 0;</span><br><span class="line">virtual Status Get(const ReadOptions&amp; options,</span><br><span class="line">                   const Slice&amp; key, std::string* value) = 0;</span><br><span class="line">virtual Iterator* NewIterator(const ReadOptions&amp; options) = 0;</span><br><span class="line">virtual const Snapshot* GetSnapshot() = 0;</span><br><span class="line">virtual void ReleaseSnapshot(const Snapshot* snapshot) = 0;</span><br></pre></td></tr></table></figure>
+<p>整体接口分为：</p>
+<ol>
+<li><p>数据库创建和删除</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DB() &#123; &#125;;</span><br><span class="line">virtual ~DB();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数据库打开</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">static Status Open(const Options&amp; options,</span><br><span class="line">                   const std::string&amp; name,</span><br><span class="line">                   DB** dbptr);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数据库读写删除操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">virtual Status Put(const WriteOptions&amp; options,</span><br><span class="line">                   const Slice&amp; key,</span><br><span class="line">                   const Slice&amp; value) = 0;</span><br><span class="line">virtual Status Delete(const WriteOptions&amp; options, const Slice&amp; key) = 0;</span><br><span class="line">virtual Status Get(const ReadOptions&amp; options,</span><br><span class="line">                   const Slice&amp; key, std::string* value) = 0;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数据库批处理操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virtual Status Write(const WriteOptions&amp; options, WriteBatch* updates) = 0;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数据库遍历操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">virtual Iterator* NewIterator(const ReadOptions&amp; options) = 0;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取快照操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">virtual const Snapshot* GetSnapshot() = 0;</span><br><span class="line">virtual void ReleaseSnapshot(const Snapshot* snapshot) = 0;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="Op-log结构分析"><a href="#Op-log结构分析" class="headerlink" title="Op log结构分析"></a>Op log结构分析</h4><p>LevelDB 使用的 Op log 日志采用了文件记录的方式，且文件使用了 mmap 方式操作，以提高效率。</p>
+<p>Op log 存储切分为 32KB 大小的数据块，每个 32KB 数据块存储着 Op log，每 个Op log 格式如下：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1IRGFSXXXXXbsXVXXXXXXXXXX-405-79.png" alt="resources structure"></p>
+<p>其中：</p>
+<ol>
+<li>CRC32 为 crc 校验码，保证数据的完整性</li>
+<li>Length，为 Op log 的数据长度</li>
+<li>Log Type，Op log 的类型，之所以会有类型，是由于 32KB 可能存不下一条 Op log，Op log 有可能跨数据块，类型分为：<ul>
+<li>FULL：代表 Data 包含了所有的数据</li>
+<li>FIRST：代表该 Data 是 Op log 的开始数据</li>
+<li>MIDDLE：代表该 Data 是 Op log 的中间数据</li>
+<li>LAST: 代表该 Data 是 Op log 的结束数据</li>
+</ul>
+</li>
+<li>Data，为 Op log 的实际数据</li>
+</ol>
+<h4 id="memtable-结构分析"><a href="#memtable-结构分析" class="headerlink" title="memtable 结构分析"></a>memtable 结构分析</h4><p>memtable 是 LevelDB 数据库的内存存储结构，采用了 skip list 结构存储，如下图所示：</p>
+<blockquote>
+<p>skip list 是一种可以代替平衡树的存储结构，它采用概率的方式来保证平衡，而平衡树则是采用严格的旋转树结构来保证平衡，复杂度会高一些。<br>对于 skip list，会有 n 层链表，其中 0 层保存所有的值，越往上层，保存的值越少。每当插入一个值时，会通过概率计算该值需要插入的最高层级 k，然后从 0~k-1 层，分别插入该值。</p>
+</blockquote>
+<p><img src="https://gw.alicdn.com/tfs/TB1aoiISXXXXXX4XVXXXXXXXXXX-941-359.png" alt="resources structure"></p>
+<p>其中每个表项的存储结构如下：</p>
+<p>key_size | key_value | sequence_num&amp;type | value_size | value</p>
+<p>其中：</p>
+<p>sequence_num：表示操作的序列号，每一个数据项都会带有一个序列号，用以表示数据的新旧程度。</p>
+<p>type：表示数据的类型，分为：</p>
+<ul>
+<li>kTypeValue：表明数据有效</li>
+<li>kTypeDeletion：表明数据已经失效，在数据进行 delete 操作时会打上该标识</li>
+</ul>
+<h4 id="sstable-结构分析"><a href="#sstable-结构分析" class="headerlink" title="sstable 结构分析"></a>sstable 结构分析</h4><p>sstable 作为落盘的存储结构，每个 sstable 最大 2MB，从宏观来看，它属于分层的结构，即：</p>
+<ul>
+<li>level 0：最多存储 4 个 sstable</li>
+<li>level 1：存储不超过 10MB 大小的 sstable</li>
+<li>level 2：存储不超过 100MB 大小的 sstable</li>
+</ul>
+<p>level 3 及之后：存储大小不超过上一级大小的 10 倍</p>
+<p>之所以这样分层，是为了提高查找效率，也是 LevelDB 名称的由来。当每一层超过限制时，会进行 compaction 操作，合并到上一层，递归进行。</p>
+<p>从微观的角度看，每个 sstable 文件结构入下图所示：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1n.yuSXXXXXacaXXXXXXXXXXX-345-228.png" alt="resources structure"></p>
+<p>其中：</p>
+<ul>
+<li>Data Block 存储具体的 k-v 数据</li>
+<li>Meta Block 存储索引过滤信息，用于快速定位 key 是否存在于 Data Block 中</li>
+<li>Meta Index Block 存储 Meta Block 的偏移位置及大小</li>
+<li>Index Block 存储 Data Block 的偏移位置及大小</li>
+<li>Footer 则存储 Meta Index Block 和 Index Block 的偏移位置及大小，相当于二级索引，Footer 的结构如下：<br><img src="https://gw.alicdn.com/tfs/TB1C9DXSXXXXXcyXXXXXXXXXXXX-197-140.png" alt="resources structure"></li>
+</ul>
+<p>另外 Data Block 及 Meta Block 的存储格式是统一的，都是如下格式：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1X9qPSXXXXXbwXFXXXXXXXXXX-435-67.png" alt="resources structure"></p>
+<p>其中 type 表示是否是压缩存储，目前 LevelDB 支持 key 值的 snappy 压缩或者不压缩。</p>
+<p>而上图中的 Block data 的格式则为：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB11UGqSXXXXXaEaXXXXXXXXXXX-819-359.png" alt="resources structure"></p>
+<p>上图有几点要说明：</p>
+<ol>
+<li>对于 Block data 中的第一项总是不压缩存储的，不压缩存储的项称为 restarts，会被记录在上图的最尾部，同时每隔 k 个值（k 值可定制），都会存储一个不压缩的项，这些都称为 restarts，都会被记录在最尾部。</li>
+<li>每个 restarts 表项会作为索引项存储。</li>
+<li>除了 restarts 表项以外，其它的表项则基于该 restarts 项，计算跟他相同部分和不同部分，上图中的 shared_bytes 和 unshared_bytes 记录了相同部分长度和不同部分的长度，key_delta 则记录了不同的部分的值，value_length 和 value 则记录了 value 部分的值。</li>
+<li>压不压缩是可选的，默认会进行 snappy 压缩。</li>
+</ol>
+<p>对于 Meta Block 来说，它保存了用于快速定位 key 是否在 Data Block 中的信息，具体方法是：</p>
+<ol>
+<li>采用了 bloom filter 的过滤机制，bloom filter 是一种 hash 机制，它对每一个 key，会计算 k 个 hash 值，然后在 k 个 bit 位记录为 1。当查找时，相应计算出 k 个 hash 值，然后比对 k 个 bit 位是否为 1，只要有一个不为 1，则不存在。</li>
+<li>对于每一个 Data Block，所有的 key 值会传入进行 bloom filter 的 hash 计算，每个 key 存储 k 个 bit 位值。</li>
+</ol>
+<h4 id="版本管理"><a href="#版本管理" class="headerlink" title="版本管理"></a>版本管理</h4><p>对于 LevelDB 来说，它采用了简单的 sequence num 机制来管理，具体为：</p>
+<ol>
+<li>对于 Op log 文件，每一个 Op log 文件名中会包含一个唯一的 sequence num，每创建一个新的 Op log 文件，sequence num 则加 1，sequence num 越大，则表示文件越新，同时最新的 sequence num 会记录下来。</li>
+<li>对于每个 key-value 对，也会对应一个 sequence num，对于同一个 key，如果后续更新值时，sequence num 也会相应更新，这样就可以根据 sequence num 的大小，找到最新的 key-value 对</li>
+</ol>
+<h4 id="新增特性"><a href="#新增特性" class="headerlink" title="新增特性"></a>新增特性</h4><ol>
+<li><p>支持模糊查询</p>
+<p>该功能支持 key 以模糊规则匹配的方式进行数据库查询，支持＊和？两种模糊规则查询。</p>
+</li>
+<li><p>支持 JSON 格式数据存储</p>
+<p>该功能支持 k-v 中，v以json格式传入，后续可以通过关键字，查询json里面的数据。</p>
+</li>
+</ol>
+<h4 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h4><p>LevelDB 短小精悍，代码运行效率高效，且通俗易懂，是一个非常不错的 k-v 存储系统。</p>
+<p>注：图片来源于网络</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/9wwF-VmSOrY" target="_blank" rel="noopener">https://unsplash.com/photos/9wwF-VmSOrY</a> By @eberhard grossgasteiger</p>
+</blockquote>
+<style>
+.article-entry ol {
+  list-style-position: outside;
+}
+</style>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/07/05/leveldb-analysis/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/07/05/leveldb-analysis/" data-id="cjt6lbxzc005yjeu1mhuz26vq" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/07/05/leveldb-analysis/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LevelDB/">LevelDB</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/07/27/gcanvas/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          GCanvas 渲染引擎介绍
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/05/18/how-to-display-git-diff/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">如何实现一个 Git Diff 解析器</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

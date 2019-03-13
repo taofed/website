@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>构建前端 DSL | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="目前在传统的软件开发领域 DSL 已经比较普遍，特别是 Martin Fowler 的突出贡献。而在前端领域尚较少涉及，而如果在前端开发中合理使用 DSL 同样也可以有效得减少代码数量，提高可读性。一个常见的应用场景即是前端模板的构建，从本质上看模板也是一个微型语言，因此可以从 DSL 的角度着手，使用工具快速构建一个适合于特定前端框架的模板引擎。本文将以 KISSY XTemplate 为例介">
+<meta name="keywords" content="DSL,XTemplate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="构建前端 DSL">
+<meta property="og:url" content="http://taobaofed.org/blog/2012/10/12/front-end-dsl/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="目前在传统的软件开发领域 DSL 已经比较普遍，特别是 Martin Fowler 的突出贡献。而在前端领域尚较少涉及，而如果在前端开发中合理使用 DSL 同样也可以有效得减少代码数量，提高可读性。一个常见的应用场景即是前端模板的构建，从本质上看模板也是一个微型语言，因此可以从 DSL 的角度着手，使用工具快速构建一个适合于特定前端框架的模板引擎。本文将以 KISSY XTemplate 为例介">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1FviWQpXXXXbUXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1EjgkQXXXXXbbXFXXXXXXXXXX-265-555.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="构建前端 DSL">
+<meta name="twitter:description" content="目前在传统的软件开发领域 DSL 已经比较普遍，特别是 Martin Fowler 的突出贡献。而在前端领域尚较少涉及，而如果在前端开发中合理使用 DSL 同样也可以有效得减少代码数量，提高可读性。一个常见的应用场景即是前端模板的构建，从本质上看模板也是一个微型语言，因此可以从 DSL 的角度着手，使用工具快速构建一个适合于特定前端框架的模板引擎。本文将以 KISSY XTemplate 为例介">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1FviWQpXXXXbUXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-front-end-dsl" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      构建前端 DSL
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 承玉</span>
+        
+        <span>发表于: <a href="/blog/2012/10/12/front-end-dsl/" class="article-date">
+  <time datetime="2012-10-11T18:34:00.000Z" itemprop="datePublished">2012-10-12</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1FviWQpXXXXbUXpXXXXXXXXXX-900-500.jpg" alt="构建前端 DSL"></p>
+<p>目前在传统的软件开发领域 <a href="http://en.wikipedia.org/wiki/Domain-specific_language" target="_blank" rel="noopener">DSL</a> 已经比较普遍，特别是 <a href="http://martinfowler.com/" target="_blank" rel="noopener">Martin Fowler</a> 的突出贡献。而在前端领域尚较少涉及，而如果在前端开发中合理使用 DSL 同样也可以有效得<strong>减少代码数量，提高可读性</strong>。一个常见的应用场景即是前端模板的构建，从本质上看模板也是一个微型语言，因此可以从 DSL 的角度着手，使用工具快速构建一个适合于特定前端框架的模板引擎。本文将以 <a href="http://docs.kissyui.com/1.4/docs/html/guideline/xtemplate.html" target="_blank" rel="noopener">KISSY XTemplate</a> 为例介绍如何构建前端的 DSL。</p>
+<p>DSL 也是初学，敬请勘误。</p>
+<h3 id="首先-npm-安装-KISSY"><a href="#首先-npm-安装-KISSY" class="headerlink" title="首先 npm 安装 KISSY"></a>首先 npm 安装 KISSY</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g kissy</span><br></pre></td></tr></table></figure>
+<h3 id="XTemplate-示例代码"><a href="#XTemplate-示例代码" class="headerlink" title="XTemplate 示例代码"></a>XTemplate 示例代码</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">This is KISSY XTemplate:</span><br><span class="line">&#123;&#123;date&#125;&#125;</span><br><span class="line">&#123;&#123;#if n &gt; n*2&#125;&#125;</span><br><span class="line">  &#123;&#123;&#123;no escape&#125;&#125;&#125;</span><br><span class="line">  &#123;&#123;each array&#125;&#125;</span><br><span class="line">    index: &#123;&#123;xindex&#125;&#125;</span><br><span class="line">    count: &#123;&#123;xcount&#125;&#125;</span><br><span class="line">    value: &#123;&#123;value&#125;&#125;</span><br><span class="line">    &#123;&#123;set t = value*2&#125;&#125;</span><br><span class="line">    subValue:</span><br><span class="line">    &#123;&#123;#with this.subValue&#125;&#125;</span><br><span class="line">      &#123;&#123;subSubValue + ../t&#125;&#125;</span><br><span class="line">    &#123;&#123;/with&#125;&#125;</span><br><span class="line">  &#123;&#123;/each&#125;&#125;</span><br><span class="line">&#123;&#123;else&#125;&#125;</span><br><span class="line">  &#123;&#123;#custom_block param&#125;&#125;</span><br><span class="line">    &#123;&#123;custom_tpl param2&#125;&#125;</span><br><span class="line">  &#123;&#123;/custom_block&#125;&#125;</span><br><span class="line">&#123;&#123;/if&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="模板词法-语法"><a href="#模板词法-语法" class="headerlink" title="模板词法/语法"></a>模板词法/语法</h3><p>这一步主要是为了下一步构建自定义语言的语法树做准备，这里采用使用工具自动生成语法解析器（parser）的方向来做，如果你打算手写解析器则可以略过此步（事实上可以略过本文）。</p>
+<p>由于本文关注前端技术，故词法以及语法都采用 JSON 格式描述，词法直接采用正则表达式，语法采用变形的 <a href="http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form" target="_blank" rel="noopener">BNF</a> 形式，例如 XTemplate 的 <a href="https://github.com/kissyteam/kissy/blob/ea6fa104530506027c6ba819c3bf703d1653e1ff/src/xtemplate/sub-modules/compiler/src/parser-grammar.kison" target="_blank" rel="noopener">词法语法文件</a></p>
+<p>工具采用 KISSY 开发的 <a href="http://en.wikipedia.org/wiki/LALR" target="_blank" rel="noopener">LALR</a> 语法解析器生成器 kison.</p>
+<p>词法关注如何从输入代码中解析出最基本的代码单元（关键词，字符串，数字…），例如 XTemplate 的部分词法</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">state</span>: <span class="string">'t'</span>, <span class="attr">regexp</span>: <span class="regexp">/^&#123;&#123;/</span>, <span class="attr">token</span>: <span class="string">'OPEN'</span> &#125;,</span><br><span class="line">&#123; <span class="attr">state</span>: <span class="string">'t'</span>, <span class="attr">regexp</span>: <span class="regexp">/^&#125;&#125;/</span>, <span class="attr">token</span>: <span class="string">'CLOSE'</span> &#125;,</span><br><span class="line">&#123; <span class="attr">state</span>: <span class="string">'t'</span>, <span class="attr">regexp</span>: <span class="regexp">/^&lt;=/</span>, <span class="attr">token</span>: <span class="string">'LE'</span> &#125;,</span><br><span class="line">&#123; <span class="attr">state</span>: <span class="string">'t'</span>, <span class="attr">regexp</span>: <span class="regexp">/^\+/</span>, <span class="attr">token</span>: <span class="string">'PLUS'</span> &#125;,</span><br><span class="line">&#123; <span class="attr">state</span>: <span class="string">'t'</span>, <span class="attr">regexp</span>: <span class="regexp">/^[a-zA-Z0-9_$-]+/</span>, <span class="attr">token</span>: <span class="string">'ID'</span> &#125;</span><br></pre></td></tr></table></figure>
+<p>其中 state 表示单个状态，词法解析过程也是一个状态机变换状态的过程。</p>
+<p>而语法解析关注与从词法单元中识别出有效的程序结构，即语法解析树，例如 XTemplate 的部分语法描述：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">symbol</span>: <span class="string">'Expression'</span>, <span class="attr">rhs</span>: [<span class="string">'ConditionalOrExpression'</span>] &#125;,</span><br><span class="line">&#123; <span class="attr">symbol</span>: <span class="string">'ConditionalOrExpression'</span>, <span class="attr">rhs</span>: [<span class="string">'ConditionalAndExpression'</span>] &#125;,</span><br><span class="line">&#123; <span class="attr">symbol</span>: <span class="string">'program'</span>, <span class="attr">rhs</span>: [<span class="string">'statements'</span>, <span class="string">'inverse'</span>, <span class="string">'statements'</span>] &#125;,</span><br><span class="line">&#123; <span class="attr">symbol</span>: <span class="string">'statement'</span>, <span class="attr">rhs</span>: [<span class="string">'openBlock'</span>, <span class="string">'program'</span>, <span class="string">'closeBlock'</span>] &#125;</span><br></pre></td></tr></table></figure>
+<p>其中对应 BNF 形式中： symbol ::= rhs</p>
+<h3 id="构建模板抽象语法树"><a href="#构建模板抽象语法树" class="headerlink" title="构建模板抽象语法树"></a>构建模板抽象语法树</h3><p>语法词法只是描述了如何识别模板语言，而构建语法树的过程则需要在语法识别过程中由调用者自行构建，kison 支持在每个语法规则项中添加动作函数，通过工具在识别语言过程中（遍历<a href="http://en.wikipedia.org/wiki/Parse_tree" target="_blank" rel="noopener">语法解析树</a>）同时有选择性得构建异型<a href="http://en.wikipedia.org/wiki/Abstract_syntax_tree" target="_blank" rel="noopener">抽象语法树</a>，<br>例如 XTemplate 的树节点构建过程：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  symbol: <span class="string">'program'</span>,</span><br><span class="line">  rhs: [<span class="string">'statements'</span>, <span class="string">'inverse'</span>, <span class="string">'statements'</span>],</span><br><span class="line">  action: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="keyword">this</span>.yy.ProgramNode(<span class="keyword">this</span>.lexer.lineNumber, <span class="keyword">this</span>.$<span class="number">1</span>, <span class="keyword">this</span>.$<span class="number">3</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">  symbol: <span class="string">'PrimaryExpression'</span>,</span><br><span class="line">  rhs: [<span class="string">'path'</span>]</span><br><span class="line">&#125;,</span><br><span class="line">&#123;</span><br><span class="line">  symbol: <span class="string">'RelationalExpression'</span>,</span><br><span class="line">  rhs: [<span class="string">'RelationalExpression'</span>, <span class="string">'LE'</span>, <span class="string">'AdditiveExpression'</span>],</span><br><span class="line">  action: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="keyword">this</span>.yy.RelationalExpression(<span class="keyword">this</span>.$<span class="number">1</span>, <span class="string">'&lt;='</span>, <span class="keyword">this</span>.$<span class="number">3</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中 最基本的表达式（PrimaryExpression）可以直接是变量词法单元的值，而复杂的比较表达式以及整个程序则是自底向上由子树构建起来.</p>
+<p>最后使用 kissy-kison 命令</p>
+<p>kissy-kison -g parser.kison -m xtemplate/parser<br>就可以生成模板解析函数模块，大致为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">KISSY.add(<span class="string">'xtemplate/parser'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">parse</span>(<span class="params">code</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> parse;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="模板编译"><a href="#模板编译" class="headerlink" title="模板编译"></a>模板编译</h3><p>最后一步即是模板编译过程，将模板代码编译为 JavaScript 代码，填入数据执行后即可得到真正的渲染 HTML.</p>
+<h3 id="调用-parse"><a href="#调用-parse" class="headerlink" title="调用 parse"></a>调用 parse</h3><p>经过上一步得到解析函数后，调用</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">parse(tempalteCode);</span><br></pre></td></tr></table></figure>
+<p>即得到一棵抽象语法树，例如 XTemplate 的一段代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;#each data&#125;&#125;</span><br><span class="line">  &#123;&#123;#if n === ../n2 * 5&#125;&#125;</span><br><span class="line">    &#123;&#123;n + 10.1&#125;&#125;</span><br><span class="line">  &#123;&#123;/if&#125;&#125;</span><br><span class="line">&#123;&#123;/each&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>对应的抽象语法树：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1EjgkQXXXXXbbXFXXXXXXXXXX-265-555.png" alt="XTemplate AST"></p>
+<p>翻译代码</p>
+<p>接着就可以采用 <a href="http://en.wikipedia.org/wiki/Visitor_pattern" target="_blank" rel="noopener">visitor</a> 模式将生成具体代码的逻辑写入 visitor 对象，遍历 AST 将对应的子树或节点转换成 JavaScript 代码。</p>
+<p>这步可以继续优雅得采用代码模板，将代码模板的数据替换成模板对应的 JavaScript 单元。不过为了不折磨大脑，最后放松下，可以直接采用原生的代码拼接：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">visitor.tplNode = <span class="function"><span class="keyword">function</span>(<span class="params">node</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (node.escapeHTML) &#123;</span><br><span class="line">    codes.push(<span class="string">"if("</span> + node.id + <span class="string">" in data) &#123; ret.push(KISSY.escapeHTML(data."</span> + node.js + <span class="string">");) &#125;"</span> + <span class="string">" else &#123; KISSY.warn('not found')!; &#125;"</span>);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>不过确实还是挺折磨.</p>
+<h3 id="离线编译"><a href="#离线编译" class="headerlink" title="离线编译"></a>离线编译</h3><p>大多数 DSL 都是推荐在使用前就转换成目标语言，而客户端在不太注重性能的情况下也可以在终端用户使用时在线编译。</p>
+<p>XTemplate 通过 kissy-xtemplate 命令支持将模板代码离线编译为模板函数模块，这样客户端可以直接require该模块，省去了客户端编译过程，同时开发中直接面对 html 类似的模板代码，省去了字符串嵌入模板的繁琐。</p>
+<p>例如 t-tpl.html</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; offline &#125;&#125; compile</span><br></pre></td></tr></table></figure>
+<p>运行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kissy-xtemplate -t t-tpl.html -m tests/t -w</span><br></pre></td></tr></table></figure>
+<p>可得到 t.js</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">KISSY.add(<span class="string">'tests/t'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">render</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> render;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>离线编译的一个缺点是编译出来的代码肯定比原生模板大很多，这也正体现了 DSL 节省代码，易读的特性（代码肯定不可读了）。</p>
+<h3 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h3><p>目前存在两大问题：</p>
+<h4 id="体积较大"><a href="#体积较大" class="headerlink" title="体积较大"></a>体积较大</h4><p>压缩前 130k， 不过 gzip + compress 后由于生成的重复代码比较多，降到 10k，不过仍然需要优化生成代码: 减少模板解析器的代码。同时也可优化模板转化为最终代码的大小，这在离线编译情况下很有用。</p>
+<h4 id="xtemplate-模块需要拆分"><a href="#xtemplate-模块需要拆分" class="headerlink" title="xtemplate 模块需要拆分"></a>xtemplate 模块需要拆分</h4><p>当选择离线编译，实际上 XTemplate 的编译代码可以不用下载，可拆分为两个模块: xtemplate/runtime 以及 xtemplate/compiler 。这样当选择离线编译时直接use xtemplate/runtime 载入模板的功能基础设施即可。</p>
+<p>xtemplate 文档</p>
+<p><a href="http://docs.kissyui.com/1.4/docs/html/api/xtemplate/index.html" target="_blank" rel="noopener">api</a></p>
+<p><a href="http://docs.kissyui.com/1.4/docs/html/demo/xtemplate/index.html" target="_blank" rel="noopener">demo</a></p>
+<p><a href="http://docs.kissyui.com/1.4/docs/html/tutorials/kissy/xtemplate/index.html" target="_blank" rel="noopener">tutorial</a></p>
+<h3 id="推荐书籍"><a href="#推荐书籍" class="headerlink" title="推荐书籍"></a>推荐书籍</h3><p>感谢这些作者，没有这些书籍， 这个任务不可能完成</p>
+<p><a href="https://book.douban.com/subject/3296317/" target="_blank" rel="noopener">Compilers: Principles,Techniques and Tools</a></p>
+<p><a href="https://book.douban.com/subject/4768014/" target="_blank" rel="noopener">DSL In Action</a></p>
+<p><a href="https://book.douban.com/subject/10482195/" target="_blank" rel="noopener">Language Implementation Patterns: Create Your Own Domain-Specific and General Programming Languages</a></p>
+<h3 id="致谢"><a href="#致谢" class="headerlink" title="致谢"></a>致谢</h3><p>在开发过程中参考一了下工具：</p>
+<p><a href="http://velocity.apache.org/" target="_blank" rel="noopener">velocity</a></p>
+<p><a href="https://developers.google.com/closure/templates/" target="_blank" rel="noopener">closure templates</a></p>
+<p><a href="http://www.gnu.org/software/bison/" target="_blank" rel="noopener">bison</a></p>
+<p><a href="http://zaach.github.com/jison/" target="_blank" rel="noopener">jison</a></p>
+<p><a href="http://handlebarsjs.com/" target="_blank" rel="noopener">handlebar</a></p>
+<p><a href="http://mustache.github.com/" target="_blank" rel="noopener">mustache</a></p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/Dm974WDaErc" target="_blank" rel="noopener">https://unsplash.com/photos/Dm974WDaErc</a> By @Cintia Matteo</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2012/10/12/front-end-dsl/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2012/10/12/front-end-dsl/" data-id="cjt6lbxyf003bjeu1iy3wv8c6" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2012/10/12/front-end-dsl/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DSL/">DSL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/XTemplate/">XTemplate</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2012/11/08/form-decoupling-practice-in-taobao-flight-ticket/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          复杂表单应用解耦，淘宝机票订单实践
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2012/10/11/fsm-based-component-design-and-implementation/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">基于有限状态机的交互组件设计与实现</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

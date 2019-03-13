@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前端测试的平台化之路 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="概述相对前端技术快速发展的今天，测试这块显得有点冷清，原因有很多：可能在于测试的价值体现、在于测试的持续跟踪、在于 UI 测试的准确性等。在淘宝 FED 有针对前端的测试平台，也一直在探索前端测试的切入、测试工具的选择，经过不断的探索，觉得有必要说说目前的一些思路和进展。 历史淘宝 FED 的前端测试平台名称叫 UITest，大约在几年前的一个冬季面世，从名字上就可以看出来起初主要定位是做 UI">
+<meta name="keywords" content="UI测试,单元测试,前端测试,持续集成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端测试的平台化之路">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/11/frontend-test-platform/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="概述相对前端技术快速发展的今天，测试这块显得有点冷清，原因有很多：可能在于测试的价值体现、在于测试的持续跟踪、在于 UI 测试的准确性等。在淘宝 FED 有针对前端的测试平台，也一直在探索前端测试的切入、测试工具的选择，经过不断的探索，觉得有必要说说目前的一些思路和进展。 历史淘宝 FED 的前端测试平台名称叫 UITest，大约在几年前的一个冬季面世，从名字上就可以看出来起初主要定位是做 UI">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1foO3KVXXXXaDXVXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1KDe.KVXXXXaHXpXXXXXXXXXX-621-449.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1uG_gKVXXXXXWXpXXXXXXXXXX-625-465.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB19R9_KVXXXXaVXpXXXXXXXXXX-1032-476.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1pl1.KVXXXXacXpXXXXXXXXXX-1038-387.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB198TgKVXXXXXEXXXXXXXXXXXX-1037-446.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1v_q6KVXXXXXTXFXXXXXXXXXX-1037-437.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端测试的平台化之路">
+<meta name="twitter:description" content="概述相对前端技术快速发展的今天，测试这块显得有点冷清，原因有很多：可能在于测试的价值体现、在于测试的持续跟踪、在于 UI 测试的准确性等。在淘宝 FED 有针对前端的测试平台，也一直在探索前端测试的切入、测试工具的选择，经过不断的探索，觉得有必要说说目前的一些思路和进展。 历史淘宝 FED 的前端测试平台名称叫 UITest，大约在几年前的一个冬季面世，从名字上就可以看出来起初主要定位是做 UI">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1foO3KVXXXXaDXVXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-frontend-test-platform" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前端测试的平台化之路
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 林谦</span>
+        
+        <span>发表于: <a href="/blog/2015/12/11/frontend-test-platform/" class="article-date">
+  <time datetime="2015-12-10T21:24:07.000Z" itemprop="datePublished">2015-12-11</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1foO3KVXXXXaDXVXXXXXXXXXX-900-500.png" alt="前端测试的平台化之路"></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>相对前端技术快速发展的今天，测试这块显得有点冷清，原因有很多：可能在于测试的价值体现、在于测试的持续跟踪、在于 UI 测试的准确性等。在淘宝 FED 有针对前端的测试平台，也一直在探索前端测试的切入、测试工具的选择，经过不断的探索，觉得有必要说说目前的一些思路和进展。</p>
+<h2 id="历史"><a href="#历史" class="headerlink" title="历史"></a>历史</h2><p>淘宝 FED 的前端测试平台名称叫 UITest，大约在几年前的一个冬季面世，从名字上就可以看出来起初主要定位是做 UI 的测试，检测页面的一些功能问题，比如：资源 404、JS 报错、页面性能等，对淘宝频繁的大促活动页面起到了质量保障作用，形式是在页面发布时创建一条 UI 测试任务，测试结果会通过旺旺通知给开发者，自动化测试发现一些页面的问题。</p>
+<p>随着时间推进，前端技术体系，开发模式、协作方式都有了变化，测试这块仅仅覆盖 UI 测试显得已经不够了，尤其 Node.js 的出现，给前端带来了新的方向，前端慢慢开始做些后端的事情，在后端体系里：单元测试就很常见，能够最小粒度的保证代码的质量。因此 UITest 的平台之路开始探索单元测试的切入，定位也发生了变化：作为前端的质量中心，覆盖前端的各种测试。</p>
+<h2 id="测试的分类"><a href="#测试的分类" class="headerlink" title="测试的分类"></a>测试的分类</h2><p>测试的分类很多，从不同维度划分可能有不同的分类，这里从前端的角度来看大致的分类：</p>
+<p><strong>UI 测试</strong></p>
+<p>UI 测试是测试页面交互、功能的测试，有点类似集成测试，是从用户的角度做的测试，测试的结果能反应产品的功能的完整性。比如页面中一个按钮 hover 后浮层是否正确展示可以是一个 UI 测试、页面中 Tab 切换后对应的 Panel 是否正确切换，这些测试也是测试同学经常重复测试的事情；对一些基础产品来说，每周一个迭代，这些细节的回归难免会漏掉，对这种情况做 UI 测试时有必要，在预发时做一次自动的回归即保证了质量，又减少了重复劳动。</p>
+<p><strong>单元测试</strong></p>
+<p>作为一个开发人员，应该保证自己代码的正确性，保证自己提供的 API 的正确性。单元测试的对象是一般是方法、组件；对于前端组件，也会有一些 UI 上的验证，不过测试的整体依然是组件，因此对组件级的 UI 测试也归为单元测试；单元测试对组件 API 设计有要求，要便于测试；便于测试的代码组件化的设计的也是友好的。因此组件化和测试也是一个相辅相成的好基友。</p>
+<p>哪些情况可以写单元测试呢？比如应用中的 Base 模块、或者公用的 Popup 组件都可以添加上单元测试，每次有修改就自动跑测试用例。</p>
+<h2 id="测试的好处"><a href="#测试的好处" class="headerlink" title="测试的好处"></a>测试的好处</h2><p>对于写测试用例来说，不少人觉得价值不容易体现出来。我是这么看的：对于不断迭代的业务来说，很有必要；写完用例后，对每次迭代都会重复的执行测试，这种投入的性价比是很高的。如果测试总是在正确的时间运行，需求改动后测试失效也会及时的得到通知，及时的更新，整个就良性循环起来了。</p>
+<h2 id="平台化之路"><a href="#平台化之路" class="headerlink" title="平台化之路"></a>平台化之路</h2><p>在梳理了测试后，UITest 重新做了定位： <strong>前端质量中心</strong>，涵盖 UI 测试和单元测试，以业务维度汇总聚合，能从整体看出业务的质量情况。</p>
+<p>UI 测试这块，使用一批机器做 UI 检测，通过 <code>webdriver</code> 协议驱动浏览器跑测试用例，每个测试用例做为一个插件。</p>
+<p>在传统后端的开发体系里持续集成的概念已经非常成熟，比如 Github 有对应的 <a href="https://travis-ci.org/" target="_blank" rel="noopener">travis-ci</a>，持续集成能保证测试的及时执行，不断的执行，保证是自动触发的，成为流程中不可绕过的一环，保证的单元测试代码的有效性。借鉴 travis-ci 的思路，将单元测试作为 CI 的一个过程，提供一批插件，单元测试是其中一个插件。</p>
+<p><strong>整体设计图</strong></p>
+<p><img src="https://img.alicdn.com/tps/TB1KDe.KVXXXXaHXpXXXXXXXXXX-621-449.jpg" alt></p>
+<p><strong>质量体系覆盖图</strong></p>
+<p><img src="https://img.alicdn.com/tps/TB1uG_gKVXXXXXWXpXXXXXXXXXX-625-465.jpg" alt></p>
+<p>UITest 的设计从上图可以看出来是 <strong>开放</strong> 的 <strong>插件</strong> 体系，这样才能最大化平台的能力。</p>
+<h2 id="UITest-相关工具"><a href="#UITest-相关工具" class="headerlink" title="UITest 相关工具"></a>UITest 相关工具</h2><p>UITest 做为质量中心，除了流程、系统的打通，还需要配套的工具支持，对与 单元测试 和 UI 测试 UITest 平台分别提供工具做测试，一方面可以统一测试工程，还把控了数据收集，方面汇总。</p>
+<p><strong>单元测试</strong></p>
+<p>单元测试作为持续集成的一个命令，持续集成对外提供一个本地 ci-client，单元测试作为 ci-client 的一个插件：ci-test（基于 karma，<a href="http://karma-runner.github.io/" target="_blank" rel="noopener">karma</a> 是 Angular 团队开发的一个测试工具，他相对于 webdriver 更轻量，面向单元测试，原理是直接启动本地浏览器，自动生成 runner.html 执行测试）。 ci-test 会生成一些测试的脚手架，方便的在本地做单元测试，仓库中有了单元测试后，在 push 的时候也会执行用例，并将数据汇总到 UITest。</p>
+<p><strong>UI 测试</strong></p>
+<p>UI 测试是基于 webdriver 实现的一个框架 <code>browserjs</code>，封装了常用的 API 和相关用例规范。界内也有相关的测试框架，比如 <a href="http://nightwatchjs.org/" target="_blank" rel="noopener">nightwatch</a>，实现大致相同。对 UI 测试很有必要搞一批通用用例，可以首先对页面做通用的检测；对于业务特有的检测，开发人员需要自己开发业务用例。</p>
+<h2 id="截图"><a href="#截图" class="headerlink" title="截图"></a>截图</h2><p>说了这么多，截几张图简单的说明下吧~</p>
+<p><strong>UI 测试</strong></p>
+<p><img src="https://img.alicdn.com/tps/TB19R9_KVXXXXaVXpXXXXXXXXXX-1032-476.jpg" alt="UI 测试成功"></p>
+<p><img src="https://img.alicdn.com/tps/TB1pl1.KVXXXXacXpXXXXXXXXXX-1038-387.jpg" alt="UI 测试失败"></p>
+<p><strong>CI 测试</strong></p>
+<p><img src="https://img.alicdn.com/tps/TB198TgKVXXXXXEXXXXXXXXXXXX-1037-446.jpg" alt="CI 部分成功"></p>
+<p><img src="https://img.alicdn.com/tps/TB1v_q6KVXXXXXTXFXXXXXXXXXX-1037-437.jpg" alt="CI 部分成功"></p>
+<h2 id="未来"><a href="#未来" class="headerlink" title="未来"></a>未来</h2><p>仅仅有了平台是不够的，需要能够持续的 run 起来，才能发挥平台的力量。</p>
+<p>未来跟更多的系统打通，<code>跟发布系统打通</code>，代码发布时检测对应测试是否成功，只有测试通过了才能发布。</p>
+<p>慢慢提高开发人员的测试意识，让测试被重视起来，将写测试作为开发的一部分。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/11/frontend-test-platform/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/11/frontend-test-platform/" data-id="cjt6lbxyg003fjeu1jby23a8s" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/11/frontend-test-platform/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/UI测试/">UI测试</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端测试/">前端测试</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/单元测试/">单元测试</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/持续集成/">持续集成</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/14/velocity-new-york-2015-frontend/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Velocity New York 2015 - 前端篇
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/10/nodejs-unit-tests/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Node.js 单元测试：我要写测试</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

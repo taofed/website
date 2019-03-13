@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Velocity New York 2015 - 前端篇 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="这是一篇迟到的总结。2015 年 10 月有幸代表淘宝前端参加了 Velocity New York 性能大会，回来后马不停蹄的忙完双十一、双十二两个大促，终于有时间完成这篇总结。阿里每年都会参加将近 30 场国外会议，和前端相关的主要就是 Velocity（纽约）和 QCon（旧金山）了。这次纽约之行我们一共五人，分别来自 5 个不同的部门和岗位：前端、运维、中间件、测试、云计算。为期三天的会">
+<meta name="keywords" content="性能,velocity,效率,webpagetest,纽约">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Velocity New York 2015 - 前端篇">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/14/velocity-new-york-2015-frontend/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="这是一篇迟到的总结。2015 年 10 月有幸代表淘宝前端参加了 Velocity New York 性能大会，回来后马不停蹄的忙完双十一、双十二两个大促，终于有时间完成这篇总结。阿里每年都会参加将近 30 场国外会议，和前端相关的主要就是 Velocity（纽约）和 QCon（旧金山）了。这次纽约之行我们一共五人，分别来自 5 个不同的部门和岗位：前端、运维、中间件、测试、云计算。为期三天的会">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1kNqWKVXXXXauapXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1XLjXKVXXXXafXFXXXXXXXXXX-1041-894.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1BKiQKVXXXXbCXVXXXXXXXXXX-1689-886.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1hyqNKVXXXXX6aXXXXXXXXXXX-1888-1064.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1O7_xKVXXXXbfaXXXXXXXXXXX-981-453.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1RwvNKVXXXXXFXFXXXXXXXXXX-980-750.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1fgTEKVXXXXbsXVXXXXXXXXXX-980-190.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1Mc_TKVXXXXcYXXXXXXXXXXXX-980-630.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1Jcf2KVXXXXbcXXXXXXXXXXXX-980-580.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1ZXY6KVXXXXXcXXXXXXXXXXXX-980-440.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Velocity New York 2015 - 前端篇">
+<meta name="twitter:description" content="这是一篇迟到的总结。2015 年 10 月有幸代表淘宝前端参加了 Velocity New York 性能大会，回来后马不停蹄的忙完双十一、双十二两个大促，终于有时间完成这篇总结。阿里每年都会参加将近 30 场国外会议，和前端相关的主要就是 Velocity（纽约）和 QCon（旧金山）了。这次纽约之行我们一共五人，分别来自 5 个不同的部门和岗位：前端、运维、中间件、测试、云计算。为期三天的会">
+<meta name="twitter:image" content="https://gw.alicdn.com/tps/TB1kNqWKVXXXXauapXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-velocity-new-york-2015-frontend" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Velocity New York 2015 - 前端篇
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 海文</span>
+        
+        <span>发表于: <a href="/blog/2015/12/14/velocity-new-york-2015-frontend/" class="article-date">
+  <time datetime="2015-12-14T14:09:12.000Z" itemprop="datePublished">2015-12-14</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tps/TB1kNqWKVXXXXauapXXXXXXXXXX-900-500.jpg" alt="Velocity New York 2015 - 前端篇"></p>
+<p>这是一篇迟到的总结。2015 年 10 月有幸代表淘宝前端参加了 <a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/grid/public" target="_blank" rel="noopener">Velocity New York</a> 性能大会，回来后马不停蹄的忙完双十一、双十二两个大促，终于有时间完成这篇总结。阿里每年都会参加将近 30 场国外会议，和前端相关的主要就是 Velocity（纽约）和 QCon（旧金山）了。这次纽约之行我们一共五人，分别来自 5 个不同的部门和岗位：前端、运维、中间件、测试、云计算。为期三天的会议每天都有至少 5 个会场同时开讲，大家根据自己的方向分别选择参加。先来几张张会场照片。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1XLjXKVXXXXafXFXXXXXXXXXX-1041-894.png" width="100%"></p>
+<hr>
+<h2 id="分享介绍"><a href="#分享介绍" class="headerlink" title="分享介绍"></a>分享介绍</h2><h3 id="一、-There-is-a-client-side-proxy-ServiceWorker-in-your-browser"><a href="#一、-There-is-a-client-side-proxy-ServiceWorker-in-your-browser" class="headerlink" title="一、 There is a client-side proxy (ServiceWorker) in your browser!"></a>一、 <a href="http://conferences.oreilly.com/velocity/devops-web-performance-ny-2015/public/schedule/detail/45079" target="_blank" rel="noopener">There is a client-side proxy (ServiceWorker) in your browser!</a></h3><p>serviceWorker 是浏览器提供的一层 proxy，介于 renderer 和 network 之间拥有独立的进程。所有的 request 和 response 都要经过这一层，但没有操作 DOM 的权限。它可以通过 script 脚本来进行操作，可以加载、修改、缓存、管理所有的 request 和 response，看到这里是不是觉得想象空间非常巨大。直接上原 PPT 的大图。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1BKiQKVXXXXbCXVXXXXXXXXXX-1689-886.png" width="100%"></p>
+<h4 id="浏览器支持情况"><a href="#浏览器支持情况" class="headerlink" title="浏览器支持情况"></a>浏览器支持情况</h4><p>目前支持最好的当然是 Chrome，下面是更详细的浏览器支持情况：</p>
+<ul>
+<li>需要浏览器原生支持 Promise：Chrome 36+、Firefox 29+、Opera 23+、Safari 7.1+、Edge</li>
+<li>ServiceWorker 支持：Chrome 、Firefox 、Opera 、Edge</li>
+<li>调试支持：Chrome 40+、Opera</li>
+</ul>
+<h4 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h4><ol>
+<li>注册 ServiceWorker，是一个异步过程，页面不会被阻塞</li>
+<li>几个事件：<ul>
+<li>oninstall：表示注册成功，之后可以管理自己的 Cache 了，比如对一些 HTML，JS，CSS 资源文件进行预加载和缓存</li>
+<li>onactivate：在 ServiceWorker 创建成功后，并且所有之前的版本都不活跃时触发，主要用来更新逻辑、净化 Cache 。</li>
+<li>onfetch：render 发出的每一个请求都可以在这里被拦截，进行处理</li>
+</ul>
+</li>
+</ol>
+<h4 id="能做什么"><a href="#能做什么" class="headerlink" title="能做什么"></a>能做什么</h4><p><img src="https://gw.alicdn.com/tps/TB1hyqNKVXXXXX6aXXXXXXXXXXX-1888-1064.png" width="100%"></p>
+<ol>
+<li>完全控制 request 路由、cacheing、response 内容<ul>
+<li>按照需要修改 response 的内容</li>
+<li>请求返回异常时，可降级到之前 cache 的较旧的数据</li>
+<li>网络处于离线状态时页面可用，直接调取 cache 的数据</li>
+</ul>
+</li>
+<li>local template + remote data<ul>
+<li>在 ServiceWorkder 完成 HTML 片段的生成，减少数据传输量</li>
+<li>可以是后台生成、Node.js 生成、JS 生成的一个替代选择</li>
+</ul>
+</li>
+<li>本地绘制图片，减少服务器绘制图片的资源消耗，只传输数据，由 ServiceWorker 完成。<ul>
+<li>类似的工作也可以由 SVG，Canvas 来实现</li>
+<li>但 ServiceWorker 另一个特点是可以在浏览器启动后在 background 运行，与浏览器插件的运行机制有些类似，既有当前页面的运行时，又有浏览器启动后的 background 运行时。</li>
+</ul>
+</li>
+<li>资源部分更新<ul>
+<li>比如 CSS 文件，30 天后的版本和之前版本可能 97% 是相似的，完全下载有较大的资源消耗</li>
+<li>可以根据缓存中之前的版本，再获取新旧版本间的 diff 数据，在 ServiceWorkder 更新后推给 render</li>
+</ul>
+</li>
+<li>预先加载下一个页面的资源<ul>
+<li>知道下一个页面的相关资源，在空闲时提前下载。当用户点击到下一个页面时，网络请求带来的时间消耗可以极大的减少。</li>
+</ul>
+</li>
+</ol>
+<h3 id="二、Modern-performance-best-practices"><a href="#二、Modern-performance-best-practices" class="headerlink" title="二、Modern performance best practices"></a>二、<a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/45065" target="_blank" rel="noopener">Modern performance best practices</a></h3><p>性能的最佳实践，主要分三个部分：</p>
+<ol>
+<li>一些优化点方向：减少 cookie 大小、域名收敛、空闲时预加载、CSS 选择器优化、web font 等</li>
+<li>衡量标准：Chrome Dev Tools，Google PageSpeed 等可衡量的标准</li>
+<li>工具自动化：将标准自动化执行，解放自己的双手，<a href="http://www.webpagetest.org/" target="_blank" rel="noopener">http://www.webpagetest.org/</a>，<a href="https://www.sitespeed.io/" target="_blank" rel="noopener">https://www.sitespeed.io/</a></li>
+</ol>
+<p>做为对照，简单介绍一下淘系无线页面的性能监控体系。</p>
+<ol>
+<li>首先制定标准，我们对所有影响性能的关键指标都进行了梳理，包含但不限于以下几条，根据重要性都有不同的分数设定，检查类目和评分标准必要时可以随时调整<ul>
+<li>禁止发出 woff 字体请求<ul>
+<li>禁止发出 ttf 字体请求</li>
+<li>接口请求数量检查</li>
+<li>图片尺寸检查</li>
+<li>CSS 数量检查</li>
+<li>图片懒加载检查</li>
+<li>404 页面检查</li>
+<li>首屏请求数量检查</li>
+<li>首屏请求大小检查</li>
+<li>图片域名收敛检查</li>
+<li>图片大小检查</li>
+<li>禁止使用 gif 图片</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>一个页面发布之前，强制自动跑分，满足一定的分数才能发布上线。满分 100，低于 93 分的页面不允许发布。每不满足一项扣减相应的分数，比如一个图片链接没有域名收敛扣 5 分，并且单项会重复累加积分，基本有 2 项不合格就无法发布。</li>
+<li>真机测评，每次跑分都会随机连接到一个真实的手机上跑分</li>
+<li>所有的无线页面在同一平台发布，保证有统一的入口。这点很重要，这样就可以在这个入口统一处理，保证所有页面都通过测试验证。另外一个好处是如果标准有调整也可以及时传递个开发人员，解决宣导不及时的问题。</li>
+</ol>
+<p>PS：关于监控，除了性能监控，还有 UI 监控（JS 错误检测、静态资源可访问检测、空链检测等），前端单元测试（前端框架、核心逻辑、Node.js 测试等），感兴趣的同学可以查看 淘宝前端团队（FED）前两天的文章。</p>
+<h3 id="三、WebPageTest"><a href="#三、WebPageTest" class="headerlink" title="三、WebPageTest"></a>三、<a href="http://www.webpagetest.org/" target="_blank" rel="noopener">WebPageTest</a></h3><p>这次 Velocity 分享中，基本上每个演讲者提到性能分析工具的时候都会提到 WebPageTest。下面做一个简单的介绍。</p>
+<h4 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h4><p>下面以淘宝 PC 首页为例，介绍一下 WebPageTest 的主要内容。PS：国外地址访问淘宝和国内相比还是有相当差距的。</p>
+<ol>
+<li>首先是一些关键数据信息的展示，包含 Load Time、First Byte、Start Render、DOM Elements 等，最大特点就是会分 <strong>首次加载和再次加载的对比</strong>。<br><img src="https://gw.alicdn.com/tps/TB1O7_xKVXXXXbfaXXXXXXXXXXX-981-453.png" width="100%"></li>
+</ol>
+<ol start="2">
+<li><p>和 Chrome 浏览器提供的瀑布流类似，每个请求的有详细的不同阶段占用时间对比，以及每个请求的 detail、request、response、object 信息。<br><img src="https://gw.alicdn.com/tps/TB1RwvNKVXXXXXFXFXXXXXXXXXX-980-750.png" width="100%"></p>
+</li>
+<li><p>必要的性能检查，包含 Keep-Alive、Gzip、Compress Img、Progressive、Cache Static、CDN Detected。<br><img src="https://gw.alicdn.com/tps/TB1fgTEKVXXXXbsXVXXXXXXXXXX-980-190.png" width="100%"></p>
+</li>
+<li><p>Content Breakdown，不同类型资源的请求数、大小分析。<br><img src="https://gw.alicdn.com/tps/TB1Mc_TKVXXXXcYXXXXXXXXXXXX-980-630.png" width="100%"></p>
+</li>
+<li><p>Domains，域名分析，域名越多消耗的 DNS 查询时间就越长。<br><img src="https://gw.alicdn.com/tps/TB1Jcf2KVXXXXbcXXXXXXXXXXXX-980-580.png" width="100%"></p>
+</li>
+<li><p>关键帧的分解图，并可以录制视频<br><img src="https://gw.alicdn.com/tps/TB1ZXY6KVXXXXXcXXXXXXXXXXXX-980-440.png" width="100%"></p>
+</li>
+</ol>
+<h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><p>个人认为最大的好处有下面几点：</p>
+<ol>
+<li>有首次加载和再次加载的全数据对比，性能优化更有针对性</li>
+<li>所有的数据可保留，作为优化前后的对比依据，可以节约很多时间和资源</li>
+<li>已有的最佳实践检测，比如请求是否全部 Gzip 压缩、静态资源是否全部 Cache、JPG 图片优化等</li>
+<li>非 Chrome 浏览器也可以跟踪到，并按照 Chrome 的形式展现</li>
+</ol>
+<h4 id="进阶"><a href="#进阶" class="headerlink" title="进阶"></a>进阶</h4><p>WebPageTest 有很多更细致的配置选项，可以根据各自情况选择。另外还有一些高端功能，需要注册或者收费后才能使用，涉及的就是更专业、更深入的分析了。</p>
+<ol>
+<li>TCP Dump，可以下载相应的文件，进行分析。</li>
+<li>Processing breakdown。<ul>
+<li>包含主要 Thread 的消耗占比，消耗时间，如 Scripting、Layout、Painting、Loading 等； </li>
+<li>Processing Events 包含更细致的分类占比，消耗时间，如 FunctionCall、EvaluateScript、Layout、Program、CompositeLayer、ParseHTML、RecalculateStyle、TimerFire 等、</li>
+</ul>
+</li>
+<li>Trace，对应 Chrome://tracing 的功能。<ul>
+<li><a href="https://www.chromium.org/developers/how-tos/trace-event-profiling-tool" target="_blank" rel="noopener">https://www.chromium.org/developers/how-tos/trace-event-profiling-tool</a></li>
+<li>It records C++ or JavaScript method signatures in a hierarchical view for each thread in each process.</li>
+</ul>
+</li>
+<li>Net Log，对应 Chrome 的 network logging system。</li>
+</ol>
+<h3 id="四、基础研究"><a href="#四、基础研究" class="headerlink" title="四、基础研究"></a>四、基础研究</h3><p>歪果仁对于标准和基础技术的研究热情很高，相较于国内更加务实一些，这类分享大约占 1/4 的比例。</p>
+<ol>
+<li><p>预处理：<a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/43854" target="_blank" rel="noopener">Resource hints</a></p>
+<ul>
+<li><p>各种 W3C 标准的预处理，但不是所有浏览器都支持</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;link rel=&quot;dns-prefetch&quot; href=&quot;//example.com&quot;&gt;</span><br><span class="line">&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.example.com&quot; crossorigin&gt;</span><br><span class="line">&lt;link rel=&quot;preload&quot; href=&quot;https://3rdparty.com/dependency.js&quot; as=&quot;script&quot;&gt;</span><br><span class="line">&lt;link rel=&quot;prerender&quot; href=&quot;https://example.com/article/page_2&quot; pr=&quot;0.8&quot;&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>web font：<a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/46234" target="_blank" rel="noopener">The performance and usability of web fonts</a></p>
+<ul>
+<li>web fonts 加载完成后会导致已加载的 DOM 回流，解决方式有 2 个维度：<ul>
+<li>减少文件大小：no use no download；使用 woff 2 比 woff 小 30%</li>
+<li>尽早的触发 fonts 下载</li>
+</ul>
+</li>
+<li>但仍然无法根本解决延迟下载导致的回流问题，只是尽可能的将时间缩短。尤其是使用 iconfont 时，性能较低的机型会先展示一个方框，加载完后才显示正确的图形</li>
+</ul>
+</li>
+<li>flexbox：<a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/43921" target="_blank" rel="noopener">Better front-end performance with Flexbox</a><ul>
+<li>flexbox 的性能，pageload 时间对比 float 快大约 40%，resize，scroll 时的性能消耗都有较大提升</li>
+</ul>
+</li>
+<li>SVG：<a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/44982" target="_blank" rel="noopener">Tips for avoiding common SVG pitfalls</a></li>
+</ol>
+<h3 id="五、参会感受"><a href="#五、参会感受" class="headerlink" title="五、参会感受"></a>五、参会感受</h3><ol>
+<li>阿里在前端性能方面的积累还是不错的，很多大会中分享的方法、工具、理念都已经应用在我厂的日常工作中了。</li>
+<li>性能提升的参与者越来越多，设计师也参与其中，从页面的设计源头屏蔽掉性能的潜在瓶颈，包括图片的选择、font 的处理，复杂设计对性能的影响，如何针对性能做设计决策，用户主流程/视觉焦点的流畅性跟踪、梳理等。<ul>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/46887" target="_blank" rel="noopener">Optimizing images and type on the Web</a></li>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/46191" target="_blank" rel="noopener">Design decisions through the lens of performance</a></li>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/46885" target="_blank" rel="noopener">Design + performance</a></li>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/43861" target="_blank" rel="noopener">Speed vs. fluency</a></li>
+</ul>
+</li>
+<li>云服务大热，很多围绕云进行的生态系统建设，包括性能监控、分析、压力测试、文件存储、CDN 服务、发布&amp;框架服务等。云服务 AWS 一家独大，怪不得亚马逊的股票蹭蹭的涨</li>
+<li>Docker 也很热，虽然不了解，但还是在会场感受到了强烈的气息。</li>
+</ol>
+<hr>
+<h2 id="Velocity北京-VS-Velocity-纽约"><a href="#Velocity北京-VS-Velocity-纽约" class="headerlink" title="Velocity北京 VS Velocity 纽约"></a>Velocity北京 VS Velocity 纽约</h2><p>淘宝前端团队在北京也有一个 team（欢迎帝都的小伙伴们加入）。借助地利也参加了今年 8 月的  Velocity 北京会议。北京和纽约这两场听下来还是有很大的不同。</p>
+<h4 id="业务-VS-基础"><a href="#业务-VS-基础" class="headerlink" title="业务 VS 基础"></a>业务 VS 基础</h4><ul>
+<li><p>北京场注重业务结合，从业务瓶颈找到解决办法。</p>
+<ul>
+<li><a href="http://velocity.oreilly.com.cn/2015/index.php?func=session&amp;id=8" target="_blank" rel="noopener">淘宝全站 HTTPS 实践</a> </li>
+<li><a href="http://velocity.oreilly.com.cn/2015/index.php?func=session&amp;id=27" target="_blank" rel="noopener">手机淘宝性能优化</a> </li>
+<li><a href="http://velocity.oreilly.com.cn/2015/index.php?func=session&amp;id=14" target="_blank" rel="noopener">eBay 对页面性能的监控和调优</a></li>
+<li><a href="http://velocity.oreilly.com.cn/2015/index.php?func=session&amp;id=25" target="_blank" rel="noopener">京东网站单品页 618 实战</a></li>
+<li><a href="http://velocity.oreilly.com.cn/2015/index.php?func=session&amp;id=3" target="_blank" rel="noopener">58 同城webim性能优化</a></li>
+</ul>
+</li>
+<li><p>纽约场注重基础、标准。深入技术细节寻找最佳实践。</p>
+<ul>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/44982" target="_blank" rel="noopener">Tips for avoiding common SVG pitfalls</a></li>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/46234" target="_blank" rel="noopener">The performance and usability of web fonts</a></li>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/43921" target="_blank" rel="noopener">Better front-end performance with Flexbox</a></li>
+<li><a href="http://velocityconf.com/devops-web-performance-ny-2015/public/schedule/detail/43854" target="_blank" rel="noopener">Resource hints</a></li>
+</ul>
+</li>
+</ul>
+<h4 id="大公司-VS-小团队"><a href="#大公司-VS-小团队" class="headerlink" title="大公司 VS 小团队"></a>大公司 VS 小团队</h4><ul>
+<li><p>北京场的演讲者基本来自国内各大互联网公司，包括 BAT、360、京东、58 等，其中阿里占到了 1/4。基本国内顶尖的互联网公司都有参与。</p>
+</li>
+<li><p>纽约场的演讲者则基本不是来自知名互联网公司，只有一个来自 Google，还有就是 IBM、HP 这两家。一方面可能是地处纽约，与硅谷和西雅图相距太远；另一方面可能是美国的创业环境优异，一批高成长的企业还不为国人所知，比如 Akamai 实际是 CDN 技术的发明者，并且是全球最大的 CDN 供应商。</p>
+</li>
+</ul>
+<h4 id="封闭-VS-开放"><a href="#封闭-VS-开放" class="headerlink" title="封闭 VS 开放"></a>封闭 VS 开放</h4><ul>
+<li><p>北京场各大互联网公司各自搭建的解决方案，相对来说还是比较封闭，目前只能供内部使用，定制化比较强。对外只能提供思路，无法提供服务。</p>
+</li>
+<li><p>纽约场的演讲接近一半来自云服务商，每一项技术都能通过云服务，npm 等方式让更多开发者使用并不断改进（虽然很多是收费的）。</p>
+</li>
+</ul>
+<hr>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><ol>
+<li>地点：肯尼迪机场。一行五人，分批到达纽约，其中一组人出航站楼没有看到 Taxi，打了一辆美帝的黑车，送达后收费 200 刀，实际应该 50 刀左右。</li>
+<li>地点：时代广场。一个小伙伴在时代广场闲逛，一会近 10 个穿着各种造型的服饰的歪果仁要和他合影，美国人民好热情啊，自我感觉相当棒。照相完毕每人要收费 10 刀，经过砍价最终花费 20 刀逃脱。</li>
+<li>地点：时代广场。拜访了 MongoDB，MongoDB 是极罕见的把核心工程师团队放在纽约曼哈顿中心的技术公司，办公室就在时代广场，楼上还有雅虎在纽约的办公室！都是任性的主。MangoDB 目前一共就 500 人规模，在纽约有 150 来号人，其中大半是工程师。选择时代广场的很大原因是很多客户都在这里（例如花旗银行），相关的各种人才也非常多（这里应该不包含程序员）。</li>
+</ol>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/14/velocity-new-york-2015-frontend/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/14/velocity-new-york-2015-frontend/" data-id="cjt6lby1x00cdjeu1vvag6skf" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/14/velocity-new-york-2015-frontend/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/velocity/">velocity</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpagetest/">webpagetest</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能/">性能</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/效率/">效率</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/纽约/">纽约</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/15/nodejs-cluster-cov/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          多进程下的测试覆盖率
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/11/frontend-test-platform/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前端测试的平台化之路</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

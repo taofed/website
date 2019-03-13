@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Webkit 远程调试协议初探 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="任何做过 Web 开发的同学，都避免不了在浏览器内进行调试。而大部分同学的首选工具，就是 Chrome DevTools。DevTools 本身我们无需多说，是一个大家不能再熟悉的工具了。但是埋藏在 DevTools 下面的开放协议以及它赋予的众多可能性，至今仍未见到充分的剖析和应用。 Webkit 的远程调试协议是 Webkit 在 2012 年引入的。目前所有 Webkit 内核的浏览器都支">
+<meta name="keywords" content="debug,devtools,webkit">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Webkit 远程调试协议初探">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/20/webkit-remote-debug-test/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="任何做过 Web 开发的同学，都避免不了在浏览器内进行调试。而大部分同学的首选工具，就是 Chrome DevTools。DevTools 本身我们无需多说，是一个大家不能再熟悉的工具了。但是埋藏在 DevTools 下面的开放协议以及它赋予的众多可能性，至今仍未见到充分的剖析和应用。 Webkit 的远程调试协议是 Webkit 在 2012 年引入的。目前所有 Webkit 内核的浏览器都支">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1.fiaKFXXXXadXXXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/c93aed3f984d3b96e9330f88f065ece7d3809955">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1t8JFKFXXXXb8XVXXXXXXXXXX-1440-515.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB10vdWKFXXXXb8XpXXXXXXXXXX-1440-900.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB16ceaKFXXXXalXXXXXXXXXXXX-1440-900.png">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/b2b240491b929237c98040dc2a0740f021a8de73">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Webkit 远程调试协议初探">
+<meta name="twitter:description" content="任何做过 Web 开发的同学，都避免不了在浏览器内进行调试。而大部分同学的首选工具，就是 Chrome DevTools。DevTools 本身我们无需多说，是一个大家不能再熟悉的工具了。但是埋藏在 DevTools 下面的开放协议以及它赋予的众多可能性，至今仍未见到充分的剖析和应用。 Webkit 的远程调试协议是 Webkit 在 2012 年引入的。目前所有 Webkit 内核的浏览器都支">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1.fiaKFXXXXadXXXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-webkit-remote-debug-test" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Webkit 远程调试协议初探
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 竹暄</span>
+        
+        <span>发表于: <a href="/blog/2015/11/20/webkit-remote-debug-test/" class="article-date">
+  <time datetime="2015-11-20T14:05:29.000Z" itemprop="datePublished">2015-11-20</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1.fiaKFXXXXadXXXXXXXXXXXX-900-500.png" alt="Webkit 远程调试协议初探"></p>
+<p>任何做过 Web 开发的同学，都避免不了在浏览器内进行调试。而大部分同学的首选工具，就是 Chrome DevTools。DevTools 本身我们无需多说，是一个大家不能再熟悉的工具了。但是埋藏在 DevTools 下面的开放协议以及它赋予的众多可能性，至今仍未见到充分的剖析和应用。</p>
+<p>Webkit 的远程调试协议是 Webkit 在 <a href="https://lists.webkit.org/pipermail/webkit-dev/2012-April/020168.html" target="_blank" rel="noopener">2012 年引入的</a>。目前所有 Webkit 内核的浏览器都支持这一特性。<strong>但是我们还是以 DevTools 和 Chrome 为出发点</strong>，来做讨论。</p>
+<p>为什么我们关注 DevTools:</p>
+<ul>
+<li>原因 1：DevTools 是开源项目<blockquote>
+<p>DevTools 的源码就在 <a href="https://chromium.googlesource.com/chromium/blink.git/+/master/Source/devtools/" target="_blank" rel="noopener">Google 的 blink 项目</a> 中，高度的开放。目前这么多丰富的功能，正是 Google 和其社区的共同贡献。同时它的 <a href="https://chromium.googlesource.com/chromium/blink.git/+/master/LICENSE" target="_blank" rel="noopener">License</a> 也不拒绝任何的二次开发。</p>
+</blockquote>
+</li>
+<li>原因 2：它足够简单<blockquote>
+<p>DevTools 仅仅是简单的由 HTML、JavaScript、CSS、Images 组成的，本质上就是一个 WebApp，纯粹的前端应用。当你去了解、修改它时，你不需要理解 C++ 和任何编译的知识。</p>
+</blockquote>
+</li>
+<li>原因 3：它的应用架构足够开放，满足任何形式的功能扩展。<blockquote>
+<p>事实上 Devtools 是一个充分模块化的 JavaScript 网页应用。它的每个功能你都可以去扩展（仅需要了解 JavaScript）。</p>
+</blockquote>
+</li>
+<li>原因 4：大部分前端都已经习惯它并且喜欢它。</li>
+</ul>
+<h2 id="Webkit-的远程调试特性"><a href="#Webkit-的远程调试特性" class="headerlink" title="Webkit 的远程调试特性"></a>Webkit 的远程调试特性</h2><p>谈到远程调试前，有必要先了解各组件之间的关系。</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/c93aed3f984d3b96e9330f88f065ece7d3809955" alt></p>
+<ul>
+<li>浏览器拥有多个 Tab，并为每个 Tab 单独提供 WebSocket 的 Endpoint URI</li>
+<li>每个 DevTool 实例只能检视一个 Tab，即只能与一个 Tab 保持通讯</li>
+</ul>
+<p>DevTools 的界面是数据驱动的。数据的来源就是 WebSocket API。Google 对 Webkit 的调试协议做了进一步的封装，提供了以 JSON 为序列化格式的 <a href="https://developer.chrome.com/devtools/docs/debugger-protocol" target="_blank" rel="noopener">WebSocket</a> 界面。</p>
+<p>大家在本地电脑上就可以体验这个远程调试是怎样一回事。执行如下步骤：</p>
+<ol>
+<li>彻底关闭当前 Chrome 进程</li>
+<li><p>在 Chrome 的启动参数上加上 <code>--remote-debugging-port=9222</code>，例如 Mac 平台：</p>
+<blockquote>
+<p>open -a Google\ Chrome –args –remote-debugging-port=9222</p>
+</blockquote>
+</li>
+<li><p>在开启的 Chrome 浏览器里打开任意网页，例如：<a href="http://www.taobao.com/" target="_blank" rel="noopener">http://www.taobao.com/</a></p>
+</li>
+<li><p>在其他浏览器或者 Chrome 的新 Tab 打开 <a href="http://localhost:9222" target="_blank" rel="noopener">http://localhost:9222</a>，你会得到这样的界面：</p>
+<p><img src="https://img.alicdn.com/tps/TB1t8JFKFXXXXb8XVXXXXXXXXXX-1440-515.png" alt></p>
+</li>
+<li><p>点击 “淘宝网” 的方框，就进入页面的调试界面了：</p>
+<p><img src="https://img.alicdn.com/tps/TB10vdWKFXXXXb8XpXXXXXXXXXX-1440-900.png" alt></p>
+</li>
+</ol>
+<p>注意看地址栏，我们访问的是一个标准的 HTTP 协议下的网页，不是 Chrome 的私有协议。这里，你可以用 DevTools 再次检视这个页面，即按下 <code>CMD</code> + <code>OPTION</code> + <code>i</code>。你会发现，这真的就是一个 HTML 应用。</p>
+<p>再观察一下这个 URL：</p>
+<blockquote>
+<p><a href="http://localhost:9222/devtools/inspector.html?ws=localhost:9222/devtools/page/06D198AC-907F-430C-999C-16CCD7D2D489" target="_blank" rel="noopener">http://localhost:9222/devtools/inspector.html?ws=localhost:9222/devtools/page/06D198AC-907F-430C-999C-16CCD7D2D489</a></p>
+</blockquote>
+<p>通过 QueryString，我们告诉了 DevTools 的前端应用，它应该连接到哪个 WebSocket 服务。</p>
+<p>你可以再你刚打开的检视 DevTools 的 DevTools（好绕口）里面，观察整个调试过程中的 WebSocket 通讯。例如：</p>
+<p><img src="https://img.alicdn.com/tps/TB16ceaKFXXXXalXXXXXXXXXXXX-1440-900.png" alt></p>
+<p>以前用 WebSocket 做过 RPC 的同学应该看得出来，Google 实现的的确就是一个远程调用的接口。这个接口里面有两种通讯模式：</p>
+<ol>
+<li>request/response：就如同一个异步调用，通过请求的信息，获取相应的返回结果。这样的通讯必然有一个 message id，否则两方都无法正确的判断请求和返回的匹配状况。</li>
+<li>notification：和第一种不同，这种模式用于由一方单方面的通知另一方某个信息。和 “事件” 的概念类似。</li>
+</ol>
+<h2 id="实验一：通过调试协议获取页面加载的-Timeline-数据"><a href="#实验一：通过调试协议获取页面加载的-Timeline-数据" class="headerlink" title="实验一：通过调试协议获取页面加载的 Timeline 数据"></a>实验一：通过调试协议获取页面加载的 Timeline 数据</h2><p>通过调试协议来获取页面加载的所有网络请求并打印。为了简单，我们编写一个 Node.js 的应用来实现。大致步骤如下：</p>
+<ul>
+<li>用 WebSocket 客户端连接调试服务</li>
+<li>分别监听 <code>Network.requestWillBeSent</code>、<code>Network.loadingFailed</code>、<code>Network.loadingFinished</code>、 <code>Network.responseReceived</code>、<code>Network.requestServedFromCache 的 Notification</code>，并且打印相关的 log。</li>
+<li>发送 <code>Page.navigate</code> 的请求，将页面跳转到某个页面，例如：<a href="http://www.taobao.com/" target="_blank" rel="noopener">http://www.taobao.com/</a></li>
+</ul>
+<p>这里拿到的数据足以绘制一个非常准确的页面加载的瀑布图。从调试协议里拿到的数据具有以下特点：</p>
+<ul>
+<li>准确，这是 Webkit 内核反馈的数据；而不是外层 JavaScript 接口的统计，也不是通过代理监控网络数据拿到的结果。</li>
+<li>丰富，有很多数据，别的方法根本拿不到。例如，缓存状况、JavaScript 方法执行情况。</li>
+<li>标准，调试协议本身已经定义了大量的 JSON 数据结构，你不需要再次进行抽象设计。</li>
+</ul>
+<p>完整代码如下（请先安装好相应的 npm 模块，并且打开 Chrome 本地的 9222 调试端口）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line">var WebSocketClient = require(&quot;websocket&quot;).client,</span><br><span class="line">    util = require(&quot;util&quot;),</span><br><span class="line">    EE = require(&quot;events&quot;).EventEmitter,</span><br><span class="line">    request = require(&quot;request&quot;),</span><br><span class="line">    chalk = require(&quot;chalk&quot;),</span><br><span class="line">    exec = require(&quot;child_process&quot;).exec;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// `Commander` class is message handler that talks to debug service exposed by Chrome</span><br><span class="line">var Commander = function(conn) &#123;</span><br><span class="line">  EE.call(this);</span><br><span class="line">  this.connection = conn;</span><br><span class="line">  this.sendCommands = [];</span><br><span class="line">  var self = this;</span><br><span class="line">  Object.defineProperty(this, &quot;nextMsgId&quot;, &#123;</span><br><span class="line">    get: function() &#123;</span><br><span class="line">      return self.sendCommands.length;</span><br><span class="line">    &#125;,</span><br><span class="line">    enumerable: true,</span><br><span class="line">    configurable: false</span><br><span class="line">  &#125;);</span><br><span class="line">  conn.on(&quot;message&quot;, this.onMessage.bind(this));</span><br><span class="line">&#125;;</span><br><span class="line">util.inherits(Commander, EE);</span><br><span class="line"></span><br><span class="line">// Send message using websocket connection</span><br><span class="line">Commander.prototype.send = function(method, params, callback) &#123;</span><br><span class="line">  this.sendCommands.push([method, params, callback]);</span><br><span class="line">  var msg = JSON.stringify(&#123;</span><br><span class="line">    id: this.nextMsgId,</span><br><span class="line">    method: method,</span><br><span class="line">    params: params</span><br><span class="line">  &#125;);</span><br><span class="line">  console.log(msg);</span><br><span class="line">  this.connection.send(msg);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//handler for receiving a message</span><br><span class="line">Commander.prototype.onMessage = function(msg) &#123;</span><br><span class="line">  var command, data;</span><br><span class="line">  if(msg.type === &quot;utf8&quot;) &#123;</span><br><span class="line">    data = JSON.parse(msg.utf8Data);</span><br><span class="line">    if(data.id) &#123;//it&apos;s method request/response invocation</span><br><span class="line">      command = this.sendCommands[data.id-1];</span><br><span class="line">      if(command) &#123;</span><br><span class="line">        if(command.callback) &#123;</span><br><span class="line">          command.callback(data.params);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">        console.warn(&quot;unmatched message id %s&quot;, data.id);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; else &#123;//notifications</span><br><span class="line">      this.emit(data.method, data.params);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    console.warn(&quot;message of unknown encoding&quot;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">//find tab info</span><br><span class="line">request(&quot;http://localhost:9222/json&quot;, function(e, res, data) &#123;</span><br><span class="line">  data = JSON.parse(data);</span><br><span class="line">  var url = data[0].webSocketDebuggerUrl;</span><br><span class="line">  if(!url) &#123;</span><br><span class="line">    throw new Error(&quot;no url&quot;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  var client = new WebSocketClient();</span><br><span class="line"></span><br><span class="line">  //once it&apos;s connect, start our actions</span><br><span class="line">  client.on(&quot;connect&quot;, function(conn) &#123;</span><br><span class="line">    console.log(&quot;client connceted&quot;);</span><br><span class="line">    var commander = new Commander(conn);</span><br><span class="line"></span><br><span class="line">    //Shoud enable this freatures</span><br><span class="line">    commander.send(&quot;Network.enable&quot;,&#123;&#125;);</span><br><span class="line">    commander.send(&quot;Page.enable&quot;,&#123;&#125;);</span><br><span class="line"></span><br><span class="line">    //Listen to wanted notifications</span><br><span class="line">    commander.on(&quot;Network.requestWillBeSent&quot;, function(data) &#123;</span><br><span class="line">      console.log(&quot;[%s] %s %s: %s&quot;, chalk.green(data.timestamp), chalk.blue(&quot;WillSend&quot;), data.requestId, data.request.url);</span><br><span class="line">    &#125;);</span><br><span class="line">    commander.on(&quot;Network.loadingFailed&quot;, function(data) &#123;</span><br><span class="line">      console.log(&quot;[%s] %s %s&quot;, chalk.green(data.timestamp), chalk.red(&quot;LoadFail&quot;), data.requestId);</span><br><span class="line">    &#125;);</span><br><span class="line">    commander.on(&quot;Network.loadingFinished&quot;, function(data) &#123;</span><br><span class="line">      console.log(&quot;[%s] %s %s&quot;, chalk.green(data.timestamp), chalk.magenta(&quot;LoadDone&quot;), data.requestId);</span><br><span class="line">    &#125;);</span><br><span class="line">    commander.on(&quot;Network.responseReceived&quot;, function(data) &#123;</span><br><span class="line">      console.log(&quot;[%s] %s %s: %s Status %s %s&quot;, chalk.cyan(data.timestamp), chalk.red(&quot;RespRecv&quot;), data.requestId, data.type, data.response.status, data.response.headers[&quot;Content-Length&quot;]);</span><br><span class="line">    &#125;);</span><br><span class="line">    commander.on(&quot;Network.requestServedFromCache&quot;, function(data) &#123;</span><br><span class="line">      console.log(&quot;%s %s&quot;, chalk.gray(data.timestamp), chalk.red(&quot;RespCache&quot;), data.requestId);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    commander.on(&quot;Page.domContentEventFired&quot;, function() &#123;</span><br><span class="line">      console.log(chalk.bgGreen(&quot;OnDOMContentLoad\t\t\t\t\t\t\t\t&quot;));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    commander.on(&quot;Page.loadEventFired&quot;, function() &#123;</span><br><span class="line">      console.log(chalk.bgCyan(&quot;OnLoad\t\t\t\t\t\t\t\t&quot;));</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    //Navigate to target page</span><br><span class="line">    commander.send(&quot;Page.navigate&quot;, &#123;url: &quot;http://www.taobao.com&quot;&#125;);</span><br><span class="line"></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  client.connect(url);</span><br><span class="line"></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>运行后的结果如下：</p>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/b2b240491b929237c98040dc2a0740f021a8de73" alt></p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本篇内容仅仅介绍调试协议这个概念，以及它的通讯原理。并且，我们通过一个实验，来展示这套协议的强大特性。后面，我们还会讨论其他浏览器的调试协议，以及移动设备的调试。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/20/webkit-remote-debug-test/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/20/webkit-remote-debug-test/" data-id="cjt6lby2900d1jeu15wvowe4x" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/20/webkit-remote-debug-test/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/debug/">debug</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/devtools/">devtools</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webkit/">webkit</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/24/a-strange-bug-research-at-taobao-home-page/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          记一次淘宝首页奇葩的渲染问题
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/19/yield-and-delegating-yield/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">yield 和 yield*</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

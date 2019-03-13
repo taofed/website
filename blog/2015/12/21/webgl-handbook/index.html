@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>WebGL 技术储备指南 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="WebGL 是 HTML 5 草案的一部分，可以驱动 Canvas 渲染三维场景。WebGL 虽然还未有广泛应用，但极具潜力和想象空间。本文是我学习 WebGL 时梳理知识脉络的产物，花点时间整理出来与大家分享。 示例WebGL 很酷，有以下 demos 为证： 寻找奥兹国赛车游戏划船的男孩(Goo Engine Demo) 本文的目标本文的预期读者是：不熟悉图形学，熟悉前端，希望了解或系统学习">
+<meta name="keywords" content="webGL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebGL 技术储备指南">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/21/webgl-handbook/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="WebGL 是 HTML 5 草案的一部分，可以驱动 Canvas 渲染三维场景。WebGL 虽然还未有广泛应用，但极具潜力和想象空间。本文是我学习 WebGL 时梳理知识脉络的产物，花点时间整理出来与大家分享。 示例WebGL 很酷，有以下 demos 为证： 寻找奥兹国赛车游戏划船的男孩(Goo Engine Demo) 本文的目标本文的预期读者是：不熟悉图形学，熟悉前端，希望了解或系统学习">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1fZo2KVXXXXcQapXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1.bc9KVXXXXXAaXXXXXXXXXXX-283-291.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1x_k7KVXXXXc0aXXXXXXXXXXX-283-245.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1zSpnLXXXXXXGXFXXXXXXXXXX-283-236.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1umA_KVXXXXaDaXXXXXXXXXXX-283-324.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1NbRuLXXXXXc3XXXXXXXXXXXX-283-245.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1kq4CLXXXXXXoXXXXXXXXXXXX-639-129.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1H9xALXXXXXaYXXXXXXXXXXXX-567-463.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1sXXmLXXXXXasXFXXXXXXXXXX-283-283.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1B1A.KVXXXXcQXVXXXXXXXXXX-600-300.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1uKZ7KVXXXXc8aXXXXXXXXXXX-283-286.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1PNVmLXXXXXXLXFXXXXXXXXXX-283-262.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1e50eLXXXXXauXVXXXXXXXXXX-283-281.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1.6twLXXXXXcRXXXXXXXXXXXX-283-283.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1pndjLXXXXXbtXFXXXXXXXXXX-283-285.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1st34KVXXXXXqapXXXXXXXXXX-567-447.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1b6g_KVXXXXaYaXXXXXXXXXXX-145-286.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WebGL 技术储备指南">
+<meta name="twitter:description" content="WebGL 是 HTML 5 草案的一部分，可以驱动 Canvas 渲染三维场景。WebGL 虽然还未有广泛应用，但极具潜力和想象空间。本文是我学习 WebGL 时梳理知识脉络的产物，花点时间整理出来与大家分享。 示例WebGL 很酷，有以下 demos 为证： 寻找奥兹国赛车游戏划船的男孩(Goo Engine Demo) 本文的目标本文的预期读者是：不熟悉图形学，熟悉前端，希望了解或系统学习">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1fZo2KVXXXXcQapXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-webgl-handbook" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      WebGL 技术储备指南
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 叶斋</span>
+        
+        <span>发表于: <a href="/blog/2015/12/21/webgl-handbook/" class="article-date">
+  <time datetime="2015-12-21T12:04:57.000Z" itemprop="datePublished">2015-12-21</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1fZo2KVXXXXcQapXXXXXXXXXX-900-500.jpg" alt="WebGL 技术储备指南"></p>
+<p>WebGL 是 HTML 5 草案的一部分，可以驱动 Canvas 渲染三维场景。WebGL 虽然还未有广泛应用，但极具潜力和想象空间。本文是我学习 WebGL 时梳理知识脉络的产物，花点时间整理出来与大家分享。</p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>WebGL 很酷，有以下 demos 为证：</p>
+<p><a href="http://www.findyourwaytooz.com/" target="_blank" rel="noopener">寻找奥兹国</a><br><a href="http://triggerrally.com/" target="_blank" rel="noopener">赛车游戏</a><br><a href="http://www.gooengine.com/demofiles/pearl-boy/index.html" target="_blank" rel="noopener">划船的男孩</a>(<a href="https://www.goocreate.com/" target="_blank" rel="noopener">Goo Engine</a> Demo)</p>
+<h2 id="本文的目标"><a href="#本文的目标" class="headerlink" title="本文的目标"></a>本文的目标</h2><p>本文的预期读者是：不熟悉图形学，熟悉前端，希望了解或系统学习 WebGL 的同学。</p>
+<p>本文不是 WebGL 的概述性文章，也不是完整详细的 WebGL 教程。本文只希望成为一篇供 WebGL 初学者使用的提纲。</p>
+<h2 id="Canvas"><a href="#Canvas" class="headerlink" title="Canvas"></a>Canvas</h2><p>熟悉 Canvas 的同学都知道，Canvas 绘图先要获取绘图上下文：</p>
+<pre><code>var context = canvas.getContext(&apos;2d&apos;);
+</code></pre><p>在<code>context</code>上调用各种函数绘制图形，比如：</p>
+<pre><code>// 绘制左上角为(0,0)，右下角为(50, 50)的矩形
+context.fillRect(0, 0, 50, 50);
+</code></pre><p>WebGL 同样需要获取绘图上下文：</p>
+<pre><code>var gl = canvas.getContext(&apos;webgl&apos;); // 或 experimental-webgl
+</code></pre><p>但是接下来，如果想画一个矩形的话，就没这么简单了。实际上，Canvas 是浏览器封装好的一个绘图环境，在实际进行绘图操作时，浏览器仍然需要调用 OpenGL API。而 WebGL API 几乎就是 OpenGL API 未经封装，直接套了一层壳。</p>
+<p>Canvas 的更多知识，可以参考：</p>
+<ul>
+<li><a href="http://www.amazon.cn/JavaScript%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97-David-Flanagan/dp/B00E593MTS" target="_blank" rel="noopener">JS 权威指南</a>的 21.4 节或 <a href="http://www.amazon.cn/JavaScript%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-%E6%B3%BD%E5%8D%A1%E6%96%AF/dp/B00CBBJS5Y/ref=sr_1_1?s=digital-text&amp;ie=UTF8&amp;qid=1408975825&amp;sr=1-1&amp;keywords=javascript%E9%AB%98%E7%BA%A7%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1" target="_blank" rel="noopener">JS 高级程序设计</a>中的 15 章</li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Canvas/Tutorial" target="_blank" rel="noopener">W3CSchool</a></li>
+<li><a href="http://javascript.ruanyifeng.com/htmlapi/canvas.html" target="_blank" rel="noopener">阮一峰的 Canvas 教程</a></li>
+</ul>
+<h2 id="矩阵变换"><a href="#矩阵变换" class="headerlink" title="矩阵变换"></a>矩阵变换</h2><p>三维模型，从文件中读出来，到绘制在 Canvas 中，经历了多次坐标变换。</p>
+<p>假设有一个最简单的模型：三角形，三个顶点分别为(-1,-1,0)，(1,-1,0)，(0,1,0)。这三个数据是从文件中读出来的，是三角形最初始的坐标(局部坐标)。如下图所示，右手坐标系。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1.bc9KVXXXXXAaXXXXXXXXXXX-283-291.png" alt></p>
+<p>模型通常不会位于场景的原点，假设三角形的原点位于(0,0,-1)处，没有旋转或缩放，三个顶点分别为(-1,-1,-1)，(1,-1,-1)，(0,1,-1)，即世界坐标。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1x_k7KVXXXXc0aXXXXXXXXXXX-283-245.png" alt></p>
+<p>绘制三维场景必须指定一个观察者，假设观察者位于(0,0,1)处而且看向三角形，那么三个顶点相对于观察者的坐标为(-1,-1,-2)，(1,-1,-2)，(0,1,-2)，即视图坐标。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1zSpnLXXXXXXGXFXXXXXXXXXX-283-236.png" alt></p>
+<p>观察者的眼睛是一个点(这是透视投影的前提)，水平视角和垂直视角都是90度，视野范围(目力所及)为[0,2]在Z轴上，观察者能够看到的区域是一个四棱台体。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1umA_KVXXXXaDaXXXXXXXXXXX-283-324.png" alt></p>
+<p>将四棱台体映射为标准立方体(CCV，中心为原点，边长为2，边与坐标轴平行)。顶点在 CCV 中的坐标，离它最终在 Canvas 中的坐标已经很接近了，如果把 CCV 的前表面看成 Canvas，那么最终三角形就画在图中橙色三角形的位置。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1NbRuLXXXXXc3XXXXXXXXXXXX-283-245.png" alt></p>
+<p>上述变换是用矩阵来进行的。</p>
+<p>局部坐标 –(模型变换)-&gt; 世界坐标 –(视图变换)-&gt; 视图坐标 –(投影变换)–&gt; CCV 坐标。</p>
+<p>以(0,1,0)为例，它的齐次向量为(0,0,1,1)，上述变换的表示过程可以是：</p>
+<p><img src="https://img.alicdn.com/tps/TB1kq4CLXXXXXXoXXXXXXXXXXXX-639-129.png" alt></p>
+<p>上面三个矩阵依次是透视投影矩阵，视图矩阵，模型矩阵。三个矩阵的值分别取决于：观察者的视角和视野距离，观察者在世界中的状态(位置和方向)，模型在世界中的状态(位置和方向)。计算的结果是(0,1,1,2)，化成齐次坐标是(0,0.5,0.5,1)，就是这个点在CCV中的坐标，那么(0,0.5)就是在Canvas中的坐标(认为 Canvas 中心为原点，长宽都为2)。</p>
+<p>上面出现的(0,0,1,1)是(0,0,1)的齐次向量。齐次向量(x,y,z,w)可以代表三维向量(x,y,z)参与矩阵运算，通俗地说，w 分量为 1 时表示位置，w 分量为 0 时表示位移。</p>
+<p>WebGL 没有提供任何有关上述变换的机制，开发者需要亲自计算顶点的 CCV 坐标。</p>
+<p>关于坐标变换的更多内容，可以参考：</p>
+<ul>
+<li><a href="http://www.amazon.cn/%E5%9B%BD%E5%A4%96%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%95%99%E6%9D%90%E7%B3%BB%E5%88%97-%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6-Donald-D-Hearn/dp/B007IDS39W/ref=sr_1_cc_2?s=aps&amp;ie=UTF8&amp;qid=1408975885&amp;sr=1-2-catcorr&amp;keywords=%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6" target="_blank" rel="noopener">计算机图形学</a>中的5-7章</li>
+<li><a href="http://zh.wikipedia.org/wiki/%E5%8F%98%E6%8D%A2%E7%9F%A9%E9%98%B5" target="_blank" rel="noopener">变换矩阵@维基百科</a></li>
+<li><a href="http://www.cnblogs.com/graphics/archive/2012/07/25/2582119.html" target="_blank" rel="noopener">透视投影详解</a></li>
+</ul>
+<p>比较复杂的是模型变换中的绕任意轴旋转(通常用四元数生成矩阵)和投影变换(上面的例子都没收涉及到)。</p>
+<p>关于绕任意轴旋转和四元数，可以参考：</p>
+<ul>
+<li><a href="http://zh.wikipedia.org/wiki/%E5%9B%9B%E5%85%83%E6%95%B8" target="_blank" rel="noopener">四元数@维基百科</a></li>
+<li><a href="http://www.cs.ucr.edu/~vbz/resources/quatut.pdf" target="_blank" rel="noopener">一个老外对四元数公式的证明</a></li>
+</ul>
+<p>关于齐次向量的更多内容，可以参考。</p>
+<ul>
+<li><a href="http://www.amazon.cn/%E5%9B%BD%E5%A4%96%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A7%91%E5%AD%A6%E6%95%99%E6%9D%90%E7%B3%BB%E5%88%97-%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6-Donald-D-Hearn/dp/B007IDS39W/ref=sr_1_cc_2?s=aps&amp;ie=UTF8&amp;qid=1408975885&amp;sr=1-2-catcorr&amp;keywords=%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6" target="_blank" rel="noopener">计算机图形学</a>的5.2节</li>
+<li><a href="http://zh.wikipedia.org/zh/%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87" target="_blank" rel="noopener">齐次坐标@维基百科</a></li>
+</ul>
+<h2 id="着色器和光栅化"><a href="#着色器和光栅化" class="headerlink" title="着色器和光栅化"></a>着色器和光栅化</h2><p>在 WebGL 中，开发者是通过着色器来完成上述变换的。着色器是运行在显卡中的程序，以 GLSL 语言编写，开发者需要将着色器的源码以字符串的形式传给 WebGL 上下文的相关函数。</p>
+<p>着色器有两种，顶点着色器和片元(像素)着色器，它们成对出现。顶点着色器任务是接收顶点的局部坐标，输出 CCV 坐标。CCV 坐标经过光栅化，转化为逐像素的数据，传给片元着色器。片元着色器的任务是确定每个片元的颜色。</p>
+<p>顶点着色器接收的是 attribute 变量，是逐顶点的数据。顶点着色器输出 varying 变量，也是逐顶点的。逐顶点的 varying 变量数据经过光栅化，成为逐片元的 varying 变量数据，输入片元着色器，片元着色器输出的结果就会显示在 Canvas 上。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1H9xALXXXXXaYXXXXXXXXXXXX-567-463.png" alt></p>
+<p>着色器功能很多，上述只是基本功能。大部分炫酷的效果都是依赖着色器的。如果你对着色器完全没有概念，可以试着理解下一节 hello world 程序中的着色器再回顾一下本节。</p>
+<p>关于更多着色器的知识，可以参考：</p>
+<ul>
+<li><a href="http://zh.wikipedia.org/zh/GLSL" target="_blank" rel="noopener">GLSL@维基百科</a></li>
+<li><a href="http://msdn.microsoft.com/zh-cn/library/dn385807.aspx" target="_blank" rel="noopener">WebGL@MSDN</a></li>
+</ul>
+<h2 id="程序"><a href="#程序" class="headerlink" title="程序"></a>程序</h2><p>这一节解释绘制上述场景(三角形)的 WebGL 程序。点<a href="http://codepen.io/taobaofed/full/RrRWmR/" target="_blank" rel="noopener">这个链接</a>，查看源代码，试图理解一下。这段代码出自<a href="http://www.amazon.com/WebGL-Programming-Guide-Interactive-Graphics/dp/0321902920" target="_blank" rel="noopener">WebGL Programming Guide</a>，我作了一些修改以适应本文内容。如果一切正常，你看到的应该是下面这样：</p>
+<p><img src="https://gw.alicdn.com/tps/TB1sXXmLXXXXXasXFXXXXXXXXXX-283-283.png" alt></p>
+<p>解释几点(如果之前不了解 WebGL ，多半会对下面的代码困惑，无碍)：</p>
+<ol>
+<li><p>字符串 VSHADER_SOURCE 和 FSHADER_SOURCE 是顶点着色器和片元着色器的源码。可以将着色器理解为有固定输入和输出格式的程序。开发者需要事先编写好着色器，再按照一定格式着色器发送绘图命令。</p>
+</li>
+<li><p>Part2 将着色器源码编译为 program 对象：先分别编译顶点着色器和片元着色器，然后连接两者。如果编译源码错误，不会报 JS 错误，但可以通过其他 API(如gl.getShaderInfo等)获取编译状态信息(成功与否，如果出错的错误信息)。</p>
+<pre><code>// 顶点着色器
+var vshader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vshader, VSHADER_SOURCE);
+gl.compileShader(vshader);
+// 同样新建 fshader
+var program = gl.createProgram();
+gl.attachShader(program, vshader);
+gl.attachShader(program, fshader);
+gl.linkProgram(program);
+</code></pre></li>
+<li><p>program 对象需要指定使用它，才可以向着色器传数据并绘制。复杂的程序通常有多个 program 对 象，(绘制每一帧时)通过切换 program 对象绘制场景中的不同效果。</p>
+<pre><code>gl.useProgram(program);
+</code></pre></li>
+<li><p>Part3 向正在使用的着色器传入数据，包括逐顶点的 attribute 变量和全局的 uniform 变量。向着色器传入数据必须使用 ArrayBuffer，而不是常规的 JS 数组。</p>
+<pre><code>var varray = new Float32Array([-1, -1, 0, 1, -1, 0, 0, 1, 0])
+</code></pre></li>
+<li><p>WebGL API 对 ArrayBuffer 的操作(填充缓冲区，传入着色器，绘制等)都是通过 gl.ARRAY_BUFFER 进行的。在 WebGL 系统中又很多类似的情况。</p>
+<pre><code>// 只有将 vbuffer 绑定到 gl.ARRAY_BUFFER，才可以填充数据
+gl.bindBuffer(gl.ARRAY_BUFFER, vbuffer);
+// 这里的意思是，向“绑定到 gl.ARRAY_BUFFER”的缓冲区中填充数据
+gl.bufferData(gl.ARRAY_BUFFER, varray, gl.STATIC_DRAW);
+// 获取 a_Position 变量在着色器程序中的位置，参考顶点着色器源码
+var aloc = gl.getAttribLocation(program, &apos;a_Position&apos;);
+// 将 gl.ARRAY_BUFFER 中的数据传入 aloc 表示的变量，即 a_Position
+gl.vertexAttribPointer(aloc, 3, gl.FLOAT, false, 0, 0);
+gl.enableVertexAttribArray(aloc);
+</code></pre></li>
+<li><p>向着色器传入矩阵时，是按列存储的。可以比较一下 mmatrix 和矩阵变换一节中的模型矩阵(第 3 个)。</p>
+</li>
+<li><p>顶点着色器计算出的 gl_Position 就是 CCV 中的坐标，比如最上面的顶点(蓝色)的 gl_Position 化成齐次坐标就是(0,0.5,0.5,1)。</p>
+</li>
+<li><p>向顶点着色器传入的只是三个顶点的颜色值，而三角形表面的颜色渐变是由这三个颜色值内插出的。光栅化不仅会对 gl_Position 进行，还会对 varying 变量插值。</p>
+</li>
+<li><p>gl.drawArrays()方法驱动缓冲区进行绘制，gl.TRIANGLES 指定绘制三角形，也可以改变参数绘制点、折线等等。</p>
+</li>
+</ol>
+<p>关于 ArrayBuffer 的详细信息，可以参考：</p>
+<ul>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/ArrayBuffer" target="_blank" rel="noopener">ArrayBuffer@MDN</a></li>
+<li><a href="http://javascript.ruanyifeng.com/stdlib/arraybuffer.html" target="_blank" rel="noopener">阮一峰的 ArrayBuffer 介绍</a></li>
+<li><a href="http://www.zhangxinxu.com/wordpress/2013/10/understand-domstring-document-formdata-blob-file-arraybuffer/" target="_blank" rel="noopener">张鑫旭的 ArrayBuffer 介绍</a></li>
+</ul>
+<p>关于 gl.TRIANGLES 等其他绘制方式，可以参考下面这张图或<a href="http://3dgep.com/rendering-primitives-with-opengl/" target="_blank" rel="noopener">这篇博文</a>。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1B1A.KVXXXXcQXVXXXXXXXXXX-600-300.png" alt="引用自http://3dgep.com/rendering-primitives-with-opengl/"></p>
+<h2 id="深度检测"><a href="#深度检测" class="headerlink" title="深度检测"></a>深度检测</h2><p>当两个表面重叠时，前面的模型会挡住后面的模型。比如<a href="http://codepen.io/taobaofed/full/rxLOgo/" target="_blank" rel="noopener">这个例子</a>，绘制了两个交叉的三角形( varray 和 carray 的长度变为 18，gl.drawArrays 最后一个参数变为 6)。为了简单，这个例子去掉了矩阵变换过程，直接向着色器传入 CCV 坐标。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1uKZ7KVXXXXc8aXXXXXXXXXXX-283-286.png" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1PNVmLXXXXXXLXFXXXXXXXXXX-283-262.png" alt></p>
+<p>顶点着色器给出了 6 个顶点的 gl_Position ，经过光栅化，片元着色器获得了 2X 个片元(假设 X 为每个三角形的像素个数)，每个片元都离散的 x，y 坐标值，还有 z 值。x，y 坐标就是三角形在 Canvas 上的坐标，但如果有两个具有相同 x，y 坐标的片元同时出现，那么 WebGL 就会取 z 坐标值较小的那个片元。</p>
+<p>在深度检测之前，必须在绘制前开启一个常量。否则，WebGL 就会按照在 varray 中定义的顺序绘制了，后面的会覆盖前面的。</p>
+<pre><code>gl.enable(gl.DEPTH_TEST);
+</code></pre><p>实际上，WebGL 的逻辑是这样的：依次处理片元，如果渲染缓冲区(这里就是 Canvas 了)的那个与当前片元对应的像素还没有绘制时，就把片元的颜色画到渲染缓冲区对应像素里，同时把片元的 z 值缓存在另一个深度缓冲区的相同位置；如果当前缓冲区的对应像素已经绘制过了，就去查看深度缓冲区中对应位置的 z 值，如果当前片元 z 值小，就重绘，否则就放弃当前片元。</p>
+<p>WebGL 的这套逻辑，对理解蒙版(后面会说到)有一些帮助。</p>
+<h2 id="顶点索引"><a href="#顶点索引" class="headerlink" title="顶点索引"></a>顶点索引</h2><p>gl.drawArrays()是按照顶点的顺序绘制的，而 gl.drawElements()可以令着色器以一个索引数组为顺序绘制顶点。比如<a href="http://codepen.io/taobaofed/full/VejvJv/" target="_blank" rel="noopener">这个例子</a>。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1e50eLXXXXXauXVXXXXXXXXXX-283-281.png" alt></p>
+<p>这里画了两个三角形，但只用了 5 个顶点，有一个顶点被两个三角形共用。这时需要建立索引数组，数组的每个元素表示顶点的索引值。将数组填充至<code>gl.ELEMENT_ARRAY</code>，然后调用 gl.drawElements()。</p>
+<pre><code>var iarray = new Uint8Array([0,1,2,2,3,4]);
+var ibuffer = gl.createBuffer(gl.ARRAY_BUFFER, ibuffer);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibuffer);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, iarray, gl.STATIC_DRAW);
+</code></pre><h2 id="纹理"><a href="#纹理" class="headerlink" title="纹理"></a>纹理</h2><p>attribute 变量不仅可以传递顶点的坐标，还可以传递其他任何逐顶点的数据。比如 HelloTriangle 程序把单个顶点的颜色传入了 a_Color，片元着色器收到 v_Color 后直接赋给 gl_FragmentColor，就决定了颜色。</p>
+<p>attribute 变量还可以帮助绘制纹理。绘制纹理的基本原理是，为每个顶点指定一个纹理坐标(在(0,0)与(1,1,)的正方形中)，然后传入纹理对象。片元着色器拿到的是对应片元的内插后的纹理坐标，就利用这个纹理坐标去纹理对象上取颜色，再画到片元上。内插后的纹理坐标很可能不恰好对应纹理上的某个像素，而是在几个像素之间(因为通常的图片纹理也是离散)，这时可能会通过周围几个像素的加权平均算出该像素的值(具体有若干种不同方法，可以参考)。</p>
+<p>比如<a href="http://codepen.io/taobaofed/full/KVMdOR/" target="_blank" rel="noopener">这个例子</a>。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1.6twLXXXXXcRXXXXXXXXXXXX-283-283.png" alt></p>
+<p>纹理对象和缓冲区对象很类似：使用 gl 的 API 函数创建，需要绑定至常量 gl.ARRAY_BUFFER 和 gl.TEXTURE_2D ，都通过常量对象向其中填入图像和数据。不同的是，纹理对象在绑定时还需要激活一个纹理单元(此处的<code>gl.TEXTURE0</code>)，而 WebGL 系统支持的纹理单元个数是很有限的(一般为 8 个)。</p>
+<pre><code>var texture = gl.createTexture();
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, textureImage);
+var sloc = gl.getUniformLocation(program, &apos;u_Sampler&apos;);
+gl.uniform1i(sloc, 0);
+</code></pre><p>片元着色器内声明了 sampler2D 类型的 uniform 变量，通过<code>texture2D</code>函数取样。</p>
+<pre><code>precision mediump float;
+uniform sampler2D u_Sampler;
+varying vec2 v_TexCoord;
+void main() {
+  gl_FragColor = texture2D(u_Sampler, v_TexCoord);
+};
+</code></pre><h2 id="混合与蒙版"><a href="#混合与蒙版" class="headerlink" title="混合与蒙版"></a>混合与蒙版</h2><p>透明效果是用混合机制完成的。混合机制与深度检测类似，也发生在试图向某个已填充的像素填充颜色时。深度检测通过比较z值来确定像素的颜色，而混合机制会将两种颜色混合。比如<a href="http://codepen.io/taobaofed/full/JGKGoP/" target="_blank" rel="noopener">这个例子</a>。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1pndjLXXXXXbtXFXXXXXXXXXX-283-285.png" alt></p>
+<p>混合的顺序是按照绘制的顺序进行的，如果绘制的顺序有变化，混合的结果通常也不同。如果模型既有非透明表面又有透明表面，绘制透明表面时开启蒙版，其目的是锁定深度缓冲区，因为半透明物体后面的物体还是可以看到的，如果不这样做，半透明物体后面的物体将会被深度检测机制排除。</p>
+<p>开启混合的代码如下。<code>gl.blendFunc</code>方法指定了混合的方式，这里的意思是，使用源(待混合)颜色的 α 值乘以源颜色，加上 1-[源颜色的 α]乘以目标颜色。</p>
+<pre><code>gl.enable(gl.BLEND);
+gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+</code></pre><p>所谓 α 值，就是颜色的第 4 个分量。</p>
+<pre><code>var carray = new Float32Array([
+  1,0,0,0.7,1,0,0,0.7,1,0,0,0.7,
+  0,0,1,0.4,0,0,1,0.4,0,0,1,0.4
+  ]);
+</code></pre><h2 id="浏览器的WebGL系统"><a href="#浏览器的WebGL系统" class="headerlink" title="浏览器的WebGL系统"></a>浏览器的WebGL系统</h2><p>WebGL 系统各个组成部分在既定规则下互相配合。稍作梳理如下。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1st34KVXXXXXqapXXXXXXXXXX-567-447.png" alt></p>
+<p>这张图比较随意，箭头上的文字表示 API，箭头方向大致表现了数据的流动方向，不必深究。</p>
+<h2 id="光照"><a href="#光照" class="headerlink" title="光照"></a>光照</h2><p>WebGL 没有为光照提供任何内置的方法，需要开发者在着色器中实现光照算法。</p>
+<p>光是有颜色的，模型也是有颜色的。在光照下，最终物体呈现的颜色是两者共同作用的结果。</p>
+<p>实现光照的方式是：将光照的数据(点光源的位置，平行光的方向，以及光的颜色和强度)作为 uniform 变量传入着色器中，将物体表面每个顶点处的法线作为 attribute 变量传入着色器，遵循光照规则，修订最终片元呈现的颜色。</p>
+<p>光照又分为逐顶点的和逐片元的，两者的区别是，将法线光线交角因素放在顶点着色器中考虑还是放在片元着色器中考虑。逐片元光照更加逼真，一个极端的例子是：</p>
+<p><img src="https://gw.alicdn.com/tps/TB1b6g_KVXXXXaYaXXXXXXXXXXX-145-286.png" alt></p>
+<p>此时，点光源在距离一个表面较近处，表面中央 A 处较亮，四周较暗。但是在逐顶点光照下，表面的颜色(的影响因子)是由顶点内插出来的，所以表面中央也会比较暗。而逐片元光照直接使用片元的位置和法线计算与点光源的交角，因此表面中央会比较亮。</p>
+<h2 id="复杂模型"><a href="#复杂模型" class="headerlink" title="复杂模型"></a>复杂模型</h2><p>复杂模型可能有包括子模型，子模型可能与父模型有相对运动。比如开着雨刮器的汽车，雨刮器的世界坐标是受父模型汽车，和自身的状态共同决定的。若要计算雨刮器某顶点的位置，需要用雨刮器相对汽车的模型矩阵乘上汽车的模型矩阵，再乘以顶点的局部坐标。</p>
+<p>复杂模型可能有很多表面，可能每个表面使用的着色器就不同。通常将模型拆解为组，使用相同着色器的表面为一组，先绘制同一组中的内容，然后切换着色器。每次切换着色器都要重新将缓冲区中的数据分配给着色器中相应变量。</p>
+<h2 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h2><p>动画的原理就是快速地擦除和重绘。常用的方法是大名鼎鼎的 requestAnimationFrame 。不熟悉的同学，可以参考<a href="http://www.cnblogs.com/rubylouvre/archive/2011/08/22/2148797.html" target="_blank" rel="noopener">正美的介绍</a>。</p>
+<h2 id="WebGL库"><a href="#WebGL库" class="headerlink" title="WebGL库"></a>WebGL库</h2><p>目前最流行的 WebGL 库是 ThreeJS，很强大，<a href="http://threejs.org/" target="_blank" rel="noopener">官网</a>，<a href="https://github.com/mrdoob/three.js/" target="_blank" rel="noopener">代码</a>。</p>
+<h2 id="调试工具"><a href="#调试工具" class="headerlink" title="调试工具"></a>调试工具</h2><p>比较成熟的 WebGL 调试工具是<a href="http://benvanik.github.io/WebGL-Inspector/" target="_blank" rel="noopener">WebGL Inspector</a>。</p>
+<h2 id="网络资源和书籍"><a href="#网络资源和书籍" class="headerlink" title="网络资源和书籍"></a>网络资源和书籍</h2><p>英文的关于 WebGL 的资源有很多，包括：</p>
+<ul>
+<li><a href="http://learningwebgl.com/blog/?page_id=1217" target="_blank" rel="noopener">learning webgl</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/WebGL" target="_blank" rel="noopener">WebGL@MDN</a></li>
+<li><a href="http://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf" target="_blank" rel="noopener">WebGL Cheat Sheet</a></li>
+</ul>
+<p>国内最早的 WebGL 教程是由郝稼力翻译的，放在 hiwebgl 上，目前 hiwebgl 已经关闭，但教程还可以在<a href="http://www.html-5.cn/html5/texing/WebGL/" target="_blank" rel="noopener">这里</a>找到。郝稼力目前运营着<a href="http://www.lao3d.com/" target="_blank" rel="noopener">Lao3D</a>。</p>
+<p>国内已经出版的 WebGL 书籍有：</p>
+<ul>
+<li><a href="http://www.amazon.cn/WebGL%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97-%E5%B8%95%E9%87%8C%E8%A5%BF/dp/B00DA1VQF4/ref=sr_1_1?s=books&amp;ie=UTF8&amp;qid=1409016405&amp;sr=1-1&amp;keywords=webgl%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97" target="_blank" rel="noopener">WebGL入门指南</a>：其实是一本讲 ThreeJS 的书</li>
+<li><a href="http://www.amazon.cn/WebGL%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B-%E5%BC%80%E5%8F%91Web-3D%E5%9B%BE%E5%BD%A2-%E9%98%BF%E5%B0%A4%E9%B2%81/dp/B00DNVT6H6/ref=cm_cr_pr_pb_t" target="_blank" rel="noopener">WebGL高级编程</a>：还不错的一本</li>
+<li><a href="http://www.amazon.cn/WebGL%E7%BC%96%E7%A8%8B%E6%8C%87%E5%8D%97-%E6%9D%BE%E7%94%B0%E6%B5%A9%E4%B8%80/dp/B00KXQPR0Y/ref=sr_1_1?s=books&amp;ie=UTF8&amp;qid=1409016454&amp;sr=1-1&amp;keywords=WebGL%E7%BC%96%E7%A8%8B%E6%8C%87%E5%8D%97" target="_blank" rel="noopener">WebGL编程指南</a>：相当靠谱的全面教程</li>
+</ul>
+<p>最后再夹杂一点私货吧。读书期间我曾花了小半年时间翻译了一本<a href="http://www.amazon.com/WebGL-Programming-Guide-Interactive-Graphics/dp/0321902920" target="_blank" rel="noopener">WebGL的书</a>，也就是上面的第 3 本。这本书确实相当靠谱，网上各种教程里很多没说清楚的东西，这本书说得很清楚，而且还提供了一份很完整的API文档。翻译这本书的过程也使我受益匪浅。如果有同学愿意系统学一下 WebGL 的，建议购买一本(文青建议买<a href="http://www.amazon.com/WebGL-Programming-Guide-Interactive-Graphics/dp/0321902920/ref=sr_1_1?ie=UTF8&amp;qid=1409015819&amp;sr=8-1&amp;keywords=webgl+programming+guide" target="_blank" rel="noopener">英文版</a>)。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/21/webgl-handbook/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/21/webgl-handbook/" data-id="cjt6lby2400csjeu1pmnaqev7" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/21/webgl-handbook/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webGL/">webGL</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/22/node-subway-ep1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          让我们谈谈「生产环境中的 Node.js」- Node 地下铁第1次线下沙龙邀约
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/18/think-to-def/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">DEF 2.0 的想法</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>高效 Node.js 开发环境之命令行工具篇 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="追求更高的效率是码农不断的追求。选择合适的工具，合理搭配使用，既能提高一部分开发效率，又能改善写代码时的心情。本文介绍笔者自己平时使用的部分工具与配置，希望抛砖引玉，对大家有所帮助。每种工具或配置后都有扩展阅读的链接，方便大家做更深入的了解。 写在前面的操作系统选择作为一个 Node.js 开发者，如果你还在用 Windows，那你一定是上辈子折翼的天使……（大雾）。Node.js 应用的开发过">
+<meta name="keywords" content="Node.js,CLI,Shell">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高效 Node.js 开发环境之命令行工具篇">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/08/efficient-node-dev-cli-setup/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="追求更高的效率是码农不断的追求。选择合适的工具，合理搭配使用，既能提高一部分开发效率，又能改善写代码时的心情。本文介绍笔者自己平时使用的部分工具与配置，希望抛砖引玉，对大家有所帮助。每种工具或配置后都有扩展阅读的链接，方便大家做更深入的了解。 写在前面的操作系统选择作为一个 Node.js 开发者，如果你还在用 Windows，那你一定是上辈子折翼的天使……（大雾）。Node.js 应用的开发过">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1tjp4KVXXXXXpaXXX2AXZ8pXX-900-500.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1dgQEKFXXXXX2aXXX59tm9VXX-2764-1640.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1jk32KFXXXXaOXpXX8nn.WFXX-1540-1240.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1a5E1KFXXXXbRXpXXHGlxLFXX-1936-1560.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1Hvk2KFXXXXaTXFXX4DRhUVXX-1920-1182.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="高效 Node.js 开发环境之命令行工具篇">
+<meta name="twitter:description" content="追求更高的效率是码农不断的追求。选择合适的工具，合理搭配使用，既能提高一部分开发效率，又能改善写代码时的心情。本文介绍笔者自己平时使用的部分工具与配置，希望抛砖引玉，对大家有所帮助。每种工具或配置后都有扩展阅读的链接，方便大家做更深入的了解。 写在前面的操作系统选择作为一个 Node.js 开发者，如果你还在用 Windows，那你一定是上辈子折翼的天使……（大雾）。Node.js 应用的开发过">
+<meta name="twitter:image" content="http://gtms04.alicdn.com/tps/i4/TB1tjp4KVXXXXXpaXXX2AXZ8pXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-efficient-node-dev-cli-setup" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      高效 Node.js 开发环境之命令行工具篇
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 渐飞</span>
+        
+        <span>发表于: <a href="/blog/2015/12/08/efficient-node-dev-cli-setup/" class="article-date">
+  <time datetime="2015-12-08T13:01:02.000Z" itemprop="datePublished">2015-12-08</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms04.alicdn.com/tps/i4/TB1tjp4KVXXXXXpaXXX2AXZ8pXX-900-500.png" alt="高效 Node.js 开发环境之命令行工具篇"></p>
+<p>追求更高的效率是码农不断的追求。选择合适的工具，合理搭配使用，既能提高一部分开发效率，又能改善写代码时的心情。本文介绍笔者自己平时使用的部分工具与配置，希望抛砖引玉，对大家有所帮助。每种工具或配置后都有扩展阅读的链接，方便大家做更深入的了解。</p>
+<h2 id="写在前面的操作系统选择"><a href="#写在前面的操作系统选择" class="headerlink" title="写在前面的操作系统选择"></a>写在前面的操作系统选择</h2><p>作为一个 Node.js 开发者，如果你还在用 Windows，那你一定是上辈子折翼的天使……（大雾）。Node.js 应用的开发过程需要用到大量的命令行操作，偏偏 Windows 对命令行工具的支持是最薄弱的，并且有相当一部分模块在 Windows 上无法编译通过。OS X 的内核 Darwin 是 Unix 的一个变种，基本兼容 POSIX 规范，与 Linux 一样对命令行工具有天然的良好支持，再加上优秀的 GUI，不选 OS X 选什么？什么，你说你要用 Linux？也行啊，只是本文部分优秀 GUI 工具与你无缘了：） 什么？！你一定要用 Windows ？！好吧，也有两件如意兵器在后面。</p>
+<h2 id="终端-命令行工具"><a href="#终端-命令行工具" class="headerlink" title="终端/命令行工具"></a>终端/命令行工具</h2><ul>
+<li>iTerm2: OS X 已经自带了 <code>Terminal.app</code>，但如果你每天会花一个小时以上的时间面对终端软件， iTerm2 无疑是更佳的选择。除了 session 分屏、便携的快捷键、高亮搜索结果之类称手的功能，iTerm2 的强大更体现在：<ul>
+<li>Instant Replay：实时「重放」当前 session 之前的状态，简直是终端里的时间机器。</li>
+<li>Password Manager：是否已经厌倦了在 sudo 或者 ssh 远程主机时一遍又一遍输入密码？ Password Manager 可以帮你摆脱这些重复劳动。当然，免输密码的办法很多，不过这是另一个话题，以后可以再聊。</li>
+<li>Captured Output：在几百几千行的 stdout/stderr 中找感兴趣的信息实在是件费眼睛费脑子的事情。Captured Output 可以直接捕获符合你定义的正则表达式的输入并将其收集起来，省去不少力气。<br><img src="http://gtms02.alicdn.com/tps/i2/TB1dgQEKFXXXXX2aXXX59tm9VXX-2764-1640.png" alt="iTerm2"></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>扩展阅读 <a href="https://www.iterm2.com/features.html" target="_blank" rel="noopener">https://www.iterm2.com/features.html</a></p>
+</blockquote>
+<ul>
+<li>zsh： 曾经有一位哲学家（我）说过，「bash is good, but zsh is way better!」 zsh 基本兼容 bash 的语法（新手直接 <code>cat ~/.bashrc &gt;&gt; ~/.zshrc</code> 基本上是用起来的，虽然不是 good practise），并具有以下强大的功能：<ul>
+<li>基于上下文的自动补全</li>
+<li>全局别名</li>
+<li>命令拼写检查与提示</li>
+<li>命令历史管理</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>扩展阅读 No, Really. Use Zsh：<a href="http://fendrich.se/blog/2012/09/28/no/" target="_blank" rel="noopener">http://fendrich.se/blog/2012/09/28/no/</a></p>
+</blockquote>
+<ul>
+<li>oh-my-zsh 是 zsh 的主题与插件集合，给 zsh 锦上添花。有了 oh-my-zsh，轻轻松松更改 zsh 的提示符主题，或者增加第三方命令行工具的自动补全。我启用的 oh-my-zsh 插件有 git、git-extras、tig、nvm、npm、osx、brew、 autojump、 sudo、 history-substring-search、 docker，看官们可以酌情自选。</li>
+</ul>
+<blockquote>
+<p>扩展阅读 Become A Command-Line Power User With Oh-My-ZSH And Z <a href="http://www.smashingmagazine.com/2015/07/become-command-line-power-user-oh-my-zsh-z/" target="_blank" rel="noopener">http://www.smashingmagazine.com/2015/07/become-command-line-power-user-oh-my-zsh-z/</a></p>
+</blockquote>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1jk32KFXXXXaOXpXX8nn.WFXX-1540-1240.png" alt="zsh+oh-my-zsh"></p>
+<ul>
+<li>homebrew：不要再羡慕 Debian/Ubuntu 用户们有 apt-get 或者 CentOS/RHEL 用户们有 yum。有了 homebrew，OS X 下的包管理实在太方便了！需要一个 MySQL Server？<code>brew install mysql</code>。需要知道有哪些 git 相关的 package? <code>brew search git</code>。homebrew 不仅仅可以安装命令行工具，连 GUI 应用，也可以用它来安装更新。<code>brew cask</code> 一下，你就知道。</li>
+</ul>
+<blockquote>
+<p>扩展阅读 Homebrew Demystified: OS X’s Ultimate Package Manager: <a href="http://computers.tutsplus.com/tutorials/homebrew-demystified-os-xs-ultimate-package-manager--mac-44884" target="_blank" rel="noopener">http://computers.tutsplus.com/tutorials/homebrew-demystified-os-xs-ultimate-package-manager--mac-44884</a></p>
+</blockquote>
+<ul>
+<li>git-extras：git-extras 提供了一系列 git 子命令扩展，一步完成好几个 git 原生命令或者外部命令才能搞定的操作。比如 <code>git changelog</code> 可快速根据 commit log 生成 Changelog，<code>git release</code> 可生成相应版本 tag, <code>git pr</code> 可以直接在 GitHub 上创建一条 Pull Request，简直是一把 git 瑞士军刀。 git-extras 可以作为 oh-my-zsh 的插件直接在 <code>~/.zshrc</code> 中启用，也可以用 homebrew 执行 <code>brew install git-extras</code> 安装。</li>
+</ul>
+<blockquote>
+<p>扩展阅读 git extras commands <a href="https://github.com/tj/git-extras/blob/master/Commands.md" target="_blank" rel="noopener">https://github.com/tj/git-extras/blob/master/Commands.md</a></p>
+</blockquote>
+<ul>
+<li>tig：是不是觉得 tig 这个名字有些眼熟？嗯，其实就是 git 三个字母颠倒一下顺序。tig 是一个「基于文本」的 git 「图形界面」，有点儿拗口，且来看图：<img src="http://gtms03.alicdn.com/tps/i3/TB1a5E1KFXXXXbRXpXXHGlxLFXX-1936-1560.png" alt> tig 可以在一个「文本图形界面」中使用 log/tree/diff/branch/refs/stage/stash 等操作，异常方便。</li>
+</ul>
+<blockquote>
+<p>扩展阅读 The Tig Manual: <a href="http://jonas.nitro.dk/tig/manual.html" target="_blank" rel="noopener">http://jonas.nitro.dk/tig/manual.html</a></p>
+</blockquote>
+<ul>
+<li>nvm/n：如果你需要在 Node.js 开发过程中经常切换 Node.js 包的版本，nvm/n 显然是让这个过程轻松太多的不二选择。关于 nvm/n 的比较与用法，之前有<a href="http://taobaofed.org/blog/2015/11/17/nvm-or-n/">文章已经详细介绍过</a>。但如果你是一个 nvm 的重度用户，你会发现每次用 nvm 来切换一个全新版本的 Node.js，需要用 <code>nvm copy-packages</code> 重新安装一次之前安装的所有全局模块，简直让人头疼。其实也有个小技巧解决:<ol>
+<li>编辑 <code>~/.npmrc</code>，添加一行 <code>prefix=~/.npm-global</code></li>
+<li>编辑 <code>~/.zshrc</code> 或者 <code>~/.bashrc</code>，在末尾添加一行 <code>export PATH=~/.npm-global/bin:$PATH</code></li>
+<li>执行 <code>source ~/.zshrc</code> 或者 <code>source ~/.bashrc</code></li>
+</ol>
+</li>
+</ul>
+<p>注：新版本的 nvm 考虑到一些需要编译的模块在不同 V8 版本下的问题，禁止 prefix 的用法。解决办法也很简单，删除 nvm.sh 中这三行即可：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if ! nvm_die_on_prefix "$NVM_DELETE_PREFIX" "$NVM_USE_CMD"; then</span><br><span class="line">  return 11</span><br><span class="line">fi</span><br></pre></td></tr></table></figure></p>
+<p>这样无论哪个版本的 node 安装全局模块时都会安装到 <code>~/.npm-global</code>，避免在切换版本后需要重新安装。</p>
+<h3 id="Windows-用户尊贵专场"><a href="#Windows-用户尊贵专场" class="headerlink" title="Windows 用户尊贵专场"></a>Windows 用户尊贵专场</h3><ul>
+<li>cmder: 虽然 Windows 下没有 iTerm2 这样的神器，但是还是有少数终端软件在努力着，cmder 就是其中一例。简陋的 cmd.exe 与 cmder 相比，简直一个地下一个天上。<img src="http://gtms04.alicdn.com/tps/i4/TB1Hvk2KFXXXXaTXFXX4DRhUVXX-1920-1182.png" alt="cmder"></li>
+<li>Chocolatey：这是我唯一能找到的 Windows 下的第三方包管理工具（Windows 10 Powershell 附带的 OneGet 不，正如它的自述，”Chocolatey NuGet is a Machine Package Manager, somewhat like apt-get, but built with Windows in mind.” 类似 brew cask，Chocolatey 也可以安装 GUI 应用程序。</li>
+</ul>
+<blockquote>
+<p>扩展阅读 Chocolatey official site: <a href="https://chocolatey.org/" target="_blank" rel="noopener">https://chocolatey.org/</a></p>
+</blockquote>
+<p>咳，简短的介绍到此。欢大家迎拍砖，欢迎建议更棒的工具！</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/08/efficient-node-dev-cli-setup/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/08/efficient-node-dev-cli-setup/" data-id="cjt6lbxy00024jeu1r150ujb3" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/08/efficient-node-dev-cli-setup/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CLI/">CLI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Shell/">Shell</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/09/using-js-to-build-an-crossplatform-native-app-an-introduction-to-listview/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          使用 JS 构建跨平台的原生应用：ListView 组件介绍
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/07/some-thing-about-random/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Math.random() 二三事</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

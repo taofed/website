@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>ES6 你可能不知道的事 - 基础篇 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="序ES6，或许应该叫 ES2015（2015 年 6 月正式发布），对于大多数前端同学都不陌生。 首先这篇文章不是工具书，不会去过多谈概念，而是想聊聊关于每个特性 你可能不知道的事，希望能为各位同学 正确使用 ES6，提供一些指导。 对于 ES6，有些同学已经在项目中有过深入使用了，有些则刚刚开始认识他，但不论你是属于哪一类，相信这篇文章都有适合你的部分。针对文章中的问题或不同意见，欢迎随时拍砖">
+<meta name="keywords" content="ES6,JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES6 你可能不知道的事 - 基础篇">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/07/22/es6-basics/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="序ES6，或许应该叫 ES2015（2015 年 6 月正式发布），对于大多数前端同学都不陌生。 首先这篇文章不是工具书，不会去过多谈概念，而是想聊聊关于每个特性 你可能不知道的事，希望能为各位同学 正确使用 ES6，提供一些指导。 对于 ES6，有些同学已经在项目中有过深入使用了，有些则刚刚开始认识他，但不论你是属于哪一类，相信这篇文章都有适合你的部分。针对文章中的问题或不同意见，欢迎随时拍砖">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1HPI1KVXXXXbBXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES6 你可能不知道的事 - 基础篇">
+<meta name="twitter:description" content="序ES6，或许应该叫 ES2015（2015 年 6 月正式发布），对于大多数前端同学都不陌生。 首先这篇文章不是工具书，不会去过多谈概念，而是想聊聊关于每个特性 你可能不知道的事，希望能为各位同学 正确使用 ES6，提供一些指导。 对于 ES6，有些同学已经在项目中有过深入使用了，有些则刚刚开始认识他，但不论你是属于哪一类，相信这篇文章都有适合你的部分。针对文章中的问题或不同意见，欢迎随时拍砖">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1HPI1KVXXXXbBXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-es6-basics" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      ES6 你可能不知道的事 - 基础篇
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 化辰</span>
+        
+        <span>发表于: <a href="/blog/2016/07/22/es6-basics/" class="article-date">
+  <time datetime="2016-07-22T11:32:30.000Z" itemprop="datePublished">2016-07-22</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tfs/TB1HPI1KVXXXXbBXpXXXXXXXXXX-900-500.jpg" alt="ES6 你可能不知道的事 - 基础篇"></p>
+<h2 id="序"><a href="#序" class="headerlink" title="序"></a>序</h2><p>ES6，或许应该叫 ES2015（2015 年 6 月正式发布），对于大多数前端同学都不陌生。</p>
+<p>首先这篇文章不是工具书，不会去过多谈概念，而是想聊聊关于每个特性 <strong>你可能不知道的事</strong>，希望能为各位同学 <strong>正确使用</strong> ES6，提供一些指导。</p>
+<p>对于 ES6，有些同学已经在项目中有过深入使用了，有些则刚刚开始认识他，但不论你是属于哪一类，相信这篇文章都有适合你的部分。针对文章中的问题或不同意见，欢迎随时拍砖、指正。</p>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="Let-Const"><a href="#Let-Const" class="headerlink" title="Let + Const"></a>Let + Const</h3><p>这个大概是开始了解 ES6 后，我们第一个感觉自己完全明白并兴致勃勃的开始使用的特性。</p>
+<p>以如下方式使用的同学请举下手？</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义常量</span></span><br><span class="line"><span class="keyword">const</span> REG_GET_INPUT = <span class="regexp">/^\d&#123;1,3&#125;$/</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义配置项</span></span><br><span class="line"><span class="keyword">let</span> config = &#123;</span><br><span class="line">  isDev : <span class="literal">false</span>,</span><br><span class="line">  pubDir: <span class="string">'./admin/'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引入 gulp</span></span><br><span class="line"><span class="keyword">let</span> gulp    = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引入gulp相关插件</span></span><br><span class="line"><span class="keyword">let</span> concat  = <span class="built_in">require</span>(<span class="string">'gulp-concat'</span>);</span><br><span class="line"><span class="keyword">let</span> uglify  = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);</span><br><span class="line"><span class="keyword">let</span> cssnano = <span class="built_in">require</span>(<span class="string">'gulp-cssnano'</span>);</span><br></pre></td></tr></table></figure>
+<p>很多人看完概念之后，第一印象都是：“<code>const</code> 是表示不可变的值，而 <code>let</code> 则是用来替换原来的 <code>var</code> 的。”</p>
+<p>所以就会出现上面代码中的样子；一段代码中出现大量的 <code>let</code>，只有部分常量用 <code>const</code> 去做定义，这样的使用方式是错误的。</p>
+<h4 id="你可能不知道的事"><a href="#你可能不知道的事" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><p><code>const</code> 的定义是<strong>不可重新赋值</strong>的值，与不可变的值(immutable value)不同；<code>const</code> 定义的 Object，在定义之后仍可以修改其属性。</p>
+<p>所以其实他的使用场景很广，包括常量、配置项以及引用的组件、定义的 “大部分” 中间变量等，都应该以<code>const</code>做定义。反之就 <code>let</code> 而言，他的使用场景应该是相对较少的，我们只会在 loop(for，while 循环)及少量必须重定义的变量上用到他。</p>
+<blockquote>
+<p>猜想：就执行效率而言，<code>const</code> 由于不可以重新赋值的特性，所以可以做更多语法静态分析方面的优化，从而有更高的执行效率。</p>
+</blockquote>
+<p>所以上面代码中，所有使用 <code>let</code> 的部分，其实都应该是用 <code>const</code> 的。</p>
+<h3 id="Template-Strings（字符串模板）"><a href="#Template-Strings（字符串模板）" class="headerlink" title="Template Strings（字符串模板）"></a>Template Strings（字符串模板）</h3><p>字符串模板是我刚接触ES6时最喜欢的特性之一，他语法简洁，语义明确，而且很好的解决了之前字符串拼接麻烦的问题。</p>
+<p>因为他并不是 “必须” 的，而且原有的字符串拼接思维根深蒂固，导致我们很容易忽视掉他。</p>
+<h4 id="使用实例"><a href="#使用实例" class="headerlink" title="使用实例"></a>使用实例</h4><p>我们先来看看他的一般使用场景：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> start = <span class="string">'hi all'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> getName = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">'jelly'</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> conf = &#123;</span><br><span class="line">  fav: <span class="string">'Coding'</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模板</span></span><br><span class="line"><span class="keyword">const</span> msg = <span class="string">`<span class="subst">$&#123;start&#125;</span>, my name is <span class="subst">$&#123;getName()&#125;</span>, <span class="subst">$&#123;conf.fav&#125;</span> is my favourite`</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="你可能不知道的事-1"><a href="#你可能不知道的事-1" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 与引号混用</span></span><br><span class="line"><span class="keyword">const</span> wantToSay = <span class="string">`I'm a "tbfed"`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 支持多行文本</span></span><br><span class="line"><span class="keyword">const</span> slogan = </span><br><span class="line"><span class="string">`</span></span><br><span class="line"><span class="string">I have a dream today!</span></span><br><span class="line"><span class="string">`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 比较适合写HTML</span></span><br><span class="line"><span class="keyword">const</span> resultTpl = </span><br><span class="line"><span class="string">`</span></span><br><span class="line"><span class="string">  &lt;section&gt;</span></span><br><span class="line"><span class="string">    &lt;div&gt;...&lt;/div&gt;</span></span><br><span class="line"><span class="string">  &lt;/section&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="Enhanced-Object-Literals（增强的对象字面量）"><a href="#Enhanced-Object-Literals（增强的对象字面量）" class="headerlink" title="Enhanced Object Literals（增强的对象字面量）"></a>Enhanced Object Literals（增强的对象字面量）</h3><p>增强的对象字面量是 ES6 中的升华功能，他设计了很多简写，这些简写不但保留了明确的语义，还减少了我们多余的代码量。</p>
+<p>当他的使用成为一个习惯时，我们会看到自己代码变得更为优雅。</p>
+<h4 id="你可能不知道的事-2"><a href="#你可能不知道的事-2" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">const</span> _bookNum = <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> basicConfig = &#123;</span><br><span class="line">  level: <span class="number">5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  <span class="comment">// 直接指定原型对象</span></span><br><span class="line">  __proto__: basicConfig,</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 属性简写</span></span><br><span class="line">  _bookNum,</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 方法简写</span></span><br><span class="line">  getBookNum() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.bookNum;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Arrows-and-Lexical-This（箭头函数）"><a href="#Arrows-and-Lexical-This（箭头函数）" class="headerlink" title="Arrows and Lexical This（箭头函数）"></a>Arrows and Lexical This（箭头函数）</h3><p>箭头函数是ES6中的一个新的语法特性，他的用法简单，形态优雅，备受人们青睐。</p>
+<p>大多数同学初识这个特性时，更多的仅仅用它作为函数定义的简写，这其实就有些屈才了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 未使用箭头函数的写法</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  </span><br><span class="line">  addOptions: <span class="function"><span class="keyword">function</span> (<span class="params">options</span>) </span>&#123;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">  </span><br><span class="line">    options.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">name, opts</span>)</span>&#123;</span><br><span class="line">      </span><br><span class="line">      self[name] = self.addChild(name, opts);</span><br><span class="line">      </span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用箭头函数后的写法</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  </span><br><span class="line">  addOptions: <span class="function"><span class="keyword">function</span> (<span class="params">options</span>) </span>&#123;</span><br><span class="line">  </span><br><span class="line">    options.forEach(<span class="function">(<span class="params">name, opts</span>) =&gt;</span> &#123;</span><br><span class="line">      </span><br><span class="line">      <span class="keyword">this</span>[name] = <span class="keyword">this</span>.addChild(name, opts);</span><br><span class="line">      </span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以注意到上下两段代码的区别。</p>
+<p>在未使用箭头函数前，我们在过程函数中使用父级 <code>this</code>，需要将其显式缓存到另一个中间变量中，因为过程函数有独立的 <code>this</code> 变量，会覆盖父级；使用箭头函数后，不但简写了一个过程函数（ <code>forEach</code> 的参数），还省略掉了 <code>this</code> 的中间变量的定义。</p>
+<p><em><strong>原因：箭头函数没有独立执行上下文（ <code>this</code> ），所以其内部引用 <code>this</code> 对象会直接访问父级。</strong></em></p>
+<blockquote>
+<p>插播：原来我们定义这个中间变量还有一个有趣的现象，就是明明千奇百怪，例如 <code>self, that, me, _that, _me, Self...</code>，快站出来说说你用过哪个，还是哪几个~</p>
+</blockquote>
+<p>当然，从这块我们也可以看出，箭头函数是无法替代全部 <code>function</code> 的使用场景的，例如我们需要有独立 <code>this</code> 的函数。</p>
+<h4 id="你可能不知道的事-3"><a href="#你可能不知道的事-3" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><ol>
+<li>箭头函数不但没有独立 <code>this</code>，他也没有独立的 <code>arguments</code>，所以如果需要取不定参的时候，要么使用 <code>function</code>，要么用  ES6 的另一个新特性 <strong>rest</strong>（具体在 rest 中会有详解）。</li>
+<li>箭头函数语法很灵活，在只有一个参数或者只有一句表达式做方法体时，可以省略相应括号。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 完整写法</span></span><br><span class="line"><span class="keyword">const</span> getOptions = <span class="function">(<span class="params">name, key</span>) =&gt;</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 省略参数括号</span></span><br><span class="line"><span class="keyword">const</span> getOptions = <span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">  ... </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 省略参数和方法体括号</span></span><br><span class="line"><span class="keyword">const</span> getOptions = <span class="function"><span class="params">key</span> =&gt;</span> <span class="built_in">console</span>.log(key);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 无参数或方法体，括号不能省略</span></span><br><span class="line"><span class="keyword">const</span> noop = <span class="function"><span class="params">()</span> =&gt;</span> &#123;&#125;;</span><br></pre></td></tr></table></figure>
+<p>有个简单小栗子，这一灵活的语法在写连续的Promise链式调用时，可以使代码更加优雅</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">gitPromise</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> git.add())</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> git.commit())</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> git.log())</span><br><span class="line">  .then(<span class="function">(<span class="params">msg</span>) =&gt;</span> &#123;</span><br><span class="line">      ...</span><br><span class="line">  &#125;)</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> git.push())</span><br><span class="line">  .catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">      utils.error(err);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="Destructuring（解构）"><a href="#Destructuring（解构）" class="headerlink" title="Destructuring（解构）"></a>Destructuring（解构）</h3><p>解构这个特性可以简单解读为分别定义，用于一次定义多个变量，常常用于分解方法返回对象为多个变量，分别使用。<br>使用过ES6的同学应该或多或少接触过这个特性，但是你可能不知道它如下几个用法：</p>
+<h4 id="你可能不知道的事-4"><a href="#你可能不知道的事-4" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bookSet = [<span class="string">'UED'</span>, <span class="string">'TB fed'</span>, <span class="string">'Not find'</span>];</span><br><span class="line"><span class="keyword">const</span> bookCollection = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;<span class="attr">book1</span>: <span class="string">'UED'</span>, <span class="attr">book2</span>: <span class="string">'TB fed'</span>&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 解构也可以设置默认值</span></span><br><span class="line"><span class="keyword">const</span> &#123;book1, book3 = <span class="string">'Not find'</span>&#125; = bookCollection();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 解构数组时候是可以跳过其中某几项的</span></span><br><span class="line"><span class="keyword">const</span> [book1,,book3] = bookSet;  <span class="comment">// book1 = 'UED', book3 = 'Not find'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 解构可以取到指定对象的任何属性，包括它包含的方法</span></span><br><span class="line"><span class="keyword">const</span> &#123;<span class="attr">length</span>: setLength&#125; = bookSet;  <span class="comment">// setLength = 3</span></span><br></pre></td></tr></table></figure>
+<h3 id="Rest-Spread"><a href="#Rest-Spread" class="headerlink" title="Rest + Spread"></a>Rest + Spread</h3><p>Rest 和 Spread 主要是应用 <code>...</code> 运算符，完成值的聚合和分解。</p>
+<h4 id="你可能不知道的事-5"><a href="#你可能不知道的事-5" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 1. rest 得到的是一个真正的数组而不是一个伪数组</span></span><br><span class="line"><span class="keyword">const</span> getOptions = <span class="function"><span class="keyword">function</span>(<span class="params">...args</span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(args.join); <span class="comment">// function</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. rest 可以配合箭头函数使用，达到取得所有参数的目的</span></span><br><span class="line"><span class="keyword">const</span> getOptions = <span class="function">(<span class="params">...args</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(args); <span class="comment">// array</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. spread 可以用于解构时，聚合所得的值</span></span><br><span class="line"><span class="keyword">const</span> [opt1, ...opts] = [<span class="string">'one'</span>, <span class="string">'two'</span>, <span class="string">'three'</span>, <span class="string">'four'</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. spread 可以用于数组定义</span></span><br><span class="line"><span class="keyword">const</span> opts = [<span class="string">'one'</span>, <span class="string">'two'</span>, <span class="string">'three'</span>, <span class="string">'four'</span>];</span><br><span class="line"><span class="keyword">const</span> config = [<span class="string">'other'</span>, ...opts];</span><br></pre></td></tr></table></figure>
+<h3 id="Classes"><a href="#Classes" class="headerlink" title="Classes"></a>Classes</h3><p>ES6 中实现的一个语法糖，用于简化基于原型集成实现类定义的场景。<br>虽然有很多人不太喜欢这个特性，认为它作为一个简单增强扩展，并没有其他语言 class 应有的特点。<br>但是就我自己观点来看，还是感觉这样一种写法确实比原有的原型继承的写法语义更清晰、明确，而且语法更简单。</p>
+<p>同样，可能有些用法是你之前容易忽略掉的，在此做个补充。</p>
+<h4 id="你可能不知道的事-6"><a href="#你可能不知道的事-6" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 1. 静态变量</span></span><br><span class="line"><span class="comment">// ES6 的类定义实现了静态方法的定义，但静态变量呢？</span></span><br><span class="line"><span class="comment">// 可以用如下方式实现: </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TbFedMembers</span></span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> HuaChen()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'jelly'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">TbFedMembers.HuaChen; <span class="comment">// "化辰"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 私有属性（私有属性有多种实现方式，只谈及其中一种）</span></span><br><span class="line"><span class="comment">// 闭包</span></span><br><span class="line"><span class="keyword">const</span> TbFedMembers = <span class="function">(<span class="params">(</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> HuaChen = <span class="string">'jelly'</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="class"><span class="keyword">class</span></span>&#123;</span><br><span class="line">    getOneMemberName()&#123;</span><br><span class="line">      <span class="keyword">return</span> HuaChen;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<h3 id="Promises"><a href="#Promises" class="headerlink" title="Promises"></a>Promises</h3><p>Promise 不只是一个对象、一个语法，他更是一种异步编程方式的变化<br>相信使用过 ES6 的同学都已经开始尝试了 Promise，甚至在不支持ES6的时候，已经开始使用一些基于 Promise 思想的开源框架。</p>
+<p>那么我们之前用 Promise 究竟用的对么？有什么需要注意的点呢？</p>
+<h4 id="你可能不知道的事-7"><a href="#你可能不知道的事-7" class="headerlink" title="你可能不知道的事"></a>你可能不知道的事</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 1. 多个异步任务同时执行用 Promise.all，顺序执行使用链式调用</span></span><br><span class="line"><span class="comment">// Promise.all</span></span><br><span class="line"><span class="built_in">Promise</span></span><br><span class="line">  .all([jsBuildPromise, cssBuildPromise])</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// chain</span></span><br><span class="line">jsBuildPromise</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> cssBuildPromise)</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. Promise 的链式调用需要每一个过程返回一个 Promise 对象才能保证顺序执行</span></span><br><span class="line">gitPromise</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> git.add())  <span class="comment">// 正确，箭头函数简写</span></span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    git.commit(); <span class="comment">// 错误，函数返回 undefined，会立即执行下一过程</span></span><br><span class="line">  &#125;)</span><br><span class="line">  .then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> git.log(); <span class="comment">// 正确</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. Promise 需要调用 catch 方法来捕获错误，而且过程内的错误不会阻塞后续代码执行</span></span><br><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  f;  <span class="comment">// not define error !</span></span><br><span class="line">&#125;)</span><br><span class="line">.catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(err)  <span class="comment">// show 'f is not define'</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'error test'</span>);  <span class="comment">// 此行可以被正常执行</span></span><br></pre></td></tr></table></figure>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>基础篇主要是讲了我们最常用的一些特性，后续如果大家感兴趣，还可以再来个 “进阶篇”，最后，希望文章中的部分内容可以对大家理解和使用 ES6 有所帮助。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.stackoverflow.com" target="_blank" rel="noopener">https://www.stackoverflow.com</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/JavaScript</a></li>
+<li><a href="https://babeljs.io/docs/learn-es2015/" target="_blank" rel="noopener">https://babeljs.io/docs/learn-es2015/</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener">https://developer.mozilla.org/en-US/docs/Web/JavaScript</a></li>
+<li><a href="https://ponyfoo.com/articles/es6-spread-and-butter-in-depth" target="_blank" rel="noopener">https://ponyfoo.com/articles/es6-spread-and-butter-in-depth</a></li>
+<li><a href="http://12devs.co.uk/articles/promises-an-alternative-way-to-approach-asynchronous-javascript/" target="_blank" rel="noopener">http://12devs.co.uk/articles/promises-an-alternative-way-to-approach-asynchronous-javascript/</a></li>
+<li><a href="http://www.2ality.com/2015/01/es6-destructuring.html" target="_blank" rel="noopener">http://www.2ality.com/2015/01/es6-destructuring.html</a></li>
+<li><a href="http://www.datchley.name/es6-rest-spread-defaults-and-destructuring/" target="_blank" rel="noopener">http://www.datchley.name/es6-rest-spread-defaults-and-destructuring/</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/07/22/es6-basics/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/07/22/es6-basics/" data-id="cjt6lbxy4002ejeu1q9qhwsc3" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/07/22/es6-basics/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ES6/">ES6</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/07/29/puzzled-by-link/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          纠结的链接：ln、ln -s、fs.symlink、require
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/07/14/performance-optimization-memoization/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">性能优化：memoization</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

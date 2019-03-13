@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Pandora.js 的 Service 机制 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="这篇依然是介绍 Pandora.js 的系列文章之一项目地址：https://github.com/midwayjs/pandora 欢迎社会各界前来 Star ~  本章主要介绍我们的 Service 机制，是 Pandora.js 对于进程编排的一种高级机制。  Q：为什么要有这种机制？A：因为进程是昂贵的，我们需要有一种机制可以管理进程内的启停。  Service 解决什么问题？我们希望">
+<meta name="keywords" content="Node.js,Pandora.js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandora.js 的 Service 机制">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/12/19/pandora-service/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="这篇依然是介绍 Pandora.js 的系列文章之一项目地址：https://github.com/midwayjs/pandora 欢迎社会各界前来 Star ~  本章主要介绍我们的 Service 机制，是 Pandora.js 对于进程编排的一种高级机制。  Q：为什么要有这种机制？A：因为进程是昂贵的，我们需要有一种机制可以管理进程内的启停。  Service 解决什么问题？我们希望">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB17ocZiY_I8KJjy1XaXXbsxpXa-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pandora.js 的 Service 机制">
+<meta name="twitter:description" content="这篇依然是介绍 Pandora.js 的系列文章之一项目地址：https://github.com/midwayjs/pandora 欢迎社会各界前来 Star ~  本章主要介绍我们的 Service 机制，是 Pandora.js 对于进程编排的一种高级机制。  Q：为什么要有这种机制？A：因为进程是昂贵的，我们需要有一种机制可以管理进程内的启停。  Service 解决什么问题？我们希望">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB17ocZiY_I8KJjy1XaXXbsxpXa-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-pandora-service" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Pandora.js 的 Service 机制
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 九十</span>
+        
+        <span>发表于: <a href="/blog/2017/12/19/pandora-service/" class="article-date">
+  <time datetime="2017-12-19T08:19:29.000Z" itemprop="datePublished">2017-12-19</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB17ocZiY_I8KJjy1XaXXbsxpXa-900-500.jpg" alt="Pandora.js 的 Service 机制"></p>
+<blockquote>
+<p>这篇依然是介绍 Pandora.js 的系列文章之一<br>项目地址：<a href="https://github.com/midwayjs/pandora" target="_blank" rel="noopener">https://github.com/midwayjs/pandora</a> 欢迎社会各界前来 Star ~</p>
+</blockquote>
+<p>本章主要介绍我们的 Service 机制，是 Pandora.js 对于进程编排的一种高级机制。</p>
+<blockquote>
+<p>Q：为什么要有这种机制？<br>A：因为进程是昂贵的，我们需要有一种机制可以管理进程内的启停。</p>
+</blockquote>
+<h2 id="Service-解决什么问题？"><a href="#Service-解决什么问题？" class="headerlink" title="Service 解决什么问题？"></a>Service 解决什么问题？</h2><p><strong>我们希望，Service 能做一些应用流程之外的事情，比如：</strong></p>
+<ol>
+<li>基础的中间件管理（比如 etcd）</li>
+<li>需要标准上下线流程的服务，比如 RPC Provider</li>
+<li>需要和应用隔离的一些服务，启动停止时同步文件等等</li>
+</ol>
+<p>通过一定的规范体系，把常用的，需要内聚的程序逻辑放到一起，我们就把这些逻辑称为 “Service”。</p>
+<p>如果程序本身的逻辑之外，我们还需要考虑和 Pandora.js 整体，进程编排逻辑，应用的启动生命周期相关联，我们还考虑了其他方面的东西。</p>
+<p>当然有一些基本原则：</p>
+<ul>
+<li>接口简单易用，便于实现</li>
+<li>把启动流程尽量统一化</li>
+</ul>
+<p>除了上面两条之外，还有一些其他的原则，简述如下：</p>
+<ol>
+<li><strong>异步启动：</strong> 无法让进程异步的启动，如果应用启动需要几秒，没办法知道什么时候才算启动好了。<ul>
+<li>我们之前的做法是定时轮询 HTTP 接口是否暴露，相当地 Tricky。</li>
+</ul>
+</li>
+<li><strong>异步停止：</strong> 关闭全靠 kill (也许还要 -9)，RPC 、Web 服务也不好做平滑下线。<ul>
+<li>我们经常因为这个问题，在发布新版时收到一些接口调用超时的错误报警。</li>
+</ul>
+</li>
+<li><strong>进程是昂贵的：</strong> 一个进程一个入口文件不能结构复用宝贵的进程。<ul>
+<li>当然直接在入口文件里直接 require，或者像 egg 的 plugin 机制都能解决这个问题。不过依然不够通用，分层也不够清晰。</li>
+</ul>
+</li>
+</ol>
+<p><strong>最终确定了，Service 主要提供了如下的能力：</strong></p>
+<ol>
+<li>标准的 <code>async start()</code> 接口</li>
+<li>标准的 <code>async stop()</code> 接口</li>
+<li>结构化的日志管理、配置能力</li>
+<li>进程内的启动顺序（依赖关系）管理</li>
+</ol>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>Service 主要分为两个部分：</p>
+<ol>
+<li><code>procfile.js</code> 中的链式定义语法</li>
+<li>实现 Service 的接口约束</li>
+</ol>
+<h3 id="接下来通过一个自发现的-RPC-Provider-来介绍"><a href="#接下来通过一个自发现的-RPC-Provider-来介绍" class="headerlink" title="接下来通过一个自发现的 RPC Provider 来介绍"></a>接下来通过一个自发现的 RPC Provider 来介绍</h3><p>下面的例子在：<a href="https://github.com/midwayjs/pandora-example/tree/master/rpc" target="_blank" rel="noopener">https://github.com/midwayjs/pandora-example/tree/master/rpc</a></p>
+<p><strong>我们先编写一个 <code>procfile.js</code>：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">pandora</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Part 1 : 基础 Service</span></span><br><span class="line"><span class="comment">   * Etcd 是所有进程都要有的基础 Service</span></span><br><span class="line"><span class="comment">   * 使用 weak-all 分配到全部启动了的进程</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  pandora</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 定义 Service 的名字叫 etcd</span></span><br><span class="line">    .service(<span class="string">'etcd'</span>, <span class="string">'./services/Etcd'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// weak-all 表示这个 service 不激活任何进程</span></span><br><span class="line">    <span class="comment">// 但是会分配到激活了的进程中去，比如下面被 tryRpc 激活的了的 rpc 进程</span></span><br><span class="line">    .process(<span class="string">'weak-all'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 配置 etcd 的地址</span></span><br><span class="line">    .config(&#123;</span><br><span class="line">      host: <span class="string">'http://localhost:2379'</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Part 2 : RPC 进程</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  pandora</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 定义一个进程专门发布 RPC</span></span><br><span class="line">    .process(<span class="string">'rpc'</span>)</span><br><span class="line">    .scale(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 向 rpc 进程注入一个 叫 tryRpc 的 RPC Provider</span></span><br><span class="line">  pandora</span><br><span class="line">    .service(<span class="string">'tryRpc'</span>, <span class="string">'./services/TryRpc'</span>)</span><br><span class="line">    .process(<span class="string">'rpc'</span>)</span><br><span class="line">    .config(&#123;</span><br><span class="line">      port: <span class="number">5222</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>我们先把最基础的中间件 etcd <code>services/Etcd.js</code> 实现：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> NodeEtcd = <span class="built_in">require</span>(<span class="string">'node-etcd'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 简单继承 NodeEtcd 即可</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="class"><span class="keyword">class</span> <span class="title">Etcd</span> <span class="keyword">extends</span> <span class="title">NodeEtcd</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(ctx) &#123;</span><br><span class="line">    <span class="comment">// 从 ctx 中获得配置，传给父类构造</span></span><br><span class="line">    <span class="keyword">super</span>(ctx.config.host);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>然后我们再来编写 RPC Provider 的实现 <code>services/TryRpc.js</code> ：</strong></p>
+<p><em>主要关注里面的 <code>async start()</code> 和 <code>async stop()</code></em></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123;promisify&#125; = <span class="built_in">require</span>(<span class="string">'util'</span>);</span><br><span class="line"><span class="keyword">const</span> jayson = <span class="built_in">require</span>(<span class="string">'jayson/promise'</span>);</span><br><span class="line"><span class="keyword">const</span> uuid = <span class="built_in">require</span>(<span class="string">'uuid'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 实现一个服务自发现的 Provider</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TryRpc</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * @param ctx 构造时会传递一个上下文对象，这个具体可以参考：</span></span><br><span class="line"><span class="comment">   *   http://www.midwayjs.org/pandora/api-reference/pandora/classes/servicecontextaccessor.html</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">constructor</span>(ctx) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生成个 UUID 作这个 Provider 的标识好了</span></span><br><span class="line">    <span class="keyword">this</span>.uuid = uuid.v4();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 标准的 Logger 对象</span></span><br><span class="line">    <span class="comment">//   http://www.midwayjs.org/pandora/api-reference/pandora/classes/servicecontextaccessor.html#logger</span></span><br><span class="line">    <span class="keyword">this</span>.logger = ctx.logger;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从 config 里拿 RPC 监听的地址</span></span><br><span class="line">    <span class="keyword">this</span>.port = ctx.config.port;</span><br><span class="line">    <span class="keyword">this</span>.host = ctx.config.host || <span class="string">'127.0.0.1'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从依赖里获得 etcd</span></span><br><span class="line">    <span class="comment">//   http://www.midwayjs.org/pandora/api-reference/pandora/classes/servicecontextaccessor.html#getdependency</span></span><br><span class="line">    <span class="keyword">this</span>.etcd = ctx.getDependency(<span class="string">'etcd'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 得到自己在 etcd 上的 key</span></span><br><span class="line">    <span class="keyword">this</span>.etcdKey = <span class="string">'/JSONRPC/'</span> + <span class="keyword">this</span>.uuid;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 得到自己在 etcd 上的 Value</span></span><br><span class="line">    <span class="keyword">this</span>.etcdValue = <span class="built_in">JSON</span>.stringify(&#123;</span><br><span class="line">      uuid: <span class="keyword">this</span>.uuid,</span><br><span class="line">      hostname: <span class="keyword">this</span>.host,</span><br><span class="line">      port: <span class="keyword">this</span>.port</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 通过 jayson 创建一个 RPC 服务</span></span><br><span class="line">    <span class="keyword">this</span>.server = jayson.server(<span class="keyword">this</span>.getRpcMethods());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 我们通过 jayson 的 http 界面暴露服务</span></span><br><span class="line">    <span class="keyword">this</span>.http = <span class="keyword">this</span>.server.http();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 获得 RPC 中暴露的方法</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  getRpcMethods() &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="keyword">async</span> add(args) &#123;</span><br><span class="line">        <span class="keyword">return</span> args[<span class="number">0</span>] + args[<span class="number">1</span>];</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="keyword">async</span> mul(args) &#123;</span><br><span class="line">        <span class="keyword">return</span> args[<span class="number">0</span>] * args[<span class="number">1</span>];</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 标准的启动接口</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> start() &#123;</span><br><span class="line">    <span class="comment">// 将我们的 RPC 的 HTTP 界面进行监听</span></span><br><span class="line">    <span class="keyword">await</span> promisify(<span class="keyword">this</span>.http.listen).call(<span class="keyword">this</span>.http, <span class="keyword">this</span>.port, <span class="keyword">this</span>.host);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在 etcd 中暴露，并且定时心跳</span></span><br><span class="line">    <span class="keyword">await</span> <span class="keyword">this</span>.startHeartbeat();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动完成</span></span><br><span class="line">    <span class="keyword">this</span>.logger.info(<span class="string">'Service JSON RPC Listens On http://'</span> + <span class="keyword">this</span>.host + <span class="string">':'</span> + <span class="keyword">this</span>.port);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 标准的停止接口</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> stop() &#123;</span><br><span class="line">    <span class="comment">// 清除心跳定时器</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.timer) &#123;</span><br><span class="line">      clearInterval(<span class="keyword">this</span>.timer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把自己从 etcd 上删除，等于下线</span></span><br><span class="line">    <span class="keyword">await</span> promisify(<span class="keyword">this</span>.etcd.del).call(<span class="keyword">this</span>.etcd, <span class="keyword">this</span>.etcdKey);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> 等待所有的 RPC 调用都结束，否则会出现客户端调用超时</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 已经从 etcd 上下线，并且所有存量 RPC 调用也已经完成</span></span><br><span class="line">    <span class="comment">// 关闭 HTTP 监听</span></span><br><span class="line">    <span class="keyword">await</span> promisify(<span class="keyword">this</span>.http.close).call(<span class="keyword">this</span>.http);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下线完成</span></span><br><span class="line">    <span class="keyword">this</span>.logger.info(<span class="string">'Service JSON RPC Stopped'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 开始向 etcd 注册，并开始心跳</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> startHeartbeat() &#123;</span><br><span class="line">    <span class="keyword">const</span> interval = <span class="number">30</span>;</span><br><span class="line">    <span class="keyword">const</span> value = <span class="keyword">this</span>.etcdValue;</span><br><span class="line">    <span class="keyword">const</span> once = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> promisify(<span class="keyword">this</span>.etcd.set).call(<span class="keyword">this</span>.etcd, <span class="keyword">this</span>.etcdKey, value, &#123;<span class="attr">ttl</span>: interval * <span class="number">2</span>&#125;)</span><br><span class="line">        .catch(<span class="keyword">this</span>.logger.error.bind(<span class="keyword">this</span>.logger));</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">await</span> once();</span><br><span class="line">    <span class="keyword">this</span>.timer = setInterval(once, interval * <span class="number">1000</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 标记依赖，在 TC39 Stage 2 中可以使用 static dependencies 代替</span></span><br><span class="line">TryRpc.dependencies = [<span class="string">'etcd'</span>];</span><br><span class="line"><span class="built_in">module</span>.exports = TryRpc;</span><br></pre></td></tr></table></figure>
+<p><strong>本地启动一个试试看</strong></p>
+<p>首先我们启动本地的 etcd （当然你得先安装 etcd， Mac 的话直接 <code>brew install etcd</code>）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ etcd <span class="comment"># 启动 etcd</span></span><br><span class="line">2017-12-19 14:09:20.292891 I | etcdmain: etcd Version: 3.2.11</span><br><span class="line">2017-12-19 14:09:20.293013 I | etcdmain: Git SHA: GitNotFound</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>将这三个文件放到同一目录下（目录叫 tryPandora），然后运行 <code>pandora dev</code>，我们就可以前台启动这个应用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pandora dev <span class="comment"># 本地前台启动</span></span><br><span class="line">2017-12-19 14:25:16,619 INFO 42977 [serviceName: tryRpc, processName: rpc] Service JSON RPC Listens On http://127.0.0.1:5222</span><br><span class="line">2017-12-19 14:25:16,621 INFO 42975 Process [name = rpc, pid = 42977] Started successfully!</span><br><span class="line">Application start successful.</span><br></pre></td></tr></table></figure>
+<p>我们看到 <code>Service JSON RPC Listens On http://127.0.0.1:5222</code>，RPC Provider 已经成功监听。而 <strong><code>Application start successful.</code></strong> 的提示永远在其之后。</p>
+<p><strong>然后我们查看 etcd 中的注册情况</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://127.0.0.1:2379/v2/keys/JSONRPC</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/JSONRPC"</span>,<span class="string">"dir"</span>:<span class="literal">true</span>,<span class="string">"nodes"</span>:[&#123;<span class="string">"key"</span>:<span class="string">"/JSONRPC/5a32f5ab-f423-4b3c-b661-4a12e8ece5b2"</span>,<span class="string">"value"</span>:<span class="string">"&#123;\"uuid\":\"5a32f5ab-f423-4b3c-b661-4a12e8ece5b2\",\"hostname\":\"127.0.0.1\",\"port\":5222&#125;"</span>,<span class="string">"expiration"</span>:<span class="string">"2017-12-19T06:29:46.648936363Z"</span>,<span class="string">"ttl"</span>:59,<span class="string">"modifiedIndex"</span>:11,<span class="string">"createdIndex"</span>:11&#125;],<span class="string">"modifiedIndex"</span>:4,<span class="string">"createdIndex"</span>:4&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>看上去已经发布到 etcd 中了。</p>
+<p><strong>停止应用看看</strong></p>
+<p>我们按 <code>Ctrl + C</code> 停止应用，我们可以看到同样有 <code>Service JSON RPC Stopped</code> 的输出，表示 RPC 已经成功取消监听了，而进程的退出的提示永远在其之后（比如 <code>Process [name = rpc, pid = 13357] Exit with code 0 and signal null</code>）。</p>
+<p>这时应该：</p>
+<ol>
+<li>所有的存量 RPC 已经结束</li>
+<li>已从 etcd 中下线</li>
+</ol>
+<p>然后再看看 etcd 中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://127.0.0.1:2379/v2/keys/JSONRPC</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/JSONRPC"</span>,<span class="string">"dir"</span>:<span class="literal">true</span>,<span class="string">"modifiedIndex"</span>:4,<span class="string">"createdIndex"</span>:4&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>看上去也已经从 etcd 中下线。</p>
+<h3 id="实现个然并卵的消费端"><a href="#实现个然并卵的消费端" class="headerlink" title="实现个然并卵的消费端"></a>实现个然并卵的消费端</h3><p>我们实现一个 HTTP Server，作为一个 RPC 的消费端，通过 etcd 发现 RPC 服务并进行调用。</p>
+<blockquote>
+<p>浏览器 -&gt; HTTP Server -&gt; etcd -&gt; RPC Provider</p>
+</blockquote>
+<p>那我们在 <code>procfile.js</code> 中加入一个 web 进程：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Part 3 : 测试用的 Web 进程</span></span><br><span class="line"><span class="comment"> * 一个测试进程，本不应该存在的，为了方便例子演示</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">// 定义一个进程专门发布 Web 服务</span></span><br><span class="line">pandora</span><br><span class="line">  .process(<span class="string">'web'</span>)</span><br><span class="line">  .scale(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 向 rpc 进程注入一个 叫 tryWeb 的 Web 实现 Service</span></span><br><span class="line">pandora</span><br><span class="line">  .service(<span class="string">'tryWeb'</span>, <span class="string">'./services/TryWeb'</span>)</span><br><span class="line">  .process(<span class="string">'web'</span>)</span><br><span class="line">  .config(&#123;</span><br><span class="line">    port: <span class="number">5555</span></span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>然后我们的消费端是一个 HTTP 服务 <code>services/TryWeb.js</code>：</p>
+<p>太长了就不直接贴代码了，<a href="https://github.com/midwayjs/pandora-example/blob/master/rpc/services/TryWeb.js" target="_blank" rel="noopener">https://github.com/midwayjs/pandora-example/blob/master/rpc/services/TryWeb.js</a></p>
+<p>里面的核心通过是 etcd 获得客户端地址：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 通过 etcd 获得 RPC 客户端</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">async</span> getRpcClient() &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// etcd 中获得全部可用 nodes</span></span><br><span class="line">  <span class="keyword">const</span> etcdRes = <span class="keyword">await</span> promisify(<span class="keyword">this</span>.etcd.get).call(<span class="keyword">this</span>.etcd, <span class="string">'/JSONRPC/'</span>, &#123;<span class="attr">recursive</span>: <span class="literal">true</span>&#125;);</span><br><span class="line">  <span class="keyword">const</span> nodes = etcdRes.node.nodes;</span><br><span class="line">  <span class="keyword">if</span>(!nodes || !nodes.length) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Cannot found provider'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 随机取一个（虽然我们例子中，怎么样都只有一个）</span></span><br><span class="line">  <span class="keyword">const</span> randomInt = getRandomInt(<span class="number">0</span>, nodes.length - <span class="number">1</span>);</span><br><span class="line">  <span class="keyword">const</span> pickedNode = nodes[randomInt];</span><br><span class="line">  <span class="keyword">const</span> node = <span class="built_in">JSON</span>.parse(pickedNode.value);</span><br><span class="line">  <span class="keyword">this</span>.logger.info(<span class="string">'total got nodes: '</span> + nodes.length);</span><br><span class="line">  <span class="keyword">this</span>.logger.info(<span class="string">'use node: '</span> + pickedNode.value);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 创建 client</span></span><br><span class="line">  <span class="keyword">const</span> client = jayson.client.http(&#123;</span><br><span class="line">    hostname: node.hostname,</span><br><span class="line">    port: node.port</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> client;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后再用浏览器访问：</p>
+<blockquote>
+<p><a href="http://127.0.0.1:5555/?method=add&amp;params=%5B1,5%5D" target="_blank" rel="noopener">http://127.0.0.1:5555/?method=add&amp;params=[1,5]</a><br>{“jsonrpc”:”2.0”,”id”:”30a7767a-1173-41f3-be22-94376d9409f1”,”result”:6}</p>
+</blockquote>
+<p>这是一个简单的消费端例子，虽然是在一个应用里通过 etcd 服务发现了自己，感觉没什么用处。</p>
+<h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2><p>这样 Pandora.js 的 Service 模型就介绍完毕了，下一篇介绍进程间通信。进程模型介绍完之后开始介绍业务度量的能力，比如 Metrics、全链路 Trace 等，大家敬请期待。</p>
+<p>最后，不要忘了给点个 Star 喔~</p>
+<p><a href="https://github.com/midwayjs/pandora/" target="_blank" rel="noopener">https://github.com/midwayjs/pandora/</a></p>
+<p>最后的最后，我们招人。我们有超过一半的淘宝前台访问在 Node.js 上，也有做开源 Node.js 软件的机会，挑战不小，当然回报也不小。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/12/19/pandora-service/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/12/19/pandora-service/" data-id="cjt6lby0n008wjeu1hli7k74b" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/12/19/pandora-service/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pandora-js/">Pandora.js</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/12/21/pandora-ipc/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          让进程间通信更容易 - Pandora.js 的 IPC-Hub
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/12/13/pandora/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">管理 Node.js 进程从未如此优雅</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

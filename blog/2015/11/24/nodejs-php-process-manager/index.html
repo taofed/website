@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>浅谈 Node.js 和 PHP 进程管理 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="众所周知，PHP 占据了服务端编程语言的半壁江山，正如汪峰在音乐圈的地位一般。随着 Node.js 逐渐走上服务端编程的舞台，关于 PHP 和 Node.js 孰优孰劣的争论也不曾间断。 垄断性的市场份额足以佐证 PHP 的优秀。并且 HHVM 虚拟机、PHP 7 的革新，也给 PHP 带来了跨越式的性能突破。然而，当我们为语言层面的性能差异喋喋不休时，却往往忽略了 Web 模型在性能表现中的权">
+<meta name="keywords" content="Node.js,cluster,PHP,FastCGI,PHP-FPM,ReactPHP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈 Node.js 和 PHP 进程管理">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/24/nodejs-php-process-manager/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="众所周知，PHP 占据了服务端编程语言的半壁江山，正如汪峰在音乐圈的地位一般。随着 Node.js 逐渐走上服务端编程的舞台，关于 PHP 和 Node.js 孰优孰劣的争论也不曾间断。 垄断性的市场份额足以佐证 PHP 的优秀。并且 HHVM 虚拟机、PHP 7 的革新，也给 PHP 带来了跨越式的性能突破。然而，当我们为语言层面的性能差异喋喋不休时，却往往忽略了 Web 模型在性能表现中的权">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1KAeTKFXXXXczXpXXlzJZ8pXX-900-500.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1tNiQKFXXXXcBXpXX2dP3UpXX-491-190.gif">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1ULmIKFXXXXcaXFXXTbR45XXX-543-245.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1gAqWKFXXXXX0XpXXtlL3RFXX-302-200.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1XNnNJVXXXXanXpXXQzA.9VXX-447-300.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1XMmSKFXXXXc2XXXX517KGpXX-563-251.jpg">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1hA1AKFXXXXciXFXXiX2bIVXX-600-236.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈 Node.js 和 PHP 进程管理">
+<meta name="twitter:description" content="众所周知，PHP 占据了服务端编程语言的半壁江山，正如汪峰在音乐圈的地位一般。随着 Node.js 逐渐走上服务端编程的舞台，关于 PHP 和 Node.js 孰优孰劣的争论也不曾间断。 垄断性的市场份额足以佐证 PHP 的优秀。并且 HHVM 虚拟机、PHP 7 的革新，也给 PHP 带来了跨越式的性能突破。然而，当我们为语言层面的性能差异喋喋不休时，却往往忽略了 Web 模型在性能表现中的权">
+<meta name="twitter:image" content="http://gtms03.alicdn.com/tps/i3/TB1KAeTKFXXXXczXpXXlzJZ8pXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-php-process-manager" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      浅谈 Node.js 和 PHP 进程管理
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 邦彦</span>
+        
+        <span>发表于: <a href="/blog/2015/11/24/nodejs-php-process-manager/" class="article-date">
+  <time datetime="2015-11-24T11:44:15.000Z" itemprop="datePublished">2015-11-24</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms03.alicdn.com/tps/i3/TB1KAeTKFXXXXczXpXXlzJZ8pXX-900-500.jpg" alt="浅谈 Node.js 和 PHP 进程管理"></p>
+<p>众所周知，PHP 占据了服务端编程语言的半壁江山，正如汪峰在音乐圈的地位一般。随着 Node.js 逐渐走上服务端编程的舞台，关于 PHP 和 Node.js 孰优孰劣的争论也不曾间断。</p>
+<p>垄断性的市场份额足以佐证 PHP 的优秀。并且 HHVM 虚拟机、PHP 7 的革新，也给 PHP 带来了跨越式的性能突破。然而，当我们为语言层面的性能差异喋喋不休时，却往往忽略了 Web 模型在性能表现中的权重。</p>
+<h3 id="从-CGI-到-FastCGI"><a href="#从-CGI-到-FastCGI" class="headerlink" title="从 CGI 到 FastCGI"></a>从 CGI 到 FastCGI</h3><p>早期的 Web 服务，是基于传统的 CGI 协议实现的。每个发送到服务器的请求，都需要经过启动进程、处理请求、结束进程三个步骤，以至于访问量增大时，系统资源（如内存、CPU 等）开销也巨大，导致服务器性能下降甚至服务中断。</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1tNiQKFXXXXcBXpXX2dP3UpXX-491-190.gif" alt></p>
+<p><em>图 1：简单的 CGI 流程示意</em></p>
+<p>在 CGI 协议下，解析器的反复加载是性能低下的主要原因。如果让解析器进程长驻内存，那么它只需启动一次，就可以一直执行着，不必每次都重新 fork 进程，这就有了后来的 FastCGI 协议。</p>
+<p>如果 FastCGI 仅仅做到这样，那么和 Node.js 单进程单线程的模型是基本一致的：Node.js 进程启动后保持持续运行，所有的请求都由这个进程接收和处理，当某个请求引起未知错误时，才可能致使进程退出。</p>
+<p>事实上 FastCGI 并没有那么简单，为了保证服务的稳定性，他被设计成了多进程调度的模式：</p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1ULmIKFXXXXcaXFXXTbR45XXX-543-245.png" alt></p>
+<p><em>图 2：Nginx + FastCGI 执行过程</em></p>
+<p>这个过程同样可以描述为三个步骤：</p>
+<ul>
+<li>首先，初始化 FastCGI 进程管理器，并启动多个 CGI 解释器子进程；</li>
+<li>接着，当请求到达 Web 服务器时，进程管理器选择并连接一个子进程，将环境变量和标准输入发送给它，处理完成后将标准输出和错误信息返还给 Web 服务器；</li>
+<li>最终，子进程关闭连接，继续等待下一个请求的到来；</li>
+</ul>
+<h3 id="从-child-process-到-cluster"><a href="#从-child-process-到-cluster" class="headerlink" title="从 child_process 到 cluster"></a>从 child_process 到 cluster</h3><p>我们回过头来看看 Node.js 的进程管理方式。</p>
+<p>原生 Node.js 的单进程单线程模型是一个极易被喷的槽点。这种机制也决定了 Node.js 天生只支持单核 CPU，无法有效地利用多核资源，一旦进程崩溃，还会导致整个 Web 服务的土崩瓦解。</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1gAqWKFXXXXX0XpXXtlL3RFXX-302-200.jpg" alt></p>
+<p><em>图 3：简单的 Node.js 的请求模型</em></p>
+<p>和 CGI 一样，单一进程始终面临着可靠性低、稳定性差的问题，当真正服务于生产环境时，这样的弱点相当致命。如果代码本身足够健壮，倒可以在一定程度上避免出错，但同时也对测试工作提出了更高要求。现实中我们无法避免代码 100% 不出纰漏，有些东西容易编写测试用例，有些东西却只能依靠人肉目测。</p>
+<p>所幸 Node.js 提供了 <code>child_process</code> 模块，通过简单 fork 即可随意创建出子进程。如果为每个 CPU 分别指派一个子进程，多核利用就完美实现了。于此同时，由于 <code>child_process</code> 模块本身继承自 <code>EventEmitter</code> 这个基础类，事件驱动使得进程间的通信非常高效。</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1XNnNJVXXXXanXpXXQzA.9VXX-447-300.png" alt></p>
+<p><em>图 4：简单的 Node.js master-worker 模型（扒的淘杰老湿的图）</em></p>
+<p>为了简化庞杂的父子进程模型实现，Node.js 紧接着又封装了 <code>cluster</code> 模块，不论是负载均衡、资源回收，还是进程守护，它都会像保姆一样帮你默默地搞定一切。具体技术细节可以参考淘杰老湿的<a href="http://taobaofed.org/blog/2015/11/03/nodejs-cluster/">《当我们谈论 cluster 时我们在谈论什么(上)》</a>和<a href="http://taobaofed.org/blog/2015/11/10/nodejs-cluster-2/">《当我们谈论 cluster 时我们在谈论什么(下)》</a>，里面有所有关于 <code>cluster</code> 方案的推演和实现，这里不再赘述。</p>
+<p>在 Node.js 里，要让应用跑在多核集群上，只需寥寥几行代码就万事大吉了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">var cluster = require(&apos;cluster&apos;);</span><br><span class="line">var os = require(&apos;os&apos;);</span><br><span class="line"></span><br><span class="line">if (cluster.isMaster) &#123;</span><br><span class="line">	for (var i = 0, n = os.cpus().length; i &lt; n; i ++) &#123;</span><br><span class="line">		cluster.fork();</span><br><span class="line">	&#125;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">	// 启动应用...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么反观 FastCGI 协议，它又是如何处理这种模型的呢？</p>
+<h3 id="PHP-FPM-的天生缺陷"><a href="#PHP-FPM-的天生缺陷" class="headerlink" title="PHP-FPM 的天生缺陷"></a>PHP-FPM 的天生缺陷</h3><p>PHP-FPM 是 PHP 针对 FastCGI 协议的具体实现，也是 PHP 在多种服务器端应用编程端口（SAPI：cgi、fast-cgi、cli、isapi、apache）里使用最普遍、性能最佳的一款进程管理器。它同样实现了类似 Node.js 的父子进程管理模型，确保了 Web 服务的可靠性和高性能。</p>
+<p>PHP-FPM 这种模型是非常典型的多进程同步模型，意味着一个请求对应一个进程线程，并且 IO 是同步阻塞的。所以尽管 PHP-FPM 维护着独立的 CGI 进程池、系统也可以很轻松的管理进程的生命周期，但注定无法像 Node.js 那样，一个进程就可以承担巨大的请求压力。</p>
+<p>受制于服务器的硬件设施，PHP-FPM 需要指定合理的 php-fpm.conf 配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pm.max_children # 子进程最大数</span><br><span class="line">pm.start_servers # 启动时的子进程数</span><br><span class="line">pm.min_spare_servers # 最小空闲进程数，空闲进程不够时自动补充</span><br><span class="line">pm.max_spare_servers # 最大空闲进程数，空闲进程超过时自动清理</span><br><span class="line">pm.max_requests = 1000 # 子进程请求数阈值，超过后自动回收</span><br></pre></td></tr></table></figure>
+<p>和 JS 不一样的是，PHP 进程本身并不存在内存泄露的问题，每个进程完成请求处理后会回收内存，但是并不会释放给操作系统，这就导致大量内存被 PHP-FPM 占用而无法释放，请求量升高时性能骤降。</p>
+<p>所以 PHP-FPM 需要控制单个子进程请求次数的阈值。很多人会误以为 <code>max_requests</code> 控制了进程的并发连接数，实际上 PHP-FPM 模式下的进程是单一线程的，请求无法并发。这个参数的真正意义是提供请求计数器的功能，超过阈值数目后自动回收，缓解内存压力。</p>
+<p>或许你已经发现了问题的关键：尽管 PHP-FPM 架构卓越，但还是卡在单一进程的性能上了。</p>
+<p>Node.js 天生没有这个问题，而 PHP-FPM 却无法保证，它的稳定性受制于硬件设施和配置文件的契合度，以及 Web 服务器（通常是 Nginx）对 PHP-FPM 服务的负载调度能力。</p>
+<h3 id="ReactPHP，事件驱动，异步执行，非阻塞-IO"><a href="#ReactPHP，事件驱动，异步执行，非阻塞-IO" class="headerlink" title="ReactPHP，事件驱动，异步执行，非阻塞 IO"></a>ReactPHP，事件驱动，异步执行，非阻塞 IO</h3><p>对 PHP 7 的狂热掩盖了 Node.js 带来的猛烈冲击。当大家还沉醉在如何选择 HHVM 还是 PHP 7 的时候，ReactPHP 也在茁壮成长，它彻彻底底抛弃了 nginx + php-fpm 的传统架构，转而模仿并接纳了 Node.js 的事件驱动和非阻塞 IO 模型，甚至连副标题，都起得一毛一样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Event-driven, non-blocking I/O with PHP.</span><br></pre></td></tr></table></figure>
+<p>鉴于大家都比较了解 Node.js，对 ReactPHP 的原理就不再赘述了，我们可以认为它就是个 PHP 版的 Node.js。拿它和传统架构（Nginx + PHP-FPM，公平起见，PHP-FPM 只开一个进程）去做对比，结果是这样的：</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1XMmSKFXXXXc2XXXX517KGpXX-563-251.jpg" alt></p>
+<p><em>图 5：输出“Hello World”时的 QPS 曲线</em></p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1hA1AKFXXXXciXFXXiX2bIVXX-600-236.jpg" alt></p>
+<p><em>图 6：查询 SQL 时的 QPS 曲线</em></p>
+<p>我们可以看到，当事件驱动、异步执行、非阻塞 IO 被移植嫁接到 PHP 上后，即便没了 PHP-FPM 支撑，QPS 曲线依然不错，在 IO 密集型的场景下，性能甚至得到了成倍成倍的提升。</p>
+<p>事件和异步回调机制真是太赞了，它巧妙地将大规模并发、大吞吐量时的拥堵化解为一个异步事件队列，然后挨个解决阻塞（如文件读取，数据库查询等）。</p>
+<p>针对单进程模型的吐槽，或许有些偏激。不过显而易见的事实是，单进程模型的可靠性，在 Web 服务器和进程管理器层面是有很大的优化空间的，而高并发的处理能力取决于语言特性，说白了就是事件和异步的支持。</p>
+<p>这两点想必是让 Node.js 天生骄傲的事情，但在 PHP 里没有得到原生支持，只能通过模拟步进操作的方式来支持类似 Node.js 的事件机制，所以 ReactPHP 其实也并没有想象中那么完美。</p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>大部分时候，当我们比较语言优劣，容易局限在语言本身，而忽视了配套的一些关键因素。</p>
+<p>就拿 PHP 来说，这两年听到了太多关于即时编译器（JIT）、opcode 缓存、抽象语法树（AST）、HHVM 等等之类的话题。当这些优化逐步完备，语言层面的问题，早已不再是 Web 性能的短板了。如果实在不行，我们还可以把复杂任务交给 C 和 C++，以 Node.js addon 或者 PHP 扩展的形式，轻轻松松就搞定了。</p>
+<p>都说 PHP 是“世界上最好的语言”，既然如此，也是时候学习下 Node.js 事件驱动和异步回调，考虑考虑如何对 PHP-FPM 进行大刀阔斧的革新。毕竟不管是 Node.js 还是 PHP，我们所擅长的地方，终将还是 Web，高性能的 Web。</p>
+<h3 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h3><ul>
+<li><a href="http://php.net/manual/en/install.fpm.php" target="_blank" rel="noopener">FastCGI Process Manager (FPM)</a></li>
+<li><a href="https://github.com/reactphp/react" target="_blank" rel="noopener">ReactPHP - Event-driven, non-blocking I/O with PHP.</a></li>
+<li><a href="http://www.csdn.net/article/2015-10-12/2825887" target="_blank" rel="noopener">ReactPHP - PHP 版的 Node.js</a></li>
+<li><a href="http://taobaofed.org/blog/2015/11/03/nodejs-cluster/">当我们谈论 cluster 时我们在谈论什么(上)</a></li>
+<li><a href="http://taobaofed.org/blog/2015/11/10/nodejs-cluster-2/">当我们谈论 cluster 时我们在谈论什么(下)</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/24/nodejs-php-process-manager/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/24/nodejs-php-process-manager/" data-id="cjt6lby04007ujeu1e4bt060b" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/24/nodejs-php-process-manager/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/FastCGI/">FastCGI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP/">PHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/PHP-FPM/">PHP-FPM</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ReactPHP/">ReactPHP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cluster/">cluster</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/25/react-native-android-debug/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          使用 JS 构建跨平台的原生应用：React Native for Android 调试技术剖析
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/24/a-strange-bug-research-at-taobao-home-page/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">记一次淘宝首页奇葩的渲染问题</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

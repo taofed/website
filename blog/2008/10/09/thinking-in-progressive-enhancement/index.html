@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>【译】理解「渐进增强（Progressive Enhancement）」 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="原文：Understanding Progressive Enhancement作者：Aaron Gustafson译者：空帷  自 1994 年开始，Web 开发社群就擂起了名为“平稳退化（Graceful Degradation）”的大鼓。这是一个从工程界引入的概念，其主旨是为那些最新最好的浏览器提供更全方位的浏览体验，而对不幸使用 Netscape 4 的人们仅提供很少的一些基本功能。这个">
+<meta name="keywords" content="渐进增强">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【译】理解「渐进增强（Progressive Enhancement）」">
+<meta property="og:url" content="http://taobaofed.org/blog/2008/10/09/thinking-in-progressive-enhancement/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="原文：Understanding Progressive Enhancement作者：Aaron Gustafson译者：空帷  自 1994 年开始，Web 开发社群就擂起了名为“平稳退化（Graceful Degradation）”的大鼓。这是一个从工程界引入的概念，其主旨是为那些最新最好的浏览器提供更全方位的浏览体验，而对不幸使用 Netscape 4 的人们仅提供很少的一些基本功能。这个">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1TsqGQpXXXXbgaFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1nyIaPVXXXXcTXXXXXXXXXXXX-270-452.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB19NvDPVXXXXX4aXXXXXXXXXXX-540-250.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【译】理解「渐进增强（Progressive Enhancement）」">
+<meta name="twitter:description" content="原文：Understanding Progressive Enhancement作者：Aaron Gustafson译者：空帷  自 1994 年开始，Web 开发社群就擂起了名为“平稳退化（Graceful Degradation）”的大鼓。这是一个从工程界引入的概念，其主旨是为那些最新最好的浏览器提供更全方位的浏览体验，而对不幸使用 Netscape 4 的人们仅提供很少的一些基本功能。这个">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1TsqGQpXXXXbgaFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-thinking-in-progressive-enhancement" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      【译】理解「渐进增强（Progressive Enhancement）」
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 空帷</span>
+        
+        <span>发表于: <a href="/blog/2008/10/09/thinking-in-progressive-enhancement/" class="article-date">
+  <time datetime="2008-10-09T12:19:00.000Z" itemprop="datePublished">2008-10-09</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1TsqGQpXXXXbgaFXXXXXXXXXX-900-500.jpg" alt="【译】理解「渐进增强（Progressive Enhancement）」"></p>
+<p>原文：<a href="https://alistapart.com/article/understandingprogressiveenhancement" target="_blank" rel="noopener">Understanding Progressive Enhancement</a><br>作者：<a href="https://alistapart.com/author/agustafson" target="_blank" rel="noopener">Aaron Gustafson</a><br>译者：空帷</p>
+<p><img src="https://img.alicdn.com/tfs/TB1nyIaPVXXXXcTXXXXXXXXXXXX-270-452.png" alt></p>
+<p>自 1994 年开始，Web 开发社群就擂起了名为“<a href="https://en.wikipedia.org/wiki/Fault_tolerance" target="_blank" rel="noopener">平稳退化（Graceful Degradation）</a>”的大鼓。这是一个从工程界引入的概念，其主旨是为那些最新最好的浏览器提供更全方位的浏览体验，而对不幸使用 Netscape 4 的人们仅提供很少的一些基本功能。这个方法的确能够奏效，但它却并不真正符合 Tim Berners-Lee （译注：万维网之父）对“普及的可访问型 Web（Universally Accessible Web）”的设计初衷。</p>
+<p>大约十年之后，一些聪明的人开始对“平稳退化”产生质疑，并最终发现它在许多层面上都存在着缺陷。他们致力于改善内容可利用性 （Content Availability）、全局可访问性（Overall Accessibility）和移动设备浏览器的能力，并为 Web 开发寻觅到一条新的途径 —— 一条聚焦于内容并能为旧设备提供更多实际支持的途径。</p>
+<p>在 2003 年度的 SXSW （译注：西南偏南节庆及会议，South by Southwest Festivals + Conferences，这里特指其中的“交互”主题会议，除此之外还有“电影”和“音乐”两个主题）上，Steve Champeon 和 Nick Finck 发表了题为《<a href="http://www.hesketh.com/publications/inclusive_web_design_for_the_future/" target="_blank" rel="noopener">展望 Web 设计的未来 (Inclusive Web Design For the Future)</a>》的演讲。在那次演讲中，他们描绘出这条 Web 开发新途径的应用蓝图。Steve 将之命名为 “<a href="https://en.wikipedia.org/wiki/Progressive_enhancement" target="_blank" rel="noopener">渐进增强</a>”。</p>
+<h3 id="两者间的（微妙）差别"><a href="#两者间的（微妙）差别" class="headerlink" title="两者间的（微妙）差别"></a>两者间的（微妙）差别</h3><p>万一你正挠着后脑勺，试图找出“平稳退化”和“渐进增强”之间的差别，那么我可以告诉你：“它们是看待同种事物的两种观点”。“平稳退化”和“渐进增强”都关注于同一网站在不同设备里不同浏览器下的表现程度。关键的区别则在于它们各自关注于何处，以及这种关注如何影响工作的流程。</p>
+<h3 id="“平稳退化”观点"><a href="#“平稳退化”观点" class="headerlink" title="“平稳退化”观点"></a>“平稳退化”观点</h3><p>“平稳退化”观点认为应该针对那些最高级、最完善的浏览器来设计网站。而将那些被认为“过时”或有功能缺失的浏览器下的测试工作安排在开发周期的最后阶段，并把测试对象限定为主流浏览器（如 IE、Mozilla 等）的前一个版本。</p>
+<p>在这种设计范例下，旧版的浏览器被认为仅能提供“简陋却无妨（poor, but passable）” 的浏览体验。你可以做一些小的调整来适应某个特定的浏览器。但由于它们并非我们所关注的焦点，因此除了修复较大的错误之外，其它的差异将被直接忽略。</p>
+<h3 id="“渐进增强”观点"><a href="#“渐进增强”观点" class="headerlink" title="“渐进增强”观点"></a>“渐进增强”观点</h3><p>“渐进增强”观点则认为应关注于内容本身。请注意其中的差别：我甚至连“浏览器”三个字都没提。</p>
+<p>内容是我们建立网站的诱因。有的网站展示它，有的则收集它，有的寻求，有的操作，还有的网站甚至会包含以上的种种，但相同点是它们全都涉及到内容。这使得“渐进增强”成为一种更为合理的设计范例。这也是它立即被 Yahoo! 所采纳并用以构建其“分级式浏览器支持（Graded Browser Support）”策略的原因所在。</p>
+<h3 id="如何发挥效用？"><a href="#如何发挥效用？" class="headerlink" title="如何发挥效用？"></a>如何发挥效用？</h3><p>深植“渐进增强”观念其实十分简单：即从内容出发。内容为样式和交互构建起坚实的基础。假如你爱吃甜食，那么可以将其类比为一粒M&amp;M 花生巧克力：</p>
+<p><img src="https://img.alicdn.com/tfs/TB19NvDPVXXXXX4aXXXXXXXXXXX-540-250.png" alt></p>
+<p>图：“渐进增强”的巧克力分层结构<br>（由上至下分别为：“内容”、“表现”和“客户端脚本”）</p>
+<p>我们先从你的花生仁儿——内容讲起，它由丰富（rich）的语义化 (X)HTML 代码构成。包裹着内容的是一层浓郁（rich）的 CSS 奶油。最后，JavaScript 就是那层可以提升其美妙口感的坚硬糖衣（并确保它“只溶于口，不溶于手”）。</p>
+<p>如果你对 Web 标准化运动的口号——分离、分离、再分离——烂熟于心的话，那么这个比喻就显得极为合适。因为基于 Web 标准的开发经常被比喻为夹心蛋糕（或是更富想象力的比喻——乳脂松糕）。</p>
+<p>我选用 M&amp;M 花生巧克力来做类比，是因为其每一个外层都完全包裹着里层，非常类似于网页里样式和脚本包含内容的方式。</p>
+<p>如果你还愿意继续听我的“食物类比论”（我希望它没有让你觉得有点儿饿），我将解释“为何这种观点更为合理”，并告诉你“该范例下各层应如何实现交互”。</p>
+<h3 id="花生仁儿"><a href="#花生仁儿" class="headerlink" title="花生仁儿"></a>花生仁儿</h3><p>有些人喜欢吃花生；事实上比起 M&amp;Ms 花生巧克力，有些人会更偏爱花生本身。相似地，一些人（还有一些诸如搜索引擎蜘蛛的东西）只希望得到内容。</p>
+<p>然而，也有一些人其实无法享用包裹着花生仁的巧克力和糖衣（打个不恰当的比方，比如糖尿病患者）。类比于前者，使用移动设备或旧版浏览器的人们可能无福享受你优美的视觉设计或是由流畅的 Ajax 所驱动的界面交互设计。</p>
+<p>请确保你的标签结构能将其所包含的内容以最详实的程度传达给用户，这一点对于为上述用户提供基本的浏览体验来说非常必要。</p>
+<h3 id="巧克力涂层"><a href="#巧克力涂层" class="headerlink" title="巧克力涂层"></a>巧克力涂层</h3><p>接下来，你可以将内容浸入那杯热腾腾的美味 CSS 巧克力之中了——但在给它们包裹上糖衣之前，你还需要留意如下一些事项。</p>
+<p>有些人爱吃用巧克力包裹的花生。这些人就如同那些使用仅支持 CSS 却可能缺乏相应的 JS 支持的浏览器用户。或者他们受雇于某公司，而该公司的 IT 人员却疲于应付 JavaScript 安全性问题。对于这些人， JavaScript 有可能是被完全禁止的。</p>
+<p>但不管是他们爱吃或是因故只能吃到这种巧克力花生豆（花生外仅有巧克力涂层，无糖衣），他们都应有享受这顿美味的权利。有一些方法可以帮助你将样式以“渐进增强”的方式来装饰内容，它们将是本系列的下一篇文章所要探讨的主题。</p>
+<h3 id="坚硬的糖衣"><a href="#坚硬的糖衣" class="headerlink" title="坚硬的糖衣"></a>坚硬的糖衣</h3><p>最后，你可以开始向这团混合物里添加 JavaScript 了。JavaScript 拥有丰富的交互可能性，它还具有操作以及与内容和表现层实现交互的能力，可以说它能真正将访问网站变成一种“体验”。</p>
+<p>我并不了解 M&amp;M 是如何将那层坚硬的糖衣附着到最外层的（不过我猜想不过是再一次将巧克力豆浸入调料的过程），但只要你脑袋里想着“渐进增强”，那么给网站添加基于 JavaScript 功能和交互将变得易如反掌。而且，就像 M&amp;M 可以拥有眼花缭乱的颜色一样，JavaScript 的体验也可以因为目标浏览器和设备能力的不同而各富特色。</p>
+<p>你可能已经知道，这种开发方式就被称为“无侵入 （Unobtrusive）”。我将在本系列的第三篇及最终篇里详述其技术内涵并指导实践。</p>
+<h3 id="把它们组合起来"><a href="#把它们组合起来" class="headerlink" title="把它们组合起来"></a>把它们组合起来</h3><p>一旦你理解了“渐进增强”思想并开始用它来指导实践，那么你会发现开发过程实际上变得非常简单；或许比做一粒巧克力豆还要简单。本系列接下来的两篇文章将帮助你使用 CSS 和 JavsScript 来提炼你的“渐进增强”技巧，并告诉你如何将思想转化为代码。</p>
+<blockquote>
+<p>插图：Kevin Cornell</p>
+</blockquote>
+<h3 id="关于作者"><a href="#关于作者" class="headerlink" title="关于作者"></a>关于作者</h3><p>ALA 的技术编辑 Aaron Gustafson 是 Web 开发商店—— <a href="http://www.easy-designs.net/" target="_blank" rel="noopener">Easy Designs</a> 的创始人和首席顾问。他时常针对 Web 标准撰写文章和发表演说，并致力于提升 Web 的可用性和可访问性。</p>
+<h3 id="译者的话"><a href="#译者的话" class="headerlink" title="译者的话"></a>译者的话</h3><p>本文涉及到三个极具争议的术语译名：“渐进增强（Progressive Enhancement）”、“平稳退化（Graceful Degradation）”和“无侵入 （Unobtrusive）”，为了保证多数人阅读时的流畅度，我采纳了这三种比较流行的译法；而为了照顾更多不习惯此译法的读者，我均附上了英文原词，此类读者可以把译名作为原词的代号来看待。另外，翻译是一种极富主观色彩的行为，我个人在多数的时候会用意译来处理较为拗口的句子，“信达雅”是所有译者的终极目标，但如果我的翻译不合您的口味，敬请原谅。最后，附上团队中另一成员——玉伯所翻译的另一个版本，希望能为您提供更多的选择。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/HuwFOSPQGj8" target="_blank" rel="noopener">https://unsplash.com/photos/HuwFOSPQGj8</a> By @Michel Paz</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2008/10/09/thinking-in-progressive-enhancement/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2008/10/09/thinking-in-progressive-enhancement/" data-id="cjt6lby1p00bpjeu1pdi8fxft" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2008/10/09/thinking-in-progressive-enhancement/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/渐进增强/">渐进增强</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2009/12/18/html5-and-css3-demystification/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          揭秘 HTML5 和 CSS3
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2008/08/16/premature-standardization/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">【译】不成熟的标准化是我们唯一惧怕的</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

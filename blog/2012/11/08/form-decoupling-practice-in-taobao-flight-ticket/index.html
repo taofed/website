@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>复杂表单应用解耦，淘宝机票订单实践 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="背景在 Web 应用中，复杂表单这类 Web 应用富交互元素多，业务逻辑复杂，犬牙交错，且需求变化频繁。及容易成为晦涩和幽暗之地，也经常是各种代码坏味道的来源。针对这种典型的复杂应用，本文以淘宝机票订单为例提出一种架构模式梳理和消化表单带来的复杂性。  模块和组件划分解决复杂表单的的第一步，划分模块。 概念上，为了复用和解耦方便，应将模块按照功能的内聚程度进行划分。强相关，频繁沟通和交互的功能应">
+<meta name="keywords" content="解耦,表单">
+<meta property="og:type" content="article">
+<meta property="og:title" content="复杂表单应用解耦，淘宝机票订单实践">
+<meta property="og:url" content="http://taobaofed.org/blog/2012/11/08/form-decoupling-practice-in-taobao-flight-ticket/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="背景在 Web 应用中，复杂表单这类 Web 应用富交互元素多，业务逻辑复杂，犬牙交错，且需求变化频繁。及容易成为晦涩和幽暗之地，也经常是各种代码坏味道的来源。针对这种典型的复杂应用，本文以淘宝机票订单为例提出一种架构模式梳理和消化表单带来的复杂性。  模块和组件划分解决复杂表单的的第一步，划分模块。 概念上，为了复用和解耦方便，应将模块按照功能的内聚程度进行划分。强相关，频繁沟通和交互的功能应">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1ICC6QpXXXXcuXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1NSoBQXXXXXbzXpXXXXXXXXXX-559-579.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1trkNQXXXXXcbXXXXXXXXXXXX-712-569.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1yRn8QXXXXXbJaXXXXXXXXXXX-631-608.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1v5ElQXXXXXbbXVXXXXXXXXXX-715-615.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1g.ZvQXXXXXauXFXXXXXXXXXX-668-417.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1kFUFQXXXXXcaXpXXXXXXXXXX-398-337.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1ng.LQXXXXXc9XXXXXXXXXXXX-663-358.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1PKZNQXXXXXaTXXXXXXXXXXXX-646-429.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1rJr7QXXXXXaTaXXXXXXXXXXX-801-640.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1KCb8QXXXXXXkapXXXXXXXXXX-706-283.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1JuonQXXXXXc8XFXXXXXXXXXX-552-521.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1NrQxQXXXXXXtXFXXXXXXXXXX-534-170.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="复杂表单应用解耦，淘宝机票订单实践">
+<meta name="twitter:description" content="背景在 Web 应用中，复杂表单这类 Web 应用富交互元素多，业务逻辑复杂，犬牙交错，且需求变化频繁。及容易成为晦涩和幽暗之地，也经常是各种代码坏味道的来源。针对这种典型的复杂应用，本文以淘宝机票订单为例提出一种架构模式梳理和消化表单带来的复杂性。  模块和组件划分解决复杂表单的的第一步，划分模块。 概念上，为了复用和解耦方便，应将模块按照功能的内聚程度进行划分。强相关，频繁沟通和交互的功能应">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1ICC6QpXXXXcuXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-form-decoupling-practice-in-taobao-flight-ticket" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      复杂表单应用解耦，淘宝机票订单实践
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 陶清</span>
+        
+        <span>发表于: <a href="/blog/2012/11/08/form-decoupling-practice-in-taobao-flight-ticket/" class="article-date">
+  <time datetime="2012-11-08T10:26:00.000Z" itemprop="datePublished">2012-11-08</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1ICC6QpXXXXcuXXXXXXXXXXXX-900-500.jpg" alt="复杂表单应用解耦，淘宝机票订单实践"></p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在 Web 应用中，复杂表单这类 Web 应用富交互元素多，业务逻辑复杂，犬牙交错，且需求变化频繁。及容易成为晦涩和幽暗之地，也经常是各种代码坏味道的来源。针对这种典型的复杂应用，本文以淘宝机票订单为例提出一种架构模式梳理和消化表单带来的复杂性。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1NSoBQXXXXXbzXpXXXXXXXXXX-559-579.png" alt></p>
+<h3 id="模块和组件划分"><a href="#模块和组件划分" class="headerlink" title="模块和组件划分"></a>模块和组件划分</h3><p>解决复杂表单的的第一步，划分模块。</p>
+<p>概念上，为了复用和解耦方便，应将模块按照功能的内聚程度进行划分。强相关，频繁沟通和交互的功能应该归为一个模块。模块间尽量不存在依赖关系。也就是常说的“高内聚，低耦合”。<br>如下图所示，淘宝机票订单页面主要有被分为 7 个主要模块。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1trkNQXXXXXcbXXXXXXXXXXXX-712-569.png" alt></p>
+<p>模块划分完毕，下一步确认组成模块的组件。<br>关于模块和组件的区分。一般按照以下三个纬度考量。</p>
+<ul>
+<li>是否有业务逻辑参与。</li>
+<li>是否包含 HTML。</li>
+<li>是否具备一定独立性。</li>
+</ul>
+<p>“模块”，定义为一个包含 HTML、CSS（图片被认为是 CSS 的一部分）、JavaScript 的代码集。模块的应用方式多为通过 Web 模板技术（如：Velocity、FreeMarker、PHP）。因为包含了 HTML，使得模块必须通过服务端合并加载并且最终推送到用户浏览器。此外，“模块”还是具备一定独立业务和交互的集合，最好可以被其他页面引用。良好的独立性也可以帮助协同开发，在实际开发中可多人可以并行开发多个独立模块，提高效率。</p>
+<p>“组件”，定义为一个仅包含”css”和”javascript”的代码集。正因为不包含 HTML，所以组件可通过 JavaScript 异步加载。因为这种可异步加载的特性，组件在复用方面的容易性远超模块。组件没有业务逻辑或者仅有少部分公共业务逻辑。业务逻辑越多，组件的可复用性就越低。</p>
+<h3 id="模块、组件间通讯"><a href="#模块、组件间通讯" class="headerlink" title="模块、组件间通讯"></a>模块、组件间通讯</h3><p>组件/模块划分的目的是将彼此间相对独立的功能分离，前面通过模块和组件的划分解决了分离问题。实际中，模块之间存在协作关系。模块间应以一种轻量的方式协作。一般的为了更好的分离和解耦，可以考虑用广播的方式在模块间沟通，考虑使用事件的方式在组件间通讯。</p>
+<p>如下图所示，淘宝机票订单页面的数据流向。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1yRn8QXXXXXbJaXXXXXXXXXXX-631-608.png" alt></p>
+<p>不同模块在后期均有可能扩展小功能。例如不定期的活动优惠等。事件广播可以让不同模块/组件间新增功能影响面缩小。在淘宝机票订单中应用中，使用广播组件通讯主要用来完成以下意图。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1v5ElQXXXXXbbXVXXXXXXXXXX-715-615.png" alt></p>
+<p>1、知会。<br>知会的特性在于异步通讯。广播发起方只需要放出事件，无需等待其他关注者完成处理。称为异步广播。例如表单模块的内容变更需要知会到显示订单金额的模块，显示订单金额的模块接受事件后需要更改金额。<br>基于这种方式的通讯，各模块之需要做好自己的事情，外部关注的事件广播出去即可。异步广播还有一个好处是系统坚固性比较强，广播发送者不会因为事件监听者的使用不当而异常。</p>
+<p>2、请求数据<br>例如，模块 6（负责提交）需要在被点击后从模块 2（乘机人表单），模块 4（联系地址）、模块 7（金额计算）。获取具体数据提交。请求数据的场景特性在于，广播发起者需要等待事件处理者完成处理后再继续下一步行为。称为同步广播。</p>
+<p>基于此机制。提交模块只需要负责综合校验，浮层，网络请求及异常处理。而具体请求的内容由其他模块决定。对后续模块的扩充起到了很好的左右。</p>
+<h3 id="复杂组件拆分"><a href="#复杂组件拆分" class="headerlink" title="复杂组件拆分"></a>复杂组件拆分</h3><p>模块和组件划分完毕后，可能会发现某些组件非常复杂，几乎占据了整个 Web 应用一半以上的代码。这部分组件由纯 JS 实现，并且使用 JS 模块加载器加载。<br>同一个组件大量代码纠结在一起，最终还是会导致架构腐化。因此，复杂组件需要进一步拆分。在淘宝机票订单中，乘机人信息组件是一个复杂组件。如下图所示：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1g.ZvQXXXXXauXFXXXXXXXXXX-668-417.png" alt></p>
+<p>拆分这类输入型的复杂组件，一般来说有两种思路方式。</p>
+<p>1. 纵切，组件树型式。<br>将组件进一步划分为更细力度的输入组件，将每个输入域作为一个单独组件。最终形成一个组件树。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1kFUFQXXXXXcaXpXXXXXXXXXX-398-337.png" alt></p>
+<p>这样的组织方式结构严谨层级清晰，最大的优点是很容易支持字段扩展。<br>但考虑如下场景，为了尽量友好的提示用户，需要在输入域外的某处增加提示帮助。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1ng.LQXXXXXc9XXXXXXXXXXXX-663-358.png" alt></p>
+<p>这种场景下组件树的组织方式每次在面对变化时就会略显手忙脚乱。难道把每个地方出现的 tip 都座位独立组件看待吗？<br>字段级的适普性降低了适应细节调整的能力，付出的代价在于界面体验。</p>
+<p>2. 横切，AOP 式。</p>
+<p>将所有输入域抽象的看待为同一个组件。按照组件的富应用特性分层看待。在本例中，乘机人组件被按照从简单到复杂分为 3 个切面。</p>
+<ul>
+<li>切面 1：基础展现层只负责最基础的可完成输入的表单控件，及基础 DOM 管理。</li>
+<li>切面 2：富展现层负责修饰 base 层的基础 HTML 控件，形成富输入控件。</li>
+<li>切面 3：校验层负责对 base 层的输入数据进行业务级校验。</li>
+</ul>
+<p>未来，如果新增 tip 或者其他业务逻辑，增加一个新切面即可，完全或者很少需要修改老代码文件。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1PKZNQXXXXXaTXXXXXXXXXXXX-646-429.png" alt><br><img src="https://gw.alicdn.com/tfs/TB1rJr7QXXXXXaTaXXXXXXXXXXX-801-640.png" alt></p>
+<p>淘宝机票订单采用了 AOP 这种方式，从最终代码量上来看，可以看出复杂度被比较均衡的分布到不同文件中去。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1KCb8QXXXXXXkapXXXXXXXXXX-706-283.png" alt></p>
+<p>同样，这种方式也有局限，如果需要扩展字段，那将是一个灾难，你有可能需要到每一个切面里面去做修改。</p>
+<p>有句老话说的好，没有最优方案，只有最适合的解决方案，任何解决方案，都需要放到具体场景中去评判。事实上，对这个问题的进一步研究，可以发现以下规律。</p>
+<p>对于一个组件、模块，同时追求简单设计、适普性（字段级扩充）、界面体验是不可能的。如果场景需要适应字段灵活扩展，那就采用纵切的模式。如果使用场景需字段确定，需要更多细节控制力度，那就横切，AOP 式。如果两者都要兼顾，就需要引入复杂设计，综合运用横切和纵切。但是这样形成的最终设计会很复杂，开发和可维护性上会有代价付出。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1JuonQXXXXXc8XFXXXXXXXXXX-552-521.png" alt></p>
+<p>对于淘宝机票这类互联网应用，使用了横切的方式来拆分组件，因为在这个场景中，字段的数量是相对固定的，而围绕固定数量字段的优化需求是层出不穷的。然而在企业内网应用或者网站后台 Web 应用中，字段的变化会比较频繁。建议主要采用纵切的思路划分。</p>
+<p>表单校验</p>
+<p>有表单的地方就有校验。项目初期，校验的功能总是不起眼。等待项目后期时候经常会发现校验已经占据了巨大工作量并且成为海量 bug 的源头。因此校验是一种典型的容易被轻视单又蕴含巨大工作量的事情，需要特别对待，专门设计。</p>
+<p>一般来说，这根据校验根据其复杂度可以分为以下两类：</p>
+<ol>
+<li><p>格式校验<br>格式校验一般是校验用户输入的格式是否满足要求，比如是否数字、电话号码、邮箱等等。此类校验的特点是校验域单一，一般只对一个 input 或者某个组件的 value 进行检查。格式类校验应与与用户展现非常接近，一种非常好的做法是将此类校验信息直接描述在 HTML 标签属性中。HTML5 中 input 的 pattern 属性就是一种基于这种思想的解决方案。</p>
+</li>
+<li><p>逻辑校验<br>逻辑校验是满足格式校验后，继续进行的与业务相关的校验，例如是否存在相同用户名，输入的生日是否和身份证号不符等等。此类校验的一般涉及多个输入域，要综合处用户的输入内容一起校验。此类校验逻辑复杂，不适合写在 HTML 中。</p>
+</li>
+</ol>
+<p>目前有很多流行的 form 校验框架解决校验问题，如何引入合适的校验框架，先从理解校验这件事的过程开始。<br>典型的一个校验过程如下，用户在某个 input 处完成输入，应用在某个时刻被触发校验，可以是失去焦点或者 keyup 或者其他。被触发的校验过程找到此处 input 所需要的校验规则（有时候这个规则被直接写在 HTML 中）判单正确与否，如果正确，可能有提示，如果错误，可能也有提示。<br>从以上场景的描述中，可以找到校验的几个关键环节。这里局部采用一下管理学上经典的 5W1H 问题分析方法来分析问题。</p>
+<ul>
+<li>who：哪个输入控件的内容需要校验。这是框架是解决不了的。要对哪个输入域做校验应该是应用传递进入的。</li>
+<li>when：何时被触发校验。比如说是 <code>who</code> 失去焦点时。变化太多，框架解决不了。只能被动触发。</li>
+<li>what：做什么校验。有时候这个 <code>what</code> 被写在 HTML 中。基本上，所有格式校验都是固定的，这个问题应框架解决。但框架应预留接口做更加复杂的业务校验。</li>
+<li>how：校验完毕后的动作。框架不能决定做什么，但是在校验结果出来后，框架应能知会到外部调用者。<br>在设计框架或者选择已有框架时，首先要区分框架的边界，简单来说，就是做什么和不做什么。框架应实现相对固定的业务流程。同时对可变部分预留足够的灵活性。</li>
+</ul>
+<p>一个通用的校验框架一定是不含界面部分的。界面是多变和难以穷举的，是用 tip 显示错误，还是在输入域附近显示，是否需要动画，是否需要修改输入域的视觉状态，这些可变化的部分应为框架外部内容，由更专业的 tip 组件或者 popup 来完成。框架只应该负责在校验完成时候知会相关组件完成显示错误提示等若干事情。</p>
+<p>基于以上的分析，校验框架应该具备以下规格</p>
+<ul>
+<li>解决 what 问题。内置了各种格式校验规则，如电话号码、e-mail 等，并且能够灵活定义新的逻辑校验。</li>
+<li>解决 who 问题。说明如何根据输入的字符真正找到 who 对应的 value，并且能够对于这个 who 使用哪些校验规则</li>
+<li>解决 when 问题。提供一个触发校验的方法。</li>
+<li>解决 how 问题。产生校验结果后能够知会外部的功能框架。</li>
+</ul>
+<p>在淘宝机票订单应用中，依据上述原则自行设计了一个 Validator 框架，接口定义如下，Validator 是校验框架对象。</p>
+<ol>
+<li><p>在构造函数中提供表格化的校验逻辑定义型式。如下图所示，传递如下结构，定义每个字段对应的校验方式。在下图中，定义每行为一个 field，每个 field 有若干 rule，每个 rule 可以是框架内置的格式校验，也可以是自定义的逻辑校验，实际上是函数名。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1NrQxQXXXXXXtXFXXXXXXXXXX-534-170.png" alt></p>
+</li>
+<li><p>Validator 框架提供 <code>validate()</code> 方法，validate 方法有两个行为，如果不指定参数，将依次执行完所有 field 的校验，并且将最终结果返回。如果执行一个 field name，框架将只校验 field name 对应的输入域。</p>
+</li>
+<li>一旦执行 <code>validate()</code> 方法，无论校验结果如何，框架均向其观察者发送事件 <code>onValidate</code>，以便触发后续动作。</li>
+<li>一些辅助参数，需要提供一个从 field name 找到输入域 value 的 function。</li>
+</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在处理复杂表单时，首先通过合理模块、组件划分，将复杂度分散。然后利用详细和广播机制解决分散的模块和组件间通问题。接着，过于复杂的组件要考虑进一步拆分，具体拆分的方式有纵切和横切两种，根据具体使用场景决定。最后，不要小看了校验，需要特别对待，专门设计。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/_F3VBwffsOE" target="_blank" rel="noopener">https://unsplash.com/photos/_F3VBwffsOE</a> By @Andre Benz</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2012/11/08/form-decoupling-practice-in-taobao-flight-ticket/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2012/11/08/form-decoupling-practice-in-taobao-flight-ticket/" data-id="cjt6lbxye0038jeu12e9ycnh9" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2012/11/08/form-decoupling-practice-in-taobao-flight-ticket/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/表单/">表单</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/解耦/">解耦</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2013/03/12/jquery-no-conflict/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          谈谈 jQuery 中的防冲突（noConflict）机制
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2012/10/12/front-end-dsl/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">构建前端 DSL</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

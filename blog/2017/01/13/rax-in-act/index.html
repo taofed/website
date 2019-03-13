@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>淘宝双促中的 Rax | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="引子 本文开始之前先调整一个概念，陪我们奋战穿促的 Rx 更名为 Rax。本文会全部使用新的概念去描述。首先简单介绍一下 Rax 是什么以及在双促中的定位。然后介绍一下大促通用页面渲染逻辑以及模块渲染逻辑。 RaxRax 是一个基于 React 方式的跨容器的 JS 框架  React：你会用 React，那么你会很快上手 Rax 跨容器：Browser、WEEX、Node.js   gzip">
+<meta name="keywords" content="Rax">
+<meta property="og:type" content="article">
+<meta property="og:title" content="淘宝双促中的 Rax">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/01/13/rax-in-act/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="引子 本文开始之前先调整一个概念，陪我们奋战穿促的 Rx 更名为 Rax。本文会全部使用新的概念去描述。首先简单介绍一下 Rax 是什么以及在双促中的定位。然后介绍一下大促通用页面渲染逻辑以及模块渲染逻辑。 RaxRax 是一个基于 React 方式的跨容器的 JS 框架  React：你会用 React，那么你会很快上手 Rax 跨容器：Browser、WEEX、Node.js   gzip">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB1XDuDPXXXXXbRapXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1GloTOVXXXXa1XVXXXXXXXXXX-1455-368.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1oWxhPXXXXXc_XpXXXXXXXXXX-763-431.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB19PE1OVXXXXcsaXXXXXXXXXXX-1020-699.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1499MOVXXXXcIXXXXXXXXXXXX-641-436.png_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1eGRnPXXXXXXcXpXXXXXXXXXX-587-465.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1bbcPOVXXXXc9aXXXXXXXXXXX-722-362.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1Z1tqPXXXXXb.XXXXXXXXXXXX-730-448.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1Byg3OVXXXXb3XVXXXXXXXXXX-736-444.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1la3YOVXXXXbVaXXXXXXXXXXX-718-529.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1Ba75OVXXXXcaXVXXXXXXXXXX-698-515.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1OPISOVXXXXaRXVXXXXXXXXXX-570-501.jpg_500x500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1VFM7OVXXXXavXVXXXXXXXXXX-424-387.jpg_500x500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="淘宝双促中的 Rax">
+<meta name="twitter:description" content="引子 本文开始之前先调整一个概念，陪我们奋战穿促的 Rx 更名为 Rax。本文会全部使用新的概念去描述。首先简单介绍一下 Rax 是什么以及在双促中的定位。然后介绍一下大促通用页面渲染逻辑以及模块渲染逻辑。 RaxRax 是一个基于 React 方式的跨容器的 JS 框架  React：你会用 React，那么你会很快上手 Rax 跨容器：Browser、WEEX、Node.js   gzip">
+<meta name="twitter:image" content="http://gw.alicdn.com/tfs/TB1XDuDPXXXXXbRapXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-rax-in-act" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      淘宝双促中的 Rax
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 亚城</span>
+        
+        <span>发表于: <a href="/blog/2017/01/13/rax-in-act/" class="article-date">
+  <time datetime="2017-01-13T11:53:44.000Z" itemprop="datePublished">2017-01-13</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//gw.alicdn.com/tfs/TB1XDuDPXXXXXbRapXXXXXXXXXX-900-500.jpg" alt="淘宝双促中的 Rax"></p>
+<p>引子</p>
+<p>本文开始之前先调整一个概念，陪我们奋战穿促的 Rx 更名为 <a href="http://rax.taobaofed.org/" target="_blank" rel="noopener">Rax</a>。本文会全部使用新的概念去描述。首先简单介绍一下 Rax 是什么以及在双促中的定位。然后介绍一下大促通用页面渲染逻辑以及模块渲染逻辑。</p>
+<h2 id="Rax"><a href="#Rax" class="headerlink" title="Rax"></a>Rax</h2><p>Rax 是一个基于 React 方式的跨容器的 JS 框架</p>
+<ul>
+<li>React：你会用 React，那么你会很快上手 Rax</li>
+<li>跨容器：Browser、WEEX、Node.js</li>
+</ul>
+<p><img src="https://gw.alicdn.com/tps/TB1GloTOVXXXXa1XVXXXXXXXXXX-1455-368.jpg_500x500.jpg" alt></p>
+<p>gzip 大小 8k，与 Angular、React、Vue 相比更加轻量。在服务端也有更优的渲染性能，1553 op/s。作为双促页面的底层核心框架，让今年的淘宝双促的 native 100% 成为可能。</p>
+<h2 id="组件与模块"><a href="#组件与模块" class="headerlink" title="组件与模块"></a>组件与模块</h2><h3 id="体系提供的能力"><a href="#体系提供的能力" class="headerlink" title="体系提供的能力"></a>体系提供的能力</h3><p>Rax 核心框架之上，有一个支撑业务的基础体系。模拟浏览器行为和业务基础功能的 API、最基础的简单标签 Components、以及基础 UI 组件 RAXUI。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1oWxhPXXXXXc_XpXXXXXXXXXX-763-431.jpg_500x500.jpg" alt></p>
+<p>Components 对应最基础的 HTML 标签，提供了最基础的标签能力，开发同学可以通过 Components 标签搭建出最基础的组件以及模块和页面。</p>
+<p>通过最基础的标签组成通用 UI 组件 RAXUI，除了 UI 组件，双促中使用的页面核心渲染逻辑也是基于 Components 标签搭建出来的。RAXUI 成为了大促模块搭建的基础、rax-page 则是页面渲染的基础。通过上层对数据请求的封装、缓存策略、页面渲染顺序的控制等组织成了斑马联路中使用的 PI，让页面可以在斑马环境中运作。</p>
+<h3 id="RAXUI-组件"><a href="#RAXUI-组件" class="headerlink" title="RAXUI 组件"></a>RAXUI 组件</h3><p><img src="https://gw.alicdn.com/tps/TB19PE1OVXXXXcsaXXXXXXXXXXX-1020-699.jpg_500x500.jpg" alt></p>
+<p>RAXUI 是 Rax 上层的组件生态，包含了业务中常用的组件，比如横向滚动轮播（slider）、icon、tab 导航头（tabheader）、视频播放（player）等。</p>
+<p>上图中列出了部分 RAXUI 组件，通过 rax-picture、rax-slider、rax-tabheader、rax-gotop  等可以组成一个常见的带电梯长列表页面，如下图。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1499MOVXXXXcIXXXXXXXXXXXX-641-436.png_500x500.jpg" alt></p>
+<p>RAXUI 组件已经涵盖了大部分业务中需要的组件场景，为开发提供了一定的便利。</p>
+<h3 id="对开发者的影响"><a href="#对开发者的影响" class="headerlink" title="对开发者的影响"></a>对开发者的影响</h3><p><img src="https://gw.alicdn.com/tps/TB1eGRnPXXXXXXcXpXXXXXXXXXX-587-465.jpg_500x500.jpg" alt></p>
+<p>一个淘宝大促页面模块的开发与往年有很大不同，除了开始使用 React 的写法外，还有一套模块与页面渲染 PI 的约定。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1bbcPOVXXXXc9aXXXXXXXXXXX-722-362.jpg_500x500.jpg" alt></p>
+<p>大促模块分为两类，滚动容器外部的 app 级模块和 滚动容器内的 page 级模块。在 page 级模块的开发过程中需要遵循一些与页面渲染相关的约定，来实现特定逻辑和特定渲染策略。例如 moduleRenderMode 来制定模块类型、getModuleRowHeight 来获取模块高度，以及通过 props 透传的工具方法等。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">class Module extends Component &#123;</span><br><span class="line">  </span><br><span class="line">  // 模块行高</span><br><span class="line">  static getModuleRowHeight = (attrs) =&gt; &#123;</span><br><span class="line">    return 100；</span><br><span class="line">  &#125;;</span><br><span class="line">  // 无限重复的模块</span><br><span class="line">  static moduleRenderMode = &apos;repeat&apos;;</span><br><span class="line"></span><br><span class="line">  // 事件通信</span><br><span class="line">  static contextTypes = &#123;</span><br><span class="line">    page: PropTypes.object</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  componentWillMount() &#123;</span><br><span class="line">    let page = this.context.page;</span><br><span class="line">    if (page &amp;&amp; this.props.isFirstRepeatModule) &#123;</span><br><span class="line">      let moduleName = this.props.moduleName;</span><br><span class="line">      // 模拟异步请求数据</span><br><span class="line">      setTimeout(() =&gt; &#123;</span><br><span class="line">          // 重置模块数据</span><br><span class="line">          this.props.setDataSource([&apos;异步数据1&apos;, &apos;异步数据2&apos;]);</span><br><span class="line">      &#125;, 3000);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    return (&lt;View&gt;data : &#123;this.props.data&#125;&lt;/View&gt;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个简单的长列表模块示例，包含了部分约定的内容。对于这些约定规则表现出的不同渲染策略，下文中会详细列出。</p>
+<h2 id="双促页面的通用渲染逻辑"><a href="#双促页面的通用渲染逻辑" class="headerlink" title="双促页面的通用渲染逻辑"></a>双促页面的通用渲染逻辑</h2><p><img src="https://gw.alicdn.com/tps/TB1Z1tqPXXXXXb.XXXXXXXXXXXX-730-448.jpg_500x500.jpg" alt></p>
+<p>双促中的页面核心渲染逻辑依赖 rax-page，这个仓库主要负责不同容器上样式差异的抹平、页面级别的事件通信、页面滚动容器的实现、页面模块渲染、页面性能优化、业务级的通用埋点、以及部分页面级的通用功能。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1Byg3OVXXXXb3XVXXXXXXXXXX-736-444.jpg_500x500.jpg" alt></p>
+<p>上文中有提到，模块分为 app 级别和 page 级别两类。在页面渲染过程中 app 级别的模块会直接渲染。先解释两个概念</p>
+<ul>
+<li>Page：页面的外层包裹容器，主要功能包括不同容器上样式差异的抹平、页面级别的事件通信。</li>
+<li>Block：页面级的滚动容器，用来控制模块的渲染与页面的滚动。</li>
+</ul>
+<p>双促的 Block 是页面唯一的全屏滚动容器，所有需要跟随页面滚动的模块都在 Block 内，被定义为 page 级模块。对于页面渲染层面的优化也主要是在 Block 这一层。下面主要介绍一下渲染策略上 WEEX 与 H5 的不同，以及这样做带来的收益。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1la3YOVXXXXbVaXXXXXXXXXXX-718-529.jpg_500x500.jpg" alt></p>
+<p>WEEX 页面的渲染主要依赖 WEEX 原生提供的 list 标签。在页面的滚动过程中，list 内部非当前可视区域的 cell 标签会被回收，保证整个列表渲染内容不会过多。</p>
+<p>借助 list + cell 的方案，为了达到更大的收益，在 WEEX 上的实现上就需要拆分出更多的 cell（后面讲双促中的长列表渲染中会详细说明）。一次性渲染出说有的模块必然会很慢，为了让用户能更快的看到页面，在 WEEX 上的策略是首屏优先渲染，渲染完成后一次性渲染非首屏模块。这样做的好处是页面可以看到的时候就可以向下顺畅的滑动。</p>
+<p>此处和天猫双 11 会场页面不同，天猫的方案是优先加载首屏，非首屏不加载。在页面向下滚动时在首屏底部的 loadmore 时机一次性渲染第二屏幕。淘宝双促会场页面在 WEEX 的渲染策略不同，主要解决的问题时首屏电梯的跳转，与向下快速滑动过程中的体验流畅。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1Ba75OVXXXXcaXVXXXXXXXXXX-698-515.jpg_500x500.jpg" alt></p>
+<p>H5 页面的渲染策略与 WEEX 完全不同。吸收了 WEEX 页面渲染的部分思路，同时也沿用了往年淘宝大促页面渲染的经验。</p>
+<p>对于 H5 页面的渲染，同样区分首屏和非首屏。不同的是首屏渲染结束后非首屏的模块不会继续渲染，甚至模块标签都不会出现在页面上。</p>
+<p>这里引入一个站位容器的概念。非首屏的模块默认只渲染出一个和模块真实高度相同的容器。当容器出现在可视区域时（也就是容器的 appear 时机）用真实模块替换掉占位容器。这样做的好处是有效的减少了页面的节点数。当页面电梯跳转到指定楼层时，非可视区域内的模块也不会渲染。</p>
+<h2 id="双促中的长列表渲染"><a href="#双促中的长列表渲染" class="headerlink" title="双促中的长列表渲染"></a>双促中的长列表渲染</h2><p>上文中简单介绍了页面整体渲染的思路，这部分主要讲一下会场中应用最多的长列表的渲染策略。</p>
+<p>首先了解一下淘宝双促中的长列表模块，也就是 repeat 类型的模块。一个模块中包含了许多个重复相同样式的行，这样的一个模块可以自身无限加载，一个页面中可以有许多这样的模块。</p>
+<p>那么问题来了</p>
+<ul>
+<li>list 下更细化的 cell 性能会更好，这样一个多行模块渲染性能肯定是有问题的</li>
+<li>页面底部会出发到达底部的事件，显然页面有多个无限加载的列表，这个方案就不适用了</li>
+</ul>
+<p>为解决这两个问题，也主要是 WEEX 上的渲染问题，我们借助了一些 WEEX 页面渲染的方案。<br>在 Block 容器内的元素，绑定 appear 事件后都可以在进入可视区域或离开可视区域时做一些事情。利用这个机制加上 cell 细化拆分的性能优化方案，就是 repeat 类型模块的基本渲染思路。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1OPISOVXXXXaRXVXXXXXXXXXX-570-501.jpg_500x500.jpg" alt></p>
+<p><strong>占位容器的替换与模块的拆分</strong></p>
+<p>WEEX 下占位容器是一个高度撑开的 cell，在 repeat 类型模块渲染时，占位容器首先会被替换成真实的单个模块。这个模块可以进行自己业务逻辑的处理，比如请求数据。在模块渲染数据时，会将数据发送给页面的 Block，Block 判断这是一组 repeat 数据时进行真实数据的渲染</p>
+<p><img src="https://gw.alicdn.com/tps/TB1VFM7OVXXXXavXVXXXXXXXXXX-424-387.jpg_500x500.jpg" alt></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Rax 第一次接受淘宝双促的考验，在 native 化、性能、稳定性等多个方面表现优异，达成了预定的目标。在双促中沉淀下的经验也将陆续反哺给其他业务和活动中，在未来会有更多的场景使用 Rax，Rax 体系也将不断完善。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/01/13/rax-in-act/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/01/13/rax-in-act/" data-id="cjt6lby1600a0jeu1d4bfmlwt" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/01/13/rax-in-act/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rax/">Rax</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/02/11/why-rax/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Why Rax?
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/01/05/writing-readable-code/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">编写「可读」代码的实践</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

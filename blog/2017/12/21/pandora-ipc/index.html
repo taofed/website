@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>让进程间通信更容易 - Pandora.js 的 IPC-Hub | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="我们前面的两篇介绍了怎么定义多个进程，怎么利用进程这一资源。我们在淘宝业务中也是这样实践的，有一个问题也越发明显，进程间如何通信呢？ 起初我们有一个比较简单的 IPC 实现，通过 Domain Socket 进行通信。也是传统的 C/S 架构的，两个进程间进行比较基础的消息通信（比较类似 Node-IPC 这个包）。 不过实在是太基础了，时不时地在想：  在同一台计算机上的同一个语言，为什么要搞">
+<meta name="keywords" content="Node.js,Pandora.js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="让进程间通信更容易 - Pandora.js 的 IPC-Hub">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/12/21/pandora-ipc/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="我们前面的两篇介绍了怎么定义多个进程，怎么利用进程这一资源。我们在淘宝业务中也是这样实践的，有一个问题也越发明显，进程间如何通信呢？ 起初我们有一个比较简单的 IPC 实现，通过 Domain Socket 进行通信。也是传统的 C/S 架构的，两个进程间进行比较基础的消息通信（比较类似 Node-IPC 这个包）。 不过实在是太基础了，时不时地在想：  在同一台计算机上的同一个语言，为什么要搞">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1GSQ3jf6H8KJjy0FjXXaXepXa-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1RGMEjcrI8KJjy0FhXXbfnpXa-1978-1690.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="让进程间通信更容易 - Pandora.js 的 IPC-Hub">
+<meta name="twitter:description" content="我们前面的两篇介绍了怎么定义多个进程，怎么利用进程这一资源。我们在淘宝业务中也是这样实践的，有一个问题也越发明显，进程间如何通信呢？ 起初我们有一个比较简单的 IPC 实现，通过 Domain Socket 进行通信。也是传统的 C/S 架构的，两个进程间进行比较基础的消息通信（比较类似 Node-IPC 这个包）。 不过实在是太基础了，时不时地在想：  在同一台计算机上的同一个语言，为什么要搞">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1GSQ3jf6H8KJjy0FjXXaXepXa-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-pandora-ipc" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      让进程间通信更容易 - Pandora.js 的 IPC-Hub
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 九十</span>
+        
+        <span>发表于: <a href="/blog/2017/12/21/pandora-ipc/" class="article-date">
+  <time datetime="2017-12-21T03:35:12.000Z" itemprop="datePublished">2017-12-21</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1GSQ3jf6H8KJjy0FjXXaXepXa-900-500.jpg" alt="让进程间通信更容易 - Pandora.js 的 IPC-Hub"></p>
+<p>我们前面的两篇介绍了怎么定义多个进程，怎么利用进程这一资源。我们在淘宝业务中也是这样实践的，有一个问题也越发明显，进程间如何通信呢？</p>
+<p>起初我们有一个比较简单的 IPC 实现，通过 Domain Socket 进行通信。也是传统的 C/S 架构的，两个进程间进行比较基础的消息通信（比较类似 <a href="https://www.npmjs.com/package/node-ipc" target="_blank" rel="noopener">Node-IPC</a> 这个包）。</p>
+<p>不过实在是太基础了，时不时地在想：</p>
+<blockquote>
+<p>在同一台计算机上的同一个语言，为什么要搞得这么痛苦？是 Node.js 太弱了吗？<br>我要有线程的话，需要活的这么累吗？</p>
+</blockquote>
+<p>之前的大致样子：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在进程 A</span></span><br><span class="line"><span class="keyword">const</span> ipcServer = createServer(<span class="string">'/path/of/domain/socket/file'</span>);</span><br><span class="line">ipcServer.on(<span class="string">'request_resource'</span>, (client) =&gt; &#123;</span><br><span class="line">  client.send(<span class="string">'dispatch_resource'</span>, &#123; ...resource &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在进程 B</span></span><br><span class="line"><span class="keyword">const</span> ipcClient = createClient(<span class="string">'/path/of/domain/socket/file'</span>);</span><br><span class="line">ipcClient.on(<span class="string">'dispatch_resource'</span>, (resource) =&gt; &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Got resource'</span>, resource);</span><br><span class="line">&#125;);</span><br><span class="line">ipcClient.send(<span class="string">'request_resource'</span>);</span><br></pre></td></tr></table></figure>
+<p>都是一些简单消息传递，只有 <code>send()</code>、<code>boardcast()</code> 这样简单的元语。想做点什么，难度可想而知。</p>
+<p>我们在 Pandora.js 中系统化地解决了这个痛点，就是接下来要介绍的 IPC-Hub。</p>
+<h2 id="进程间通信-IPC-Hub"><a href="#进程间通信-IPC-Hub" class="headerlink" title="进程间通信 IPC-Hub"></a>进程间通信 IPC-Hub</h2><p>经过一些思考和讨论，最简洁的莫过是：</p>
+<blockquote>
+<p>我发布一个对象，这台计算机上的哪个 Node.js 进程都能调用。<br>这个对象上的方法我也不用额外地修饰，发布出去其他进程就能调用，就像调用一个普通对象上的方法一样。</p>
+</blockquote>
+<p>你只需要用 Pandora.js 启动应用，下面这些能力都是标配的。</p>
+<h3 id="简洁的进程间对象代理"><a href="#简洁的进程间对象代理" class="headerlink" title="简洁的进程间对象代理"></a>简洁的进程间对象代理</h3><p>经过努力，我们提出了『简洁的进程间对象代理』，看下面的例子会清楚得多：</p>
+<p>在 PID 为 1 的进程中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123;publishObject&#125; = <span class="built_in">require</span>(<span class="string">'pandora'</span>);</span><br><span class="line"><span class="keyword">const</span> processInfo = &#123;</span><br><span class="line">  <span class="keyword">async</span> getPid() &#123;</span><br><span class="line">    <span class="keyword">return</span> process.pid; <span class="comment">// 假定 PID 是 1</span></span><br><span class="line">  &#125; </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 发布 processInfo 在 IPCHub 中，并命名为 processInfo</span></span><br><span class="line"><span class="keyword">await</span> publishObject(<span class="string">'processInfo'</span>, processInfo);</span><br></pre></td></tr></table></figure>
+<p>在 PID 为 2 的进程中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> &#123;getProxy&#125; = <span class="built_in">require</span>(<span class="string">'pandora'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获得 processInfo 的代理对象</span></span><br><span class="line"><span class="keyword">const</span> processInfo = <span class="keyword">await</span> getProxy(<span class="string">'processInfo'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用 getPid() 方法，当然这里需要增加 await，</span></span><br><span class="line"><span class="comment">// 每个代理过来的方法都会变成 async 形式。</span></span><br><span class="line"><span class="comment">// 不过好在 await 一个非 async 的方法也不会出错，</span></span><br><span class="line"><span class="comment">// 所以一般业务逻辑都可以良好的兼容原始对象和代理对象。</span></span><br><span class="line"><span class="keyword">const</span> pid = <span class="keyword">await</span> processInfo.getPid();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将会打印 PID 为 1 的进程的 PID： 1</span></span><br><span class="line"><span class="built_in">console</span>.log(pid);</span><br></pre></td></tr></table></figure>
+<p>强大到，就连 Node.js 内置的对象都可以！</p>
+<blockquote>
+<p>—— 作者语：虽然没什么实际用处。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 进程 A</span></span><br><span class="line"><span class="keyword">const</span> &#123;publishObject&#125; = <span class="built_in">require</span>(<span class="string">'pandora'</span>);</span><br><span class="line">publishObject(<span class="string">'math'</span>, <span class="built_in">Math</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 进程 B</span></span><br><span class="line"><span class="keyword">const</span> &#123;getProxy&#125; = <span class="built_in">require</span>(<span class="string">'pandora'</span>);</span><br><span class="line"><span class="keyword">const</span> mathProxy = getProxy(<span class="string">'math'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将会打印 4</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">await</span> mathProxy.pow(<span class="number">2</span>, <span class="number">2</span>));</span><br></pre></td></tr></table></figure>
+<h3 id="Service-发布到-IPC-Hub"><a href="#Service-发布到-IPC-Hub" class="headerlink" title="Service 发布到 IPC-Hub"></a>Service 发布到 IPC-Hub</h3><p>上一篇介绍到了 Service，正是可以利用的绝佳材料，可以很方便的发布到 IPC-Hub 中：</p>
+<p><code>procfile.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">pandora</span>) </span>&#123;</span><br><span class="line">  pandora</span><br><span class="line">    .service(<span class="string">'serviceName'</span>, <span class="string">'./serviceImpl.js'</span>)</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 直接把这个 Service 发布到 IPC-Hub 中去</span></span><br><span class="line">	<span class="comment">// ，当然名字就叫 serviceName 啦~</span></span><br><span class="line">    .publish();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="一个向任务进程投递网页截图任务的例子"><a href="#一个向任务进程投递网页截图任务的例子" class="headerlink" title="一个向任务进程投递网页截图任务的例子"></a>一个向任务进程投递网页截图任务的例子</h2><p>为什么我们要把一些任务隔离进程？因为有些任务计算量大（比如大规模的定时任务）、或者不稳定因素太多（比如集成了不可靠的库），希望隔离于提供基础 Web 服务的进程组。</p>
+<p>我们下面的例子中将介绍：</p>
+<blockquote>
+<p>Web 服务收到用户的请求后，直接将任务通过 IPC-Hub 传递给任务进程，任务进程完成后再返回用户。</p>
+</blockquote>
+<p>我们其中用到了 <a href="https://github.com/GoogleChrome/puppeteer" target="_blank" rel="noopener">GoogleChrome/puppeteer</a>，一个 Chrome Headless 的 Node.js Lib。</p>
+<h3 id="实现细节"><a href="#实现细节" class="headerlink" title="实现细节"></a>实现细节</h3><p>下面讲到的例子在：<a href="https://github.com/midwayjs/pandora-example/tree/master/pageSnapshot" target="_blank" rel="noopener">https://github.com/midwayjs/pandora-example/tree/master/pageSnapshot</a> 。</p>
+<p><strong>我们先将 procfile.js 写好：</strong></p>
+<p>下面最重要的是 <code>service(&#39;pageSnapshot&#39;, &#39;./services/PageSnapshot&#39;).publish()</code>，表示将 pageSnapshot 这个 Service 发布到 IPC-Hub 中去，任何进程都可以调用了~</p>
+<p><code>procfile.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">pandora</span>) </span>&#123;</span><br><span class="line">  <span class="comment">/** </span></span><br><span class="line"><span class="comment">    重要前提:</span></span><br><span class="line"><span class="comment">    Pandora.js 中已经默认包含 worker 和 background 的进程定义</span></span><br><span class="line"><span class="comment">    ，只要往里面注册 Service 就能激活。</span></span><br><span class="line"><span class="comment">      pandora.process('worker').scale(pandora.dev ? 1: 'auto');</span></span><br><span class="line"><span class="comment">      pandora.process('background').scale(1);</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 调整后台任务进程（background）的内存限制</span></span><br><span class="line">  pandora</span><br><span class="line">    .process(<span class="string">'background'</span>)</span><br><span class="line">    .argv([<span class="string">'--max-old-space-size=512'</span>]);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将截图服务放到 background 进程</span></span><br><span class="line">  pandora</span><br><span class="line">    .service(<span class="string">'pageSnapshot'</span>, <span class="string">'./services/PageSnapshot'</span>)</span><br><span class="line">    .process(<span class="string">'background'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// *** 重要：表示发布到 IPC-Hub 中</span></span><br><span class="line">    .publish();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将 Web 服务放到 worker 进程</span></span><br><span class="line">  pandora</span><br><span class="line">    .service(<span class="string">'web'</span>, <span class="string">'./services/Web'</span>)</span><br><span class="line">    .process(<span class="string">'worker'</span>)</span><br><span class="line">    .config(&#123;</span><br><span class="line">      <span class="comment">// 配置监听端口号</span></span><br><span class="line">      port: <span class="number">5511</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>然后实现截图的 PageSnapshot <code>./services/PageSnapshot</code></strong></p>
+<p><code>services/PageSnapshot.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> puppeteer = <span class="built_in">require</span>(<span class="string">'puppeteer'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="class"><span class="keyword">class</span> <span class="title">PageSnapshot</span> </span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * @param ctx - 构造时会传递一个上下文对象，这个具体可以参考：</span></span><br><span class="line"><span class="comment">   * http://www.midwayjs.org/pandora/api-reference/pandora/classes/servicecontextaccessor.html</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">constructor</span>(ctx) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 标准的日志对象</span></span><br><span class="line">    <span class="keyword">this</span>.logger = ctx.logger;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 标准的启动接口：</span></span><br><span class="line"><span class="comment">   * http://www.midwayjs.org/pandora/api-reference/pandora/interfaces/service.html#start</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> start() &#123;</span><br><span class="line">    <span class="comment">// 启动一个 Headless Chrome</span></span><br><span class="line">    <span class="keyword">this</span>.browser = <span class="keyword">await</span> puppeteer.launch();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动完毕</span></span><br><span class="line">    <span class="keyword">this</span>.logger.info(<span class="string">'Service PageSnapshot Started'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 标准的停止接口：</span></span><br><span class="line"><span class="comment">   * http://www.midwayjs.org/pandora/api-reference/pandora/interfaces/service.html#stop</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> stop() &#123;</span><br><span class="line">    <span class="comment">// 关闭 Headless Chrome</span></span><br><span class="line">    <span class="keyword">await</span> <span class="keyword">this</span>.browser.close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动完毕</span></span><br><span class="line">    <span class="keyword">this</span>.logger.info(<span class="string">'Service PageSnapshot Stopped'</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">async</span> take(url) &#123;</span><br><span class="line">    <span class="comment">// 新建一个页面</span></span><br><span class="line">    <span class="keyword">const</span> page = <span class="keyword">await</span> <span class="keyword">this</span>.browser.newPage();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 跳转到目标地址</span></span><br><span class="line">    <span class="keyword">await</span> page.goto(url);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 截图</span></span><br><span class="line">    <span class="keyword">const</span> buf = <span class="keyword">await</span> page.screenshot(&#123;<span class="attr">type</span>: <span class="string">'jpeg'</span>, <span class="attr">quality</span>: <span class="number">60</span>&#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关闭页面</span></span><br><span class="line">    <span class="keyword">await</span> page.close();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="comment">// 现在 IPC Hub 不能直接传递 Buffer，需要 base64。</span></span><br><span class="line">      base64: buf.toString(<span class="string">'base64'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>然后实现前台 Web 服务 <code>./services/Web</code></strong></p>
+<p>下面的服务继承了一个基础类 <a href="https://github.com/midwayjs/pandora-example/blob/master/pageSnapshot/services/SimpleHTTP.js" target="_blank" rel="noopener">SimpleHTTP</a>，这里就不再引出了，基本上就是封装了一个 HTTP Server 上线下线逻辑。</p>
+<p>下面的重点是获得 <code>pageSnapshot</code> 对象代理那里。</p>
+<p><code>services/Web.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> querystring = <span class="built_in">require</span>(<span class="string">'querystring'</span>);</span><br><span class="line"><span class="keyword">const</span> url = <span class="built_in">require</span>(<span class="string">'url'</span>);</span><br><span class="line"><span class="keyword">const</span> SimpleHTTP = <span class="built_in">require</span>(<span class="string">'./SimpleHTTP'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="class"><span class="keyword">class</span> <span class="title">Web</span> <span class="keyword">extends</span> <span class="title">SimpleHTTP</span> </span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * @param ctx - 构造时会传递一个上下文对象，这个具体可以参考：</span></span><br><span class="line"><span class="comment">   * http://www.midwayjs.org/pandora/api-reference/pandora/classes/servicecontextaccessor.html</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">constructor</span>(ctx) &#123;</span><br><span class="line">    <span class="keyword">super</span>(ctx);</span><br><span class="line">    <span class="keyword">this</span>.ctx = ctx;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 实现父类要求的接口，处理 HTTP 请求</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> onRequest(req, res) &#123;</span><br><span class="line">    <span class="comment">// 标准的日志对象，父类中通过 this.logger = ctx.logger 获得</span></span><br><span class="line">    <span class="keyword">this</span>.logger.info(<span class="string">'Got a request url: '</span> + req.url);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从 query 中获得 method 和 params</span></span><br><span class="line">    <span class="keyword">const</span> query = querystring.parse(url.parse(req.url).query);</span><br><span class="line">    <span class="keyword">const</span> targetUrl = query.url;</span><br><span class="line">    <span class="keyword">if</span>(!targetUrl) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Query [url] is required'</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// *** 重点：获得 pageSnapshot 对象代理</span></span><br><span class="line">    <span class="comment">// getProxy，在 serviceContext 中同样有暴露</span></span><br><span class="line">    <span class="keyword">const</span> pageSnapshot = <span class="keyword">await</span> <span class="keyword">this</span>.ctx.getProxy(<span class="string">'pageSnapshot'</span>, &#123;</span><br><span class="line">      <span class="comment">// 默认 5 秒超时，截取网页，还是需要加大点超时时间</span></span><br><span class="line">      timeout: <span class="number">10</span> * <span class="number">1000</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 调用截图。</span></span><br><span class="line">    <span class="comment">// 现在 IPC Hub 不能直接传递 Buffer，需要 base64。</span></span><br><span class="line">    <span class="keyword">const</span> snapshot = <span class="keyword">await</span> pageSnapshot.take(targetUrl);</span><br><span class="line">    <span class="keyword">const</span> jpg = <span class="keyword">new</span> Buffer(snapshot.base64, <span class="string">'base64'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回给客户端</span></span><br><span class="line">    res.writeHead(<span class="number">200</span>, &#123;<span class="string">'Content-Type'</span>: <span class="string">'image/jpeg'</span>&#125;);</span><br><span class="line">    res.end(jpg);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 实现父类要求的接口，提供 TCP 端口</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  getPort() &#123;</span><br><span class="line">    <span class="comment">// 通过配置获取</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.ctx.config.port;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="启动一个试试看"><a href="#启动一个试试看" class="headerlink" title="启动一个试试看"></a>启动一个试试看</h3><p>可以直接 Clone 例子试试看。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ pandora dev <span class="comment"># 本地前台启动项目</span></span><br><span class="line">2017-12-20 21:49:51,318 INFO 94498 [serviceName: web, processName: worker] Service Web Listens On http://127.0.0.1:5511</span><br><span class="line">2017-12-20 21:49:51,320 INFO 94496 Process [name = worker, pid = 94498] Started successfully!</span><br><span class="line">2017-12-20 21:49:51,877 INFO 94499 [serviceName: pageSnapshot, processName: background] Service PageSnapshot Started</span><br><span class="line">2017-12-20 21:49:51,879 INFO 94496 Process [name = background, pid = 94499] Started successfully!</span><br><span class="line">** Application start successful. **</span><br></pre></td></tr></table></figure>
+<p>可以看到 background 和 worker 进程都已经启动了。</p>
+<p><strong>浏览器访问看看</strong></p>
+<p>访问 <code>http://127.0.0.1:5511/?url=https://www.taobao.com/</code> 看看。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1RGMEjcrI8KJjy0FhXXbfnpXa-1978-1690.png" alt="taobao | center"></p>
+<p>嗯，已经可以用了。</p>
+<h2 id="未完待续"><a href="#未完待续" class="headerlink" title="未完待续"></a>未完待续</h2><p>这样 Pandora.js 的进程间通信能力就介绍完了，和进程模型相关的能力基本介绍完毕了。</p>
+<p>下周开始介绍业务度量能力啦~ 比如 Metrics、全链路 Trace 等，大家敬请期待。</p>
+<p>最后，不要忘了给点个 Star 喔~</p>
+<p><a href="https://github.com/midwayjs/pandora/" target="_blank" rel="noopener">https://github.com/midwayjs/pandora/</a></p>
+<p>最后的最后，我们招人。我们有超过一半的淘宝前台访问在 Node.js 上，也有做开源 Node.js 软件的机会，挑战不小，当然回报也不小。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/kRLXoi3Dtqs" target="_blank" rel="noopener">https://unsplash.com/photos/kRLXoi3Dtqs</a> By @Ian Simmonds</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/12/21/pandora-ipc/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/12/21/pandora-ipc/" data-id="cjt6lby0l008pjeu1sy2hepkk" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/12/21/pandora-ipc/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Pandora-js/">Pandora.js</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2018/01/05/pandora-metrics/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          跨越时代的度量衡 - Pandora.js 的 Metrics 介绍
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/12/19/pandora-service/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Pandora.js 的 Service 机制</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

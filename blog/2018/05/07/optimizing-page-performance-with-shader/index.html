@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>活用 Shader，让你的页面更小，更炫，更快 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="可编程着色器（shader）是运行在 GPU 中的程序，是现代图形渲染技术的基础。shader 赋予了开发者「逐像素着色」的能力。桌面/移动设备的图形程序 API 诸如 OpenGL，OpenGL ES，DirectX 以及新一代的 Vulkan，shader 都是重中之重，核心中的核心。 WebGL 的出现，使得在浏览器环境中渲染 3D 场景变得轻而易举。但是 WebGL 和 shader 不">
+<meta name="keywords" content="WebGL,shader">
+<meta property="og:type" content="article">
+<meta property="og:title" content="活用 Shader，让你的页面更小，更炫，更快">
+<meta property="og:url" content="http://taobaofed.org/blog/2018/05/07/optimizing-page-performance-with-shader/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="可编程着色器（shader）是运行在 GPU 中的程序，是现代图形渲染技术的基础。shader 赋予了开发者「逐像素着色」的能力。桌面/移动设备的图形程序 API 诸如 OpenGL，OpenGL ES，DirectX 以及新一代的 Vulkan，shader 都是重中之重，核心中的核心。 WebGL 的出现，使得在浏览器环境中渲染 3D 场景变得轻而易举。但是 WebGL 和 shader 不">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1zdJ_qeOSBuNjy0FdXXbDnVXa-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1RNl_qntYBeNjy1XdXXXXyVXa-600-529.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1B88_qntYBeNjy1XdXXXXyVXa-500-254.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1Xcsip1uSBuNjy1XcXXcYjFXa-500-226.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB11dUjp1uSBuNjy1XcXXcYjFXa-750-571.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB13tUjp1uSBuNjy1XcXXcYjFXa-700-700.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB16JUjp1uSBuNjy1XcXXcYjFXa-700-1256.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB10Tp.qntYBeNjy1XdXXXXyVXa-400-363.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1ctq.p3mTBuNjy1XbXXaMrVXa-400-430.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1ltq.p3mTBuNjy1XbXXaMrVXa-700-1105.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="活用 Shader，让你的页面更小，更炫，更快">
+<meta name="twitter:description" content="可编程着色器（shader）是运行在 GPU 中的程序，是现代图形渲染技术的基础。shader 赋予了开发者「逐像素着色」的能力。桌面/移动设备的图形程序 API 诸如 OpenGL，OpenGL ES，DirectX 以及新一代的 Vulkan，shader 都是重中之重，核心中的核心。 WebGL 的出现，使得在浏览器环境中渲染 3D 场景变得轻而易举。但是 WebGL 和 shader 不">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1zdJ_qeOSBuNjy0FdXXbDnVXa-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-optimizing-page-performance-with-shader" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      活用 Shader，让你的页面更小，更炫，更快
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 叶斋</span>
+        
+        <span>发表于: <a href="/blog/2018/05/07/optimizing-page-performance-with-shader/" class="article-date">
+  <time datetime="2018-05-07T08:21:04.000Z" itemprop="datePublished">2018-05-07</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1zdJ_qeOSBuNjy0FdXXbDnVXa-900-500.jpg" alt="活用 Shader，让你的页面更小，更炫，更快"></p>
+<p>可编程着色器（shader）是运行在 GPU 中的程序，是现代图形渲染技术的基础。shader 赋予了开发者「逐像素着色」的能力。桌面/移动设备的图形程序 API 诸如 OpenGL，OpenGL ES，DirectX 以及新一代的 Vulkan，shader 都是重中之重，核心中的核心。</p>
+<p>WebGL 的出现，使得在浏览器环境中渲染 3D 场景变得轻而易举。但是 WebGL 和 shader 不仅可以用来渲染 3D 场景，还可以做一些其他酷酷的事情。前两天，我用 shader 技术改造 / 复刻了之前开发的一个业务页面，颇有心得和启发，不妨记录下来。</p>
+<blockquote>
+<p>广告：在 GCanvas 的帮助下，前端开发可以在 Weex，RN 等 Hybrid 环境中使用本文中用到的技术。详情见 <a href="https://alibaba.github.io/GCanvas/" target="_blank" rel="noopener">GCanvas</a>。</p>
+</blockquote>
+<p>先看一下效果：<a href="http://g.alicdn.com/gama/assets/0.0.10/assets/shader-view-demo/compare.html" target="_blank" rel="noopener">链接</a></p>
+<p><img src="https://img.alicdn.com/tfs/TB1RNl_qntYBeNjy1XdXXXXyVXa-600-529.jpg" alt></p>
+<p>左侧是原页面，<a href="http://g.alicdn.com/gama/assets/0.0.10/assets/shader-view-demo/index.html" target="_blank" rel="noopener">地址</a>；右侧是用 Shader 复刻后的页面，<a href="http://g.alicdn.com/gama/assets/0.0.10/assets/shader-view-demo/shader.html" target="_blank" rel="noopener">地址</a>。</p>
+<p>这其实是 2018 年春晚项目的一个活动页面，页面结构非常简单。这个页面当时是我完成的，所以现在复刻起来熟悉一些。</p>
+<p>我们可以看到，复刻前的页面（后面称「原页面」）是静态的，加载了 1 个 js 文件和 6 张图片共 599K 的资源（包含一张 502K 的大尺寸透明 png 图片）；而复刻后的页面上，有不少元素在动，加载了 1 个 js 文件和 4 张图片共 122K 的资源。不管是视觉效果，还是页面尺寸上的提升，都是比较明显的。</p>
+<p><img src="https://img.alicdn.com/tfs/TB1B88_qntYBeNjy1XdXXXXyVXa-500-254.jpg" alt></p>
+<p><img src="https://img.alicdn.com/tfs/TB1Xcsip1uSBuNjy1XcXXcYjFXa-500-226.jpg" alt></p>
+<p>下面，我们就以这个页面为例，分析一下，使用 shader 是如何让这个页面更小，更炫，更快。</p>
+<blockquote>
+<p>阅读后面的文本需要一些 WebGL 和 GLSL 的基础知识，之前在团内对曾做过一些培训，参加的同学应该不会有什么压力，没参加的同学，也可以稍微看下 the book of shaders 这篇教程。shader 比你想象的要简单易用，相信我。</p>
+</blockquote>
+<h1 id="大尺寸透明背景图"><a href="#大尺寸透明背景图" class="headerlink" title="大尺寸透明背景图"></a>大尺寸透明背景图</h1><p>原页面存在的一个最大的问题是，有一张特别大的透明背景图。</p>
+<p><img src="https://img.alicdn.com/tfs/TB11dUjp1uSBuNjy1XcXXcYjFXa-750-571.jpg" alt></p>
+<p>这张图的体积达到了惊人的 501K，这是因为这张图是具有透明通道的 png 图片。而且由于这张图是广告内容，可能不止一张，是无法融合到背景里去的，必须透明。这时怎么优化呢？<br>我们知道，具有透明通道的 png 的压缩是比较困难的；而不具备透明通道的图片，我们可以把它转化为 jpg 等格式，压缩比就高得多了，我们就可以以较小的质量损失去换取较大的压缩空间。</p>
+<p>我的思路是这样：把这张透明的 png 格式图片拆分为两张不透明的 jpg 格式图片。这两张不透明的图片，其中一张继承 png 图片的 rgb 通道，还有一张则仅使用 r 通道储存 png 图片的 a 通道。然后把这两张图片拼接在一起，给 WebGL 使用。由于拼接后的这张图没有透明度分量，所以可以使用 jpg 格式压缩，尺寸大幅度降低。这张图只有 41.5k，大约为之前的 8.2%。</p>
+<p>这张图看上去是这样的：</p>
+<p><img src="https://img.alicdn.com/tfs/TB13tUjp1uSBuNjy1XcXXcYjFXa-700-700.jpg" alt></p>
+<blockquote>
+<p>注意，前一张图的像素尺寸是 750x571，而后一张图的像素尺寸为 1024x1024，这里我并没有通过缩小图片的像素尺寸来进行压缩。</p>
+<p>此外，第二张图看上去有些变形，这是因为图片尺寸为 2 的整数次幂，WebGL 能够方便地生成 mipmap，这对我们的使用没有影响。</p>
+</blockquote>
+<p>在 shader 中，我们根据像素坐标从图片中取色，注意需要从图的上半部分和下半部分各取一个颜色，然后根据一定规则拼起来即可。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">precision</span> <span class="keyword">mediump</span> <span class="type">float</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uniform</span> <span class="type">vec2</span> uResolution;</span><br><span class="line"><span class="keyword">uniform</span> <span class="type">sampler2D</span> uImage;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">vec2</span> st = <span class="built_in">gl_FragCoord</span>.xy / uResolution;</span><br><span class="line"></span><br><span class="line">    <span class="type">vec4</span> c2 = <span class="built_in">texture2D</span>(uImage, <span class="type">vec2</span>(st.x, st.y*<span class="number">0.5</span>));      <span class="comment">// 取 A​lpha 通道</span></span><br><span class="line">    <span class="type">vec4</span> c1 = <span class="built_in">texture2D</span>(uImage, <span class="type">vec2</span>(st.x, st.y*<span class="number">0.5</span>+<span class="number">0.5</span>));  <span class="comment">// 取 RGB 通道</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(c1.xyz, c2.r &gt; <span class="number">0.6</span> ? c2.r : <span class="number">0.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>png 图片转化为 jpg 图片的过程，可以很轻松地在浏览器里操作 canvas 完成（示例），也可以借助一些其他的工具完成。</p>
+<h1 id="会动的背景"><a href="#会动的背景" class="headerlink" title="会动的背景"></a>会动的背景</h1><p>首先，我们注意到，原页面的背景是在红色的渐变之上，随机散布着一些黄色的氛围小碎片。红色渐变背景和这些小碎片全部画在一张静态 jpg 图片上，如下图（1.原图）所示。</p>
+<p><img src="https://img.alicdn.com/tfs/TB16JUjp1uSBuNjy1XcXXcYjFXa-700-1256.jpg" alt></p>
+<p>在复刻前，我把原页面用到的图片分为了两类，图案（pattern）性质和图片（image）性质。Pattern 性质的图片，本身并不传递信息，通常用作底纹，氛围等场景；而 image 性质的图片则是信息的载体。</p>
+<p>这张图片明显是 pattern 性质的，这类图片往往尺寸大，体积也较大（尤其是半透明图案）。其实，这些图案完全可以用 shader 「手绘」出来，这样就不用去加载此图片了。<br>用 shader 绘制图案的另一个好处是，图案可以有规律地动起来。在这个例子中，如果碎片能像天女散花一般洒下来，那就太棒了，对吧？但是熟悉前端动画的同学，一定会想到，这么多粒子组成的动画，如果用纯 CSS 或者 canvas 2d 来做的话，性能肯定好不了，粒子越多，动画的性能越差。用 WebGL 和 shader 来做粒子动画则不会因为粒子数量的增多而导致性能变差。</p>
+<p>我们来看看如何用 shader 绘制这些碎片。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">vec2</span> random2(<span class="type">vec2</span> st)&#123;</span><br><span class="line">  st = <span class="type">vec2</span>( <span class="built_in">dot</span>(st,<span class="type">vec2</span>(<span class="number">127.1</span>,<span class="number">311.7</span>)),</span><br><span class="line">            <span class="built_in">dot</span>(st,<span class="type">vec2</span>(<span class="number">269.5</span>,<span class="number">183.3</span>)));</span><br><span class="line">  st = <span class="number">-1.0</span> + <span class="number">2.0</span>*<span class="built_in">fract</span>(<span class="built_in">sin</span>(st)*<span class="number">43758.5453123</span>);</span><br><span class="line">  <span class="keyword">return</span> st;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">float</span> <span class="built_in">noise2</span>(<span class="type">vec2</span> ist, <span class="type">vec2</span> fst)&#123;</span><br><span class="line">  <span class="type">vec2</span> g1 = random2(ist+<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">0.0</span>));</span><br><span class="line">  <span class="type">vec2</span> g2 = random2(ist+<span class="type">vec2</span>(<span class="number">1.0</span>, <span class="number">0.0</span>));</span><br><span class="line">  <span class="type">vec2</span> g3 = random2(ist+<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">1.0</span>));</span><br><span class="line">  <span class="type">vec2</span> g4 = random2(ist+<span class="type">vec2</span>(<span class="number">1.0</span>, <span class="number">1.0</span>));</span><br><span class="line"></span><br><span class="line">  <span class="type">vec2</span> f1 = fst - <span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">0.0</span>);</span><br><span class="line">  <span class="type">vec2</span> f2 = fst - <span class="type">vec2</span>(<span class="number">1.0</span>, <span class="number">0.0</span>);</span><br><span class="line">  <span class="type">vec2</span> f3 = fst - <span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">1.0</span>);</span><br><span class="line">  <span class="type">vec2</span> f4 = fst - <span class="type">vec2</span>(<span class="number">1.0</span>, <span class="number">1.0</span>);</span><br><span class="line"></span><br><span class="line">  <span class="type">float</span> p1 = <span class="built_in">dot</span>(g1, f1);</span><br><span class="line">  <span class="type">float</span> p2 = <span class="built_in">dot</span>(g2, f2);</span><br><span class="line">  <span class="type">float</span> p3 = <span class="built_in">dot</span>(g3, f3);</span><br><span class="line">  <span class="type">float</span> p4 = <span class="built_in">dot</span>(g4, f4);</span><br><span class="line"></span><br><span class="line">  fst = <span class="built_in">smoothstep</span>(<span class="number">0.0</span>, <span class="number">1.0</span>, fst);</span><br><span class="line">  </span><br><span class="line">  <span class="type">float</span> p = <span class="built_in">mix</span>(</span><br><span class="line">    <span class="built_in">mix</span>(p1, p2, fst.x),</span><br><span class="line">    <span class="built_in">mix</span>(p3, p4, fst.x),</span><br><span class="line">    fst.y</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">float</span> inFrag()&#123;</span><br><span class="line">    <span class="type">vec2</span> st = <span class="built_in">gl_FragCoord</span>.xy / uResolution.xx;</span><br><span class="line">    st = st * <span class="number">60.0</span>;</span><br><span class="line">    <span class="type">float</span> res = <span class="built_in">noise2</span>(<span class="built_in">floor</span>(st), <span class="built_in">fract</span>(st));</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()&#123;</span><br><span class="line">    <span class="type">float</span> pct = inFrag();</span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(<span class="type">vec3</span>(pct), <span class="number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先我们要借助一个梯度噪声函数 noise2（参考此教程），对每个像素而言，把像素坐标输入，这个函数则会输出一个灰度值。此函数输出的图像大致如上图 （2.梯度噪声）所示。<br>如果你对诸如「噪声函数」的原理感到陌生，其实也没太大关系。你可以在社区找到大量各种各样的开箱即用的功能函数，只需要知道它们的效果是什么，而不必太拘泥于其内部的原理。<br>显然，图 2.梯度噪声 和我们设想的还有差距。接下来，我们用一个筛子把亮度大于某个阈值的点筛出来：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">function initFrag()&#123;</span><br><span class="line">    ...</span><br><span class="line">    res = <span class="built_in">step</span>(<span class="number">0.5</span>, res);</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，用 step 函数直接把大于 0.5 的点筛出来。可是这样做容易产生锯齿，为了使碎片的边缘比较平滑，所以我们用 smoothsStep 函数进行截取。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">res = <span class="built_in">smoothstep</span>(<span class="number">0.35</span>, <span class="number">0.5</span>, res);</span><br></pre></td></tr></table></figure>
+<p>这样，我们就得到了图 3.拉伸的结果。</p>
+<p>图 3 只是一张灰度图，我们使用这个灰度混合红色和黄色，使之得到一张彩色的图。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">vec3</span> bgColor()&#123;</span><br><span class="line">    <span class="type">float</span> y = <span class="built_in">gl_FragCoord</span>.y / uResolution.y;</span><br><span class="line">    <span class="type">vec3</span> c1 = <span class="type">vec3</span>(<span class="number">0.96</span>, <span class="number">0.02</span>, <span class="number">0.16</span>);</span><br><span class="line">    <span class="type">vec3</span> c2 = <span class="type">vec3</span>(<span class="number">0.96</span>, <span class="number">0.25</span>, <span class="number">0.21</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">mix</span>(c1, c2, y);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="type">vec3</span> cRed = bgColor();</span><br><span class="line">    <span class="type">vec3</span> cYello = <span class="type">vec3</span>(<span class="number">0.96</span>, <span class="number">0.70</span>, <span class="number">0.26</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(<span class="built_in">mix</span>(cRed, cYello, pct), <span class="number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里 bgColor 方法返回红色，由于红色背景仍然是有一点垂直渐变色效果的，所以这里也要额外用两种不同的红色进行混合（混合系数和像素坐标的 Y 值相关），处理成渐变色。</p>
+<p>此时我们的结果和原图的意图还有些不同：</p>
+<ul>
+<li>原图中，页面下半部分的碎片比较透明度，越往页面下方，碎片就越透明（融入了红色背景）。</li>
+<li>原图中，中间圈圈部分（即红色窗格占据的部分）没有碎片。</li>
+<li>原图中，碎片的分布没有这么均匀，常有一小块区域完全没有碎片的情况，似乎有一种尺寸更大的随机变量在影响。</li>
+</ul>
+<p>从以上三点出发，我们制作了 3 个通道，并依次叠加（如图 5，图 6，图 7）所示，最终得到如 图 7 所示。将叠加后的结果与图 3 进行叠加，也就是说，图 3 中被筛出的点，如果在图 7 中是较暗的，则也会被降低亮度。再使用这一步的结果进行混色，最终得到图 8 的效果。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> pct = inFrag();</span><br><span class="line">    pct = <span class="built_in">min</span>(pct, yFactor());</span><br><span class="line">    pct = <span class="built_in">min</span>(pct, rFactor());</span><br><span class="line">    pct = <span class="built_in">min</span>(pct, mFactor());</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面，我们来使碎片动起来（洒下来）。在生成碎片的时候，传入噪音函数的坐标数据中，加上和时间有关的偏移量：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> inFrag()&#123;</span><br><span class="line">    <span class="type">vec2</span> st = <span class="built_in">gl_FragCoord</span>.xy / uResolution.xx;</span><br><span class="line">    st = st * <span class="number">60.0</span>;</span><br><span class="line">    st.y += uTime * <span class="number">2.0</span>;  <span class="comment">// 增加与时间相关的偏移量</span></span><br><span class="line">    <span class="type">float</span> res = <span class="built_in">noise2</span>(<span class="built_in">floor</span>(st), <span class="built_in">fract</span>(st));</span><br><span class="line">    res = <span class="built_in">smoothstep</span>(<span class="number">0.35</span>, <span class="number">0.5</span>, res);</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后，为了更出色的效果，我这里做了两个碎层碎片，两层碎片具有不同的下落速度，形成一些视差效果。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> main() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> pct = inFrag();</span><br><span class="line">    pct = <span class="built_in">min</span>(pct, yFactor());</span><br><span class="line">    pct = <span class="built_in">min</span>(pct, rFactor());</span><br><span class="line">    pct = <span class="built_in">min</span>(pct, mFactor());</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> pct2 = inFrag2();</span><br><span class="line">    pct2 = <span class="built_in">min</span>(pct2, yFactor());</span><br><span class="line">    pct2 = <span class="built_in">min</span>(pct2, rFactor());</span><br><span class="line">    pct2 = <span class="built_in">min</span>(pct2, mFactor());</span><br><span class="line"></span><br><span class="line">    pct = <span class="built_in">max</span>(pct, pct2);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，就在完全不依赖外部资源的情况下，仅用 shader 直接绘制，制作出了氛围碎片的效果。</p>
+<h1 id="手绘图案"><a href="#手绘图案" class="headerlink" title="手绘图案"></a>手绘图案</h1><p>原页面中有一个圆形的窗格，这个窗格也是画在一张透明图片上。不知读者是否注意到，在复刻后的页面中，这个窗格是用 shader 直接画出来的。</p>
+<p><img src="https://img.alicdn.com/tfs/TB10Tp.qntYBeNjy1XdXXXXyVXa-400-363.jpg" alt></p>
+<p>实际上，这种复杂程度的窗格，也可以归为图案（pattern）一类，shader 是完全可以直接画出来的。下面，我们就来看看用 shader 如何来画窗格。<br>窗格是由线组成的，其基本单元是线。首先我们看一下是如何画线的：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 绘制线的函数 veins</span></span><br><span class="line"><span class="type">float</span> line(<span class="type">float</span> e, <span class="type">float</span> w, <span class="type">float</span> d, <span class="type">float</span> p)&#123;</span><br><span class="line">    <span class="type">float</span> e1 = e - w/<span class="number">2.0</span>;</span><br><span class="line">    <span class="type">float</span> e2 = e + w/<span class="number">2.0</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">smoothstep</span>(e1 - d / <span class="number">2.0</span>, e1 + d / <span class="number">2.0</span>, p) * </span><br><span class="line">            <span class="built_in">smoothstep</span>(e2 + d / <span class="number">2.0</span>, e2 - d / <span class="number">2.0</span>, p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 绘制网格</span></span><br><span class="line"><span class="type">vec3</span> veins()&#123;</span><br><span class="line">    <span class="type">float</span> r = uResolution.x * <span class="number">0.4</span>;</span><br><span class="line">    <span class="type">vec2</span> center = <span class="type">vec2</span>(uResolution.x/<span class="number">2.0</span>, uResolution.y-r<span class="number">-5.0</span>);</span><br><span class="line">    <span class="type">vec2</span> st = <span class="built_in">gl_FragCoord</span>.xy - center;</span><br><span class="line">    st /= uResolution.x * <span class="number">0.5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> p = line(<span class="number">0.0</span>, <span class="number">0.3</span>, <span class="number">0.2</span>, st.x);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">mix</span>(veinsBgColor, veinsFgColor, p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 主函数</span></span><br><span class="line"><span class="type">void</span> main()&#123;</span><br><span class="line">    <span class="type">vec3</span> res = veins();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(<span class="type">vec3</span>(res), <span class="number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>main 函数调用 veins 函数，veins 又调用 line 函数得到一个灰度值，然后混合两种颜色。上述程序的结果如下图所示。</p>
+<p><img src="https://img.alicdn.com/tfs/TB1ctq.p3mTBuNjy1XbXXaMrVXa-400-430.jpg" alt></p>
+<p>解释一下几个参数：p 是当前像素的 x 或 y 坐标值（取决于横线还是竖线，如果是横线为 y 坐标值，如果为竖线为 x 坐标值），e 则是所绘制的直线所在的坐标。w 指线的宽度，而 d 指在线与非线的交界处，用来平滑的区域的宽度。</p>
+<blockquote>
+<p>在上面的代码中，w 取了 0.3，而 d 取了 0.2，线看上去很粗。后面，我们会把这两个值固定在 0.035 和 0.003 上。</p>
+</blockquote>
+<p>由于窗格图案中包含多跟线，我们需要多次调用 line 函数，并得到一个一个灰度值。如果当前像素在「任意一个」 line 函数中返回了大于 0 的灰度值，我们就认为这个像素是在图案上的。换言之，我们取多次 line 函数返回的灰度值中最大的那个值，作为最后的灰度值来计算颜色。代码如下所示：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> maxList(<span class="type">float</span> list[<span class="number">20</span>])&#123;</span><br><span class="line">    <span class="type">float</span> res = list[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">20</span>; i++)&#123;</span><br><span class="line">        <span class="keyword">if</span>(list[i]&gt;res)&#123;</span><br><span class="line">            res = list[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">vec3</span> veins()&#123;</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> p = <span class="number">0.0</span>;</span><br><span class="line">    <span class="type">float</span> pl[<span class="number">20</span>];</span><br><span class="line">    pl[<span class="number">0</span>] = line(<span class="number">0.29</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.x);</span><br><span class="line">    pl[<span class="number">1</span>] = line(<span class="number">0.58</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.x);</span><br><span class="line">    ...</span><br><span class="line">    pl[<span class="number">7</span>] = line(<span class="number">-0.58</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.y);</span><br><span class="line"></span><br><span class="line">    p = maxList(pl);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们计算了 8 根直线，得到的结果如下图 2 所示。</p>
+<p><img src="https://img.alicdn.com/tfs/TB1ltq.p3mTBuNjy1XbXXaMrVXa-700-1105.jpg" alt></p>
+<p>拆解图案，我们发现光有直线还不能满足要求，还需要有射线和矩形框。同样，我们引入射线 ray 和矩形框 box 函数。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> rayV(<span class="type">vec2</span> ep, <span class="type">float</span> w, <span class="type">float</span> d,  <span class="type">float</span> dir, <span class="type">vec2</span> st)&#123;</span><br><span class="line">    <span class="type">float</span> pct = line(ep.x, w, d, st.x);</span><br><span class="line">    <span class="keyword">if</span>((st.y - ep.y) * dir &lt; <span class="number">0.0</span>)&#123;</span><br><span class="line">        pct = <span class="number">0.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pct;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">float</span> rayH(<span class="type">vec2</span> ep, <span class="type">float</span> w, <span class="type">float</span> d,  <span class="type">float</span> dir, <span class="type">vec2</span> st)&#123;</span><br><span class="line">    <span class="type">float</span> pct = line(ep.y, w, d, st.y);</span><br><span class="line">    <span class="keyword">if</span>((st.x - ep.x)* dir &lt; <span class="number">0.0</span>)&#123;</span><br><span class="line">        pct = <span class="number">0.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pct;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">float</span> box(<span class="type">vec2</span> center, <span class="type">float</span> width, <span class="type">float</span> height, <span class="type">float</span> w, <span class="type">float</span> d, <span class="type">vec2</span> st)&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> l1 = line(center.x, width+w, d, st.x);</span><br><span class="line">    <span class="type">float</span> l2 = line(center.y, height+w, d, st.y);</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> inBox = l1*l2;</span><br><span class="line">    <span class="type">float</span> plist[<span class="number">20</span>];</span><br><span class="line"></span><br><span class="line">    plist[<span class="number">0</span>] = line(center.x+width*<span class="number">0.5</span>, w, d, st.x);</span><br><span class="line">    plist[<span class="number">1</span>] = line(center.x-width*<span class="number">0.5</span>, w, d, st.x);</span><br><span class="line">    plist[<span class="number">2</span>] = line(center.y+height*<span class="number">0.5</span>, w, d, st.y);</span><br><span class="line">    plist[<span class="number">3</span>] = line(center.y-height*<span class="number">0.5</span>, w, d, st.y);</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> p = maxList(plist);</span><br><span class="line">    p *= inBox;</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后依次向图案中增加内容，得到图 4，图 6 的效果。通过最终的叠加，得到了图 7 的效果。代码如下（不要被密密麻麻的浮点数吓住了，其实都是一些固定的坐标而已，有意义的值只有几个，通过正负号进行组合形成图案）：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> p = <span class="number">0.0</span>;</span><br><span class="line"><span class="type">float</span> pl[<span class="number">20</span>];</span><br><span class="line">pl[<span class="number">0</span>] = line(<span class="number">0.29</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.x);</span><br><span class="line">pl[<span class="number">1</span>] = line(<span class="number">0.58</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.x);</span><br><span class="line">pl[<span class="number">2</span>] = line(<span class="number">-0.29</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.x);</span><br><span class="line">pl[<span class="number">3</span>] = line(<span class="number">-0.58</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.x);</span><br><span class="line">pl[<span class="number">4</span>] = line(<span class="number">0.29</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.y);</span><br><span class="line">pl[<span class="number">5</span>] = line(<span class="number">0.58</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.y);</span><br><span class="line">pl[<span class="number">6</span>] = line(<span class="number">-0.29</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.y);</span><br><span class="line">pl[<span class="number">7</span>] = line(<span class="number">-0.58</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st.y);</span><br><span class="line"></span><br><span class="line">pl[<span class="number">8</span>] = rayV(<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">0.29</span>), <span class="number">0.035</span>, <span class="number">0.003</span>, <span class="number">1.0</span>, st);</span><br><span class="line">pl[<span class="number">9</span>] = rayV(<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">-0.29</span>), <span class="number">0.035</span>, <span class="number">0.003</span>, <span class="number">-1.0</span>, st);</span><br><span class="line">pl[<span class="number">10</span>] = rayH(<span class="type">vec2</span>(<span class="number">0.29</span>, <span class="number">0.0</span>), <span class="number">0.035</span>, <span class="number">0.003</span>, <span class="number">1.0</span>, st);</span><br><span class="line">pl[<span class="number">11</span>] = rayH(<span class="type">vec2</span>(<span class="number">-0.29</span>, <span class="number">0.0</span>), <span class="number">0.035</span>, <span class="number">0.003</span>, <span class="number">-1.0</span>, st);</span><br><span class="line"></span><br><span class="line">p = maxList(pl);</span><br><span class="line"></span><br><span class="line"><span class="type">float</span> pl2[<span class="number">20</span>];</span><br><span class="line"></span><br><span class="line">pl2[<span class="number">0</span>] = box(<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">0.0</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line"></span><br><span class="line">pl2[<span class="number">1</span>] = box(<span class="type">vec2</span>(<span class="number">0.29</span>, <span class="number">0.29</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">2</span>] = box(<span class="type">vec2</span>(<span class="number">-0.29</span>, <span class="number">0.29</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">3</span>] = box(<span class="type">vec2</span>(<span class="number">-0.29</span>, <span class="number">-0.29</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">4</span>] = box(<span class="type">vec2</span>(<span class="number">0.29</span>, <span class="number">-0.29</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line"></span><br><span class="line">pl2[<span class="number">5</span>] = box(<span class="type">vec2</span>(<span class="number">0.58</span>, <span class="number">0.0</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">6</span>] = box(<span class="type">vec2</span>(<span class="number">-0.58</span>, <span class="number">0.0</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">7</span>] = box(<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">0.58</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">8</span>] = box(<span class="type">vec2</span>(<span class="number">0.0</span>, <span class="number">-0.58</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line"></span><br><span class="line">pl2[<span class="number">9</span>] = box(<span class="type">vec2</span>(<span class="number">0.58</span>, <span class="number">0.58</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">10</span>] = box(<span class="type">vec2</span>(<span class="number">-0.58</span>, <span class="number">0.58</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">11</span>] = box(<span class="type">vec2</span>(<span class="number">-0.58</span>, <span class="number">-0.58</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line">pl2[<span class="number">12</span>] = box(<span class="type">vec2</span>(<span class="number">0.58</span>, <span class="number">-0.58</span>), <span class="number">0.39</span>, <span class="number">0.39</span>, <span class="number">0.035</span>, <span class="number">0.003</span>, st);</span><br><span class="line"></span><br><span class="line">p = <span class="built_in">max</span>(p, maxList(pl2));</span><br></pre></td></tr></table></figure>
+<p>得到图 7 的图案后，我们还需要为其蒙上一层阴影（可对比原图），这样后面裁切的时候会有一些立体感。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> shadow()&#123;</span><br><span class="line">    <span class="type">float</span> r = uResolution.x * <span class="number">0.4</span>;</span><br><span class="line">    <span class="type">vec2</span> center = <span class="type">vec2</span>(uResolution.x/<span class="number">2.0</span>, uResolution.y-r<span class="number">-5.0</span>);</span><br><span class="line">    <span class="type">vec2</span> st = <span class="built_in">gl_FragCoord</span>.xy - center;</span><br><span class="line">    st /= uResolution.x * <span class="number">0.5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">smoothstep</span>(<span class="number">0.9</span>, <span class="number">0.3</span>, st.y+<span class="number">0.5</span>*st.x*st.x<span class="number">-0.1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">vec3</span> veins()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">mix</span>(veinsBgColor, veinsFgColor, p)*shadow();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里为了方便，使用了一个开口朝下，中轴和 y 轴重合的抛物线（st.y + 0.5<em>st.x</em>st.x - 0.1）来模拟圆形的阴影。这样我们就得到了图 8。</p>
+<p>最后，原设计稿中红色边框和透明背景的效果，对整个图像进行了两次裁切。裁切掉的部分，分别用红色和透明色来填充。依次得到图 9 和 图 10 的结果。图 10 也就是最终的结果。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">vec3</span> circle(<span class="type">vec3</span> veinsColor)&#123;</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> r = uResolution.x * <span class="number">0.4</span>;    </span><br><span class="line">    <span class="type">vec2</span> center = <span class="type">vec2</span>(uResolution.x/<span class="number">2.0</span>, uResolution.y-r<span class="number">-5.0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">vec2</span> dxy = <span class="built_in">gl_FragCoord</span>.xy - center;</span><br><span class="line">    <span class="type">float</span> dist = <span class="built_in">sqrt</span>(dxy.x*dxy.x+dxy.y*dxy.y);</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> p = dist/r;</span><br><span class="line">    p = <span class="built_in">smoothstep</span>(<span class="number">0.95</span>, <span class="number">0.96</span>, p);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">mix</span>(veinsColor, borderColor, p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">vec4</span> clip(<span class="type">vec3</span> color)&#123;</span><br><span class="line">    <span class="type">float</span> r = uResolution.x * <span class="number">0.4</span>;    </span><br><span class="line">    <span class="type">vec2</span> center = <span class="type">vec2</span>(uResolution.x/<span class="number">2.0</span>, uResolution.y-r<span class="number">-5.0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">vec2</span> dxy = <span class="built_in">gl_FragCoord</span>.xy - center;</span><br><span class="line">    <span class="type">float</span> dist = <span class="built_in">sqrt</span>(dxy.x*dxy.x+dxy.y*dxy.y);</span><br><span class="line"></span><br><span class="line">    <span class="type">float</span> p = <span class="built_in">smoothstep</span>(<span class="number">1.0</span>, <span class="number">1.02</span>, dist/r);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="type">vec4</span>(color, <span class="number">1.0</span>-p);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> main()&#123;</span><br><span class="line">    <span class="type">vec3</span> res = veins();</span><br><span class="line">    res = circle(res);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">gl_FragColor</span> = clip(res);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>通过上面三个例子，可以看到，合理地使用 WebGL 可以对页面进行精雕细琢的优化，可以减少对图片的依赖，避免使用大尺寸的透明图层，可以做一些全局性/背景性的动画效果。由于 WebGL 是给了开发者「逐个像素」进行着色的能力，开发者可以非常灵活地使用 shader 来做事情。所以说，灵活地使用 shader ，可以帮助你把页面变得更小，更炫，更快。</p>
+<p>其实复刻后的页面里还有一些其他用 shader 完成的小玩意儿，比如底部 loading bar 的动态颜色渐变，以及中部文字「魅族手机祝你新春快乐」上掠过的高光，因为点比较小，用到的技术也比较简单，就不再详细介绍了。</p>
+<p>（完）</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/NFs6dRTBgaM" target="_blank" rel="noopener">https://unsplash.com/photos/NFs6dRTBgaM</a> By @Ferdinand Stöhr</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2018/05/07/optimizing-page-performance-with-shader/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2018/05/07/optimizing-page-performance-with-shader/" data-id="cjt6lby0j008jjeu1v2uin4rv" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2018/05/07/optimizing-page-performance-with-shader/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WebGL/">WebGL</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shader/">shader</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2018/05/31/a-rich-interaction-solution-based-on-bindingx/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          基于 BindingX 的富交互解决方案
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2018/03/12/long-list-in-rax/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Rax 系列教程（长列表）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

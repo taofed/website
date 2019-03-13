@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>淘宝前端国际化方案探索 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="全球化、农村、云计算大数据是我们目前集团非常明确的未来战略。全球化会让我们服务更多的人，服务全球范围内的人。落实到我们前端这块就需要有一套国际化的方案，能为海外用户提供非常好的体验，推进集团全球化进展。 这段时间有幸交接了淘宝海外的业务，淘宝海外就是专门面向国外用户提供服务的，因此在国际化这边有一些尝试，但是还远远不够，之前主要面向的用户是海外华人和留学生等，所以国际化只是做了一些繁简体转换等。">
+<meta name="keywords" content="国际化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="淘宝前端国际化方案探索">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/03/21/internationalization/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="全球化、农村、云计算大数据是我们目前集团非常明确的未来战略。全球化会让我们服务更多的人，服务全球范围内的人。落实到我们前端这块就需要有一套国际化的方案，能为海外用户提供非常好的体验，推进集团全球化进展。 这段时间有幸交接了淘宝海外的业务，淘宝海外就是专门面向国外用户提供服务的，因此在国际化这边有一些尝试，但是还远远不够，之前主要面向的用户是海外华人和留学生等，所以国际化只是做了一些繁简体转换等。">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1qZUTLVXXXXbMapXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1.I7yLVXXXXX.XpXXXXXXXXXX-397-193.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1_lsqLVXXXXaFXFXXXXXXXXXX-1077-316.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1BZ3lLVXXXXcfXVXXXXXXXXXX-992-400.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB19dcGLVXXXXXYXXXXXXXXXXXX-578-384.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1EGQ8LVXXXXa9XVXXXXXXXXXX-1801-1692.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="淘宝前端国际化方案探索">
+<meta name="twitter:description" content="全球化、农村、云计算大数据是我们目前集团非常明确的未来战略。全球化会让我们服务更多的人，服务全球范围内的人。落实到我们前端这块就需要有一套国际化的方案，能为海外用户提供非常好的体验，推进集团全球化进展。 这段时间有幸交接了淘宝海外的业务，淘宝海外就是专门面向国外用户提供服务的，因此在国际化这边有一些尝试，但是还远远不够，之前主要面向的用户是海外华人和留学生等，所以国际化只是做了一些繁简体转换等。">
+<meta name="twitter:image" content="https://gw.alicdn.com/tps/TB1qZUTLVXXXXbMapXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-internationalization" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      淘宝前端国际化方案探索
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 浩睿</span>
+        
+        <span>发表于: <a href="/blog/2016/03/21/internationalization/" class="article-date">
+  <time datetime="2016-03-21T15:42:13.000Z" itemprop="datePublished">2016-03-21</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tps/TB1qZUTLVXXXXbMapXXXXXXXXXX-900-500.png" alt="淘宝前端国际化方案探索"></p>
+<p>全球化、农村、云计算大数据是我们目前集团非常明确的未来战略。全球化会让我们服务更多的人，服务全球范围内的人。落实到我们前端这块就需要有一套国际化的方案，能为海外用户提供非常好的体验，推进集团全球化进展。</p>
+<p>这段时间有幸交接了淘宝海外的业务，淘宝海外就是专门面向国外用户提供服务的，因此在国际化这边有一些尝试，但是还远远不够，之前主要面向的用户是海外华人和留学生等，所以国际化只是做了一些繁简体转换等。后面多语言还会面临更多更大的挑战。在这里我思考整理汇总一下国际化方案，希望与大家讨论完善，后续可以针对一些重要的点进行突破和落地，最终产出一整套国际化方案。</p>
+<h2 id="国际化的目的"><a href="#国际化的目的" class="headerlink" title="国际化的目的"></a>国际化的目的</h2><p>简单的说一个国外网站被你打开却以为是国内公司开的，那么这个网站的国际化就做的非常成功。</p>
+<p>所以国际化的目的就是：让各个地区的人都能感受到这个网站像本地的网站一样，亲切、易用。</p>
+<p>然而这个目标很难实现，在做调研的时候，亚马逊属于国际化比较好的网站，开设分站并在主要几个国家都有专门的运营团队等，然而让普通人打开这个中国亚马逊，还是能感受到与淘宝、京东的不同。</p>
+<p>即便是无法完全实现目标，我们仍然可以用技术以较低成本来尽可能改善体验，因此还是有一定的价值来探索这个。</p>
+<h2 id="国际化的流程和步骤"><a href="#国际化的流程和步骤" class="headerlink" title="国际化的流程和步骤"></a>国际化的流程和步骤</h2><p>一个其他地区的人访问我们的网页，然后最终得到一个国际化友好的网页，这个过程发生了什么？这个过程有哪些问题和解决方案？下面就来整条链路的梳理一下。</p>
+<h3 id="针对来源判断用户所属区域"><a href="#针对来源判断用户所属区域" class="headerlink" title="针对来源判断用户所属区域"></a>针对来源判断用户所属区域</h3><p>当这个用户访问的时候，我们要获取该用户所属地区，然后拿到相关语言和习惯然后才能进行下一步处理。因此可以有两种方法：</p>
+<ul>
+<li>入口 URL 附带相关参数。</li>
+<li>通过 IP 地址进行判断。</li>
+</ul>
+<p>第一种方法适用于引导页进行跳转，使用范围比较小。初次访问的判断方法最好是 IP 判断的方式进行。我们已经有一套 IP 库：<a href="http://ip.taobao.com/" target="_blank" rel="noopener">http://ip.taobao.com/</a> ，后端也有相关接口，初次访问的人可以用这种方式进行粗略的定位，因为 IP 肯定会有误差。</p>
+<h3 id="记录-Cookie-并提供用户切换地区、语言的功能"><a href="#记录-Cookie-并提供用户切换地区、语言的功能" class="headerlink" title="记录 Cookie 并提供用户切换地区、语言的功能"></a>记录 Cookie 并提供用户切换地区、语言的功能</h3><p>访问之后，我们可以粗略拿到该用户所在的地区，因此可以回写一个 Cookie 来保存当前用户的一些信息，通常比较重要的信息有：</p>
+<ul>
+<li>地区</li>
+<li>语言</li>
+<li>货币</li>
+</ul>
+<p>这几个信息组合就可以像 sku 那样，共同确定唯一的一个信息，所以我起了个名字叫<strong>『唯一地区语言定位串』</strong>。但是<strong>目前缺乏一套一致的数据规范</strong>，因此会产生一些问题：</p>
+<ul>
+<li>地区是按国家维度区分还是按区域？香港是表示为 HK 还是 CN？</li>
+<li>语言按照什么维度区分？用什么表示？繁体和简体都属于中文，只用中文区分？chinese 和 zh-cn 用哪种表示？</li>
+</ul>
+<p><strong>这些信息如果没有一套规范和列表，很难进行统一和推广，如果没有在一开始就全集团统一确定下来，后期就会像 GBK、UTF-8 这样的编码问题一样，后患无穷。</strong></p>
+<p>当确定了记录信息和 Cookie 键名之后，只要在集团域名下，大家都可以共享这些信息然后进行后续的国际化处理。</p>
+<p>此外，由于 IP 的不准确性以及人口的流动，所以还需要提供用户自定义选择的功能，例如之前国际 UED 团队（之前维护淘宝海外）定制的吊顶：</p>
+<p><img src="https://img.alicdn.com/tps/TB1.I7yLVXXXXX.XpXXXXXXXXXX-397-193.jpg" alt></p>
+<p>上面这两步对于基于 Midway 开发的应用，可以以中间件的形式过滤处理直接变成『唯一地区语言定位串』，如果全集团铺开，甚至可以考虑在接入层做这个处理。</p>
+<h3 id="针对特定区域进行国际化处理"><a href="#针对特定区域进行国际化处理" class="headerlink" title="针对特定区域进行国际化处理"></a>针对特定区域进行国际化处理</h3><p>获取信息只是第一步，下面轮到我们进行国际化处理了。</p>
+<p>国际化的处理主要分为两部分：</p>
+<ul>
+<li>页面内容改变</li>
+<li>页面交互样式改变</li>
+</ul>
+<p>按照当地的习惯设计视觉、展示当地的语言的内容等，基本就是国际化处理的核心。这块也是最复杂最有挑战性的部分。</p>
+<h4 id="文本内容改变"><a href="#文本内容改变" class="headerlink" title="文本内容改变"></a>文本内容改变</h4><p>内容主要有固定文案和动态数据，比如购物车这里：</p>
+<p><img src="https://img.alicdn.com/tps/TB1_lsqLVXXXXaFXFXXXXXXXXXX-1077-316.jpg" alt></p>
+<p>固定文案的处理比较简单，最常见的方法就是创建一个映射表，用一个标记来表示该文案，然后不同区域下读取不同的文案内容即可。</p>
+<p>现在市场上也有非常多类似的工具可以帮你简化这些操作，比如 <a href="http://i18next.com/" target="_blank" rel="noopener">i18next</a> 等。</p>
+<p>比较麻烦的是动态数据这块，在淘宝这个场景下，就是各种商品数据，比如标题、sku 等信息。这些信息怎么进行本地化语言转换就是一个需要突破的问题。即便是看似最简单的繁简体转换，也没有那么简单。有些香港、台湾的惯用语等，并不是单个汉字转成繁体就可以的。<a href="http://www.fjt2.net/gate/gb/www.rnb.com.hk/is/difficult.htm" target="_blank" rel="noopener">更具体的细节可以点击这里</a>。</p>
+<p>由于目前在考虑做英文站，需要大量英文数据，后端也有考虑批量翻译商品数据直接存入数据库的方式来处理。但这种翻译不够完善，最大的缺陷在于无法对图片的内容翻译。一个淘宝商品详情承载最大信息量的不是商品标题等，而是商品的图片。卖家往往通过在商品图片上打字来介绍这个商品，所以这种批量转换只能在搜索和 SEO 方面能有所价值。对于真实成交和本地化的体验可能没有非常大的效果。</p>
+<p>既然商品信息都是卖家提交的，那国际化的内容，能否让卖家自行提交、编辑？这或许是一个最好的突破口，提供给卖家多语言的编辑入口，赋能想要发展国外业务的卖家，在搜索排名上也会更倾向于这些本地化做的好的商家。这样既解决了本地化内容的问题，又促进了卖家的成交，还带给了买家愉快的购物体验。</p>
+<p>更进一步，让淘宝真的只是作为一个交易平台，在当地推广，让本地人开店把商品卖给本地人，建立本地商品库，那是更好的一种方案了。</p>
+<p>除了商品数据之外，还有一个非常重要不可忽视的就是价格信息。包括货币表示符号、货币单位、价格映射，也是一块比较大的挑战。而稍有差池则会引起强烈的不满。比如类似人民币的这种货币符号，跟日元等比较像，如果没有表述清楚可能会产生一些误解。</p>
+<h4 id="图片内容改变"><a href="#图片内容改变" class="headerlink" title="图片内容改变"></a>图片内容改变</h4><p>商品图片内容改变的挑战已经在在上面列出来了，所以不再赘述。本节所说的图片是由视觉做的，然后由我们进行控制的图片，比如首焦图：</p>
+<p><img src="https://img.alicdn.com/tps/TB1BZ3lLVXXXXcfXVXXXXXXXXXX-992-400.jpg" alt></p>
+<p>这种图片的多语言、国际化我们应该怎么处理呢？马上就可以想到：让视觉在做的时候，把相关文案、视觉换一下，做成多张图片就好了，然后由技术进行定向切换图片地址实现。</p>
+<p>但跟淘海外支持视觉讨论了下，并没有这么简单。如果要做好一个国际化的突破，是需要非常细致的做，并不是简单的文案转换即可，视觉都要有变化。对于十分重要的场景（双十一等）这样的投入也是值得的。而日常的一些需求，如果这样做就会十分的浪费资源，投入跟产出比比较低。</p>
+<p>他介绍了一种更方便实现的思路，希望可以通过技术手段来解决掉这个问题。顺着他描述的需求的原型，我补充了一些更细节的技术实现思路，在这里简单介绍下。</p>
+<p>首先活动图片其实是有一些共性的，比如下图：</p>
+<p><img src="https://img.alicdn.com/tps/TB19dcGLVXXXXXYXXXXXXXXXXXX-578-384.jpg" alt></p>
+<p>基本元素就几个：宣传文案、利益点、辅助图片等。其实很容易形成规范固定下来，比如设计时就放这几个元素，然后基于这几个元素设计一张底图，约定好几个文案元素的位置、大小、字体等，然后由运营填写文案。我们的技术工具可以自动把文案翻译并合并到图片上生成多张多语言的图片。然后当请求这个图片时，会自动根据地区进行返回。实在不行也可以手动填写进去，进行定向投放。</p>
+<p>再到后面，甚至都不需要视觉资源。运营想要一个活动，利用现有的模板，从高质量图片库中取出辅助图片，放上去定下位置，填下文案就可以了。</p>
+<p>这样就可以减少人力资源的投入，也可以很好的实现图片的国际化处理，极大的提高了效率。</p>
+<h4 id="交互样式改变"><a href="#交互样式改变" class="headerlink" title="交互样式改变"></a>交互样式改变</h4><p>国际化中这也是非常大一部分，正如中国亚马逊，商品内容是中文的，但是视觉和交互没有做好本地化，仍然给人感觉跟淘宝、京东不是一类网站。</p>
+<p>对于样式、交互的国际化，马上想到的应该是通过给 body 加『唯一地区语言定位串』相关联的 class 来实现定制。这样也有问题，就是与浏览器强绑定，无法实现跨端复用。当你的内容用在 Native 或者没有 body 标签的地方，就没法用了。</p>
+<p>如果用这样一套方案，有两个点需要着重考虑：</p>
+<ul>
+<li>根据语系和习惯来定制 class，而不是语言。比如英文和德语都是字母，他们的样式个性化就有共通性，而不需要定义多个 class 重复编写规则，产生冗余代码。</li>
+<li>样式是用来适配内容而不是约束内容。中文内容翻译成英文，长度势必会增长，从而产生错位。这就需要在视觉时就要思考到溢出要怎么处理。可以像响应式布局那样流动起来，样式用来适配内容，而不是固定死约束内容展示。</li>
+</ul>
+<p>后端的处理在这里会有比较大的优势，就 Midway 而言，可以根据上面解析出来的『唯一地区语言定位串』直接映射到某个区域的 xtpl 模板，实现非常灵活的改变。</p>
+<h3 id="国际化的部署服务器"><a href="#国际化的部署服务器" class="headerlink" title="国际化的部署服务器"></a>国际化的部署服务器</h3><p>终于到了最后一步，服务器部署国际化。国内的网络都变幻莫测，更别提国外连到国内服务器的网速了。所以我们的服务器也要进行国际化部署。这样就依靠阿里云多造（租）点机房了。</p>
+<p>但并不是所有应用都能迁移到国外，有些核心数据还是要在国内机房。那么这么远距离的链接、数据沟通、应用部署又带来非常多的、不可预知的挑战。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>整个过程中，除了上面描述的那些问题和挑战，目前我能想到的还有两个：</p>
+<ul>
+<li>文件编码</li>
+<li>内容不准确性的修正和个性化需要投入的人力成本</li>
+</ul>
+<p>目前淘宝由于历史原因还有一些应用是 GBK 编码，GBK 编码显然不能用于国际化、全球化，特殊语言的国家访问看下来全是『口口口口口口口口口口口口口口口口』。或许这也是一个契机，就像升级 HTTPS 那样，推动整个集团去 GBK。</p>
+<p>内容和个性化始终需要人力，我们如何能利用技术进一步提高效率解决人力问题？这也是一个挑战。</p>
+<p>欢迎你提出一些问题和见解，一起来继续完善下！</p>
+<h2 id="附：国际化方案探索脑图"><a href="#附：国际化方案探索脑图" class="headerlink" title="附：国际化方案探索脑图"></a>附：国际化方案探索脑图</h2><p><img src="https://img.alicdn.com/tps/TB1EGQ8LVXXXXa9XVXXXXXXXXXX-1801-1692.jpg" alt></p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/03/21/internationalization/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/03/21/internationalization/" data-id="cjt6lbxyz004vjeu1kyebzd80" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/03/21/internationalization/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/国际化/">国际化</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/03/23/the-growth-of-front-end/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          一个前端的自我修养
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/18/error-handling-in-koa/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">如何优雅的在 koa 中处理错误</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

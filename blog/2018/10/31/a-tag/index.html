@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Atag - Web Components 最佳实践 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="引子上一次社区中谈论起 Web Components 已经可以追溯到三四年前了，彼时 Web Components 仍处于不稳定的草案阶段，Polymer 的出世使大家似乎看到了新一代的前端技术，但直到今天，在今年五月 Google I/O 发布 Polymer 3 之后， Web Components 的规模化应用才看似成为了可能。 过去一段时间，我一直在使用 Web Components 构">
+<meta name="keywords" content="小程序,web-components,Polymer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Atag - Web Components 最佳实践">
+<meta property="og:url" content="http://taobaofed.org/blog/2018/10/31/a-tag/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="引子上一次社区中谈论起 Web Components 已经可以追溯到三四年前了，彼时 Web Components 仍处于不稳定的草案阶段，Polymer 的出世使大家似乎看到了新一代的前端技术，但直到今天，在今年五月 Google I/O 发布 Polymer 3 之后， Web Components 的规模化应用才看似成为了可能。 过去一段时间，我一直在使用 Web Components 构">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Atag - Web Components 最佳实践">
+<meta name="twitter:description" content="引子上一次社区中谈论起 Web Components 已经可以追溯到三四年前了，彼时 Web Components 仍处于不稳定的草案阶段，Polymer 的出世使大家似乎看到了新一代的前端技术，但直到今天，在今年五月 Google I/O 发布 Polymer 3 之后， Web Components 的规模化应用才看似成为了可能。 过去一段时间，我一直在使用 Web Components 构">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-a-tag" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Atag - Web Components 最佳实践
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 卓凌</span>
+        
+        <span>发表于: <a href="/blog/2018/10/31/a-tag/" class="article-date">
+  <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg" alt="Atag - Web Components 最佳实践"></p>
+<h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>上一次社区中谈论起 Web Components 已经可以追溯到三四年前了，彼时 Web Components 仍处于不稳定的草案阶段，Polymer 的出世使大家似乎看到了新一代的前端技术，但直到今天，在今年五月 Google I/O 发布 Polymer 3 之后， Web Components 的规模化应用才看似成为了可能。</p>
+<p>过去一段时间，我一直在使用 Web Components 构建淘宝小程序的 <a href="https://github.com/alibaba/rax/tree/master/packages/atag" target="_blank" rel="noopener">基础组件 Atag</a>。MDN 上对 Web Components 这个名词的解释是</p>
+<blockquote>
+<p>Web Components是一套不同的技术，允许您创建可重用的定制元素（它们的功能封装在您的代码之外）并且在您的web应用中使用它们。</p>
+</blockquote>
+<p>我们从中提取几个关键字：<code>可重用</code> <code>定制元素</code> <code>封装</code> </p>
+<p>这些特性刚好能满足可复用组件的需求，更重要的是，这是由 W3C 标准提供的，面向标准编程不需要再考虑我使用的技术在未来几年内会不会过时。目前社区中的框架大都具有<strong>传染性</strong>，什么是传染性？如果你希望使用一个 React 组件，大概率你的整个用户界面都会使用 React 来开发。而 Custom Elements 不是这样，因为它替代的是 <code>div</code>，能使用 <code>div</code> 的地方就能使用它，它即插即用：引入一个 <code>js</code> 文件就可以了，直接操作 DOM 使它的性能更高，它并不跟社区主流的框架相克，这样看来它更适合用来开发底层的基础组件。</p>
+<p>回到正题，这篇文章的目的，是希望总结在 Atag 开发阶段中使用 Web Components 的经验，避免大家踩坑。</p>
+<h2 id="基础设施"><a href="#基础设施" class="headerlink" title="基础设施"></a>基础设施</h2><h3 id="webcomponentsjs"><a href="#webcomponentsjs" class="headerlink" title="webcomponentsjs"></a>webcomponentsjs</h3><p><a href="https://github.com/webcomponents/webcomponentsjs" target="_blank" rel="noopener">Github 地址</a></p>
+<p>这是一系列 Web Components 规范的 polyfill 集合，如果你的目标用户不是最新的现代浏览器，强烈建议引入这个库。</p>
+<p>引用方式 ：</p>
+<p>建议在 html 中使用 script 标签引入它，而不是通过 npm 引入，这样浏览器可以使用缓存帮助你减少二次加载的消耗。</p>
+<p>(以下引入方式二选一) </p>
+<ol>
+<li>使用 bundle 整包引入，这样会引入整个库中包含的所有 polyfills。<ul>
+<li>如果你需要按需引入 bundle，这个库的 bundles 目录下有一系列预打包好的 bundle 文件，用后缀标明了它包含的功能：ce 表示 custom-elements，sd 表示 shadow-dom，pf 表示环境的 polyfills。</li>
+</ul>
+</li>
+<li>[推荐] 使用 loader 按需引入，引入 <code>webcomponents-loader.js</code> 后，它会根据浏览器中的特征按需加载。</li>
+</ol>
+<p>这里有必要对一些名词做一些解释：</p>
+<ul>
+<li>ShadyDOM 这是 Shadow DOM 的 polyfill 的官方名称，它通过劫持 HTMLElement 的原型方法来实现一些 Shadow DOM 节点拥有的功能，实际上它的原理是把节点添加到了真实(light) DOM 节点之上。</li>
+<li>ShadyCSS 跟上面一样，这也是 polyfill 的名称，它提供了一些 Shadow DOM 节点内样式的封装，使得可以在真实 DOM 中模拟 scoped style 的效果。它的原理是通过解析和重写 style 节点内部的样式规则来实现的。</li>
+</ul>
+<p>需要注意的是，在引入 polyfill 的同时，有一些功能是无法被模拟的，需要我们在使用的时候避开，在下文中会介绍到。</p>
+<blockquote>
+<p>NOTE: 这个库的 2.1.x 版本对 Symbol 的 polyfill 有一些问题，在官方修复之前建议使用 2.0.4 的稳定版本。</p>
+<p>这里提供一份 alicdn 的 bundle URL：</p>
+<p><code>https://g.alicdn.com/code/npm/@webcomponents/webcomponentsjs/2.0.4/bundles/webcomponents-sd-ce-pf.js</code></p>
+</blockquote>
+<h3 id="polymer-3"><a href="#polymer-3" class="headerlink" title="polymer 3"></a>polymer 3</h3><p><a href="https://github.com/Polymer/polymer" target="_blank" rel="noopener">Github 地址</a></p>
+<p>在 Web Components 的实践中，Polymer 不是必须的，但有了它会让我们轻松很多。强烈建议使用最新版本的 Polymer 3，在这个版本不再使用 html 定义和引入组件，官方推荐使用 JS 模块的方式进行文件组织，同时抛弃了 bower 迎接 npm，这使得很多现代的前端工具能派上用场，比如使用 webpack 和 babel 进行打包，使用 ESLint 对代码进行规则校验，使用 prettier 对代码进行美化等。</p>
+<p>安装 polymer 3:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm i @polymer/polymer --save</span><br></pre></td></tr></table></figure>
+<p>官方推荐的 polymer-cli 工具比较鸡肋，可以不用。</p>
+<p>在使用之前强烈建议对 <a href="https://www.polymer-project.org/3.0/start/quick-tour" target="_blank" rel="noopener">polymer 的文档</a> 或者本文进行一番了解，避免踩坑。</p>
+<h3 id="构建配置"><a href="#构建配置" class="headerlink" title="构建配置"></a>构建配置</h3><p>为什么要把构建配置单独拿出来讲呢，当然是因为有坑?。开发组件过程中 ES 678 已经是标配，运行在低版本浏览器还得依赖 Babel。Web Components 中每一个 Component，对应一个类 (class)。Babel 的转换逻辑如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTag</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">customElements.define(<span class="string">'my-tag'</span>, MyTag);</span><br><span class="line"><span class="built_in">document</span>.createElement(<span class="string">'my-tag'</span>);</span><br></pre></td></tr></table></figure>
+<p><strong>—&gt;</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> MyTag = <span class="function"><span class="keyword">function</span> (<span class="params">_HTMLElement</span>) </span>&#123;</span><br><span class="line">  _inherits(MyTag, _HTMLElement);</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">MyTag</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    _classCallCheck(<span class="keyword">this</span>, MyTag);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> _possibleConstructorReturn(<span class="keyword">this</span>, (MyTag.__proto__ || <span class="built_in">Object</span>.getPrototypeOf(MyTag)).apply(<span class="keyword">this</span>, <span class="built_in">arguments</span>));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> MyTag;</span><br><span class="line">&#125;(HTMLElement);</span><br><span class="line"></span><br><span class="line">customElements.define(<span class="string">'my-tag'</span>, MyTag);</span><br><span class="line"><span class="built_in">document</span>.createElement(<span class="string">'my-tag'</span>);</span><br></pre></td></tr></table></figure>
+<p>这样执行的话浏览器会显示如下报错 <code>Uncaught TypeError: Failed to construct &#39;HTMLElement&#39;: Please use the &#39;new&#39; operator, this DOM object constructor cannot be called as a function</code>，大意就是被继承的类 HTMLElement 必须使用 new 来初始化，不能使用函数调用 + apply 的使用方式。</p>
+<p>针对这个问题 webcomponentsjs 额外提供了一份 <code>custom-elements-es5-adapter-index.js</code> 的 polyfill 来解决，这个文件的具体代码<a href="https://github.com/webcomponents/custom-elements/blob/master/src/native-shim.js" target="_blank" rel="noopener">见此</a>。引入这个文件可以通过在组件库的 webpack 配置中添加或者额外在使用的 html 文件中通过 script 标签引入，只要在组件被注册之前执行这段脚本就可以避免报错。</p>
+<h2 id="兼容性"><a href="#兼容性" class="headerlink" title="兼容性"></a>兼容性</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Import</th>
+<th>ShadowDOM</th>
+<th>CustomElement</th>
+<th>Template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chrome 最新版 (66)</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>Firefox 最新版</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>iOS 最新版 (12)</td>
+<td>N</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+<tr>
+<td>Android (UC 11.6.0.960)</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+<td>Y</td>
+</tr>
+</tbody>
+</table>
+<p>其中 import 特性在整个体系下比较鸡肋，可以通过 webpack 打包的方式来替代。</p>
+<p>结论是在移动端下，99% 以上的用户可以通过 polyfill 的方式来获得比较好的 Web Components 特性支持。</p>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><table>
+<thead>
+<tr>
+<th>(单位 ms)</th>
+<th>注册 1W 个组件</th>
+<th>渲染 1W 个组件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pure web-components</td>
+<td>55.5ms  48.6ms 47.2ms</td>
+<td>934.3ms  889.0ms  915.1ms</td>
+</tr>
+<tr>
+<td>polymer</td>
+<td>184.9ms 191.9ms 197.8ms</td>
+<td>768.0ms  858.4ms  785.0ms</td>
+</tr>
+<tr>
+<td>React 16.2.0</td>
+<td>38.9ms 38.0ms  40.60ms</td>
+<td>1834.8ms 1754.8ms 1869.5ms</td>
+</tr>
+<tr>
+<td>Rax 使用 View 和 Text 组件</td>
+<td>86.4ms  73.9ms 82.4ms</td>
+<td>11587.4ms  11238.0ms 11289.6ms</td>
+</tr>
+<tr>
+<td>Rax使用 append={‘tree’} 模式</td>
+<td>82.5ms  67.3ms 81.4ms</td>
+<td>798.0ms  823.5ms  878.0ms</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到，由于 React JSX 的 VDOM 在构建时解析的加持，React 的注册时间是最短的，但是放大到 1W 个组件的渲染时，原生 DOM 的性能就发挥出来了，web-components 获得了比较优秀的表现。对原生 web-components 和 polymer，后者只是在注册的时候由于需要在运行时解析模板字符串，牺牲了一些性能，但是如果组件数量有限，这个性能差距可以忽略不计，加上 polymer 本身提供的一些组件化开发的便利，整体来看使用 polymer 获得的收益还是比较高的。</p>
+<blockquote>
+<p>基准环境:</p>
+<ul>
+<li>Chrome 66</li>
+<li>macOS 10.13.1</li>
+<li>Macbook Pro 15’ late 2015</li>
+</ul>
+</blockquote>
+<h2 id="组件化"><a href="#组件化" class="headerlink" title="组件化"></a>组件化</h2><p>个人认为，Web Components 在整个前端的语境下更偏向于提供符合 DOM 标准的规范，而 Polymer 则是在这种规范之上的一种框架封装，使用 Polymer 可以带来更便利的组件化开发体验。因此这里就不多介绍如何使用标准的 custom element 来创建自定义标签，下文都使用 Polymer 来封装自定义标签。文章中的组件、自定义标签、自定义组件其实描述的是同一个东西。</p>
+<p>推荐使用以下模式创建一个自定义组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; PolymerElement, html &#125; <span class="keyword">from</span> <span class="string">'@polymer/polymer'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomElement</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> is() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'custom-element'</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> template() &#123;</span><br><span class="line">    <span class="keyword">return</span> html<span class="string">`</span></span><br><span class="line"><span class="string">      &lt;style&gt;:host &#123; color: red; &#125;&lt;/style&gt;</span></span><br><span class="line"><span class="string">      &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">    `</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用以下方式注册自定义组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">customElements.define(CustomElement.is, CustomElement);</span><br></pre></td></tr></table></figure>
+<p>使用以下或任意方式使用自定义组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> el = <span class="built_in">document</span>.createElement(<span class="string">'custom-element'</span>);</span><br><span class="line">el.innerText = <span class="string">'Hello World'</span>;</span><br><span class="line"><span class="built_in">document</span>.body.appendChild(el);</span><br></pre></td></tr></table></figure>
+<h2 id="生命周期"><a href="#生命周期" class="headerlink" title="生命周期"></a>生命周期</h2><p>PolymerElement 继承了 HTMLElement，所以它拥有和 HTMLElement 一致的生命周期。</p>
+<p><strong>constructor</strong>：组件被 create 的时候会被调用，整个生命周期中最早触发也只会触发一次，通常可以在这里做一些初始化私有变量、记录数据的一些操作；但是出于性能和职责分离的考虑，不建议在这里做一些 DOM 相关的事情。</p>
+<p><strong>connectedCallback</strong>：组件被 <code>连接</code> 到 DOM Tree 的时候会触发，这个时机包括节点被插入节点树、节点被从节点树中移动，所以它可能会被触发多次。你可以在这里监听 DOM 事件或者对 DOM 节点做一些修改。</p>
+<p><strong>disconnectedCallback</strong>：组件被从 DOM Tree 中移除的时候触发，这个生命周期也可能被触发多次。如果你在 connectedCallback 中监听了事件，一定要记得在这里移除，否则事件监听回调可能会一直引用导致内存泄露和一些奇怪的问题。</p>
+<p><strong>adoptedCallback</strong>：不常用，不多介绍。</p>
+<p><strong>attributeChangedCallback</strong>：当组件的 attribute 发生变化的时候触发，它的三个形参分别是 <code>name, oldValue, newValue</code>，记得别把顺序搞反了。如果你声明了 properties 对象，对 attribute 的相应值变化也会触发这个回调。需要注意的是，如果你覆盖了组件的 <code>observedAttributes</code> 静态方法，properties 对象中声明的值不会触发，它会按照你覆盖的 <code>observedAttributes</code> 静态方法的返回值为准。</p>
+<p>除此之外，polymer 还额外添加了一些生命周期</p>
+<p><strong>ready</strong>：由于 HTMLElement 的生命周期中没有一个可以操作 DOM，又只触发一次的周期，Polymer 人为地添加了 ready 这个时机，它在整个生命周期中只会触发一次，也就是第一次节点插入到 DOM 树的时刻。</p>
+<p>记得调用 <code>super.ready()</code> 来触发 <code>PolymerElement</code> 的初始化阶段。在初始化阶段，Polymer 会做以下几件事情：</p>
+<ul>
+<li>attache 组件实例的 Shadow DOM，所以在这个阶段之后才可以访问 <code>this.shadowRoot</code></li>
+<li>初始化 properties，并赋初始值</li>
+<li>如果 properties 有声明 observer 或者 computed，会执行它们</li>
+</ul>
+<p>通常可以在 ready 函数中给组件实例添加一个 <code>this._isReady = true;</code> 的状态以标明组件已经 ready。</p>
+<h4 id="首屏性能优化技巧"><a href="#首屏性能优化技巧" class="headerlink" title="首屏性能优化技巧"></a>首屏性能优化技巧</h4><p>我们知道页面的首屏渲染直接影响了这个页面的性能，组件也是一样。Polymer 提供了 render-status 的 afterNextRender 方法来帮助你在首次渲染之后执行一些不必要的 DOM 操作，比如添加事件绑定。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; afterNextRender &#125; <span class="keyword">from</span> <span class="string">'@polymer/polymer/lib/utils/render-status'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DeferElement</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  ready() &#123;</span><br><span class="line">    <span class="keyword">super</span>.ready();</span><br><span class="line">      </span><br><span class="line">    <span class="comment">// When possible, use afterNextRender to defer non-critical</span></span><br><span class="line">    <span class="comment">// work until after first paint.</span></span><br><span class="line">    afterNextRender(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">this</span>.addEventListener(<span class="string">'click'</span>, <span class="keyword">this</span>._handleClick);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="属性-property-和属性-attribute"><a href="#属性-property-和属性-attribute" class="headerlink" title="属性 (property)和属性 (attribute)"></a>属性 (property)和属性 (attribute)</h2><p>在 DOM 中，property 和 attribute 这两个概念是严格区分的，虽然有时它们会产生类似双向绑定的联动，例如 id、input 的 checked 属性等。</p>
+<p>在 Polymer 中，使用 properties 静态属性来声明组件的 property：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">XCustom</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> properties() &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      user: <span class="built_in">String</span>,</span><br><span class="line">      isHappy: <span class="built_in">Boolean</span>,</span><br><span class="line">      count: &#123;</span><br><span class="line">        type: <span class="built_in">Number</span>,</span><br><span class="line">        readOnly: <span class="literal">true</span>,</span><br><span class="line">        notify: <span class="literal">true</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">customElements.define(<span class="string">'x-custom'</span>, XCustom);</span><br></pre></td></tr></table></figure>
+<p>在大多数情况下，如果你的属性需要暴露为公有 (public) API，你需要把这个属性声明到 properties 对象中。</p>
+<p>关于 properties 对象的声明，可以参考<a href="https://www.polymer-project.org/3.0/docs/devguide/properties" target="_blank" rel="noopener">文档</a></p>
+<h3 id="属性的默认值"><a href="#属性的默认值" class="headerlink" title="属性的默认值"></a>属性的默认值</h3><p>通过 property 的 value 可以设置属性的默认值，这里<strong>强烈建议</strong>所有的属性都显式声明一个默认值，这样更清晰于阅读，也避免了默认为 undefined 值处理的坑。</p>
+<p>如果声明的 value 是一个函数，Polymer 会在初始化这个组件的时候取函数的返回值为默认属性；如果 value 是一个对象或数组，Polymer 会在初始化这个组件的时候对 value 做一次浅拷贝，所以不用担心会在不同组件实例中会共享同一个对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomEl</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> properties() &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      mode: &#123;</span><br><span class="line">        type: <span class="built_in">String</span>,</span><br><span class="line">        value: <span class="string">'auto'</span></span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      data: &#123;</span><br><span class="line">        type: <span class="built_in">Object</span>,</span><br><span class="line">        notify: <span class="literal">true</span>,</span><br><span class="line">        value: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="keyword">return</span> &#123;&#125;; &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="attribute-映射为-property"><a href="#attribute-映射为-property" class="headerlink" title="attribute 映射为 property"></a>attribute 映射为 property</h3><p>在 properties 对象中声明的属性，polymer 会自动创建从 attribute 到 perperty 的映射解析规则，解析的规则是：</p>
+<ul>
+<li>大写的 attribute 名称会被转换为小写的 property：<code>firstName</code> 映射为 <code>firstname</code></li>
+<li>带中划线 <code>-</code>的 attribute 名会被转换为小驼峰 (camelCased) 的 property：<code>first-name</code> 映射为 <code>firstName</code></li>
+</ul>
+<p>值的解析会使用声明的类型去判断和解析，对于 JS 基本类型的值，会直接转换类型映射；对于 Object 和 Array 类型，会通过 <code>JSON.parse</code> 来解析。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;my-element id=<span class="string">"foo"</span> book=<span class="string">'&#123; "title": "Persuasion", "author": "Austen" &#125;'</span>&gt;&lt;/my-element&gt;</span><br></pre></td></tr></table></figure>
+<p>由于 JSON 的序列化和反序列化会比较消耗性能，而且我们从数据源获取数据后一般已经是 JS Object，这个时候通过 property 赋值的方式来使用 Object/Array 类型的数据可以避免额外的性能消耗。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> el = <span class="built_in">document</span>.querySelector(<span class="string">'#foo'</span>);</span><br><span class="line">el.book = &#123; <span class="attr">title</span>: <span class="string">'Persuasion'</span>, <span class="attr">author</span>: <span class="string">'Austen'</span> &#125;;</span><br></pre></td></tr></table></figure>
+<p>关于布尔值，我们在 React 中习惯于显式传递布尔值 <code>&lt;Checkbox checked={false} /&gt;</code> ，但在 DOM 中，attribute 判断布尔类型的方式是判断 attribute value 字符串的长度。<code>&lt;a-checkbox checked /&gt; &lt;a-checkbox checked=&quot;false&quot;&gt;</code> 前面这些都表示 checked 为 true，而只有 <code>&lt;a-checkbox  /&gt;</code> 才表示 checked 为 false。</p>
+<p>所以对于布尔值，这里建议在使用时跟对象一样，使用 property 赋值的方式去修改，避免使用 setAttribute 修改布尔类型的属性。如果你希望修改 checked attribute 的语义，在为字符串 “false” 的时候表示真正的 false 概念，你也可以声明一个 getter 来帮助你在内部做判断，但是其实我不建议这么做。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">X</span> <span class="title">extend</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">    <span class="keyword">get</span> _isLoop() &#123;</span><br><span class="line">        <span class="keyword">var</span> loop = <span class="keyword">this</span>.getAttribute(<span class="string">'loop'</span>);</span><br><span class="line">        <span class="keyword">return</span> loop !== <span class="string">'false'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="property-映射为-attribute"><a href="#property-映射为-attribute" class="headerlink" title="property 映射为 attribute"></a>property 映射为 attribute</h3><p>双向绑定不是必须的。</p>
+<p>通过开启 <code>reflectToAttribute: true</code> 选项可以自动把 property 映射为 attribute 值，序列化的方式跟上边正好相反。由于涉及到 setAttribute 这一 DOM 操作，开启这个功能是比较消耗性能的，仅在必要的时候开启。</p>
+<p>使用的例子如 <code>radio</code> 、<code>checkbox</code> 组件的 <code>checked</code> 属性，<code>image</code> 组件的 <code>src</code> 属性等。</p>
+<h3 id="计算属性"><a href="#计算属性" class="headerlink" title="计算属性"></a>计算属性</h3><p>跟 Vue 的 computed 很像 (其实是 Vue 参考了这里)，计算属性允许你用一个方法来计算 property 的值。</p>
+<h3 id="观察属性"><a href="#观察属性" class="headerlink" title="观察属性"></a>观察属性</h3><p>跟 Vue 的 watch 很像，当你的属性发生变化时，polymer 会通知相应的函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">XCustom</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> properties() &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      active: &#123;</span><br><span class="line">        type: <span class="built_in">Boolean</span>,</span><br><span class="line">        <span class="comment">// Observer method identified by name</span></span><br><span class="line">        observer: <span class="string">'_activeChanged'</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// Observer method defined as a class method</span></span><br><span class="line">  _activeChanged(newValue, oldValue) &#123;</span><br><span class="line">    <span class="keyword">this</span>.toggleClass(<span class="string">'highlight'</span>, newValue);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="观察-children-的变化"><a href="#观察-children-的变化" class="headerlink" title="观察 children 的变化"></a>观察 children 的变化</h2><p>有时候我们需要观察 children 节点的添加或者删除，比如在 <a href="https://developers.taobao.com/components/container/swiper.html" target="_blank" rel="noopener"><code>swiper</code> 组件</a>中，它需要动态地监听子节点中 <code>swiper-item</code> 节点的增删改，来变化其内部的 <code>indicator-dots</code> 数量等。</p>
+<p>Polymer 提供了 FlattenedNodesObserver 工具集合来追踪子孙节点的变化。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; FlattenedNodesObserver &#125; <span class="keyword">from</span> <span class="string">'@polymer/polymer/lib/utils/flattened-nodes-observer'</span>;</span><br></pre></td></tr></table></figure>
+<p>添加监听器，每当子节点发生变化的时候会触发对应的回调函数，回调函数的第一个参数包含了一些增加或者删除节点的信息可以使用：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>._childrenObserver = <span class="keyword">new</span> FlattenedNodesObserver(<span class="keyword">this</span>, <span class="keyword">this</span>._handleChildrenChanged);</span><br></pre></td></tr></table></figure>
+<p>当然不要忘记移除监听器：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>._childrenObserver.disconnect();</span><br></pre></td></tr></table></figure>
+<p>获取子孙节点的方法：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FlattenedNodesObserver.getFlattenedNodes(<span class="keyword">this</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="模板语法"><a href="#模板语法" class="headerlink" title="模板语法"></a>模板语法</h2><p>Polymer 使用 <code>html</code> 方法来把模板字符串转换成一个 DOM fragment，并可以自由绑定组件实例上下文中的属性。</p>
+<h3 id="创建-Shadow-DOM"><a href="#创建-Shadow-DOM" class="headerlink" title="创建 Shadow DOM"></a>创建 Shadow DOM</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; PolymerElement, html &#125; <span class="keyword">from</span> <span class="string">'@polymer/polymer'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomElement</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> is() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'custom-element'</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> template() &#123;</span><br><span class="line">    <span class="keyword">return</span> html<span class="string">`</span></span><br><span class="line"><span class="string">      &lt;style&gt;:host &#123; color: red; &#125;&lt;/style&gt;</span></span><br><span class="line"><span class="string">      &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">    `</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>slot</code> 表示该组件子节点的引用，跟 Vue 的 slot 师出同门，对应 React 的 <code>this.props.children</code> 的概念。</p>
+<p>需要注意的是反引号语法在这里其实等价于 <code>html(templateString)</code>，但是不要试图在模板字符串中使用插值，至于原因你可以参考阮老师的 <a href="http://es6.ruanyifeng.com/#docs/string#%E6%A0%87%E7%AD%BE%E6%A8%A1%E6%9D%BF" target="_blank" rel="noopener">ES6 参考</a>。</p>
+<h3 id="创建-Light-DOM"><a href="#创建-Light-DOM" class="headerlink" title="创建 Light DOM"></a>创建 Light DOM</h3><p>有时候由于 Shadow DOM 的一些限制，它并不能满足所有组件的需求，我们可能需要创建一个拥有真实节点的自定义标签组件。</p>
+<p>跟普通的 DOM 操作一样，如果你需要创建真实节点(light dom)，直接在 constructor 生命周期中使用 DOM 方法创建并添加到节点的 children 中即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; PolymerElement, html &#125; <span class="keyword">from</span> <span class="string">'@polymer/polymer'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomElement</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> is() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'custom-element'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        <span class="keyword">super</span>();</span><br><span class="line">        <span class="keyword">const</span> container = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</span><br><span class="line">        container.innerHTML = <span class="string">'Hello World'</span>;</span><br><span class="line">        <span class="keyword">this</span>.appendChild(container);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>详细参考 <a href="https://www.polymer-project.org/3.0/docs/devguide/dom-template" target="_blank" rel="noopener">https://www.polymer-project.org/3.0/docs/devguide/dom-template</a></p>
+</blockquote>
+<h3 id="公私有方法和属性的命名约定"><a href="#公私有方法和属性的命名约定" class="headerlink" title="公私有方法和属性的命名约定"></a>公私有方法和属性的命名约定</h3><p>这是一个建议，但是 W3C 标准中的方法大多遵守这一约定。除生命周期方法外，组件的实例属性和实例方法会被视作外部接口，可被外部直接访问到。所以如果是私有的属性和方法，需要加上 <code>_</code> 作为前缀以作区分。如</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyVideo</span> <span class="keyword">extends</span> <span class="title">PolymerElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">get</span> properties() &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * 作为接口暴露的属性</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      status: &#123;</span><br><span class="line">        type: <span class="built_in">String</span>,</span><br><span class="line">        value: <span class="string">'paused'</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  connectedCallback() &#123;</span><br><span class="line">    <span class="keyword">this</span>.addEventListener(<span class="string">'click'</span>, <span class="keyword">this</span>._handleClick);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 私有方法</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  _handleClick(evt) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 作为接口暴露的方法</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  play() &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">var</span> video = <span class="built_in">document</span>.createElement(<span class="string">'my-video'</span>);</span><br><span class="line">video.play(); <span class="comment">// 使用暴露的接口方法</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Polymer 官方建议使用 <code>_</code> 前缀表示私有变量，<code>__</code> 前缀表示受保护的变量，个人以为这种区分太过复杂，建议用一个 <code>_</code> 来替代就可以了。</p>
+</blockquote>
+<h2 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h2><p>这里的事件指的都是 DOM 事件，你可以通过模板事件监听或者 DOM 事件监听两种方式来绑定事件。前者是声明式的而且不需要处理解除绑定，所以更加推荐使用模板事件监听器的方式来绑定事件。</p>
+<h3 id="模板事件监听器"><a href="#模板事件监听器" class="headerlink" title="模板事件监听器"></a>模板事件监听器</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">get</span> template()&#123;</span><br><span class="line">  <span class="keyword">return</span> html<span class="string">`</span></span><br><span class="line"><span class="string">    &lt;button on-click="handleClick"&gt;Click Me&lt;/button&gt;</span></span><br><span class="line"><span class="string">  `</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 handleClick 指的是实例方法，其它就跟直接绑定 <code>onclick</code> 事件没什么差别。</p>
+<h3 id="DOM-事件监听器"><a href="#DOM-事件监听器" class="headerlink" title="DOM 事件监听器"></a>DOM 事件监听器</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">connectedCallback() &#123;</span><br><span class="line">  <span class="keyword">super</span>.connectedCallback()</span><br><span class="line">  <span class="keyword">this</span>.addEventListener(<span class="string">'click'</span>, <span class="keyword">this</span>._handleClick);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>不要忘记在 disconnectedCallback 的时候解除绑定</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">disconnectedCallback() &#123;</span><br><span class="line">  <span class="keyword">super</span>.disconnectedCallback()</span><br><span class="line">  <span class="keyword">this</span>.removeEventListener(<span class="string">'click'</span>, <span class="keyword">this</span>._handleClick);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有一种情况下你必须使用 DOM 事件监听器：你希望监听的事件节点不在 ShadowDOM 中，例如使用 window 或者 document 对象代理监听事件等。</p>
+<h3 id="关于冒泡"><a href="#关于冒泡" class="headerlink" title="关于冒泡"></a>关于冒泡</h3><p>slot 子节点的冒泡，在 ShadowDOM 中，slot 子节点是出现在影子节点树内部的，所以它冒泡事件传递顺序会包含 slot 节点，在 polyfill 的实现中并不是这样，所以不要依赖这一项来实现一些功能。</p>
+<h3 id="触发自定义事件"><a href="#触发自定义事件" class="headerlink" title="触发自定义事件"></a>触发自定义事件</h3><p>有时候组件可能希望在事件中带入一些额外的 <code>detail</code> 信息。如果你的事件名称与 DOM 事件不同名，直接使用 Custom Event 的接口声明和派发即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> myEvent = <span class="keyword">new</span> CustomEvent(<span class="string">'myevent'</span>, &#123;</span><br><span class="line">  bubbles: <span class="literal">true</span>,</span><br><span class="line">  datail: &#123; <span class="attr">foo</span>: <span class="string">'bar'</span> &#125;,</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">this</span>.dispatchEvent(myEvent);</span><br></pre></td></tr></table></figure>
+<p>如果你的事件名称与 DOM 事件同名，原生 DOM 事件可不支持修改，但是你可以在它冒泡的时候阻止它并派发一个自己的同名事件出来。</p>
+<p>在 <code>window</code> 上捕获你需要拦截的事件，并在事件处理回调中停止冒泡原生事件和派发一个自定义的同名事件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">connectedCallback() &#123;</span><br><span class="line">  <span class="keyword">super</span>.connectedCallback();</span><br><span class="line">  afterNextRender(<span class="keyword">this</span>, () =&gt; &#123;</span><br><span class="line">  	<span class="built_in">window</span>.addEventListener(<span class="string">'click'</span>, <span class="keyword">this</span>._handleClick, <span class="literal">true</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_handleClick(evt) &#123;</span><br><span class="line">  evt.stopPropagation();</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">const</span> event = <span class="keyword">new</span> CustomEvent(<span class="string">'click'</span>, &#123;</span><br><span class="line">    bubbles: <span class="literal">true</span>,</span><br><span class="line">    detail: &#123; <span class="attr">foo</span>: <span class="string">'bar'</span> &#125;,</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">this</span>.dispatchEvent(event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="手势"><a href="#手势" class="headerlink" title="手势"></a>手势</h2><p>在移动端中手势的处理可以说是比较常用的功能，我们可以通过监听 <code>touchstart</code> <code>touchmove</code> <code>touchend</code> <code>touchacancel</code> 事件并合成处理几乎所有的复杂交互。Polymer 为组件开发者提供了 <code>Gesture</code> 工具库，你可以按需地引入它：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> Gestures <span class="keyword">from</span> <span class="string">'@polymer/polymer/lib/utils/gestures'</span>;</span><br></pre></td></tr></table></figure>
+<p>它提供了很多合成事件的封装，比如在 ATAG 中，swiper 轮播器组件就使用到了 track 合成事件。</p>
+<p>在 ready 的时刻添加 track 事件的监听，</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">ready() &#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">  Gestures.addListener(<span class="keyword">this</span>, <span class="string">'track'</span>, <span class="keyword">this</span>._handleTrack);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_handleTrack(e) &#123;</span><br><span class="line">  <span class="keyword">const</span> detail = e.detail;</span><br><span class="line">  <span class="keyword">if</span> (detail.state === <span class="string">'start'</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> dx = detail.dx;</span><br><span class="line">    <span class="keyword">const</span> dy = detail.dy;</span><br><span class="line">    <span class="keyword">const</span> direction = <span class="built_in">Math</span>.abs(dy) - <span class="built_in">Math</span>.abs(dx);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.vertical &amp;&amp; direction &lt; <span class="number">0</span> || <span class="keyword">this</span>.vertical &amp;&amp; direction &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">this</span>._onTouchStart(detail);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>track 使你追踪手指滑动的过程和方向。</p>
+<p>有时候你需要考虑横向滚动和纵向滚动之间的关系，比如在横向滚动 swiper 轮播器的时候，通常并不希望同时触发纵向的页面滚动，这个时候就需要在开始内部滚动的时候为组件添加一个拖动的状态，在拖动状态中的 <code>touchmove</code> 事件需要被执行 <code>preventDefault</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">_handleSwiperTouchMove = <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="comment">// Prevent scrolling in swipper when user is dragging</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>.dragging) &#123;</span><br><span class="line">    event.preventDefault();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>另外在 Polymer 监听 track 事件的时候，组件本身的 <code>touch-action</code> CSS 属性会被置为 <code>none</code>，这是一个 Chrome 下已经支持的属性，当为 <code>none</code> 时组件不向上传递触摸事件和阻止默认事件，跟 <code>preventDefault</code> 的效果一致。所以如果你需要响应滚动事件，可以参考以下方法自定义 <code>touch-action</code> 的值：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">NOTE:</span> if swiper direction is different with parent</span></span><br><span class="line"><span class="comment"> * scroll view direction, set touch-action to pan-x if vertically,</span></span><br><span class="line"><span class="comment"> * to pan-y if not.</span></span><br><span class="line"><span class="comment"> * Excepted case: if parent scroll element is the whole page (body)</span></span><br><span class="line"><span class="comment"> * and the swiper's scroll direction is vertical, set touch action</span></span><br><span class="line"><span class="comment"> * to none to avoid double scrolling.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">_observeVertical() &#123;</span><br><span class="line">  afterNextRender(<span class="keyword">this</span>, () =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> parentScrollView = <span class="keyword">this</span>._getParentScrollView();</span><br><span class="line">    <span class="keyword">const</span> parentScrollVertical = !(</span><br><span class="line">      parentScrollView &amp;&amp; parentScrollView.scrollX</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.vertical &amp;&amp; parentScrollView === <span class="literal">null</span>) &#123;</span><br><span class="line">      Gestures.setTouchAction(<span class="keyword">this</span>, <span class="string">'none'</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.vertical === parentScrollVertical) &#123;</span><br><span class="line">      Gestures.setTouchAction(<span class="keyword">this</span>, <span class="string">'auto'</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      Gestures.setTouchAction(<span class="keyword">this</span>, <span class="keyword">this</span>.vertical ? <span class="string">'pan-x'</span> : <span class="string">'pan-y'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>NOTE: </p>
+<ul>
+<li><p>更多详细的手势使用可以<a href="https://www.polymer-project.org/3.0/docs/devguide/gesture-events" target="_blank" rel="noopener">参考这里</a></p>
+</li>
+<li><p>touch-action 的 <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action" target="_blank" rel="noopener">MDN 文档</a></p>
+</li>
+</ul>
+</blockquote>
+<h2 id="样式"><a href="#样式" class="headerlink" title="样式"></a>样式</h2><p>使用 Polymer 的 template 方法创建的 customElement 默认是 Shadow DOM，Shadow DOM 内的样式是局部作用域的，也就是说内部的样式不会影响全局。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">get</span> template() &#123;</span><br><span class="line">  <span class="keyword">return</span> html<span class="string">`</span></span><br><span class="line"><span class="string">    &lt;style&gt;</span></span><br><span class="line"><span class="string">      :host &#123;</span></span><br><span class="line"><span class="string">        display: inline-block;</span></span><br><span class="line"><span class="string">        background-color: #fff;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">      #input &#123;</span></span><br><span class="line"><span class="string">        all: unset;</span></span><br><span class="line"><span class="string">        width: 100%;</span></span><br><span class="line"><span class="string">        height: 100%;</span></span><br><span class="line"><span class="string">        -webkit-text-fill-color: initial;</span></span><br><span class="line"><span class="string">        -webkit-user-select: auto;</span></span><br><span class="line"><span class="string">        user-select: auto;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &lt;/style&gt;</span></span><br><span class="line"><span class="string">    &lt;input id="input" /&gt;</span></span><br><span class="line"><span class="string">  `</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="避免动态修改-style-标签来应用样式"><a href="#避免动态修改-style-标签来应用样式" class="headerlink" title="避免动态修改 style 标签来应用样式"></a>避免动态修改 style 标签来应用样式</h3><p>对于 Shadow DOM 内部的样式，ShadyCSS 会解析和重写以正确地作用到真实节点上，所以如果你的组件内部有动态创建或者写 style 标签的 innerHTML 属性，这些都不会被 ShadyCSS 作用到，应当避免。</p>
+<p>如果实在无法避免，我在使用的过程中使用了一种 HACK 的手段：</p>
+<ul>
+<li>给每一个组件添加一个 uid 的标识来区分组件实例，并带到组件的 data-id attribute 上面</li>
+<li>在写 CSS 的时候通过 [data-id=xxx] 选择符来区分</li>
+<li>这种方式你需要同时写 :host {} 和 my-element[data-id=xxx]{} 两个 CSS 选择符来保证同时非 polyfill 情况下和 polyfill 情况下都能工作</li>
+<li>由于对 ShadyCSS 的源码研究还不够，可能还有更好的办法，如果你有的话也请在下边评论指教~~</li>
+</ul>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>一个健壮的基础应用必须有响应的测试机制来保障，一般一款软件的稳定性跟它的测试代码/应用代码的比例正相关。DOM 相关的 UI 测试在前几年一直有着不错的发展，比如截图对比测试，Driver 服务化等，但是真正被大规模使用的寥寥。本着实用至上的原则，Atag 的测试分为自动化的冒烟测试和手动的 UI 测试。</p>
+<h3 id="冒烟测试"><a href="#冒烟测试" class="headerlink" title="冒烟测试"></a>冒烟测试</h3><p>顾名思义，就是渲染一个组件，看看有没有报错或者渲染异常，进行一些简单的 DOM 渲染判断。这里我们用到了 Karma + puppteer 的搭配，如果你想验证浏览器兼容性的差异也可以加入更多的 karma-driver。</p>
+<p>karma 配置文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> webpackConfig = <span class="built_in">require</span>(<span class="string">'./tests/webpack.test.js'</span>);</span><br><span class="line">process.env.CHROME_BIN = <span class="built_in">require</span>(<span class="string">'puppeteer'</span>).executablePath();</span><br><span class="line"></span><br><span class="line"><span class="comment">// karma.conf.js</span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">config</span>) </span>&#123;</span><br><span class="line">  config.set(&#123;</span><br><span class="line">    browsers: [<span class="string">'ChromeHeadless'</span>],</span><br><span class="line">    frameworks: [<span class="string">'mocha'</span>, <span class="string">'sinon-chai'</span>],</span><br><span class="line">    reporters: [<span class="string">'spec'</span>, <span class="string">'coverage'</span>],</span><br><span class="line">    files: [<span class="string">'vendors/custom-elements-es5-adapter.js'</span>, <span class="string">'tests/index.js'</span>],</span><br><span class="line"></span><br><span class="line">    preprocessors: &#123;</span><br><span class="line">      <span class="string">'./tests/index.js'</span>: [<span class="string">'webpack'</span>, <span class="string">'sourcemap'</span>]</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    webpack: webpackConfig,</span><br><span class="line"></span><br><span class="line">    webpackMiddleware: &#123;</span><br><span class="line">      stats: <span class="string">'errors-only'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    coverageReporter: &#123;</span><br><span class="line">      dir: <span class="string">'./coverage'</span>,</span><br><span class="line">      reporters: [&#123; <span class="attr">type</span>: <span class="string">'html'</span> &#125;, &#123; <span class="attr">type</span>: <span class="string">'text'</span> &#125;]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>tests/index.js：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// require all src files except main.js for coverage.</span></span><br><span class="line"><span class="comment">// you can also change this to match only the subset of files that</span></span><br><span class="line"><span class="comment">// you want coverage for.</span></span><br><span class="line"><span class="keyword">const</span> srcContext = <span class="built_in">require</span>.context(<span class="string">'../src'</span>, <span class="literal">true</span>, /^\.\/(?!index(\.js)?$)/);</span><br><span class="line">srcContext.keys().forEach(srcContext);</span><br><span class="line"></span><br><span class="line"><span class="comment">// require all test files (files that ends with .spec.js)</span></span><br><span class="line"><span class="keyword">const</span> testsContext = <span class="built_in">require</span>.context(<span class="string">'./specs'</span>, <span class="literal">true</span>, /\.spec$/);</span><br><span class="line">testsContext.keys().forEach(testsContext);</span><br></pre></td></tr></table></figure>
+<p>一个简单的测试用例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> SOURCE =</span><br><span class="line">  <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'&lt;a-audio&gt;'</span>, () =&gt; &#123;</span><br><span class="line">  it(<span class="string">'should render a-audio'</span>, () =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> el = <span class="built_in">document</span>.createElement(<span class="string">'a-audio'</span>);</span><br><span class="line">    el.setAttribute(<span class="string">'src'</span>, SOURCE);</span><br><span class="line">    el.setAttribute(<span class="string">'autoplay'</span>, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">document</span>.body.appendChild(el);</span><br><span class="line">    expect(el).to.not.be.an.instanceOf(HTMLUnknownElement);</span><br><span class="line">    expect(getComputedStyle(el).display).to.equal(<span class="string">'block'</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="UI-测试"><a href="#UI-测试" class="headerlink" title="UI 测试"></a>UI 测试</h3><p>真正功能性的测试依旧是通过组件例子的方式来验证，因为很多富交互的组件用例很难通过单元测试的方式书写。有了 UI 测试用例，很多可视的元素效果能一目了然；当然你也可以使用一些针对 DOM 编程的测试框架。</p>
+<blockquote>
+<p>这个是 Atag 的 <a href="https://github.com/alibaba/rax/blob/master/packages/atag/demo/index.htm" target="_blank" rel="noopener">UI 测试用例</a>。</p>
+</blockquote>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://github.com/alibaba/rax/tree/master/packages/atag" target="_blank" rel="noopener">ATAG</a></li>
+<li><a href="https://developers.taobao.com/components/" target="_blank" rel="noopener">淘宝小程序组件文档</a></li>
+<li><a href="http://w3c.github.io/webcomponents/" target="_blank" rel="noopener">W3C Web Components Specs</a></li>
+<li><a href="https://polymer-project.org" target="_blank" rel="noopener">Polymer Project</a></li>
+<li><a href="https://www.webcomponents.org/" target="_blank" rel="noopener">Web Components.org</a></li>
+<li><a href="https://github.com/polymer" target="_blank" rel="noopener">Github@Polymer</a></li>
+<li><a href="https://github.com/webcomponents" target="_blank" rel="noopener">Github@WebComponents</a></li>
+</ul>
+<blockquote>
+<p>题图出处 <a href="https://www.webcomponents.org/community/articles/why-web-components" target="_blank" rel="noopener">https://www.webcomponents.org/community/articles/why-web-components</a></p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2018/10/31/a-tag/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2018/10/31/a-tag/" data-id="cjt6lbxx6000gjeu1rlm3ansz" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2018/10/31/a-tag/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Polymer/">Polymer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web-components/">web-components</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/小程序/">小程序</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2018/11/27/hooks-and-function-component/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前端架构杂思录：议 Function Component 与 Hooks
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2018/08/08/workbox3/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Workbox 3：Service Worker 可以如此简单</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

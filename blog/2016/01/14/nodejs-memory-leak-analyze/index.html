@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>记一次 Node.js 应用内存暴涨分析 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="起因之前 TMS 在运行时 CPU 中占用率和内存占用一直很高，导致应用运行状态不是很良好，需要频繁重启。经过排查，找出了部分原因：  使用的 html-minifier 模块有问题，如果输入的内容是一个有错误的 HTML 结构，会使解析进入死循环，导致 CPU 占用率 100%。  在使用 vm 模块时，使用姿势错误，导致内存占用无法释放，使内存占用暴涨。   第一个问题我们今天不予讨论，主要">
+<meta name="keywords" content="Node.js,memory">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次 Node.js 应用内存暴涨分析">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="起因之前 TMS 在运行时 CPU 中占用率和内存占用一直很高，导致应用运行状态不是很良好，需要频繁重启。经过排查，找出了部分原因：  使用的 html-minifier 模块有问题，如果输入的内容是一个有错误的 HTML 结构，会使解析进入死循环，导致 CPU 占用率 100%。  在使用 vm 模块时，使用姿势错误，导致内存占用无法释放，使内存占用暴涨。   第一个问题我们今天不予讨论，主要">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1LphILpXXXXb5XVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/03cb3e71cc79fd137ddc8b813d096edab0469e2f.jpeg">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/1c03a75601acbe234a04bb17f235dc6977b1881e.jpeg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次 Node.js 应用内存暴涨分析">
+<meta name="twitter:description" content="起因之前 TMS 在运行时 CPU 中占用率和内存占用一直很高，导致应用运行状态不是很良好，需要频繁重启。经过排查，找出了部分原因：  使用的 html-minifier 模块有问题，如果输入的内容是一个有错误的 HTML 结构，会使解析进入死循环，导致 CPU 占用率 100%。  在使用 vm 模块时，使用姿势错误，导致内存占用无法释放，使内存占用暴涨。   第一个问题我们今天不予讨论，主要">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1LphILpXXXXb5XVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-memory-leak-analyze" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      记一次 Node.js 应用内存暴涨分析
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 凌恒</span>
+        
+        <span>发表于: <a href="/blog/2016/01/14/nodejs-memory-leak-analyze/" class="article-date">
+  <time datetime="2016-01-14T10:46:37.000Z" itemprop="datePublished">2016-01-14</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1LphILpXXXXb5XVXXXXXXXXXX-900-500.jpg" alt="记一次 Node.js 应用内存暴涨分析"></p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>之前 TMS 在运行时 CPU 中占用率和内存占用一直很高，导致应用运行状态不是很良好，需要频繁重启。经过排查，找出了部分原因：</p>
+<ol>
+<li><p>使用的 html-minifier 模块有问题，如果输入的内容是一个有错误的 HTML 结构，会使解析进入死循环，导致 CPU 占用率 100%。</p>
+</li>
+<li><p>在使用 vm 模块时，使用姿势错误，导致内存占用无法释放，使内存占用暴涨。</p>
+</li>
+</ol>
+<p>第一个问题我们今天不予讨论，主要来说一下第二个问题。</p>
+<h2 id="VM（Virtual-Machine）-模块"><a href="#VM（Virtual-Machine）-模块" class="headerlink" title="VM（Virtual Machine） 模块"></a>VM（Virtual Machine） 模块</h2><p>我们就先了解下 VM 这个模块。</p>
+<p>从它的名字和暴露的 API 可以看出，它能创建一个拥有指定上下文的运行环境，可以在里面直接运行 JavaScript 代码，类似 <code>eval</code>。这样运行代码时，不会污染当前作用域，一旦出问题，也不会对当前环境造成很大影响。</p>
+<p>虽然这个模块我们平时用的比较少，但它算是 Node.js 的核心模块，在 <code>require</code> 的实现中，你会发现它的身影。我们在使用 Node.js 时，会使用 <code>require</code> 引入很多外部模块，对于 Node.js 来说，我们引入的代码如果直接和运行环境交互，是十分危险的。所以在 Node.js 模块加载的过程中，会先将 <code>.js</code> 文件的内容进行包裹，变成类似 <code>function(...) {}(...)</code> 的形式，然后使用 <code>vm.runInThisContext</code> 去运行，同时将 module、require 等方法传入返回的函数中。具体的模块加载机制，可以在 <a href="https://github.com/nodejs/node/blob/master/lib/module.js#L377" target="_blank" rel="noopener">lib/module.js</a> 中看到实现，不是本文重点，就不细说了。</p>
+<p>当然，我们也可以用它来执行我们的代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> vm = <span class="built_in">require</span>(<span class="string">'vm'</span>);</span><br><span class="line"><span class="keyword">const</span> code = <span class="string">'result = 2 * n;'</span>;</span><br><span class="line"><span class="keyword">const</span> script = <span class="keyword">new</span> vm.Script(code); <span class="comment">// 预编译后供之后使用</span></span><br><span class="line"><span class="keyword">const</span> sandbox = &#123; <span class="attr">n</span>: <span class="number">5</span> &#125;;</span><br><span class="line"><span class="keyword">const</span> _sandbox = &#123; <span class="attr">n</span>: <span class="number">10</span> &#125;;</span><br><span class="line"><span class="keyword">const</span> ctx = vm.createContext(_sandbox); <span class="comment">// contextify</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 供 runInThisContext 使用</span></span><br><span class="line">global.result = <span class="number">0</span>;</span><br><span class="line">global.n = <span class="number">16</span>;</span><br><span class="line"><span class="comment">// 在当前上下文运行，32</span></span><br><span class="line">vm.runInThisContext(code);</span><br><span class="line">script.runInThisContext();</span><br><span class="line"><span class="comment">// 在新的上下文中运行，10</span></span><br><span class="line">vm.runInNewContext(code, sandbox);</span><br><span class="line">script.runInNewContext(sandbox);</span><br><span class="line"><span class="comment">// 在执行上下文中运行，20</span></span><br><span class="line">vm.runInContext(code, _sandbox);</span><br><span class="line">script.runInContext(_sandbox);</span><br></pre></td></tr></table></figure>
+<h2 id="问题出现"><a href="#问题出现" class="headerlink" title="问题出现"></a>问题出现</h2><p>在 TMS 中，需要压缩用户上传的代码，出于安全和稳定的考虑，需要和当前运行环境进行隔离，这里就可以使用 VM 模块。为了便于理解，简化了一个类似的 Demo，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fibonacci，计算斐波纳挈数列</span></span><br><span class="line">http.createServer(<span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> sandbox = &#123;</span><br><span class="line">    fibonacci: fibonacci,</span><br><span class="line">    number: <span class="number">10</span></span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  vm.runInNewContext(<span class="string">'a = fibonacci(number)'</span>, sandbox);</span><br><span class="line">  res.end();</span><br><span class="line">&#125;).listen(<span class="number">8999</span>, <span class="string">'127.0.0.1'</span>);</span><br></pre></td></tr></table></figure>
+<p>运行 Demo。为了模拟实际环境中的并发，这里我们使用 <code>ab</code> 来发起请求。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ab -n 1000 -c 100  http://127.0.0.1:8999/</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Apache HTTP server benchmarking tool，简称 ab，是一个常用的开源网站压力测试工具，<a href="http://httpd.apache.org/docs/2.0/programs/ab.html" target="_blank" rel="noopener">官网</a>。</p>
+</blockquote>
+<p>在运行期间，我们使用 <code>top</code> 来观察内存的占用情况。</p>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/03cb3e71cc79fd137ddc8b813d096edab0469e2f.jpeg" alt="实验一"></p>
+<p>可以发现一些问题，</p>
+<ul>
+<li>内存占用暴涨，大约 800M</li>
+<li>占用的内存在运行结束（没有请求）后，释放很慢</li>
+<li>QPS 很低</li>
+</ul>
+<p>Demo 应用比较简单，引发的问题不大。但如果在实际的应用场景中，一旦发生内存占用过高，无法分配内存空间的情况，会对应用稳定性照成很大影响，甚至导致应用崩溃。</p>
+<p>接下来，我们再看一个例子，将上面的代码稍作修改，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sandbox = &#123;</span><br><span class="line">  fibonacci: fibonacci,</span><br><span class="line">  number: <span class="number">10</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">http.createServer(<span class="function"><span class="keyword">function</span> <span class="title">server</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  vm.runInNewContext(<span class="string">'a = fibonacci(number)'</span>, sandbox);</span><br><span class="line">  res.end();</span><br><span class="line">&#125;).listen(<span class="number">8999</span>, <span class="string">'127.0.0.1'</span>);</span><br></pre></td></tr></table></figure>
+<p>用上面同样的方法观察，结果如下图：</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/1c03a75601acbe234a04bb17f235dc6977b1881e.jpeg" alt="实验二"></p>
+<p>这次，我们看到内存仅占用了 19M，而且增长很平缓，QPS 提高了不少。</p>
+<p>仅仅是声明 sandbox 位置的不同，差别却如此之大，为什么呢？</p>
+<h2 id="探究原因"><a href="#探究原因" class="headerlink" title="探究原因"></a>探究原因</h2><p>我们都知道，一般一个在函数中声明的变量，在函数运行完，就会被释放掉，所占用的空间也会被回收。但在之前的例子，很有可能 sandbox 变量没有被回收，导致的内存暴涨。它和其它变量有什么区别，导致它不能被正确释放呢？</p>
+<p>翻了下 vm 的代码，发现在使用 <code>vm.runInNewContext</code> 时，会将你传入的 sandbox 进行 contextify，问题可能就出在这里。</p>
+<p>contextify 大体流程如下（<a href="https://github.com/nodejs/node/blob/master/src/node_contextify.cc#L281" target="_blank" rel="noopener">src/node_contextify.cc#L281 MakeContext</a>）：</p>
+<ol>
+<li>检查传入的对象（sandbox）是否有  <strong>_contextifyHidden</strong>  这个隐藏的属性。</li>
+<li>如果没有，则 new 一个 <code>ContextifyContext</code> 实例，并且挂载到 sandbox 的  <strong>_contextifyHidden</strong>  属性上。</li>
+<li>如果存在，则返回，不做处理，防止在一个对象上多次进行 contextify。</li>
+</ol>
+<p>如果我们用一个在函数外部声明的 sandbox，如同第二种写法，那么无论我们调用多少次 runInNewContext，都只会进行一次 contextify 操作，效果类似于 <code>vm.runInContext</code>。但是，如果像第一种写法那样，每次都使用一个新的对象，那么每次都要进行 contextify，而 contextify 过程中比较关键的一步是创建一个 <code>ContextifyContext</code> 实例，这个类有些特殊的地方，我们看下它的具体定义（在<a href="https://github.com/nodejs/node/blob/master/src/node_contextify.cc#L49" target="_blank" rel="noopener"> src/node_contextify.cc#L49 </a>）：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ContextifyContext</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  Persistent&lt;Object&gt; sandbox_;</span><br><span class="line">  Persistent&lt;Context&gt; context_;</span><br><span class="line">  Persistent&lt;Object&gt; proxy_global_;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">ContextifyContext</span><span class="params">(Environment* env, Local&lt;Object&gt; sandbox)</span> </span>&#123;</span><br><span class="line">      ...     </span><br><span class="line">      sandbox_.MarkIndependent();</span><br><span class="line">      ...</span><br><span class="line">      context_.MarkIndependent();</span><br><span class="line">      ...</span><br><span class="line">      proxy_global_.MarkIndependent();</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>它里面有三个被声明成 <code>Persistent</code> 类型的变量，重点就在这里。</p>
+<p>在 V8 中，有三种概念， <strong>Handle</strong> 、 <strong>Local</strong> 、 <strong>Persistent</strong> 。所有 JavaScript 数据都是有 GC 管理的。JavaScript 中的变量在 C++ 层面都是和 Handle 对应的，可以把它理解成一个普通的指针，用来指向数据的内存位置。而 Local 可以看做一个实际存储数据的空间，拥有 new 方法，当它 new 出来后，无论是否有变量接收，都会存在于  <strong>HandleScope</strong>  中。 HandleScope 可以理解成一个管理和回收 Handle 的东西。所以，一个 Local 可以有多个 Handle 指向。而 HandleScope 类似于函数的作用域，它管理着 Handle 和 Local，一旦 HandleScope 退出，其上的 Handle 和 Local 就会被释放掉，可以联系 JavaScript 中的函数作用域来理解。</p>
+<p>如同 JavaScript 中的闭包一样，我们有时会需要一种在函数退出后依然存在的变量，这就是  <strong>Persistent</strong>  类型，它不由 HandleScope 管理，只要没有手动释放，它就一直可以被使用。可以简单用堆和栈的概念来理解，Persistent 是堆变量，HandleScope 是栈，Local 是栈变量，而 Handle 是一种引用。</p>
+<p>对于 Persistent 类型变量，除了手动调用 <code>Dispose()</code> 释放外，V8 还提供了一种自动的，依赖 GC 的释放方式，就是 <code>Weak Callback + MarkIndependent</code> 的组合，显然，Node.js 就是使用的这种。这种方式的优势在于自动化，不用开发者去管理这部分内存，但是过分的依赖 GC，难免会产生各种各样的问题，比如：内存释放不及时，占用过多系统资源等。</p>
+<p>要知道，GC 并不是实时的，它是需要程序停下来一段时间来让它来进行回收操作的，如果程序一直在运行，那么 GC 操作就会被延后，直到它觉得必需要运行的时候。这样，会造成要释放资源的积压。如果频繁执行 GC，则会影响程序的运行效率。</p>
+<p>而且，<code>Weak Callback</code> 的执行是由 GC 决定的，一般是在 Full GC 前后。比较过分的是，GC 不保证一定会调用这个回调。。。</p>
+<p>另外，在上述的场景中，通过试验，可以做这样的猜想：因为 old space 默认大小为 1G，而我们看到在 1000 次执行完后，old space 才 800M 左右，没有达到阈值，所以 V8 并不会处理这部分的内存占用。当我们把 old space 设为 200M 时，其值稳定在 180M 左右，可以大体印证这个猜想。</p>
+<p>综上，问题的根源找到了。每次请求回调里都会创建一个新的 sandbox，并且它不能在使用完后立即释放，于是就形成很多无用的 Persistent Handle，堆积在内存中，导致内存占用暴涨。而且，它们的释放主要依赖于 MarkSweep，执行频率不高，所以占用释放很慢。可以想象，在一个高 QPS 的应用下，内存基本上是只增不降的，一点点被蚕食干净。</p>
+<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><p>问题既然找到了，那么就来看下如何解决。</p>
+<h3 id="方案一"><a href="#方案一" class="headerlink" title="方案一"></a>方案一</h3><p>把 sandbox 在回调外面声明，减少重复 contextify。因为脚本运行所需要的 context 对象实际上就是 sandbox 对象，只是在底层标识了一下（_contextifyHidden），这一点在 MakeContext 函数中以及获取 vm 里的返回值时可以看出来，所以修改 sandbox 的值即可以实现传递不同参数的效果。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sandbox = &#123;</span><br><span class="line">  fibonacci: fibonacci,</span><br><span class="line">  number: <span class="number">10</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">http.createServer(<span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 传递不同的值</span></span><br><span class="line">  sandbox.number = <span class="built_in">Math</span>.floor(<span class="built_in">Math</span>.random() * <span class="number">20</span>);</span><br><span class="line">  vm.runInNewContext(<span class="string">'a = fibonacci(number)'</span>, sandbox);</span><br><span class="line">  res.end();</span><br><span class="line">&#125;).listen(<span class="number">8999</span>, <span class="string">'127.0.0.1'</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="方案二"><a href="#方案二" class="headerlink" title="方案二"></a>方案二</h3><p>vm 模块本身提供了复用的能力，<code>Script</code> 和 <code>createContext</code>，所以可以利用它们来处理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> code = <span class="string">'a = fibonacci(number)'</span>;</span><br><span class="line"><span class="keyword">const</span> script = <span class="keyword">new</span> vm.Script(code);</span><br><span class="line"><span class="keyword">let</span> sandbox = &#123;</span><br><span class="line">  fibonacci: fibonacci,</span><br><span class="line">  number: <span class="number">10</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">let</span> ctx = vm.createContext(sandbox);</span><br><span class="line"></span><br><span class="line">http.createServer(<span class="function"><span class="keyword">function</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  sandbox.number = <span class="built_in">Math</span>.floor(<span class="built_in">Math</span>.random() * <span class="number">20</span>);</span><br><span class="line">  script.runInContext(ctx);</span><br><span class="line">  res.end();</span><br><span class="line">&#125;).listen(<span class="number">8999</span>, <span class="string">'127.0.0.1'</span>);</span><br></pre></td></tr></table></figure>
+<p>从上面 contextify 的过程中，我们除了可以发现 context 和 sandbox 是关联的之外，还有一点就是 <code>runInNewContext</code> 会对 sandbox 做校验，所以这里使用 <code>runInNewContext</code> 也不会有上述的问题。</p>
+<h3 id="方案三"><a href="#方案三" class="headerlink" title="方案三"></a>方案三</h3><p>这种方案更有普适性，不一定针对于这个问题本身。</p>
+<p>Node.js 本身提供了很多关于 GC 方面的参数。</p>
+<blockquote>
+<p>MarkSweep，Full GC 的标记阶段</p>
+</blockquote>
+<ul>
+<li><code>--trace_gc</code>，打印 GC 日志</li>
+<li><code>--expose-gc</code>，暴露 GC 方法，可以手动调用 global.gc() 来强制执行 GC 过程，并不推荐使用。</li>
+<li><code>--max-new-space-size</code>，最大 new space 大小，执行 scavenge 回收，默认 16M，单位 KB</li>
+<li><code>--max-old-space-size</code>，最大 old space 大小，执行 MarkSweep 回收，默认 1G，单位 MB</li>
+<li><code>--gc-global</code>，强制每次执行 MarkSweep。</li>
+</ul>
+<p>可以通过调节这些参数的配置，观察 GC 日志中 <code>sweeping from</code>（内存积压状况）、<code>Mark-sweep</code>（MarkSweep 用时）等，来优化 GC 过程，需要一定的耐心。当然，有些值不能太极端，比如把 <code>--max-old-space-size</code> 设置的很小，频繁触发 GC，会导致应用的执行效率下降。</p>
+<h2 id="以后如何发现问题"><a href="#以后如何发现问题" class="headerlink" title="以后如何发现问题"></a>以后如何发现问题</h2><p>以后如果遇到一些性能问题，我们该如何去排查呢？这里介绍一些常用的方法。</p>
+<h3 id="v8-prof"><a href="#v8-prof" class="headerlink" title="v8 prof"></a>v8 prof</h3><p>使用 V8 自带的 profiler 功能，分析 JavaScript 各个函数的消耗和 GC 部分。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install profiler</span><br><span class="line">node --prof xxx.js</span><br></pre></td></tr></table></figure>
+<p>会生成 xxxx-v8.log，之后使用工具转换成可读的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install tick</span><br><span class="line">node-tick-processor xxxx-v8.log</span><br></pre></td></tr></table></figure>
+<p>就可以查看相关的数据了。</p>
+<h3 id="node-inspector"><a href="#node-inspector" class="headerlink" title="node-inspector"></a>node-inspector</h3><p>这个工具就不多介绍了，大家应该很熟了，它可以使用 Chrome 开发者工具来调试 Node.js 应用。</p>
+<h3 id="node-heapdump"><a href="#node-heapdump" class="headerlink" title="node-heapdump"></a>node-heapdump</h3><p>它可以对 Node.js 应用进行 heapdump。然后，可以使用 Chrome 开发者工具打开生成的 xxx.heapsnapshoot 文件，查看 heap 中的内容。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install heapdump</span><br></pre></td></tr></table></figure>
+<p>在应用中引入</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> heapdump = <span class="built_in">require</span>(<span class="string">'heapdump'</span>);</span><br></pre></td></tr></table></figure>
+<p>执行一段时间后退出，或者在命令行中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -USR2 &lt;pid&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="v8-profiler"><a href="#v8-profiler" class="headerlink" title="v8-profiler"></a>v8-profiler</h3><p>这个被 node-inspector 集成了，可以提供 HeapDump 和 CPU Profile 功能。<br>详见 <a href="https://www.npmjs.com/package/v8-profiler" target="_blank" rel="noopener">v8-profiler</a>。</p>
+<h3 id="node-memwatch"><a href="#node-memwatch" class="headerlink" title="node-memwatch"></a>node-memwatch</h3><p>可以帮助发现代码存在的内存泄露问题，也可以做在不同时间点堆的比较。<br>详见 <a href="https://github.com/lloyd/node-memwatch" target="_blank" rel="noopener">node-memwatch</a></p>
+<p>当然，工具只是辅助作用，在平时写代码时多思考一下，善用 API，在处理问题时多积累些经验，才能写出更好的代码。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>V8 提供的内存释放方案有它的优势所在，但 GC 是个很复杂的过程，过分依赖自动化，也不一定是好事。特别在写 Node.js 底层的 <code>C++</code> 部分时，我们还是要考虑下是否该手动释放的问题，不要把问题都抛给 V8。当然，对于 API 应用也要注意，本身 VM 模块提供了更好的方案，但我们却忽略了。</p>
+<blockquote>
+<p>V8 比较复杂，理解有误的地方，欢迎指正，讨论。</p>
+</blockquote>
+<p>参考资料：</p>
+<ul>
+<li><a href="https://developers.google.com/v8/embed" target="_blank" rel="noopener">V8 Embedder’s Guide</a></li>
+<li><a href="https://github.com/nodejs/node/blob/master/src/node_contextify.cc" target="_blank" rel="noopener">Node.js node_contextify.cc 源码</a></li>
+<li><a href="http://jayconrod.com/posts/55/a-tour-of-v8-garbage-collection" target="_blank" rel="noopener">A tour of V8: Garbage Collection</a></li>
+<li>Google</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/14/nodejs-memory-leak-analyze/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/" data-id="cjt6lby03007sjeu14f77c6jm" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/memory/">memory</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          小球是怎么落入指定球洞的？
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/13/measuring-fps/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">无线性能优化：FPS 测试</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

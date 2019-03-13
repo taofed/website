@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Node.js 和 C++ 之间的类型转换 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="我非常喜欢使用 Node.js，但是当涉及到计算密集型的场景时 Node.js 就不能够很好地胜任了。而在这样的情况下 C++  是一个很好的选择，非常幸运 Node.js 官方提供了 C/C++ Addons 的机制让我们能够使用 V8 API 把 Node.js 和 C++ 结合起来。 虽然在 Node.js 官方网站有很多的关于怎么使用这些 API 的文档，但是在 JavaScript 和">
+<meta name="keywords" content="类型转换,addons">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js 和 C++ 之间的类型转换">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/09/20/type-casts-between-node-and-cpp/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="我非常喜欢使用 Node.js，但是当涉及到计算密集型的场景时 Node.js 就不能够很好地胜任了。而在这样的情况下 C++  是一个很好的选择，非常幸运 Node.js 官方提供了 C/C++ Addons 的机制让我们能够使用 V8 API 把 Node.js 和 C++ 结合起来。 虽然在 Node.js 官方网站有很多的关于怎么使用这些 API 的文档，但是在 JavaScript 和">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1h_SoNpXXXXcMXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1JspRNpXXXXajapXXXXXXXXXX-804-860.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1jb80NpXXXXXYaXXXXXXXXXXX-840-324.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB11tB4NpXXXXaLXVXXXXXXXXXX-796-796.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node.js 和 C++ 之间的类型转换">
+<meta name="twitter:description" content="我非常喜欢使用 Node.js，但是当涉及到计算密集型的场景时 Node.js 就不能够很好地胜任了。而在这样的情况下 C++  是一个很好的选择，非常幸运 Node.js 官方提供了 C/C++ Addons 的机制让我们能够使用 V8 API 把 Node.js 和 C++ 结合起来。 虽然在 Node.js 官方网站有很多的关于怎么使用这些 API 的文档，但是在 JavaScript 和">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1h_SoNpXXXXcMXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-type-casts-between-node-and-cpp" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Node.js 和 C++ 之间的类型转换
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 慎里</span>
+        
+        <span>发表于: <a href="/blog/2016/09/20/type-casts-between-node-and-cpp/" class="article-date">
+  <time datetime="2016-09-20T11:18:23.000Z" itemprop="datePublished">2016-09-20</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tfs/TB1h_SoNpXXXXcMXXXXXXXXXXXX-900-500.jpg" alt="Node.js 和 C++ 之间的类型转换"></p>
+<p>我非常喜欢使用 Node.js，但是当涉及到计算密集型的场景时 Node.js 就不能够很好地胜任了。而在这样的情况下 C++  是一个很好的选择，非常幸运 Node.js 官方提供了 <a href="https://nodejs.org/dist/latest-v6.x/docs/api/addons.html" target="_blank" rel="noopener">C/C++ Addons</a> 的机制让我们能够使用 V8 API 把 Node.js 和 C++ 结合起来。</p>
+<p>虽然在 Node.js 官方网站有很多的关于怎么使用这些 API 的文档，但是在 JavaScript 和 C++ 之间传递数据是一件非常麻烦的事情，C++ 是强类型语言（”1024” 是字符串类型而不是整数类型），而 JavaScript 却总是默认的帮我们做一些类型转换。</p>
+<p>JavaScript 的基本类型包括 String，Number，Boolean，null，undefined，V8 使用类继承的方式来定义这类型，这些类型都继承了 <code>Primitive</code> 类，而 <code>Primitive</code> 继承了 <code>Value</code>，v8 也支持整型（包括 <code>Int32</code> 和 <code>Uint32</code>），而所有的类型定义都可以从 V8 <a href="https://v8docs.nodesource.com/node-6.0/d0/d4a/classv8_1_1_primitive.html" target="_blank" rel="noopener">类型文档</a>中看到，除了基本的类型，还有 Object，Array，Map 等类型的定义。</p>
+<p>基本类型的继承关系如下图：<br><img src="https://img.alicdn.com/tfs/TB1JspRNpXXXXajapXXXXXXXXXX-804-860.png" alt="primitive"></p>
+<p>在 V8 中所有 JavaScript 值都是被放在 <code>Local</code> 对象中，通过这个对象指定了 JavaScript 运行时的内存单元。</p>
+<p>下面这段代定义了一个 <code>Number</code> 类型的值，其中 Test 函数中声明的 isolate 变量代表着 V8 虚拟机中的堆内存，当创建新变量的时候就需要用到它，接下来的一行代码就通过 isolate 声明了一个 <code>Number</code> 类型的变量。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;node.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;v8.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> v8;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Test</span><span class="params">(<span class="keyword">const</span> v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">    Isolate* isolate = args.GetIsolate();</span><br><span class="line">    <span class="comment">// 声明变量</span></span><br><span class="line">    Local&lt;Number&gt; retval = v8::Number::New(isolate, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(Local &lt;Object&gt; exports, Local&lt;Object&gt; <span class="keyword">module</span>)</span> </span>&#123;</span><br><span class="line">    NODE_SET_METHOD(exports, <span class="string">"getTestValue"</span>, Test);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NODE_MODULE(returnValue, init)</span><br></pre></td></tr></table></figure>
+<p>看了 V8 <a href="https://v8docs.nodesource.com/node-6.0/d0/d4a/classv8_1_1_primitive.html" target="_blank" rel="noopener">类型 API 文档</a> 你会发现对于基本的 JavaScript 类型，只有变量的声明而没有变量的赋值。最初想可能觉得这个非常的奇怪，可是仔细想一想后发现这个是合理的。主要由以下几点原因：</p>
+<ul>
+<li>JavaScript 的基本类型是不可变类型，变量都是指向一个不可变的内存单元，var a = 10，则 a 指向的内存单元中包含的值为 5，重新赋值 a = 100，没有改变这个内存单元的值，而是使得 a 指向了另外一个内存单元，其中的值为 100。如果声明两个变量 x，y 的值都为 10，则他们指向的是同一个内存单元。</li>
+<li>函数的传参都是传值，而不是传引用，当在 JavaScript 中调用 C++ 的函数时，如果参数是基本类型则每次都是把这个值拷贝过去，改变参数的值不会影响原来的值。</li>
+<li>使用 <code>Local&lt;Value&gt;</code> 声明基本类型的变量都是对内存单元的引用，因为第一条原因不可能改变引用的值使其指向另外一个内存单元，因此不存在变量的重新赋值。</li>
+</ul>
+<h3 id="数据流向-C-gt-JavaScript"><a href="#数据流向-C-gt-JavaScript" class="headerlink" title="数据流向 C++ -&gt; JavaScript"></a>数据流向 C++ -&gt; JavaScript</h3><p>下面 demo 定义了一些常用的 JavaScript 类型，包括基本类型的以及 Object, Array, Fuction。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;node.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;v8.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> v8;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">MyFunction</span><span class="params">(<span class="keyword">const</span> v8::FunctionCallbackInfo&lt;Value&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">    Isolate* isolate = args.GetIsolate();</span><br><span class="line">    args.GetReturnValue().Set(String::NewFromUtf8(isolate, <span class="string">"Hello World!"</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Test</span><span class="params">(<span class="keyword">const</span> v8::FunctionCallbackInfo&lt;v8::Value&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">    Isolate* isolate = args.GetIsolate();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Number 类型的声明</span></span><br><span class="line">    Local&lt;Number&gt; retval = v8::Number::New(isolate, <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// String 类型的声明</span></span><br><span class="line">    Local&lt;String&gt; str = v8::String::NewFromUtf8(isolate, <span class="string">"Hello World!"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Object 类型的声明</span></span><br><span class="line">    Local&lt;Object&gt; obj = v8::Object::New(isolate);</span><br><span class="line">    <span class="comment">// 对象的赋值</span></span><br><span class="line">    obj-&gt;Set(v8::String::NewFromUtf8(isolate, <span class="string">"arg1"</span>), str);</span><br><span class="line">    obj-&gt;Set(v8::String::NewFromUtf8(isolate, <span class="string">"arg2"</span>), retval);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Function 类型的声明并赋值</span></span><br><span class="line">    Local&lt;FunctionTemplate&gt; tpl = v8::FunctionTemplate::New(isolate, MyFunction);</span><br><span class="line">    Local&lt;Function&gt; fn = tpl-&gt;GetFunction();</span><br><span class="line">    <span class="comment">// 函数名字</span></span><br><span class="line">    fn-&gt;SetName(String::NewFromUtf8(isolate, <span class="string">"theFunction"</span>));</span><br><span class="line">    obj-&gt;Set(v8::String::NewFromUtf8(isolate, <span class="string">"arg3"</span>), fn);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Boolean 类型的声明</span></span><br><span class="line">    Local&lt;Boolean&gt; flag = Boolean::New(isolate, <span class="literal">true</span>);</span><br><span class="line">    obj-&gt;Set(String::NewFromUtf8(isolate, <span class="string">"arg4"</span>), flag);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Array 类型的声明</span></span><br><span class="line">    Local&lt;Array&gt; arr = Array::New(isolate);</span><br><span class="line">    <span class="comment">// Array 赋值</span></span><br><span class="line">    arr-&gt;Set(<span class="number">0</span>, Number::New(isolate, <span class="number">1</span>));</span><br><span class="line">    arr-&gt;Set(<span class="number">1</span>, Number::New(isolate, <span class="number">10</span>));</span><br><span class="line">    arr-&gt;Set(<span class="number">2</span>, Number::New(isolate, <span class="number">100</span>));</span><br><span class="line">    arr-&gt;Set(<span class="number">3</span>, Number::New(isolate, <span class="number">1000</span>));</span><br><span class="line">    obj-&gt;Set(String::NewFromUtf8(isolate, <span class="string">"arg5"</span>), arr);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Undefined 类型的声明</span></span><br><span class="line">    Local&lt;Value&gt; und = Undefined(isolate);</span><br><span class="line">    obj-&gt;Set(String::NewFromUtf8(isolate, <span class="string">"arg6"</span>), und);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// null 类型的声明</span></span><br><span class="line">    Local&lt;Value&gt; null = Null(isolate);</span><br><span class="line">    obj-&gt;Set(String::NewFromUtf8(isolate, <span class="string">"arg7"</span>), null);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回给 JavaScript 调用时的返回值</span></span><br><span class="line">    args.GetReturnValue().Set(obj);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">(Local &lt;Object&gt; exports, Local&lt;Object&gt; <span class="keyword">module</span>)</span> </span>&#123;</span><br><span class="line">    NODE_SET_METHOD(exports, <span class="string">"getTestValue"</span>, Test);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NODE_MODULE(returnValue, init)</span><br></pre></td></tr></table></figure>
+<p>所有的 addon 都需要一个初始化的函数，如下面的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Initialize</span><span class="params">(Local&lt;Object&gt; exports)</span></span>;</span><br><span class="line">NODE_MODULE(module_name, Initialize)</span><br></pre></td></tr></table></figure>
+<p><code>Initialize</code> 是初始化的函数，<code>module_name</code> 是编译后产生的二进制文件名，上述代码的模块名为 <code>returnValue</code>。</p>
+<p>上述代码通过 node-gyp 编译后（编译过程官方文档 <a href="https://nodejs.org/dist/latest-v6.x/docs/api/addons.html" target="_blank" rel="noopener">C/C++ Addons</a> 有详细的介绍），可以通过如下的方式调用。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// returnValue.node 这个文件就是编译后产生的文件，通过 NODE_MODULE(returnValue, init) 决定的文件名</span></span><br><span class="line"><span class="keyword">const</span> returnValue = <span class="built_in">require</span>(<span class="string">'./build/Release/returnValue.node'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(returnValue.getTestValue());</span><br></pre></td></tr></table></figure>
+<p>运行结果如下:<br><img src="https://img.alicdn.com/tfs/TB1jb80NpXXXXXYaXXXXXXXXXXX-840-324.png" alt="returnValue"></p>
+<h3 id="数据流向-javaScript-gt-C"><a href="#数据流向-javaScript-gt-C" class="headerlink" title="数据流向 javaScript -&gt; C++"></a>数据流向 javaScript -&gt; C++</h3><p>上面的 demo 展示了怎样在在 C++ 定义 JavaScript 类型，数据的是从 C++ 流向 JavaScript，反过来数据也需要从 javaScript 流向 C++，也就是调用 C++ 函数的时候需要传入一些参数。</p>
+<p>下面的代码展示了参数个数判断，参数类型判断，以及参数类型装换成 V8 类型的过程，包括基本类型以及 Object, Array, Fuction。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;node.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;v8.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> v8;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">GetArgument</span><span class="params">(<span class="keyword">const</span> FunctionCallbackInfo&lt;Value&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">    Isolate* isolate = args.GetIsolate();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 参数长度判断</span></span><br><span class="line">    <span class="keyword">if</span> (args.Length() &lt; <span class="number">2</span>) &#123;</span><br><span class="line">        isolate-&gt;ThrowException(Exception::TypeError(</span><br><span class="line">            String::NewFromUtf8(isolate, <span class="string">"Wrong number of arguments"</span>)));</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 参数类型判断</span></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsNumber() || !args[<span class="number">1</span>]-&gt;IsNumber()) &#123;</span><br><span class="line">        <span class="comment">//抛出错误</span></span><br><span class="line">        isolate-&gt;ThrowException(Exception::TypeError(</span><br><span class="line">            String::NewFromUtf8(isolate, <span class="string">"argumnets must be number"</span>)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsObject()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not Object\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsBoolean()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not Boolean\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsArray()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not Array\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsString()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not String\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsFunction()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not Function\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsNull()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not Null\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!args[<span class="number">0</span>]-&gt;IsUndefined()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"I am not Undefined\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js Number 类型转换成 v8 Number 类型</span></span><br><span class="line">    Local&lt;Number&gt; value1 = Local&lt;Number&gt;::Cast(args[<span class="number">0</span>]);</span><br><span class="line">    Local&lt;Number&gt; value2 = Local&lt;Number&gt;::Cast(args[<span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">double</span> value = value1-&gt;NumberValue() + value2-&gt;NumberValue();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js String 类型转换成 v8 String 类型</span></span><br><span class="line">    Local&lt;String&gt; str = Local&lt;String&gt;::Cast(args[<span class="number">2</span>]);</span><br><span class="line">    String::<span class="function">Utf8Value <span class="title">utfValue</span><span class="params">(str)</span></span>;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">string</span>(*utfValue)&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js Array 类型转换成 v8 Array 类型</span></span><br><span class="line">    Local&lt;Array&gt; input_array = Local&lt;Array&gt;::Cast(args[<span class="number">3</span>]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d, %f %f\n"</span>, input_array-&gt;Length(), input_array-&gt;Get(<span class="number">0</span>)-&gt;NumberValue(), input_array-&gt;Get(<span class="number">1</span>)-&gt;NumberValue());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js Object 类型转换成 v8 Object 类型</span></span><br><span class="line">    Local&lt;Object&gt; obj = Local&lt;Object&gt;::Cast(args[<span class="number">4</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据 key 获取对象中的值</span></span><br><span class="line">    Local&lt;Value&gt; a = obj-&gt;Get(String::NewFromUtf8(isolate, <span class="string">"a"</span>));</span><br><span class="line">    Local&lt;Value&gt; b = obj-&gt;Get(String::NewFromUtf8(isolate, <span class="string">"b"</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js Array 类型转换成 v8 Array 类型</span></span><br><span class="line">    Local&lt;Array&gt; c = Local&lt;Array&gt;::Cast(obj-&gt;Get(String::NewFromUtf8(isolate, <span class="string">"c"</span>)));</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;a-&gt;NumberValue()&lt;&lt;<span class="string">"   "</span>&lt;&lt;b-&gt;NumberValue()&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d, %f %f\n"</span>, c-&gt;Length(), c-&gt;Get(<span class="number">0</span>)-&gt;NumberValue(), c-&gt;Get(<span class="number">1</span>)-&gt;NumberValue());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js String 类型转换成 v8 String 类型</span></span><br><span class="line">    Local&lt;String&gt; cString = Local&lt;String&gt;::Cast(c-&gt;Get(<span class="number">2</span>));</span><br><span class="line">    String::<span class="function">Utf8Value <span class="title">utfValueD</span><span class="params">(cString)</span></span>;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">string</span>(*utfValueD)&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据 key 获取对象中的值</span></span><br><span class="line">    Local&lt;Object&gt; d = Local&lt;Object&gt;::Cast(obj-&gt;Get(String::NewFromUtf8(isolate, <span class="string">"d"</span>)));</span><br><span class="line">    Local&lt;String&gt; dString1 = Local&lt;String&gt;::Cast(d-&gt;Get(String::NewFromUtf8(isolate, <span class="string">"m"</span>)));</span><br><span class="line">    String::<span class="function">Utf8Value <span class="title">utfValued1</span><span class="params">(dString1)</span></span>;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">string</span>(*utfValued1)&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根据 key 获取对象中的值</span></span><br><span class="line">    Local&lt;String&gt; dString2 = Local&lt;String&gt;::Cast(d-&gt;Get(String::NewFromUtf8(isolate, <span class="string">"n"</span>)));</span><br><span class="line">    String::<span class="function">Utf8Value <span class="title">utfValued2</span><span class="params">(dString2)</span></span>;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">string</span>(*utfValued2)&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js Booelan 类型转换成 v8 Boolean 类型</span></span><br><span class="line">    Local&lt;Boolean&gt; FlagTrue = Local&lt;Boolean&gt;::Cast(args[<span class="number">5</span>]);</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="string">"Flag: "</span>&lt;&lt;FlagTrue-&gt;BooleanValue()&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// js Function 类型转换成 v8 Function 类型</span></span><br><span class="line">    Local&lt;Function&gt; cb = Local&lt;Function&gt;::Cast(args[<span class="number">8</span>]);</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">unsigned</span> argc = <span class="number">2</span>;</span><br><span class="line">    Local&lt;Value&gt; argv[<span class="number">2</span>];</span><br><span class="line">    argv[<span class="number">0</span>] = a;</span><br><span class="line">    argv[<span class="number">1</span>] = b;</span><br><span class="line">    cb-&gt;Call(Null(isolate), argc, argv);</span><br><span class="line"></span><br><span class="line">    args.GetReturnValue().Set(value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Init</span><span class="params">(Local &lt;Object&gt; exports, Local &lt;Object&gt; <span class="keyword">module</span>)</span> </span>&#123;</span><br><span class="line">    NODE_SET_METHOD(<span class="keyword">module</span>, <span class="string">"exports"</span>, GetArgument);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">NODE_MODULE(argumentss, Init)</span><br></pre></td></tr></table></figure>
+<p>通过 node-gyp 编译后，可以通过如下的方式调用。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> getArguments = <span class="built_in">require</span>(<span class="string">'./build/Release/arguments'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(getArguments(<span class="number">2</span>, <span class="number">3</span>, <span class="string">'Hello Arguments'</span>, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], &#123;</span><br><span class="line">        a: <span class="number">10</span>,</span><br><span class="line">        b: <span class="number">100</span>,</span><br><span class="line">        c: [<span class="number">23</span>, <span class="number">22</span>, <span class="string">"我是33"</span>],</span><br><span class="line">        d: &#123; <span class="attr">m</span>: <span class="string">'我是22'</span>, <span class="attr">n</span>: <span class="string">'我是23'</span> &#125;</span><br><span class="line">    &#125;, <span class="literal">true</span>, <span class="literal">null</span>, <span class="literal">undefined</span>,</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">myFunction</span>(<span class="params">...args</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'I am Function!'</span>);</span><br><span class="line">        <span class="built_in">console</span>.log(...args);</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'I am Function!'</span>);</span><br><span class="line">    &#125;));</span><br></pre></td></tr></table></figure>
+<p>运行结果如下:</p>
+<p><img src="https://img.alicdn.com/tfs/TB11tB4NpXXXXaLXVXXXXXXXXXX-796-796.png" alt="argument"></p>
+<p>关于其他的类型，我这里就就不一一介绍，V8 文档里面都有对应的 API。</p>
+<h3 id="NAN"><a href="#NAN" class="headerlink" title="NAN"></a>NAN</h3><p>由于 V8 的 API 还没有彻底稳定下来，所以对于不同版本的 Node.js 类型相关的 API 会发生变化，而 <a href="https://github.com/nodejs/nan" target="_blank" rel="noopener">NAN</a> 帮我们做了封装，在编码的时候不需要关心版本问题，只需要引入相应的头文件即可。</p>
+<p>引入头文件后，可以如下使用方式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">v8::Local&lt;v8::Primitive&gt; Nan::Undefined()</span><br><span class="line">v8::Local&lt;v8::Primitive&gt; Nan::Null()</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li><a href="http://blog.scottfrees.com/type-conversions-from-javascript-to-c-in-v8" target="_blank" rel="noopener">Type conversions from JavaScript to C++ in V8</a></li>
+<li><a href="https://nodejs.org/dist/latest-v6.x/docs/api/addons.html" target="_blank" rel="noopener">node addon</a></li>
+<li><a href="https://v8docs.nodesource.com/node-6.0/d0/d4a/classv8_1_1_primitive.html" target="_blank" rel="noopener">v8 types documentation</a></li>
+<li><a href="https://github.com/nodejs/node-gyp" target="_blank" rel="noopener">node-gyp</a></li>
+<li><a href="https://gyp.gsrc.io/docs/UserDocumentation.md" target="_blank" rel="noopener">gyp user documentation</a></li>
+<li><a href="https://github.com/nodejs/nan" target="_blank" rel="noopener">nan</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/09/20/type-casts-between-node-and-cpp/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/09/20/type-casts-between-node-and-cpp/" data-id="cjt6lby1u00c5jeu1dsojxm3a" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/09/20/type-casts-between-node-and-cpp/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/addons/">addons</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类型转换/">类型转换</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/09/30/babel-plugins/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          理解 Babel 插件
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/09/09/webpack-flow/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">细说 webpack 之流程篇</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

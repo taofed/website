@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>happypack 原理解析 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="说起 happypack 可能很多同学还比较陌生，其实 happypack 是 webpack 的一个插件，目的是通过多进程模型，来加速代码构建，目前我们的线上服务器已经上线这个插件功能，并做了一定适配，效果显著。这里有一些大致参考：  这张图是 happypack 九月逐步全量上线后构建时间的的参考数据，线上构建服务器 16 核环境。 在上这个插件的过程中，我们也发现了这个单人维护的社区插件有">
+<meta name="keywords" content="happypack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="happypack 原理解析">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/12/08/happypack-source-code-analysis/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="说起 happypack 可能很多同学还比较陌生，其实 happypack 是 webpack 的一个插件，目的是通过多进程模型，来加速代码构建，目前我们的线上服务器已经上线这个插件功能，并做了一定适配，效果显著。这里有一些大致参考：  这张图是 happypack 九月逐步全量上线后构建时间的的参考数据，线上构建服务器 16 核环境。 在上这个插件的过程中，我们也发现了这个单人维护的社区插件有">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB15ZeJOFXXXXcYXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB1apiAOFXXXXcnXVXXXXXXXXXX-549-451.png">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB1svtKOFXXXXcAXpXXXXXXXXXX-767-269.png">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB12jI.OpXXXXcLaXXXXXXXXXXX-916-556.png">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB1px8jOFXXXXbDaXXXXXXXXXXX-1022-487.png">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB1qd5UOFXXXXXQXXXXXXXXXXXX-1141-720.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="happypack 原理解析">
+<meta name="twitter:description" content="说起 happypack 可能很多同学还比较陌生，其实 happypack 是 webpack 的一个插件，目的是通过多进程模型，来加速代码构建，目前我们的线上服务器已经上线这个插件功能，并做了一定适配，效果显著。这里有一些大致参考：  这张图是 happypack 九月逐步全量上线后构建时间的的参考数据，线上构建服务器 16 核环境。 在上这个插件的过程中，我们也发现了这个单人维护的社区插件有">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB15ZeJOFXXXXcYXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-happypack-source-code-analysis" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      happypack 原理解析
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 上坡</span>
+        
+        <span>发表于: <a href="/blog/2016/12/08/happypack-source-code-analysis/" class="article-date">
+  <time datetime="2016-12-08T15:54:38.000Z" itemprop="datePublished">2016-12-08</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tfs/TB15ZeJOFXXXXcYXVXXXXXXXXXX-900-500.jpg" alt="happypack 原理解析"></p>
+<p>说起 <a href="https://www.npmjs.com/package/happypack" target="_blank" rel="noopener">happypack</a> 可能很多同学还比较陌生，其实 happypack 是 webpack 的一个插件，目的是通过多进程模型，来加速代码构建，目前我们的线上服务器已经上线这个插件功能，并做了一定适配，效果显著。这里有一些大致参考：</p>
+<p><img src="http://gw.alicdn.com/tfs/TB1apiAOFXXXXcnXVXXXXXXXXXX-549-451.png" alt></p>
+<p>这张图是 happypack 九月逐步全量上线后构建时间的的参考数据，线上构建服务器 16 核环境。</p>
+<p>在上这个插件的过程中，我们也发现了这个单人维护的社区插件有一些问题，我们在解决这些问题的同时，也去修改了内部的代码，发布了自己维护的版本 @ali/happypack，那么内部是怎么跑起来的，这里做一个总结记录。</p>
+<h2 id="webpack-加载配置"><a href="#webpack-加载配置" class="headerlink" title="webpack 加载配置"></a>webpack 加载配置</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> HappyPack = <span class="built_in">require</span>(<span class="string">'happypack'</span>);</span><br><span class="line"><span class="keyword">var</span> happyThreadPool = HappyPack.ThreadPool(&#123; <span class="attr">size</span>: os.cpus().length &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 省略其余配置</span></span><br><span class="line"><span class="built_in">module</span>: &#123;</span><br><span class="line">  loaders: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.less$/</span>,</span><br><span class="line">        loader: ExtractTextPlugin.extract(</span><br><span class="line">            <span class="string">'style'</span>,</span><br><span class="line">            path.resolve(__dirname, <span class="string">'./node_modules'</span>, <span class="string">'happypack/loader'</span>) + <span class="string">'?id=less'</span></span><br><span class="line">        )</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: [</span><br><span class="line">      <span class="keyword">new</span> HappyPack(&#123;</span><br><span class="line">        id: <span class="string">'less'</span>,</span><br><span class="line">        loaders: [<span class="string">'css!less'</span>],</span><br><span class="line">        threadPool: happyThreadPool,</span><br><span class="line">        cache: <span class="literal">true</span>,</span><br><span class="line">        verbose: <span class="literal">true</span></span><br><span class="line">      &#125;)</span><br><span class="line">  ]</span><br></pre></td></tr></table></figure>
+<p>这个示例只单独抽取了配置 happypack 的部分。可以看到，类似 <a href="https://github.com/webpack/extract-text-webpack-plugin" target="_blank" rel="noopener">extract-text-webpack-plugin</a> 插件，happypack 也是通过 webpack 中 <a href="http://webpack.github.io/docs/using-loaders.html" target="_blank" rel="noopener">loader</a> 与 <a href="http://webpack.github.io/docs/using-plugins.html" target="_blank" rel="noopener">plugin</a> 的相互调用协作的方式来运作。</p>
+<p>loader 配置直接指向 happypack 提供的 loader， 对于文件实际匹配的处理 loader ，则是通过配置在 plugin 属性来传递说明，这里 happypack 提供的 loader 与 plugin 的衔接匹配，则是通过 <code>id=less</code> 来完成。</p>
+<h2 id="happypack-文件解析"><a href="#happypack-文件解析" class="headerlink" title="happypack 文件解析"></a>happypack 文件解析</h2><h3 id="HappyPlugin-js"><a href="#HappyPlugin-js" class="headerlink" title="HappyPlugin.js"></a>HappyPlugin.js</h3><p><img src="http://gw.alicdn.com/tfs/TB1svtKOFXXXXcAXpXXXXXXXXXX-767-269.png" alt></p>
+<p>对于 webpack 来讲，plugin 是贯穿在整个构建流程，同样对于 happypack 配置的构建流程，首先进入逻辑的是 plugin 的部分，从初始化的部分查看 happypack 中与 plugin 关联的文件。 </p>
+<p><strong>1. 基础参数设置</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyPlugin</span>(<span class="params">userConfig</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!(<span class="keyword">this</span> <span class="keyword">instanceof</span> HappyPlugin)) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> HappyPlugin(userConfig);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">this</span>.id = <span class="built_in">String</span>(userConfig.id || ++uid);</span><br><span class="line">  <span class="keyword">this</span>.name = <span class="string">'HappyPack'</span>;</span><br><span class="line">  <span class="keyword">this</span>.state = &#123;</span><br><span class="line">    started: <span class="literal">false</span>,</span><br><span class="line">    loaders: [],</span><br><span class="line">    baseLoaderRequest: <span class="string">''</span>,</span><br><span class="line">    foregroundWorker: <span class="literal">null</span>,</span><br><span class="line">  &#125;;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 省略 config</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于基础参数的初始化，对应上文提到的配置，可以看到插件设置了两个标识</p>
+<ul>
+<li>id: 在配置文件中设置的与 loader 关联的 id 首先会设置到实例上，为了后续 loader 与 plugin 能进行一对一匹配</li>
+<li>name: 标识插件类型为 <code>HappyPack</code>,方便快速在 loader 中定位对应 plugin，同时也可以避免其他插件中存在 id 属性引起错误的风险</li>
+</ul>
+<p>对于这两个属性的应用，可以看到 loader 文件中有这样一段代码 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isHappy</span>(<span class="params">id</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">plugin</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> plugin.name === <span class="string">'HappyPack'</span> &amp;&amp; plugin.id === id;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">happyPlugin = <span class="keyword">this</span>.options.plugins.filter(isHappy(id))[<span class="number">0</span>];</span><br></pre></td></tr></table></figure>
+<p>其次声明 state 对象标识插件的运行状态之后，开始配置信息的处理。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyPlugin</span>(<span class="params">userConfig</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 省略基础标识设置</span></span><br><span class="line">  <span class="keyword">this</span>.config = OptionParser(userConfig, &#123;</span><br><span class="line">    id:                       &#123; <span class="attr">type</span>: <span class="string">'string'</span> &#125;,</span><br><span class="line">    tempDir:                  &#123; <span class="attr">type</span>: <span class="string">'string'</span>, <span class="attr">default</span>: <span class="string">'.happypack'</span> &#125;,</span><br><span class="line">    threads:                  &#123; <span class="attr">type</span>: <span class="string">'number'</span>, <span class="attr">default</span>: <span class="number">3</span> &#125;,</span><br><span class="line">    threadPool:               &#123; <span class="attr">type</span>: <span class="string">'object'</span>, <span class="attr">default</span>: <span class="literal">null</span> &#125;,</span><br><span class="line">    cache:                    &#123; <span class="attr">type</span>: <span class="string">'boolean'</span>, <span class="attr">default</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">    cachePath:                &#123; <span class="attr">type</span>: <span class="string">'string'</span> &#125;,</span><br><span class="line">    cacheContext:             &#123; <span class="attr">type</span>: <span class="string">'object'</span>, <span class="attr">default</span>: &#123;&#125; &#125;,</span><br><span class="line">    cacheSignatureGenerator:  &#123; <span class="attr">type</span>: <span class="string">'function'</span> &#125;,</span><br><span class="line">    verbose:                  &#123; <span class="attr">type</span>: <span class="string">'boolean'</span>, <span class="attr">default</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">    debug:                    &#123; <span class="attr">type</span>: <span class="string">'boolean'</span>, <span class="attr">default</span>: process.env.DEBUG === <span class="string">'1'</span> &#125;,</span><br><span class="line">    enabled:                  &#123; <span class="attr">type</span>: <span class="string">'boolean'</span>, <span class="attr">default</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">    loaders:                  &#123;</span><br><span class="line">      validate: <span class="function"><span class="keyword">function</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">          ...</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, <span class="string">"HappyPack["</span> + <span class="keyword">this</span>.id + <span class="string">"]"</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 省略 threadPool 、HappyFSCache 初始化</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用 <code>OptionParser</code> 函数来进行插件过程中使用到的参数合并，在合并函数的参数对象中，提供了作为数据合并依据的一些属性，例如合并类型 <code>type</code>、默认值 <code>default</code> 以及还有设置校验函数的校验属性 <code>validate</code> 完成属性检查。</p>
+<p>这里对一些运行过车中的重要属性进行解释:</p>
+<ul>
+<li>tmpDir: 存放打包缓存文件的位置</li>
+<li>cache: 是否开启缓存，目前缓存如果开启，(注: 会以<strong>数量级的差异</strong>来缩短构建时间，很方便日常开发)</li>
+<li>cachePath: 存放缓存文件映射配置的位置</li>
+<li>verbose: 是否输出过程日志</li>
+<li>loaders: 因为配置中文件的处理 loader 都指向了 happypack 提供的 loadr ,这里配置的对应文件实际需要运行的 loader</li>
+</ul>
+<p><strong>2. 线程池初始化</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyPlugin</span>(<span class="params">userConfig</span>) </span>&#123;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 省略基础参数设置</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">this</span>.threadPool = <span class="keyword">this</span>.config.threadPool || HappyThreadPool(&#123;</span><br><span class="line">    id: <span class="keyword">this</span>.id,</span><br><span class="line">    size: <span class="keyword">this</span>.config.threads,</span><br><span class="line">    verbose: <span class="keyword">this</span>.config.verbose,</span><br><span class="line">    debug: <span class="keyword">this</span>.config.debug,</span><br><span class="line">  &#125;);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 省略 HappyFSCache 初始化</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 thread 其实严格意义说是 process，应该是进程，猜测只是套用的传统软件的一个主进程多个线程的模型。这里不管是在配置中，配置的是 <code>threads</code> 属性还是 <code>threadPool</code> 属性，都会生成一个 <code>HappyThreadPool</code> 对象来管理生成的子进程对象。</p>
+<p><strong>2.1. HappyThreadPool.js</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyThreadPool</span>(<span class="params">config</span>) </span>&#123;</span><br><span class="line"> <span class="keyword">var</span> happyRPCHandler = <span class="keyword">new</span> HappyRPCHandler();</span><br><span class="line"></span><br><span class="line"> <span class="keyword">var</span> threads = createThreads(config.size, happyRPCHandler, &#123;</span><br><span class="line">   id: config.id,</span><br><span class="line">   verbose: config.verbose,</span><br><span class="line">   debug: config.debug,</span><br><span class="line"> &#125;);</span><br><span class="line"> </span><br><span class="line"> <span class="comment">// 省略返回对象部分</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>在返回 <code>HappyThreadPool</code> 对象之前，会有两个操作:</p>
+<p><strong>2.1.1. HappyRPCHandler.js</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyRPCHandler</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.activeLoaders = &#123;&#125;;</span><br><span class="line">  <span class="keyword">this</span>.activeCompiler = <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于 <code>HappyRPCHandler</code> 实例，可以从构造函数看到，会绑定当前运行的 loader 与 compiler ，同时在文件中，针对 loader 与 compiler 定义调用接口:</p>
+<ul>
+<li>对应 compiler 会绑定查找解析路径的 reolve 方法: </li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">COMPILER_RPCs = &#123;</span><br><span class="line">  resolve: <span class="function"><span class="keyword">function</span>(<span class="params">compiler, payload, done</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> resolver = compiler.resolvers.normal;</span><br><span class="line">    <span class="keyword">var</span> resolve = compiler.resolvers.normal.resolve;</span><br><span class="line">    <span class="comment">// 省略部分判断</span></span><br><span class="line">    resolve.call(resolver, payload.context, payload.context, payload.resource, done);</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对应 loader 其中一些绑定: </li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">LOADER_RPCS = &#123;</span><br><span class="line">  emitWarning: <span class="function"><span class="keyword">function</span>(<span class="params">loader, payload</span>) </span>&#123;</span><br><span class="line">    loader.emitWarning(payload.message);</span><br><span class="line">  &#125;,</span><br><span class="line">  emitError: <span class="function"><span class="keyword">function</span>(<span class="params">loader, payload</span>) </span>&#123;</span><br><span class="line">      loader.emitError(payload.message);</span><br><span class="line">  &#125;,</span><br><span class="line">  addDependency: <span class="function"><span class="keyword">function</span>(<span class="params">loader, payload</span>) </span>&#123;</span><br><span class="line">      loader.addDependency(payload.file);</span><br><span class="line">  &#125;,</span><br><span class="line">  addContextDependency: <span class="function"><span class="keyword">function</span>(<span class="params">loader, payload</span>) </span>&#123;</span><br><span class="line">      loader.addContextDependency(payload.file);</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>通过定义调用 webpack 流程过程中的 loader、compiler 的能力来完成功能，类似传统服务中的 RPC 过程。</p>
+<p><strong>2.1.2. 创建子进程 (HappyThread.js)</strong></p>
+<p>传递子进程数参数 <code>config.size</code> 以及之前生成的 HappyRPCHandler 对象，调用 <code>createThreads</code>  方法生成实际的子进程。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createThreads</span>(<span class="params">count, happyRPCHandler, config</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> <span class="keyword">set</span> = []</span><br><span class="line"></span><br><span class="line">  for (var threadId = 0; threadId &lt; count; ++threadId) &#123;</span><br><span class="line">    <span class="keyword">var</span> fullThreadId = config.id ? [ config.id, threadId ].join(<span class="string">':'</span>) : threadId;</span><br><span class="line">    <span class="keyword">set</span>.push(HappyThread(fullThreadId, happyRPCHandler, config));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return <span class="keyword">set</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>fullThreadId</code> 生成之后，传入 <code>HappyThread</code> 方法，生成对应的子进程，然后放在 set 集合中返回。调用 <code>HappyThread</code> 返回的对象就是 <code>Happypack</code> 的编译 worker 的上层控制。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">HappyThread: </span><br><span class="line">&#123;</span><br><span class="line">    open: <span class="function"><span class="keyword">function</span>(<span class="params">onReady</span>) </span>&#123;</span><br><span class="line">      fd = fork(WORKER_BIN, [id], &#123;</span><br><span class="line">        execArgv: []</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="comment">// 省略进程消息绑定处理</span></span><br><span class="line">    &#125;,</span><br><span class="line">    configure: <span class="function"><span class="keyword">function</span>(<span class="params">compilerOptions, done</span>) </span>&#123;</span><br><span class="line">      <span class="comment">// 省略具体过程</span></span><br><span class="line">    &#125;,</span><br><span class="line">    compile: <span class="function"><span class="keyword">function</span>(<span class="params">params, done</span>) </span>&#123;</span><br><span class="line">      <span class="comment">// 省略具体过程</span></span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    isOpen: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> !!fd;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    close: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      fd.kill(<span class="string">'SIGINT'</span>);</span><br><span class="line">      fd = <span class="literal">null</span>;</span><br><span class="line">    &#125;,</span><br></pre></td></tr></table></figure>
+<p>对象中包含了对应的进程状态控制 <code>open</code> 、<code>close</code>，以及通过子进程来实现编译的流程控制 <code>configure</code>、<code>compile</code>。</p>
+<p><strong>2.1.2.1 子进程执行文件 HappyWorkerChannel.js</strong></p>
+<p>上面还可以看到一个信息是，<code>fd</code> 子进程的运行文件路径变量 <code>WORKER_BIN</code>，这里对应的是相同目录下的 <code>HappyWorkerChannel.js</code> 。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> HappyWorker = <span class="built_in">require</span>(<span class="string">'./HappyWorker'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (process.argv[<span class="number">1</span>] === __filename) &#123;</span><br><span class="line">  startAsWorker();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">startAsWorker</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  HappyWorkerChannel(<span class="built_in">String</span>(process.argv[<span class="number">2</span>]), process);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyWorkerChannel</span>(<span class="params">id, stream</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> worker = <span class="keyword">new</span> HappyWorker(&#123; <span class="attr">compiler</span>: fakeCompiler &#125;);</span><br><span class="line"></span><br><span class="line">  stream.on(<span class="string">'message'</span>, accept);</span><br><span class="line">  stream.send(&#123; <span class="attr">name</span>: <span class="string">'READY'</span> &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">accept</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">   <span class="comment">// 省略函数内容</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>精简之后的代码可以看到 <code>fork</code> 子进程之后，最终执行的是 <code>HappyWorkerChannel</code> 函数，这里的 <code>stream</code> 参数对应的是子进程的 <code>process</code> 对象，用来与主进程进行通信。</p>
+<p>函数的逻辑是通过 <code>stream.on(&#39;messgae&#39;)</code> 订阅消息，控制层 <code>HappyThread</code> 对象来传递消息进入子进程，通过 <code>accept()</code> 方法来路由消息进行对应编译操作。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">accept</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (message.name === <span class="string">'COMPILE'</span>) &#123;</span><br><span class="line">      worker.compile(message.data, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</span><br><span class="line">        stream.send(&#123;</span><br><span class="line">          id: message.id,</span><br><span class="line">          name: <span class="string">'COMPILED'</span>,</span><br><span class="line">          sourcePath: result.sourcePath,</span><br><span class="line">          compiledPath: result.compiledPath,</span><br><span class="line">          success: result.success</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (message.name === <span class="string">'COMPILER_RESPONSE'</span>) &#123;</span><br><span class="line">      <span class="comment">// 省略具体流程</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (message.name === <span class="string">'CONFIGURE'</span>) &#123;</span><br><span class="line">      <span class="comment">// 省略具体流程</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 省略具体流程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于不同的上层消息进行不通的子进程处理。</p>
+<p><strong>2.1.2.1.1 子进程编译逻辑文件 HappyWorker.js</strong></p>
+<p>这里的核心方法 <code>compile</code> ，对应了一层 <code>worker</code> 抽象，包含 <code>Happypack</code> 的实际编译逻辑，这个对象的构造函数对应 <code>HappyWorker.js</code> 的代码。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">HappyWorker.js</span><br><span class="line"></span><br><span class="line">HappyWorker.prototype.compile = <span class="function"><span class="keyword">function</span>(<span class="params">params, done</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  applyLoaders(&#123;</span><br><span class="line">    compiler: <span class="keyword">this</span>._compiler,</span><br><span class="line">    loaders: params.loaders,</span><br><span class="line">    loaderContext: params.loaderContext,</span><br><span class="line">  &#125;, params.loaderContext.sourceCode, params.loaderContext.sourceMap, <span class="function"><span class="keyword">function</span>(<span class="params">err, source, sourceMap</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 省略部分判断</span></span><br><span class="line">    <span class="keyword">var</span> compiledPath = params.compiledPath;</span><br><span class="line">    <span class="keyword">var</span> success = <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 省略错误处理</span></span><br><span class="line">    fs.writeFileSync(compiledPath, source);</span><br><span class="line">    fs.writeFileSync(compiledPath + <span class="string">'.map'</span>, SourceMapSerializer.serialize(sourceMap));</span><br><span class="line"></span><br><span class="line">    success = <span class="literal">true</span>;</span><br><span class="line">    </span><br><span class="line">    done(&#123;</span><br><span class="line">      sourcePath: params.loaderContext.resourcePath,</span><br><span class="line">      compiledPath: compiledPath,</span><br><span class="line">      success: success</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+<p>从 <code>applyLoaders</code> 的参数看到，这里会把 webpack 编辑过程中的 <code>loaders</code>、<code>loaderContext</code> 通过最上层的 <code>HappyPlugin</code> 进行传递，来模拟实现 loader 的编译操作。</p>
+<p>从回调函数中看到当编译完成时， <code>fs.writeFileSync(compiledPath, source);</code> 会将编译结果写入 <code>compilePath</code> 这个编译路径，并通过 <code>done</code> 回调返回编译结果给主进程。</p>
+<p><strong>3. 编译缓存初始化</strong></p>
+<p><code>happypack</code> 会将每一个文件的编译进行缓存，这里通过</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyPlugin</span>(<span class="params">userConfig</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 省略基础参数设置</span></span><br><span class="line">  <span class="comment">// 省略 threadPool 初始化</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">this</span>.cache = HappyFSCache(&#123;</span><br><span class="line">    id: <span class="keyword">this</span>.id,</span><br><span class="line">    path: <span class="keyword">this</span>.config.cachePath ?</span><br><span class="line">      path.resolve(<span class="keyword">this</span>.config.cachePath.replace(<span class="regexp">/\[id\]/g</span>, <span class="keyword">this</span>.id)) :</span><br><span class="line">      path.resolve(<span class="keyword">this</span>.config.tempDir, <span class="string">'cache--'</span> + <span class="keyword">this</span>.id + <span class="string">'.json'</span>),</span><br><span class="line">    verbose: <span class="keyword">this</span>.config.verbose,</span><br><span class="line">    generateSignature: <span class="keyword">this</span>.config.cacheSignatureGenerator</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  HappyUtils.mkdirSync(<span class="keyword">this</span>.config.tempDir); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 <code>cachePath</code> 默认会将 plugin 的 <code>tmpDir</code> 的目录作为生成缓存映射配置文件的目录路径。同时创建好 <code>config.tempDir</code> 目录。</p>
+<p><strong>3.1 happypack 缓存控制 HappyFSCache.js</strong><br><code>HappyFSCache</code> 函数这里返回对应的 cache 对象，在编译的开始和 worker 编译完成时进行缓存加载、设置等操作。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyFSCache.js</span></span><br><span class="line"></span><br><span class="line">exports.load = <span class="function"><span class="keyword">function</span>(<span class="params">currentContext</span>) </span>&#123;&#125;;</span><br><span class="line">exports.save = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line">exports.getCompiledSourceCodePath = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> cache.mtimes[filePath] &amp;&amp; cache.mtimes[filePath].compiledPath;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">exports.updateMTimeFor = <span class="function"><span class="keyword">function</span>(<span class="params">filePath, compiledPath, error</span>) </span>&#123;</span><br><span class="line">    cache.mtimes[filePath] = &#123;</span><br><span class="line">      mtime: generateSignature(filePath),</span><br><span class="line">      compiledPath: compiledPath,</span><br><span class="line">      error: error</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">exports.getCompiledSourceMapPath = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;&#125;;</span><br><span class="line">exports.hasChanged = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;&#125;;</span><br><span class="line">exports.hasErrored = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;&#125;;</span><br><span class="line">exports.invalidateEntryFor = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;&#125;;</span><br><span class="line">exports.dump = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br></pre></td></tr></table></figure>
+<p>对于编译过程中的单个文件，会通过 <code>getCompiledSourceCodePath</code> 函数来获取对应的缓存内容的文件物理路径，同时在新文件编译完整之后，会通过 <code>updateMTimeFor</code> 来进行缓存设置的更新。</p>
+<h3 id="HappyLoader-js"><a href="#HappyLoader-js" class="headerlink" title="HappyLoader.js"></a>HappyLoader.js</h3><p>在 happypack 流程中，配置的对应 loader 都指向了 <code>happypack/loader.js</code> ，文件对应导出的是 <code>HappyLoader.js</code> 导出的对象 ，对应的 bundle 文件处理都通过 <code>happypack</code> 提供的 loader 来进行编译流程。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyLoader</span>(<span class="params">sourceCode, sourceMap</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> happyPlugin, happyRPCHandler;</span><br><span class="line">  <span class="keyword">var</span> callback = <span class="keyword">this</span>.async();</span><br><span class="line">  <span class="keyword">var</span> id = getId(<span class="keyword">this</span>.query);</span><br><span class="line">  </span><br><span class="line">  happyPlugin = <span class="keyword">this</span>.options.plugins.filter(isHappy(id))[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">  happyPlugin.compile(&#123;</span><br><span class="line">    remoteLoaderId: remoteLoaderId,</span><br><span class="line">    sourceCode: sourceCode,</span><br><span class="line">    sourceMap: sourceMap,</span><br><span class="line">    useSourceMap: <span class="keyword">this</span>._module.useSourceMap,</span><br><span class="line">    context: <span class="keyword">this</span>.context,</span><br><span class="line">    request: happyPlugin.generateRequest(<span class="keyword">this</span>.resource),</span><br><span class="line">    resource: <span class="keyword">this</span>.resource,</span><br><span class="line">    resourcePath: <span class="keyword">this</span>.resourcePath,</span><br><span class="line">    resourceQuery: <span class="keyword">this</span>.resourceQuery,</span><br><span class="line">    target: <span class="keyword">this</span>.target,</span><br><span class="line">  &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">err, outSourceCode, outSourceMap</span>) </span>&#123;</span><br><span class="line">    callback(<span class="literal">null</span>, outSourceCode, outSourceMap);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>省略了部分代码，<code>HappyLoader</code> 首先拿到配置 <code>id</code> ,然后对所有的 webpack plugin 进行遍历 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isHappy</span>(<span class="params">id</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">plugin</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> plugin.name === <span class="string">'HappyPack'</span> &amp;&amp; plugin.id === id;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>找到 id 匹配的 <code>happypackPlugin</code>。传递原有 <code>webpack</code> 编译提供的 <code>loaderContext</code> (loader 处理函数中的 <code>this</code> 对象)中的参数，调用 <code>happypackPlugin</code> 的 <code>compile</code> 进行编译。</p>
+<p>上面是 happypack 的主要文件，作者在项目介绍中也提供了一张图来进行结构化描述:</p>
+<p><img src="http://gw.alicdn.com/tfs/TB12jI.OpXXXXcLaXXXXXXXXXXX-916-556.png" alt></p>
+<h2 id="实际运行"><a href="#实际运行" class="headerlink" title="实际运行"></a>实际运行</h2><p>从前面的文件解析，已经把 <code>happypack</code> 的工程文件关联结构大致说明了一下，这下结合日常在构建工程的一个例子，将整个流程串起来说明。</p>
+<h3 id="启动入口"><a href="#启动入口" class="headerlink" title="启动入口"></a>启动入口</h3><p><img src="http://gw.alicdn.com/tfs/TB1px8jOFXXXXbDaXXXXXXXXXXX-1022-487.png" alt></p>
+<p>在 webpack 编译流程中，在完成了基础的配置之后，就开始进行编译流程，这里 webpack 中的 <code>compiler</code> 对象会去触发 <code>run</code> 事件，这边 <code>HappypackPlugin</code> 以这个事件作为流程入口，进行初始化。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HappyPlugin.prototype.apply = <span class="function"><span class="keyword">function</span>(<span class="params">compiler</span>) </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  compiler.plugin(<span class="string">'run'</span>, that.start.bind(that));</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当 <code>run</code> 事件触发时，开始进行 <code>start</code> 整个流程</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">HappyPlugin.prototype.start = <span class="function"><span class="keyword">function</span>(<span class="params">compiler, done</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> that = <span class="keyword">this</span>;</span><br><span class="line">  <span class="keyword">async</span>.series([</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">registerCompilerForRPCs</span>(<span class="params">callback</span>) </span>&#123;&#125;,</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">normalizeLoaders</span>(<span class="params">callback</span>) </span>&#123;&#125;,</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">resolveLoaders</span>(<span class="params">callback</span>) </span>&#123;&#125;,</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">loadCache</span>(<span class="params">callback</span>) </span>&#123;&#125;,</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">launchAndConfigureThreads</span>(<span class="params">callback</span>) </span>&#123;&#125;,</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">markStarted</span>(<span class="params">callback</span>) </span>&#123;&#125;</span><br><span class="line">  ], done);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>start</code>函数通过 <code>async.series</code> 将整个过程串联起来。</p>
+<p><strong>1. registerCompilerForRPCs: <code>RPCHandler</code> 绑定 <code>compiler</code></strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">registerCompilerForRPCs</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  that.threadPool.getRPCHandler().registerActiveCompiler(compiler);</span><br><span class="line"></span><br><span class="line">  callback();</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>通过调用 plugin 初始化时生成的 handler 上的方法，完成对 <code>compiler</code> 对象的调用绑定。</p>
+<p><strong>2. normalizeLoaders: loader 解析</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// webpack.config.js: </span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">new</span> HappyPack(&#123;</span><br><span class="line">    id: <span class="string">'less'</span>,</span><br><span class="line">    loaders: [<span class="string">'css!less'</span>],</span><br><span class="line">    threadPool: happyThreadPool,</span><br><span class="line">    cache: <span class="literal">true</span>,</span><br><span class="line">    verbose: <span class="literal">true</span></span><br><span class="line">  &#125;)</span><br></pre></td></tr></table></figure>
+<p>对应中的 <code>webpack</code> 中的 happypackPlugin 的 loaders 配置的处理: </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">normalizeLoaders</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> loaders = that.config.loaders;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 省略异常处理</span></span><br><span class="line">  </span><br><span class="line">  that.state.loaders = loaders.reduce(<span class="function"><span class="keyword">function</span>(<span class="params">list, entry</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> list.concat(WebpackUtils.normalizeLoader(entry));</span><br><span class="line">  &#125;, []);</span><br><span class="line"></span><br><span class="line">  callback(<span class="literal">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对应配置的 loaders ，经过 <code>normalizeLoader</code> 的处理后，例如 <code>[css!less]</code> 会返回成一个 <code>loader</code> 数组 <code>[{path: &#39;css&#39;},{path: &#39;less&#39;}]</code>，复制到 plugin 的 <code>this.state</code> 属性上。</p>
+<p><strong>3.resolveLoaders: loader 对应文件路径查询</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">resolveLoaders</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> loaderPaths = that.state.loaders.map(<span class="function"><span class="keyword">function</span>(<span class="params">loader</span>) </span>&#123; <span class="keyword">return</span> loader.path; &#125;);</span><br><span class="line"></span><br><span class="line">  WebpackUtils.resolveLoaders(compiler, loaderPaths, <span class="function"><span class="keyword">function</span>(<span class="params">err, loaders</span>) </span>&#123;</span><br><span class="line">    that.state.loaders = loaders;</span><br><span class="line">    that.state.baseLoaderRequest = loaders.map(<span class="function"><span class="keyword">function</span>(<span class="params">loader</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> loader.path + (loader.query || <span class="string">''</span>);</span><br><span class="line">    &#125;).join(<span class="string">'!'</span>);</span><br><span class="line">    callback();</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了实际执行 loader 过程，这里将上一步 <strong>loader 解析</strong> 处理过后的 <code>loaders</code> 数组传递到 <code>resolveLoaders</code> 方法中，进行解析</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">exports.resolveLoaders = <span class="function"><span class="keyword">function</span>(<span class="params">compiler, loaders, done</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> resolve = compiler.resolvers.loader.resolve;</span><br><span class="line">  <span class="keyword">var</span> resolveContext = compiler.resolvers.loader;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">async</span>.parallel(loaders.map(<span class="function"><span class="keyword">function</span>(<span class="params">loader</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> callArgs = [ compiler.context, loader, <span class="function"><span class="keyword">function</span>(<span class="params">err, result</span>) </span>&#123;</span><br><span class="line">        callback(<span class="literal">null</span>, extractPathAndQueryFromString(result));</span><br><span class="line">      &#125;];</span><br><span class="line">      resolve.apply(resolveContext, callArgs);</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;), done);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>而 <code>resolveLoaders</code> 方法采用的是借用原有 <code>webpack</code> 的 compiler 对象上的对应 <code>resolvers.loader</code> 这个 <code>Resolver</code> 实例的 <code>resolve</code> 方法进行解析，构造好解析参数后，通过 <code>async.parallel</code> 并行解析 loader 的路径</p>
+<p><strong>4.loadCache: cache 加载</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">loadCache</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (that.config.cache) &#123;</span><br><span class="line">    that.cache.load(&#123;</span><br><span class="line">      loaders: that.state.loaders,</span><br><span class="line">      external: that.config.cacheContext</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  callback();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>cache 加载通过调用 <code>cache.load</code> 方法来加载上一次构建的缓存，快速提高构建速度。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">exports.load = <span class="function"><span class="keyword">function</span>(<span class="params">currentContext</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> oldCache, staleEntryCount;</span><br><span class="line">  cache.context = currentContext;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    oldCache = <span class="built_in">JSON</span>.parse(fs.readFileSync(cachePath, <span class="string">'utf-8'</span>));</span><br><span class="line">  &#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">    oldCache = <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  cache.mtimes = oldCache.mtimes;</span><br><span class="line">  cache.context = currentContext;</span><br><span class="line"></span><br><span class="line">  staleEntryCount = removeStaleEntries(cache.mtimes, generateSignature);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>load</code> 方法会去读取 <code>cachePath</code> 这个路径的缓存配置文件，然后将内容设置到当前 <code>cache</code> 对象上的 <code>mtimes</code> 上。</p>
+<p>在 happypack 设计的构建缓存中，存在一个上述的一个缓存映射文件，里面的配置会映射到一份编译生成的缓存文件。</p>
+<p><strong>5.launchAndConfigureThreads: 线程池启动</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">launchAndConfigureThreads</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  that.threadPool.start(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 省略 thread congigure 过程</span></span><br><span class="line">  &#125;);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>上面有提到，在加载完 <code>HappyPlugin</code> 时，会创建对应的 <code>HappyThreadPool</code> 对象以及设置数量的 <code>HappyThread</code>。但实际上一直没有创建真正的子进程实例，这里通过调用 <code>threadPool.start</code> 来进行子进程创建。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HappyThreadPool.js:</span><br><span class="line"></span><br><span class="line">    start: <span class="function"><span class="keyword">function</span>(<span class="params">done</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">async</span>.parallel(threads.filter(not(send(<span class="string">'isOpen'</span>))).map(<span class="keyword">get</span>('open')), done);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><code>start</code> 方法通过 <code>send</code> 、<code>not</code>、<code>get</code> 这三个方法来进行过滤、启动的串联。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">HappyThreadPool.js:</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">send</span>(<span class="params">method</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">receiver</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> receiver[method].call(receiver);</span><br><span class="line">      &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">not</span>(<span class="params">f</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">x</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> !f(x);</span><br><span class="line">      &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">get</span>(<span class="params">attr</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">object</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> object[attr];</span><br><span class="line">      &#125;;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>传递 <code>&#39;isOpen&#39;</code> 到 <code>send</code> 返回函数中，<code>receiver</code> 对象绑定调用 <code>isOpen</code> 方法；再传递给 <code>not</code> 返回函数中，返回前面函数结构取反。传递给 <code>threads</code> 的 <code>filter</code> 方法进行筛选；最后通过 <code>get</code> 传递返回的 <code>open</code> 属性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HappyThread.js </span><br><span class="line"></span><br><span class="line">    isOpen: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> !!fd;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>在 <code>HappyThread</code> 对象中 <code>isOpen</code> 通过判断 <code>fd</code> 变量来判断是否创建子进程。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">open: <span class="function"><span class="keyword">function</span>(<span class="params">onReady</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> emitReady = Once(onReady);</span><br><span class="line"></span><br><span class="line">  fd = fork(WORKER_BIN, [id], &#123;</span><br><span class="line">    execArgv: []</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  fd.on(<span class="string">'error'</span>, throwError);</span><br><span class="line">  fd.on(<span class="string">'exit'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">exitCode</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (exitCode !== <span class="number">0</span>) &#123;</span><br><span class="line">      emitReady(<span class="string">'HappyPack: worker exited abnormally with code '</span> + exitCode);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  fd.on(<span class="string">'message'</span>, <span class="function"><span class="keyword">function</span> <span class="title">acceptMessageFromWorker</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (message.name === <span class="string">'READY'</span>) &#123;</span><br><span class="line">      emitReady();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (message.name === <span class="string">'COMPILED'</span>) &#123;</span><br><span class="line">      <span class="keyword">var</span> filePath = message.sourcePath;</span><br><span class="line"></span><br><span class="line">      callbacks[message.id](message);</span><br><span class="line">      <span class="keyword">delete</span> callbacks[message.id];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>HappyThread</code> 对象的 <code>open</code> 方法首先将 <code>async.parallel</code> 传递过来的 <code>callback</code> 钩子通过 <code>Once</code> 方法封装，避免多次触发，返回成 <code>emitReady</code> 函数。</p>
+<p>然后调用 <code>childProcess.fork</code> 传递 <code>HappyWorkerChannel.js</code> 作为子进程执行文件来创建一个子进程，绑定对应的 <code>error</code> 、<code>exit</code> 异常情况的处理，同时绑定最为重要的 <code>message</code> 事件，来接受子进程发来的处理消息。而这里 <code>COMPILED</code> 消息就是对应的子进程完成编译之后会发出的消息。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyWorkerChannel.js</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyWorkerChannel</span>(<span class="params">id, stream</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> fakeCompiler = <span class="keyword">new</span> HappyFakeCompiler(id, stream.send.bind(stream));</span><br><span class="line">  <span class="keyword">var</span> worker = <span class="keyword">new</span> HappyWorker(&#123; <span class="attr">compiler</span>: fakeCompiler &#125;);</span><br><span class="line"></span><br><span class="line">  stream.on(<span class="string">'message'</span>, accept);</span><br><span class="line">  stream.send(&#123; <span class="attr">name</span>: <span class="string">'READY'</span> &#125;);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 省略消息处理</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在子进程完成创建之后，会向主进程发送一个 <code>READY</code> 消息，表明已经完成创建，在主进程接受到 <code>READY</code> 消息后，会调用前面封装的 <code>emitReady</code> ，来反馈给 <code>async.parallel</code> 表示完成 <code>open</code> 流程。</p>
+<p><strong>6.markStarted: 标记启动</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">markStarted</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  that.state.started = <span class="literal">true</span>;</span><br><span class="line">  callback();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后一步，在完成之前的步骤后，修改状态属性 <code>started</code> 为 <code>true</code>，完成整个插件的启动过程。</p>
+<h3 id="编译运行"><a href="#编译运行" class="headerlink" title="编译运行"></a>编译运行</h3><p><img src="http://gw.alicdn.com/tfs/TB1qd5UOFXXXXXQXXXXXXXXXXXX-1141-720.png" alt></p>
+<p><strong>1. loader 传递</strong><br>在 webpack 流程中，在源码文件完成内容读取之后，开始进入到 loader 的编译执行阶段，这时 <code>HappyLoader</code> 作为编译逻辑入口，开始进行编译流程。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">HappyLoader</span>(<span class="params">sourceCode, sourceMap</span>) </span>&#123;</span><br><span class="line"> <span class="comment">// 省略 Plugin 查找</span></span><br><span class="line"></span><br><span class="line"> happyPlugin.compile(&#123;</span><br><span class="line">    remoteLoaderId: remoteLoaderId,</span><br><span class="line">    sourceCode: sourceCode,</span><br><span class="line">    sourceMap: sourceMap,</span><br><span class="line">    useSourceMap: <span class="keyword">this</span>._module.useSourceMap,</span><br><span class="line">    context: <span class="keyword">this</span>.context,</span><br><span class="line">    request: happyPlugin.generateRequest(<span class="keyword">this</span>.resource),</span><br><span class="line">    resource: <span class="keyword">this</span>.resource,</span><br><span class="line">    resourcePath: <span class="keyword">this</span>.resourcePath,</span><br><span class="line">    resourceQuery: <span class="keyword">this</span>.resourceQuery,</span><br><span class="line">    target: <span class="keyword">this</span>.target,</span><br><span class="line">  &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">err, outSourceCode, outSourceMap</span>) </span>&#123;</span><br><span class="line">    callback(<span class="literal">null</span>, outSourceCode, outSourceMap);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>loader</code> 中将 webpack 原本的 <code>loaderContext(this指向)</code> 对象的一些参数例如 <code>this.resource</code>、<code>this.resourcePath</code>等透传到 <code>HappyPlugin.compile</code> 方法进行编译。</p>
+<p><strong>2. plugin 编译逻辑运行</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">HappyPlugin.js: </span><br><span class="line"></span><br><span class="line">HappyPlugin.prototype.compile = <span class="function"><span class="keyword">function</span>(<span class="params">loaderContext, done</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 省略 foregroundWorker 情况</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.compileInBackground(loaderContext, done);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">HappyPlugin.prototype.compileInBackground = <span class="function"><span class="keyword">function</span>(<span class="params">loaderContext, done</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> cache = <span class="keyword">this</span>.cache;</span><br><span class="line">  <span class="keyword">var</span> filePath = loaderContext.resourcePath;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!cache.hasChanged(filePath) &amp;&amp; !cache.hasErrored(filePath)) &#123;</span><br><span class="line">    <span class="keyword">var</span> cached = <span class="keyword">this</span>.readFromCache(filePath);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> done(<span class="literal">null</span>, cached.sourceCode, cached.sourceMap);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">this</span>._performCompilationRequest(<span class="keyword">this</span>.threadPool.get(), loaderContext, done);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>HappyPlugin</code> 中的 <code>compile</code> 方法对应 build 过程，通过调用 <code>compileInBackground</code> 方法来完成调用。</p>
+<p><strong>2.1 构建缓存判断 </strong></p>
+<p>在 <code>compileInBackground</code> 中，首先会代用 cache 的 <code>hasChanged</code> 和 <code>hasErrored</code> 方法来判断是否可以从缓存中读取构建文件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyFSCache.js</span></span><br><span class="line">  exports.hasChanged = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> nowMTime = generateSignature(filePath);</span><br><span class="line">    <span class="keyword">var</span> lastMTime = getSignatureAtCompilationTime(filePath);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> nowMTime !== lastMTime;</span><br><span class="line">  &#125;;</span><br><span class="line">  </span><br><span class="line">  exports.hasErrored = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> cache.mtimes[filePath] &amp;&amp; cache.mtimes[filePath].error;</span><br><span class="line">  &#125;;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">getSignatureAtCompilationTime</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (cache.mtimes[filePath]) &#123;</span><br><span class="line">      <span class="keyword">return</span> cache.mtimes[filePath].mtime;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p><code>hasError</code> 判断的是更新缓存的时候的 <code>error</code> 属性是否存在。</p>
+<p><code>hasChanged</code> 中会去比较 <code>nowMTime</code> 与 <code>lastMTime</code> 两个是否相等。实际上这里 <code>nowMTime</code> 通过调用 <code>generateSignature</code>（默认是 <code>getMTime</code>  函数） 返回的是文件目前的最后修改时间，<code>lastMTime</code> 返回的是编译完成时的修改时间。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function getMTime(filePath) &#123;</span><br><span class="line">  return fs.statSync(filePath).mtime.getTime();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果 <code>nowMTime</code>、<code>lastMTime</code> 两个的最后修改时间相同且不存在错误，那么说明构建可以利用缓存</p>
+<p><strong>2.1.1 缓存生效</strong></p>
+<p>如果缓存判断生效，那么开始调用 <code>readFromCache</code> 方法，从缓存中读取构建对应文件内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyPlugin.js: </span></span><br><span class="line"></span><br><span class="line">HappyPlugin.prototype.readFromCache = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> cached = &#123;&#125;;</span><br><span class="line">  <span class="keyword">var</span> sourceCodeFilePath = <span class="keyword">this</span>.cache.getCompiledSourceCodePath(filePath);</span><br><span class="line">  <span class="keyword">var</span> sourceMapFilePath = <span class="keyword">this</span>.cache.getCompiledSourceMapPath(filePath);</span><br><span class="line"></span><br><span class="line">  cached.sourceCode = fs.readFileSync(sourceCodeFilePath, <span class="string">'utf-8'</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (HappyUtils.isReadable(sourceMapFilePath)) &#123;</span><br><span class="line">    cached.sourceMap = SourceMapSerializer.deserialize(</span><br><span class="line">      fs.readFileSync(sourceMapFilePath, <span class="string">'utf-8'</span>)</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> cached;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>函数的意图是通过 <code>cache</code> 对象的 <code>getCompiledSourceCodePath</code> 、<code>getCompiledSourceMapPath</code> 方法获取缓存的编译文件及 sourcemap 文件的存储路径，然后读取出来，完成从缓存中获取构建内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyFSCache.js</span></span><br><span class="line"></span><br><span class="line">  exports.getCompiledSourceCodePath = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> cache.mtimes[filePath] &amp;&amp; cache.mtimes[filePath].compiledPath;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  exports.getCompiledSourceMapPath = <span class="function"><span class="keyword">function</span>(<span class="params">filePath</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> cache.mtimes[filePath] &amp;&amp; cache.mtimes[filePath].compiledPath + <span class="string">'.map'</span>;</span><br><span class="line">  &#125;;</span><br></pre></td></tr></table></figure>
+<p>获取的路径是通过在完成编译时调用的 <code>updateMTimeFor</code> 进行存储的对象中的 <code>compiledPath</code> 编译路径属性。</p>
+<p><strong>2.1.2 缓存失效</strong></p>
+<p>在缓存判断失效的情况下，进入 <code>_performCompilationRequest</code> ，进行下一步 <code>happypack</code> 编译流程。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HappyPlugin.prototype.compileInBackground = <span class="function"><span class="keyword">function</span>(<span class="params">loaderContext, done</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">this</span>._performCompilationRequest(<span class="keyword">this</span>.threadPool.get(), loaderContext, done);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在调用 <code>_performCompilationRequest</code> 前， 还有一步是从 <code>ThreadPool</code> 获取对应的子进程封装对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyThreadPool.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">get</span>: RoundRobinThreadPool(threads),</span><br><span class="line"></span><br><span class="line">function RoundRobinThreadPool(threads) &#123;</span><br><span class="line">  <span class="keyword">var</span> lastThreadId = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">getThread</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> threadId = lastThreadId;</span><br><span class="line"></span><br><span class="line">    lastThreadId++;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (lastThreadId &gt;= threads.length) &#123;</span><br><span class="line">      lastThreadId = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> threads[threadId];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里按照递增返回的 <a href="https://zh.wikipedia.org/wiki/%E5%BE%AA%E7%92%B0%E5%88%B6" target="_blank" rel="noopener">round-robin</a>，这种在服务器进程控制中经常使用的简洁算法返回子进程封装对象。</p>
+<p><strong>3. 编译开始</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">HappyPlugin.prototype._performCompilationRequest = <span class="function"><span class="keyword">function</span>(<span class="params">worker, loaderContext, done</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> cache = <span class="keyword">this</span>.cache;</span><br><span class="line">  <span class="keyword">var</span> filePath = loaderContext.resourcePath;</span><br><span class="line"></span><br><span class="line">  cache.invalidateEntryFor(filePath);</span><br><span class="line"></span><br><span class="line">  worker.compile(&#123;</span><br><span class="line">    loaders: <span class="keyword">this</span>.state.loaders,</span><br><span class="line">    compiledPath: path.resolve(<span class="keyword">this</span>.config.tempDir,  </span><br><span class="line">    HappyUtils.generateCompiledPath(filePath)),</span><br><span class="line">    loaderContext: loaderContext,</span><br><span class="line">  &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> contents = fs.readFileSync(result.compiledPath, <span class="string">'utf-8'</span>)</span><br><span class="line">    <span class="keyword">var</span> compiledMap;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!result.success) &#123;</span><br><span class="line">      cache.updateMTimeFor(filePath, <span class="literal">null</span>, contents);</span><br><span class="line">      done(contents);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      cache.updateMTimeFor(filePath, result.compiledPath);</span><br><span class="line">      compiledMap = SourceMapSerializer.deserialize(</span><br><span class="line">        fs.readFileSync(cache.getCompiledSourceMapPath(filePath), <span class="string">'utf-8'</span>)</span><br><span class="line">      );</span><br><span class="line"></span><br><span class="line">      done(<span class="literal">null</span>, contents, compiledMap);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>首先对编译的文件，调用 <code>cache.invalidateEntryFor</code> 设置该文件路径的构建缓存失效。然后调用子进程封装对象的 compile 方法，触发子进程进行编译。</p>
+<p>同时会生成衔接主进程、子进程、缓存的 <code>compiledPath</code>，当子进程完成编译后，会将编译后的代码写入 <code>compiledPath</code>，之后发送完成编译的消息回主进程，主进程也是通过 <code>compiledPath</code> 获取构建后的代码，同时传递 <code>compiledPath</code> 以及对应的编译前文件路径 <code>filePath</code>，更新缓存设置。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyThread.js</span></span><br><span class="line"></span><br><span class="line">    compile: <span class="function"><span class="keyword">function</span>(<span class="params">params, done</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> messageId = generateMessageId();</span><br><span class="line"></span><br><span class="line">      callbacks[messageId] = done;</span><br><span class="line"></span><br><span class="line">      fd.send(&#123;</span><br><span class="line">        id: messageId,</span><br><span class="line">        name: <span class="string">'COMPILE'</span>,</span><br><span class="line">        data: params,</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 messageId 是个从 0 开始的递增数字，完成回调方法的存储注册，方便完成编译之后找到回调方法传递信息回主进程。同时在 <code>thread</code> 这一层，也是将参数透传给子进程执行编译。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyWorkerChannel.js</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">accept</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (message.name === <span class="string">'COMPILE'</span>) &#123;</span><br><span class="line">      worker.compile(message.data, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</span><br><span class="line">        stream.send(&#123;</span><br><span class="line">          id: message.id,</span><br><span class="line">          name: <span class="string">'COMPILED'</span>,</span><br><span class="line">          sourcePath: result.sourcePath,</span><br><span class="line">          compiledPath: result.compiledPath,</span><br><span class="line">          success: result.success</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//省略其他操作</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>子进程接到消息后，调用 <code>worker.compile</code> 方法 ,同时进一步传递构建参数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyWorker.js</span></span><br><span class="line"></span><br><span class="line">HappyWorker.prototype.compile = <span class="function"><span class="keyword">function</span>(<span class="params">params, done</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  applyLoaders(&#123;</span><br><span class="line">    compiler: <span class="keyword">this</span>._compiler,</span><br><span class="line">    loaders: params.loaders,</span><br><span class="line">    loaderContext: params.loaderContext,</span><br><span class="line">  &#125;, params.loaderContext.sourceCode, params.loaderContext.sourceMap, <span class="function"><span class="keyword">function</span>(<span class="params">err, source, sourceMap</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> compiledPath = params.compiledPath;</span><br><span class="line">    <span class="keyword">var</span> success = <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">      <span class="built_in">console</span>.error(err);</span><br><span class="line">      fs.writeFileSync(compiledPath, serializeError(err), <span class="string">'utf-8'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      fs.writeFileSync(compiledPath, source);</span><br><span class="line">      fs.writeFileSync(compiledPath + <span class="string">'.map'</span>, SourceMapSerializer.serialize(sourceMap));</span><br><span class="line"></span><br><span class="line">      success = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    done(&#123;</span><br><span class="line">      sourcePath: params.loaderContext.resourcePath,</span><br><span class="line">      compiledPath: compiledPath,</span><br><span class="line">      success: success</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在 HappyWorker.js 中的 <code>compile</code> 方法中，调用 <code>applyLoaders</code> 进行 loader 方法执行。<code>applyLoaders</code> 是 <code>happypack</code> 中对 <code>webpack</code> 中 loader 执行过程进行模拟，对应 NormalModuleMixin.js 中的 <a href="https://github.com/webpack/core/blob/master/lib/NormalModuleMixin.js#L49" target="_blank" rel="noopener"><code>doBuild</code></a> 方法。完成对文件的字符串处理编译。</p>
+<p>根据 <code>err</code> 判断是否成功。如果判断成功，则将对应文件的编译后内容写入之前传递进来的 <code>compiledPath</code>,反之，则会把错误内容写入。</p>
+<p>在子进程完成编译流程后，会调用传递进来的回调方法，在回调方法中将编译信息返回到主进程，主进程根据 <code>compiledPath</code> 来获取子进程的编译内容。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyPlugin.js</span></span><br><span class="line"></span><br><span class="line">HappyPlugin.prototype._performCompilationRequest = <span class="function"><span class="keyword">function</span>(<span class="params">worker, loaderContext, done</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> contents = fs.readFileSync(result.compiledPath, <span class="string">'utf-8'</span>)</span><br><span class="line">    <span class="keyword">var</span> compiledMap;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!result.success) &#123;</span><br><span class="line">      cache.updateMTimeFor(filePath, <span class="literal">null</span>, contents);</span><br><span class="line">      done(contents);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">      cache.updateMTimeFor(filePath, result.compiledPath);</span><br><span class="line">      compiledMap = SourceMapSerializer.deserialize(</span><br><span class="line">        fs.readFileSync(cache.getCompiledSourceMapPath(filePath), <span class="string">'utf-8'</span>)</span><br><span class="line">      );</span><br><span class="line"></span><br><span class="line">      done(<span class="literal">null</span>, contents, compiledMap);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>获取子进程的编译内容 <code>contents</code> 后，根据 <code>result.success</code> 属性来判断是否编译成功，如果失败的话，会将 <code>contents</code> 作为错误传递进去。</p>
+<p>在完成调用 <code>updateMTimeFor</code> 缓存更新后，最后将内容返回到 HappyLoader.js 中的回调中，返回到 webpack 的原本流程。</p>
+<p><strong>4. 编译结束</strong></p>
+<p>当 webpack 整体编译流程结束后， <code>happypack</code> 开始进行一些善后工作 </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyPlugin.js</span></span><br><span class="line"></span><br><span class="line">compiler.plugin(<span class="string">'done'</span>, that.stop.bind(that));</span><br><span class="line"></span><br><span class="line">HappyPlugin.prototype.stop = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>.config.cache) &#123;</span><br><span class="line">    <span class="keyword">this</span>.cache.save();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">this</span>.threadPool.stop();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>4.1. 存储缓存配置</strong></p>
+<p>首先调用 <code>cache.save()</code> 存储下这个缓存的映射设置。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyFSCache.js</span></span><br><span class="line"></span><br><span class="line">  exports.save = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    fs.writeFileSync(cachePath, <span class="built_in">JSON</span>.stringify(cache));</span><br><span class="line">  &#125;;</span><br></pre></td></tr></table></figure>
+<p>cache 对象的处理是会将这个文件直接写入 <code>cachePath</code> ，这样就能供下一次 <code>cache.load</code> 方法装载配置，利用缓存。</p>
+<p><strong>4.2. 终止子进程 </strong></p>
+<p>其次调用 <code>threadPool.stop</code> 来终止掉进程</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyThreadPool.js</span></span><br><span class="line"></span><br><span class="line">   stop: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      threads.filter(send(<span class="string">'isOpen'</span>)).map(send(<span class="string">'close'</span>));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>类似前面提到的 <code>start</code> 方法，这里是筛选出来正在运行的 <code>HappyThread</code> 对象，调用 <code>close</code> 方法。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HappyThread.js</span></span><br><span class="line"></span><br><span class="line">    close: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      fd.kill(<span class="string">'SIGINT'</span>);</span><br><span class="line">      fd = <span class="literal">null</span>;</span><br><span class="line">    &#125;,</span><br></pre></td></tr></table></figure>
+<p>在 <code>HappyThread</code> 中，则是调用 <code>kill</code> 方法，完成子进程的释放。</p>
+<h2 id="汇总"><a href="#汇总" class="headerlink" title="汇总"></a>汇总</h2><p>happypack 的处理思路是将原有的 webpack 对 loader 的执行过程从单一进程的形式扩展多进程模式，原本的流程保持不变。整个流程代码结构上还是比较清晰，在使用过程中，也确实有明显提升，有兴趣的同学可以一起下来交流~</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/12/08/happypack-source-code-analysis/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/12/08/happypack-source-code-analysis/" data-id="cjt6lbxyn003tjeu17ekgz0qf" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/12/08/happypack-source-code-analysis/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/happypack/">happypack</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/12/14/node-subway-season-3-guangzhou/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          「八面玲珑的 Node.js」- Node 地下铁第三期广州站线下沙龙总结
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/11/17/react-components-communication/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">React 组件间通讯</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

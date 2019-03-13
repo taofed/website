@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>从 left-pad 事件我们可以学到什么 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="最近 NPM 圈发生了“一个 17 行代码的模块引发的血案”。left-pad 工具模块被作者从 NPM 上撤下，所有直接或者间接依赖这个模块的 NPM 包就忧伤的挂掉了，包括 babel 这样的热门项目。 而其中的原因大概是这样：作者 Azer 写了一个叫 kik 的工具和某个公司同名了，这天公司的律师要求其删掉这个模块，把 kik 这个名字“让”给他们，作者不答应，律师就直接找 NPM 了，">
+<meta name="keywords" content="node.js,left-pad,npm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 left-pad 事件我们可以学到什么">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/04/01/what-can-we-learn-from-left-pad-event/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="最近 NPM 圈发生了“一个 17 行代码的模块引发的血案”。left-pad 工具模块被作者从 NPM 上撤下，所有直接或者间接依赖这个模块的 NPM 包就忧伤的挂掉了，包括 babel 这样的热门项目。 而其中的原因大概是这样：作者 Azer 写了一个叫 kik 的工具和某个公司同名了，这天公司的律师要求其删掉这个模块，把 kik 这个名字“让”给他们，作者不答应，律师就直接找 NPM 了，">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1XPPdMXXXXXc0XVXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从 left-pad 事件我们可以学到什么">
+<meta name="twitter:description" content="最近 NPM 圈发生了“一个 17 行代码的模块引发的血案”。left-pad 工具模块被作者从 NPM 上撤下，所有直接或者间接依赖这个模块的 NPM 包就忧伤的挂掉了，包括 babel 这样的热门项目。 而其中的原因大概是这样：作者 Azer 写了一个叫 kik 的工具和某个公司同名了，这天公司的律师要求其删掉这个模块，把 kik 这个名字“让”给他们，作者不答应，律师就直接找 NPM 了，">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1XPPdMXXXXXc0XVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-what-can-we-learn-from-left-pad-event" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      从 left-pad 事件我们可以学到什么
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 栖邀</span>
+        
+        <span>发表于: <a href="/blog/2016/04/01/what-can-we-learn-from-left-pad-event/" class="article-date">
+  <time datetime="2016-03-31T16:35:09.000Z" itemprop="datePublished">2016-04-01</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1XPPdMXXXXXc0XVXXXXXXXXXX-900-500.jpg" alt="从 left-pad 事件我们可以学到什么"></p>
+<p>最近 NPM 圈发生了“一个 17 行代码的模块引发的血案”。<a href="https://github.com/azer/left-pad/blob/master/index.js" target="_blank" rel="noopener">left-pad</a> 工具模块被作者从 NPM 上撤下，所有直接或者间接依赖这个模块的 NPM 包就忧伤的挂掉了，包括 babel 这样的热门项目。</p>
+<p>而其中的原因大概是这样：作者 Azer 写了一个叫 <a href="https://github.com/starters/kik" target="_blank" rel="noopener">kik</a> 的工具和某个公司同名了，这天公司的律师要求其删掉这个模块，把 kik 这个名字“让”给他们，作者不答应，律师就直接找 NPM 了，而 NPM 未经作者同意就把包的权限转移给了这家公司。于是，Azer 一怒冲冠，将他所有的 NPM 包全部删掉了。</p>
+<p>我们不打算讨论这件事中的价值观、自由之精神、法律细节等等，我只想站在一个程序员的角度来凑个热闹，聊聊看法。</p>
+<h2 id="细分模块是必要的"><a href="#细分模块是必要的" class="headerlink" title="细分模块是必要的"></a>细分模块是必要的</h2><p>有人会觉得就这几行函数有必要单独抽取成一个模块吗？我觉得有必要，原因如下：</p>
+<ul>
+<li>你应该不想把这个工具函数在各个项目里面重复的去复制粘贴，毕竟 DRY（Don’t Repeat Yourself） 嘛。</li>
+<li>人们管理软件复杂度的通常方法都是拆分，写好一个模块，做好测试，然后直接使用这个模块。“small module” 的想法本来就是很好的。</li>
+<li>另外一种想法是我所有的工具函数都统一放在一个模块，这很容易造成工具模块越来越大，什么都往里放。而别人使用这个庞大的工具模块时，很可能其中很多东西根本就用不上。</li>
+<li>还有人说这个功能根本不用这么多代码，但是到处写这一行代码也挺烦不是？况且你也不知道一个几行代码能解决的问题有可能随着需求的变化需要更复杂的实现（比如：更多的定制性、性能要求）。</li>
+</ul>
+<p>所以，NPM 一直提倡和推动的 small module 的理念并没有什么错，我们不应该因为这个事件就把各种“小模块”的依赖从自己项目中去掉，甚至自己也不写“小模块”了。</p>
+<h2 id="不要太依赖他人"><a href="#不要太依赖他人" class="headerlink" title="不要太依赖他人"></a>不要太依赖他人</h2><p>如果我们真想构建稳定的应用，非常重要的一点就是“不要将自己的全部身家都拴在别人的裤腰带”上，你永远不知道那个别人什么时候会“扑街”。其实在代码实现中，我们一直都被教导要小心强依赖，依赖过强会导致我们不够灵动。“牵一发而动全身”是很可怕的一件事。</p>
+<p>具体到 Node 模块的依赖这件事上，太依赖他人会有些什么“可怕”的事情？</p>
+<ol>
+<li>模块全部要从 NPM 的 registry 拉取然后安装，每天的持续集成越来越慢、越来越慢。</li>
+<li>像 left-pad 这个模块一样，你依赖的模块被作者怒删了，应用挂掉。</li>
+<li>你在 package.json 里面指定依赖时使用了 <code>~a.b.c</code> 这种表示法（意思是小版本我都要），这表示每次 npm install 时其实获取到的模块依赖很可能是和你测试后发布的版本不一致的（依赖模块频繁发布了新的小版本），心里慌慌的。</li>
+<li>你依赖模块的作者是个傻逼，不小心将不兼容的改动当作小版本发布了一个新版。npm install 或者 npm update 以后你依赖了这个新版，应用挂掉了。</li>
+</ol>
+<p>是不是有点“细思极恐”？那这里抛出一个解决方案。如果有更好的方案，欢迎讨论。</p>
+<h2 id="破解强依赖"><a href="#破解强依赖" class="headerlink" title="破解强依赖"></a>破解强依赖</h2><p>先来列出我们需要些什么：</p>
+<ul>
+<li>在发布前“冻结”依赖模块的版本号。这让我们对安装的依赖有信心，依赖模块的版本都是我们验证、测试过的。</li>
+<li>在发布前“打包”依赖模块到自己项目。这让我们可以坦然面对我们依赖的某个模块“没有了”这样的囧境。</li>
+</ul>
+<h3 id="冻结依赖模块"><a href="#冻结依赖模块" class="headerlink" title="冻结依赖模块"></a>冻结依赖模块</h3><p>冻结依赖模块的版本号最简单的办法就是直接在 package.json 里面写死版本号，但是这解决不了深度依赖的问题。我们来看个例子。</p>
+<p>假设有下面这样的依赖：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A@0.1.0</span><br><span class="line">└─┬ B@0.0.1</span><br><span class="line">  └── C@0.0.1</span><br></pre></td></tr></table></figure>
+<p>A 模块依赖了 B 模块，B 模块又依赖了 C 模块。我们可以将 B 模块的依赖写死成 <code>0.0.1</code> 版本，但是如果 B 模块对 C 模块的依赖写的是 <code>C: ~0.0.1</code>，会怎样？</p>
+<p>这时候 C 模块更新到了 <code>0.0.2</code> 版本，虽然我们安装的 B 模块是 <a href="mailto:`B@0.0.1" target="_blank" rel="noopener">`B@0.0.1</a><code>，但是安装的 C 模块却是</code><a href="mailto:C@0.0.2" target="_blank" rel="noopener">C@0.0.2</a><code>。如果不巧这个</code><a href="mailto:C@0.0.2" target="_blank" rel="noopener">C@0.0.2</a>` 刚好有 bug，那我们的模块很有可能就不能正常工作了。</p>
+<p>实际上，NPM 提供了一个叫做 <code>npm shrinkwrap</code> 的命令来解决这个问题：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">NAME</span><br><span class="line">  npm-shrinkwrap -- Lock down dependency versions</span><br><span class="line"></span><br><span class="line">SYNOPSIS</span><br><span class="line">  npm shrinkwrap</span><br><span class="line"></span><br><span class="line">DESCRIPTION</span><br><span class="line">  This  command  locks down the versions of a package<span class="string">'s dependencies so that you can control exactly which versions of each  dependency  will be used when your package is installed.</span></span><br></pre></td></tr></table></figure>
+<p>这条命令会根据目前我们 <code>node_modules</code> 目录下的模块来生成一份“冻结”住的模块依赖（npm-shrinkwrap.json）。</p>
+<p>还是上面的例子，我们在模块 A 的根目录执行 <code>npm shrinkwrap</code> 后，生成的 <code>npm-shrinkwrap.json</code> 文件内容大概是下面这样：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"A"</span>,</span><br><span class="line">    <span class="attr">"dependencies"</span>: &#123;</span><br><span class="line">        <span class="attr">"B"</span>: &#123;</span><br><span class="line">            <span class="attr">"version"</span>: <span class="string">"0.0.1"</span>,</span><br><span class="line">            <span class="attr">"resolved"</span>: <span class="string">"http://registry.npmjs.com/B-0.0.1.tgz"</span>,</span><br><span class="line">            <span class="attr">"dependencies"</span>: &#123;</span><br><span class="line">                <span class="attr">"C"</span>: &#123;  </span><br><span class="line">	                <span class="attr">"version"</span>: <span class="string">"0.0.1"</span>,</span><br><span class="line">	                <span class="attr">"resolved"</span>: <span class="string">"http://registry.npmjs.com/C-0.0.1.tgz"</span></span><br><span class="line">		        &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后，当我们执行 <code>npm install</code> 时，依赖查找的“来源”不再是 <code>package.json</code>，而是我们生成的 <code>npm-shrinkwrap.json</code>，再也不会突然装上什么 <a href="mailto:`C@0.0.2" target="_blank" rel="noopener">`C@0.0.2</a>` 了，依赖里面的模块版本都是我们验证、测试后的版本，让人安心。</p>
+<p>注：<code>npm shrinkwrap</code> 默认只会生成 <code>dependencies</code> 的依赖，不会生成 <code>devDependencies</code> 的依赖，如果你真的需要，可以加 <code>--dev</code> 参数。</p>
+<h3 id="打包依赖模块"><a href="#打包依赖模块" class="headerlink" title="打包依赖模块"></a>打包依赖模块</h3><p>实际上，使用 shrinkwrap 冻结依赖模块的版本号后已经“安全”许多了，pack 这一步看实际情况可以省略，毕竟它还是会带来一些问题的（比如：项目提交的增大、安装时不能很好的利用已有模块的本地缓存等）。那我们来看看怎样把依赖打包进我们的项目。</p>
+<p>上面生成的 <code>npm-shrinkwrap.json</code> 里面有个 <code>resolved</code> 字段，表示模块所在的位置，实际上这个字段完全可以写一个文件路径。所以，我们可以递归的遍历 <code>npm-shrinkwrap.json</code> 文件，将所有的 tgz 包先下载到我们项目的某个目录，然后改写 <code>resolved</code> 字段为对应的文件路径。这样的功能有开发者已经实现了，我们可以直接享用：<a href="https://github.com/JamieMason/shrinkpack" target="_blank" rel="noopener">https://github.com/JamieMason/shrinkpack</a></p>
+<p>还是上面的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A@0.1.0</span><br><span class="line">└─┬ B@0.0.1</span><br><span class="line">  └── C@0.0.1</span><br></pre></td></tr></table></figure>
+<p>执行 <code>shrinkpack</code> 后，会生成下面的打包目录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">node_shrinkpack</span><br><span class="line"> - B-0.0.1.tgz</span><br><span class="line"> - C-0.0.1.tgz</span><br></pre></td></tr></table></figure>
+<p>和 <code>node-shrinkwrap.json</code> 文件：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"A"</span>,</span><br><span class="line">    <span class="attr">"dependencies"</span>: &#123;</span><br><span class="line">        <span class="attr">"B"</span>: &#123;</span><br><span class="line">            <span class="attr">"version"</span>: <span class="string">"0.0.1"</span>,</span><br><span class="line">            <span class="attr">"resolved"</span>: <span class="string">"./node_shrinkpack/B-0.0.1.tgz"</span>,</span><br><span class="line">            <span class="attr">"dependencies"</span>: &#123;</span><br><span class="line">                <span class="attr">"C"</span>: &#123;  </span><br><span class="line">	                <span class="attr">"version"</span>: <span class="string">"0.0.1"</span>,</span><br><span class="line">	                <span class="attr">"resolved"</span>: <span class="string">"./node_shrinkpack/C-0.0.1.tgz"</span></span><br><span class="line">		        &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>于是，我们以后再进行 <code>npm install --loglevel=http</code> 时会发现依赖模块的安装根本没有网络请求了（因为依赖都在我们自己的仓库里了嘛）。</p>
+<p>可能有人会说，为啥不直接把 <code>node_modules</code> 目录提交进仓库算了？原因主要是这样：</p>
+<ul>
+<li>有些模块需要编译，编译是和环境有关的，你当前的环境编译可用，其他环境直接使用该模块不一定能用。</li>
+<li><code>node_modules</code> 目录里面啥东西都有，太凌乱，很容易把提交给搅乱。diff 时突然 diff 出 <code>node_modules</code> 下的源代码、README，你应该不想这样吧？</li>
+</ul>
+<p>只存储模块的 tgz 包，安装编译的过程交给 NPM 命令更明智。</p>
+<h3 id="新方式"><a href="#新方式" class="headerlink" title="新方式"></a>新方式</h3><p>于是，现在我们使用 NPM 模块的正确姿势应该是这样了：</p>
+<ol>
+<li>本地安装、更新需要的模块，测试、验证</li>
+<li>执行 <code>npm shrinkwrap</code> 将依赖模块的版本冻结</li>
+<li>执行 <code>shrinkpack .</code> 将依赖模块打包进仓库</li>
+<li>提交代码（注意要将 <code>npm-shrinkwrap.json</code> 和 <code>node_shrinkpack</code> 一起提交哦）</li>
+<li>发布模块或者部署应用</li>
+</ol>
+<p>如果你觉得这样很繁琐，可以定义一个 NPM 命令：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">"scripts": &#123;</span><br><span class="line">  "pack": "npm shrinkwrap &amp; shrinkpack ."</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>拆分模块是必要的，我们应该坚持模块“小而美”</li>
+<li>不要太依赖他人，一定要有依赖方挂掉的应急方案</li>
+<li>推荐使用 <code>npm shrinkwrap</code>（冻结依赖模块的版本） 加 <code>shrinkpack</code>（打包依赖模块到自己项目） 来解决依赖模块的不确定性</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://docs.npmjs.com/cli/shrinkwrap" target="_blank" rel="noopener">https://docs.npmjs.com/cli/shrinkwrap</a></li>
+<li><a href="https://github.com/JamieMason/shrinkpack" target="_blank" rel="noopener">https://github.com/JamieMason/shrinkpack</a></li>
+<li><a href="https://nodejs.org/en/blog/npm/managing-node-js-dependencies-with-shrinkwrap/" target="_blank" rel="noopener">https://nodejs.org/en/blog/npm/managing-node-js-dependencies-with-shrinkwrap/</a></li>
+<li><a href="http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/" target="_blank" rel="noopener">http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/</a></li>
+</ul>
+<p>题图：<a href="https://pixabay.com/zh/%E5%A4%9A%E7%B1%B3%E8%AF%BA%E9%AA%A8%E7%89%8C-%E7%A7%8B%E5%A4%A9-%E6%91%94%E5%80%92%E4%BA%86-%E6%B8%B8%E6%88%8F-%E8%A1%8C-719199/" target="_blank" rel="noopener">正在倒下的多米诺骨牌</a>，请小心“牵一发而动全身”。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/04/01/what-can-we-learn-from-left-pad-event/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/04/01/what-can-we-learn-from-left-pad-event/" data-id="cjt6lby2d00d6jeu1csbaqnfi" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/04/01/what-can-we-learn-from-left-pad-event/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/left-pad/">left-pad</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/node-js/">node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/npm/">npm</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/04/01/lose-statistics/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          页面跳转时，统计数据丢失问题探讨
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/25/seller-bigpipe-coding/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">新版卖家中心 Bigpipe 实践（二）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

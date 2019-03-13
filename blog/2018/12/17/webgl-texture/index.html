@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>WebGL 纹理详解 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="WebGL 纹理详解Buffer（数据缓冲区）与 Texture（纹理）是 WebGL 程序的两大数据来源。Buffer 可以通过 ArrayBuffer 或更语义化的 TypedArray 来构造；而 Texture 在大多数情况下，是通过 Image 对象来构造的。在构造和使用 Texture 的过程中，需要确定很多选项来以不同的方式构造 Texture；这些选项之间有着各种各样的关系，或互">
+<meta name="keywords" content="WebGl,纹理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WebGL 纹理详解">
+<meta property="og:url" content="http://taobaofed.org/blog/2018/12/17/webgl-texture/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="WebGL 纹理详解Buffer（数据缓冲区）与 Texture（纹理）是 WebGL 程序的两大数据来源。Buffer 可以通过 ArrayBuffer 或更语义化的 TypedArray 来构造；而 Texture 在大多数情况下，是通过 Image 对象来构造的。在构造和使用 Texture 的过程中，需要确定很多选项来以不同的方式构造 Texture；这些选项之间有着各种各样的关系，或互">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1XAx8t9zqK1RjSZPcXXbTepXa-600-380.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1dgqbt7voK1RjSZFwXXciCFXa-600-375.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1dFuJtVzqK1RjSZSgXXcpAVXa-600-379.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1hgfJt3HqK1RjSZFEXXcGMXXa-600-481.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1l_nZtYvpK1RjSZFqXXcXUVXa-600-421.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1I2_St4TpK1RjSZR0XXbEwXXa-600-419.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1_0.ot9zqK1RjSZPxXXc4tVXa-501-503.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1CmY0tVzqK1RjSZFvXXcB7VXa-600-420.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB11zLZt9zqK1RjSZPcXXbTepXa-600-418.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB17fknt9rqK1RjSZK9XXXyypXa-600-503.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB11r3xt7voK1RjSZFDXXXY3pXa-500-316.gif">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1ctgvtYvpK1RjSZFqXXcXUVXa-500-316.gif">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1QD7Xt3HqK1RjSZFEXXcGMXXa-297-286.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1Aqr8tZbpK1RjSZFyXXX_qFXa-600-419.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1Qr__tYvpK1RjSZFqXXcXUVXa-600-421.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1xK7vtVYqK1RjSZLeXXbXppXa-500-316.gif">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WebGL 纹理详解">
+<meta name="twitter:description" content="WebGL 纹理详解Buffer（数据缓冲区）与 Texture（纹理）是 WebGL 程序的两大数据来源。Buffer 可以通过 ArrayBuffer 或更语义化的 TypedArray 来构造；而 Texture 在大多数情况下，是通过 Image 对象来构造的。在构造和使用 Texture 的过程中，需要确定很多选项来以不同的方式构造 Texture；这些选项之间有着各种各样的关系，或互">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-webgl-texture" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      WebGL 纹理详解
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 叶斋</span>
+        
+        <span>发表于: <a href="/blog/2018/12/17/webgl-texture/" class="article-date">
+  <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png" alt="WebGL 纹理详解"></p>
+<h1 id="WebGL-纹理详解"><a href="#WebGL-纹理详解" class="headerlink" title="WebGL 纹理详解"></a>WebGL 纹理详解</h1><p>Buffer（数据缓冲区）与 Texture（纹理）是 WebGL 程序的两大数据来源。Buffer 可以通过 ArrayBuffer 或更语义化的 TypedArray 来构造；而 Texture 在大多数情况下，是通过 Image 对象来构造的。在构造和使用 Texture 的过程中，需要确定很多<strong>选项</strong>来以不同的方式构造 Texture；这些选项之间有着各种各样的关系，或互相依赖，或互相排斥，或互相影响。最近，我又重新梳理了一遍我所用到的 WebGL 纹理各种参数的影响，稍作整理，以防遗忘。</p>
+<p>为此，我专门编写了一个 Demo，如下所示。Demo 页的右上角有一个使用 <a href="https://github.com/dataarts/dat.gui" target="_blank" rel="noopener">dat.GUI</a> 生成的控件，其中列举了影响纹理的一些选项。这篇文章将逐个讨论这些选项的作用和相互关系。</p>
+<p><a class="jsbin-embed" href="https://jsbin.com/boxazam/latest/embed?output&height=512px" target="_blank" rel="noopener">JS Bin on jsbin.com</a></p>
+<h2 id="Wrap"><a href="#Wrap" class="headerlink" title="Wrap"></a>Wrap</h2><p>在 JavaScript 中，创建纹理的基本流程大约如下所示：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 激活纹理单元</span></span><br><span class="line">gl.activeTexture(...);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建和绑定</span></span><br><span class="line"><span class="keyword">const</span> texture = gl.createTexture();</span><br><span class="line">gl.bindTexture(gl.TEXTURE_2D, texture);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 参数设置</span></span><br><span class="line">gl.texParameteri(...);</span><br><span class="line">gl.texParameteri(...);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 填充纹理的内容</span></span><br><span class="line">gl.texImage2D(..., image);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过纹理单元将纹理传送给着色器程序</span></span><br><span class="line">gl.uniform1i(...);</span><br></pre></td></tr></table></figure>
+<p>然后，在着色器中，使用一个坐标 (x,y) 从纹理上取色。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">vec4</span> color = <span class="built_in">texture2D</span>(<span class="built_in">texture</span>, <span class="type">vec2</span>(x, y));</span><br></pre></td></tr></table></figure>
+<p>通常，从纹理上取色的坐标 x 和 y 的值均在 0~1 之间。Wrap 配置项规定了当取色坐标的坐标取值在 (0, 1) 之外（即试图从纹理图片之外取色）时，应该如何取色。Wrap 有两种：切割(CLAMP)和重复(REPEAT)。我们可以操作上面的 Demo，调整 scale 的值使得纹理图片缩小一些，然后切换 Wrap 配置项为 CLAMP 或 REPEAT，可以发现：当选项置为 CLAMP 时，从纹理外部取色会落到对应的纹理的边缘，比如 <code>texture2D(texture, vec2(2.2, 0.5))</code> 的值会等于 <code>texture2D(texture, vec2(1.0, 0.5))</code>；而选项置为 REPEAT 时，纹理会「平铺」开来，从外部取色会把取色坐标按1取模，映射到纹理内部，比如 <code>texture2D(texture, vec2(2.2, 0.5))</code> 的值会等于 <code>texture2D(texture, vec2(0.2, 0.5))</code>。</p>
+<p>切换 Wrap 配置项的代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CLAMP</span></span><br><span class="line">gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);</span><br><span class="line">gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);</span><br><span class="line"></span><br><span class="line"><span class="comment">// REPEAT</span></span><br><span class="line">gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);</span><br><span class="line">gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);</span><br></pre></td></tr></table></figure>
+<p>下图是 REPEAT 的情况：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1XAx8t9zqK1RjSZPcXXbTepXa-600-380.jpg" alt="repeat"></p>
+<p>下图是 CLAMP 的情况：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1dgqbt7voK1RjSZFwXXciCFXa-600-375.jpg" alt="clamp"></p>
+<blockquote>
+<p>有一点需要注意的是，REPEAT 模式对纹理图片的尺寸有要求，宽度和高度必须为 2 的整数次幂，如 32x32 或 1024x256 的图片都是符合要求的，但 500x512 或 300x300 是不符合的。我们可以将控件中的 size 从 512 改成 300，这时 Demo 将加载这张图片的一个尺寸为 300x300 的替代品作为纹理。如果 Wrap 为 CLAMP，我们会发现稍微纹理模糊了一些，但是如果 Wrap 为 REPEAT，则会报警并黑屏。</p>
+</blockquote>
+<h2 id="FlipY"><a href="#FlipY" class="headerlink" title="FlipY"></a>FlipY</h2><p>FlipY 是 WebGL 的一个全局配置项（准确地说，它的名称是 UNPACK_FLIP_Y_WEBGL），在本文的范畴中，它主要影响了 <code>texImage2D()</code> 方法的行为。</p>
+<p>按照 OpenGL 的惯例，当着色器调用 <code>texture2D(t, st)</code> 方法从纹理中取色时，传入的取色坐标 <code>st</code> 的原点是左下角。换言之，如果传入的坐标是 (0, 0)，那么 OpenGL 期望取到的是左下角的那个像素的颜色。但是，由于在 Web 上图片数据的存储是从左上角开始的，传入坐标 (0,0) 时，实际上会取到左上角坐标的值。如果我们设置了 <code>FlipY</code> 配置项，那么在向纹理中加载数据的时候，就会对数据作一次翻转，使纹理坐标原点变为左下角。</p>
+<p>开启 FlipY 的代码是：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+<p>在 Demo 中，默认情况下 FlipY 配置项是勾选的，如果你勾选取消，会发现纹理图片被翻转了。下图是取消 FlipY 配置后的情况。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1dFuJtVzqK1RjSZSgXXcpAVXa-600-379.jpg" alt="cancel-flipY"></p>
+<h2 id="MIN-FILTER-和-MAG-FILTER"><a href="#MIN-FILTER-和-MAG-FILTER" class="headerlink" title="MIN_FILTER 和 MAG_FILTER"></a>MIN_FILTER 和 MAG_FILTER</h2><p>一个纹理是由离散的数据组成的，比如一个 2x2 的纹理是由 4 个像素组成的，使用 (0,0)、(0, 1) 等四个坐标去纹理上取样，自然可以取到对应的像素颜色；但是，如果使用非整数坐标到这个纹理上去取色。比如，当这个纹理被「拉近」之后，在屏幕上占据了 4x4 一共 16 个像素，那么就会使用 (0.33,0) 之类的坐标去取值，如何根据离散的 4 个像素颜色去计算 (0.33,0) 处的颜色，就取决于参数 MAG_FILTER。在 WebGL 中设置这两个项的代码如下所示：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);</span><br><span class="line">gl.texParameteri(</span><br><span class="line">    gl.TEXTURE_2D, </span><br><span class="line">    gl.TEXTURE_MIN_FILTER, </span><br><span class="line">    gl.LINEAR_MIPMAP_LINEAR</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>MAG_FILTER 有两个可选项，NEAREST 和 LINEAR。顾名思义，NEAREST 就是去取距离当前坐标最近的那个像素的颜色，而 LINEAR 则会根据距离当前坐标最近的 4 个点去内插计算出一个数值，如图所示。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1hgfJt3HqK1RjSZFEXXcGMXXa-600-481.png" alt="MAG_FILTER"></p>
+<p>显然 NEAREST 的运行速度更快，但 LINEAR 的效果更好。使用 NEAREST 时，当纹理被拉得比较近，颗粒感会比较明显，而使用 LINEAR 则会顺滑一些。你可以切换右上角空间上的 MAG_FILTER 选项，然后拖动 scale 滑块将纹理放大，体会一下两者的差别。</p>
+<p>下图是 MAG_FILTER 为 NEAREST 的效果：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1l_nZtYvpK1RjSZFqXXcXUVXa-600-421.png" alt="MAG_FILTER_NEAREST"></p>
+<p>下图是 MAG_FILTER 为 LINEAR 的效果：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1I2_St4TpK1RjSZR0XXbEwXXa-600-419.png" alt="MAG_FILTER_LINEAR"></p>
+<p>MAG_FILTER 作用于将纹理拉近/放大的情形，而当纹理远离/缩小的时候，起作用的是 MIN_FILTER。MIN_FILTER 有以下 6 个可选配置项：</p>
+<ul>
+<li>NEAREST</li>
+<li>LINEAR</li>
+<li>NEAREST_MIPMAP_NEAREST</li>
+<li>NEAREST_MIPMAP_LINEAR</li>
+<li>LINEAR_MIPMAP_NEAREST</li>
+<li>LINEAR_MIPMAP_LINEAR</li>
+</ul>
+<p>前两个配置项和 MAG_FILTER 的含义和作用是完全一样的。但问题是，当纹理被缩小时，原纹理中并不是每一个像素周围都会落上采样点，这就导致了某些像素，完全没有参与纹理的计算，新纹理丢失了一些信息。假设一种极端的情况，就是一个纹理彻底缩小为了一个点，那么这个点的值应当是纹理上所有像素颜色的平均值，这才比较合理。但是 NEAREST 只会从纹理中取一个点，而 LINEAR 也只是从纹理中取了四个点计算了一下而已。这时候，就该用上 MIPMAP 了。</p>
+<h2 id="Mipmap-和-MIN-FILTER"><a href="#Mipmap-和-MIN-FILTER" class="headerlink" title="Mipmap 和 MIN_FILTER"></a>Mipmap 和 MIN_FILTER</h2><p>为了在纹理缩小也获得比较好的效果，需要按照采样密度，选择一定数量（通常大于 LINEAR 的 4 个，极端情况下为原纹理上所有像素）的像素进行计算。实时进行计算的开销是很大的，所有有一种称为 MIPMAP（金字塔）的技术。在纹理创建之初，就为纹理创建好 MIPMAP，比如对 512x512 的纹理，依次建立 256x256（称为 1 级 Mipmap）、128x128（称为 2 级 Mipmap） 乃至 2x2、1x1 的纹理。实时渲染时，根据采样密度选择其中的某一级纹理，以此避免运行时的大量计算。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1_0.ot9zqK1RjSZPxXXc4tVXa-501-503.png" alt="Mipmap"></p>
+<blockquote>
+<p>显而易见的是，使用 MIPMAP 同样需要纹理尺寸为 2 的整数次幂。</p>
+</blockquote>
+<p>WebGL 中，可以通过调用以下方法来生成 mipmap。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gl.generateMipmap(gl.TEXTURE_2D);</span><br></pre></td></tr></table></figure>
+<p>我们将控制面板中的 <code>generateMipmap</code> 打开，并把 scale 调到一个较小的值（比如 0.5），然后切换 MIN_FILTER 的各种设置，就可以观察到 mipmap 的效果了。</p>
+<p>下图是 MIN_FILTER 为 LINEAR 的效果（NEAREST 效果是类似的）：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1CmY0tVzqK1RjSZFvXXcB7VXa-600-420.png" alt="MIN_FILTER_LINEAR"></p>
+<p>下图是 MIN_FILTER 为 LINEAR_MIPMAP_NEAREST 的效果（LINEAR_MIPMAP_LINEAR 效果是类似的）：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB11zLZt9zqK1RjSZPcXXbTepXa-600-418.png" alt="MIN_FILTER_MIPMAP"></p>
+<p>可以看到当采用 MIPMAP 时，纹理平滑了很多（特别是头发部分）。</p>
+<blockquote>
+<p>MIN_FILTER 的默认值是 LINEAR_MIPMAP_NEAREST。在 XXX_MIPMAP_XXX 的格式中，前一个 XXX 表示在单个 MIPMAP 中取色的方式，与单独的 LINEAR 或 NEAREST 类似，而后一个 XXX 表示，随着采样密度连续变化（通常是因为缩放因子连续变化）时，是否在多层 MIPMAP 之间内插。使用 MIPMAP 时，后一个 LINEAR 比较重要，只要后者是 LINEAR，前者的意义其实并不特别大，所以默认选项 NEAREST_MIPMAP_LINEAR 也是最常用的。</p>
+</blockquote>
+<h2 id="自定义-Mipmap"><a href="#自定义-Mipmap" class="headerlink" title="自定义 Mipmap"></a>自定义 Mipmap</h2><p>我们可以使用 <code>gl.generateMipmap()</code> 方法来根据原始纹理生成一套 mipmap，这种生成的方式是默认的。但是实际上，我们还有一种更灵活的方式来自定义 Mipmap，那就是直接传入另一张图片。比如，这里我们使用的是一张 512x512 的 lena 图，调用 <code>gl.generateMipmap()</code> 会生成 256x256、128x128 直至 1x1 等一系列图片。但是，如果我们手头正好有一张 128x128 尺寸的图片，我们就可以强制指定这张图片作为原始纹理的 1 级 Mipmap。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB17fknt9rqK1RjSZK9XXXyypXa-600-503.png" alt="Custom Mipmap"></p>
+<p>自定义 Mipmap 纹理的代码如下所示：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 首先要调用此方法</span></span><br><span class="line"><span class="comment">// 如果在 texImage2D 后调用，则定制的 mipmap 会被覆盖</span></span><br><span class="line">gl.generateTexture(gl.TEXTURE_2D);</span><br><span class="line"></span><br><span class="line">gl.texImage2D(</span><br><span class="line">    gl.TEXTURE_2D,</span><br><span class="line">    <span class="number">1</span>,  <span class="comment">// 就是这个参数指定几级 Mipmap</span></span><br><span class="line">    gl.RGBA,</span><br><span class="line">    gl.RGBA,</span><br><span class="line">    gl.UNSIGNED_BYTE,</span><br><span class="line">    image <span class="comment">// 尺寸必须严格符合指定级别 Mipmap 应有的尺寸</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>当我们指定好自定义的 Mipmap 纹理后（即勾选 customMipmap），同时勾选 generateMipmap，并且保证 MIN_FILTER 在 XXX_MIPMAP_XXX 的配置上，此时拖动 scale 滑块，会发现在缩小过程中的某个过程，纹理会变成自定义图片。当 MIN_FILTER 在 XXX_MIPMAP_NEAREST 时，纹理是「突变」的；而当 MIN_FILTER 位于 XXX_MINMAP_LINEAR 时，纹理是「渐变」的，这也印证了前面关于 XXX_MIPMAP_XXX 的解释。</p>
+<p>下图是 MIN_FILTER 为 LINEAR_MIPMAP_NEAREST 时缩放的效果：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB11r3xt7voK1RjSZFDXXXY3pXa-500-316.gif" alt="CustomMipmap1"></p>
+<p>下图是 MIN_FILTER 为 LINEAR_MIPMAP_LINEAR 时缩放的效果：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1ctgvtYvpK1RjSZFqXXcXUVXa-500-316.gif" alt="CustomMipmap2"></p>
+<h2 id="SRGB-扩展"><a href="#SRGB-扩展" class="headerlink" title="SRGB 扩展"></a>SRGB 扩展</h2><p>RGB 颜色空间是为人眼设计的。但是人眼感光强度和真实光线的物理强度并不是线性关系，这是人眼的生理结构所决定的。比如，在人眼看来，屏幕上显示的白色 #FFFFFF 的亮度，是半灰色 #888888 亮度的 2 倍，但是两者真实的光线物理强度（直射下单位面积上受光照的功率）并不是 2 倍关系。所以，当着色器需要基于一些物理规律来计算颜色时，直接取纹理的颜色没有意义，需要作一次转换。</p>
+<p>一个经验是，将人眼感知的颜色归一化到 (0,1) 之间，然后取 2.2 次方幂，得到的结果与光线物理强度是呈线性关系的。如下所示，横轴是 RGB 色彩空间，蓝色直线是人眼的感光曲线，红色曲线是光线物理强度曲线。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1QD7Xt3HqK1RjSZFEXXcGMXXa-297-286.png" alt="SRGB"></p>
+<p>SRGB 扩展所做的就是这件事，在用户调用 <code>texImage2D</code> 向纹理中传输数据时，将纹理的每个像素颜色取了自己的 2.2 次方幂。开启 SRGB 扩展的代码如下所示：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> SRGBExtension = gl.getExtension(<span class="string">"EXT_SRGB"</span>);</span><br><span class="line"></span><br><span class="line">gl.texImage2D(</span><br><span class="line">    gl.TEXTURE_2D, </span><br><span class="line">    <span class="number">0</span>, </span><br><span class="line">    <span class="comment">// 接下来两个参数原本是 gl.RGBA</span></span><br><span class="line">    SRGBExtension.SRGB_ALPHA_EXT, </span><br><span class="line">    SRGBExtension.SRGB_ALPHA_EXT, </span><br><span class="line">    gl.UNSIGNED_BYTE, </span><br><span class="line">    image</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>在控件中勾选 SRGB，会发现纹理变暗了很多，因为颜色作为 [0,1] 之间的数值，取了自己的 2.2 次方幂，自然变小了。其实，如果不使用 SRGB 扩展，在着色器中也可以模拟。我们可以取消勾选 SRGB 选项，然后将 postProcess（后处理）项置为 c^2.2，画面也同样变暗了。postProcess 是这个 Demo 埋在 Shader 中的一个普通 uniform 变量，为最后颜色输出增加一个可选的环节（取自己的 2.2 次方幂，或者取自己的 1/2.2 次方幂）。</p>
+<p>着色器中有关 postProcess 的代码如下：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(uPostProcess == <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(<span class="built_in">pow</span>(<span class="built_in">gl_FragColor</span>.rgb, <span class="type">vec3</span>(<span class="number">1.0</span>/<span class="number">2.2</span>)), <span class="number">1.0</span>);</span><br><span class="line">&#125;<span class="keyword">else</span> <span class="keyword">if</span>(uPostProcess == <span class="number">2</span>)&#123;</span><br><span class="line">    <span class="built_in">gl_FragColor</span> = <span class="type">vec4</span>(<span class="built_in">pow</span>(<span class="built_in">gl_FragColor</span>.rgb, <span class="type">vec3</span>(<span class="number">2.2</span>)), <span class="number">1.0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下图是 SRGB 模式的效果，postProcess 选择 c^2.2 能达到同样的效果。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1Aqr8tZbpK1RjSZFyXXX_qFXa-600-419.png" alt="SRGB"></p>
+<p>当然，我们也可以勾选 SRGB，然后在 postProcess 中选择取 1/2.2 次方幂，这样输出的颜色和最初的几乎一样。SRGB 扩展将纹理颜色值压低，后处理又把输出的颜色值调亮，两者相互抵消。这正是 PBR 渲染的常用做法，先把纹理颜色从人眼颜色空间的纹理压低成物理空间，然后进行一系列物理规律运算，最后输出时再调亮成人眼颜色空间。</p>
+<p>下图是 SRGB + postProcess c^1/2.2 的效果，和不使用 SRGB 和 postProcess 的效果基本一致：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1Qr__tYvpK1RjSZFqXXcXUVXa-600-421.png" alt="SRGB_PostProcess"></p>
+<h2 id="Tex-Lod-扩展"><a href="#Tex-Lod-扩展" class="headerlink" title="Tex_Lod 扩展"></a>Tex_Lod 扩展</h2><p>之前说过，从 Mipmap 中的哪一级纹理取色，取决于在此纹理上采样的密度。但是有了 Tex_Lod 扩展，可以不受此限制，在着色器中直接编码指定从某一级纹理取色。</p>
+<p>开启 Tex_Lod 扩展：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gl.getExtension(<span class="string">"EXT_shader_texture_lod"</span>);</span><br></pre></td></tr></table></figure>
+<p>着色器中也需要加入开启 #extension 宏：</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#extension GL_EXT_shader_texture_lod: enable</span></span><br></pre></td></tr></table></figure>
+<p>在着色器中，可调用 <code>texture2DLodExt</code> 函数来从指定级别的 Mipmap 上取色。</p>
+<figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">gl_FragColor</span> = texture2DLodEXT(uTexture, st, uExtLodLevel);</span><br></pre></td></tr></table></figure>
+<p>在右上角的控制器中，确保 Mipmap 相关的选项都打开，然后打开 extLod，拖动 extLodLevel 滑块，可见虽然纹理本身没有在缩放，但是纹理似乎变模糊了，此时实际上就是取到级别较高的 Mipmap 中去了，因为 Mipmap 的级别越高，像素数量越少，在尺寸不变的情况下，就会变模糊了。</p>
+<p>下图是 extLod 开启后，在不依赖纹理的缩放导致采样密度变化的情况下，直接手动编码来从不同级别的 Mipmap 上取色的情况：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1xK7vtVYqK1RjSZLeXXbXppXa-500-316.gif" alt="extLod"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>至此，完成了上述所有配置项的讨论。</p>
+<p>（完）</p>
+<script async src="https://static.jsbin.com/js/embed.min.js?4.1.7"></script>
+
+<blockquote>
+<p>题图出处 <a href="https://unsplash.com/photos/95YRwf6CNw8" target="_blank" rel="noopener">https://unsplash.com/photos/95YRwf6CNw8</a></p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2018/12/17/webgl-texture/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2018/12/17/webgl-texture/" data-id="cjt6lby2700cvjeu1jov2g4d2" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2018/12/17/webgl-texture/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WebGl/">WebGl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/纹理/">纹理</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2019/01/07/imgcook/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          imgcook 体验版发布
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2018/11/27/hooks-and-function-component/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前端架构杂思录：议 Function Component 与 Hooks</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

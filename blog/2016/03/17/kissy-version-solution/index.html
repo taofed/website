@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>店铺 KISSY 版本大乱斗 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="店铺 KISSY 版本大乱斗可能你不知道，从去年（或者前年？）某个时候起，店铺开始着手将 KISSY 版本从 1.3 升级到 1.4, 期间因为业务或团队变动已经换了两波前端，然而还是没有升级彻底，即部分店铺是 1.4, 另一部分还停留在 1.3 上。不彻底的升级意味着根本就没有升级，因为所有的代码要同时兼容两个版本。 我从 15 年 10 月接手店铺业务，前不久学长找我商量店铺升级 KISSY">
+<meta name="keywords" content="第三方,代码安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="店铺 KISSY 版本大乱斗">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/03/17/kissy-version-solution/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="店铺 KISSY 版本大乱斗可能你不知道，从去年（或者前年？）某个时候起，店铺开始着手将 KISSY 版本从 1.3 升级到 1.4, 期间因为业务或团队变动已经换了两波前端，然而还是没有升级彻底，即部分店铺是 1.4, 另一部分还停留在 1.3 上。不彻底的升级意味着根本就没有升级，因为所有的代码要同时兼容两个版本。 我从 15 年 10 月接手店铺业务，前不久学长找我商量店铺升级 KISSY">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1nHczLVXXXXX2XXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1g0VwLpXXXXahXFXXXXXXXXXX-1666-418.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="店铺 KISSY 版本大乱斗">
+<meta name="twitter:description" content="店铺 KISSY 版本大乱斗可能你不知道，从去年（或者前年？）某个时候起，店铺开始着手将 KISSY 版本从 1.3 升级到 1.4, 期间因为业务或团队变动已经换了两波前端，然而还是没有升级彻底，即部分店铺是 1.4, 另一部分还停留在 1.3 上。不彻底的升级意味着根本就没有升级，因为所有的代码要同时兼容两个版本。 我从 15 年 10 月接手店铺业务，前不久学长找我商量店铺升级 KISSY">
+<meta name="twitter:image" content="https://gw.alicdn.com/tps/TB1nHczLVXXXXX2XXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-kissy-version-solution" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      店铺 KISSY 版本大乱斗
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 大果</span>
+        
+        <span>发表于: <a href="/blog/2016/03/17/kissy-version-solution/" class="article-date">
+  <time datetime="2016-03-17T15:22:52.000Z" itemprop="datePublished">2016-03-17</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tps/TB1nHczLVXXXXX2XXXXXXXXXXXX-900-500.jpg" alt="店铺 KISSY 版本大乱斗"></p>
+<h2 id="店铺-KISSY-版本大乱斗"><a href="#店铺-KISSY-版本大乱斗" class="headerlink" title="店铺 KISSY 版本大乱斗"></a>店铺 KISSY 版本大乱斗</h2><p>可能你不知道，从去年（或者前年？）某个时候起，店铺开始着手将 KISSY 版本从 1.3 升级到 1.4, 期间因为业务或团队变动已经换了两波前端，然而还是没有升级彻底，即部分店铺是 1.4, 另一部分还停留在 1.3 上。不彻底的升级意味着根本就没有升级，因为所有的代码要同时兼容两个版本。</p>
+<p>我从 15 年 10 月接手店铺业务，前不久学长找我商量店铺升级 KISSY 6.0 的事情，那一刻我的内心是崩溃的、拒绝的、惨不忍睹的……然而痛苦归痛苦，坑终究是要填的，跟各位大大讨论方案后做了一些尝试，最后终于在上周把这个问题解决掉了。本文就来向大家简单介绍下这段历史以及最终的解决方案，最后附带个人对于开放脚本的一些思考。</p>
+<h3 id="TL-DR"><a href="#TL-DR" class="headerlink" title="TL;DR"></a>TL;DR</h3><blockquote>
+<p>对于第三方代码，安全问题自不用去提，在此基础上，对于官方代码和三方代码一定要做技术方案的隔离，否则当未来官方代码需要升级技术方案的时候就会步履维艰。</p>
+</blockquote>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在店铺体系里，装修系统是很重要的一部分，在整个体系建立之初，为了保证卖家可以在装修过程中有更多的选择，店铺开放了其模块体系：第三方开发者可以开发店铺的模块，然后上架到装修市场，然后卖家需要的时候去市场里订购。（第三方开放者开发的模块下文统一称为设计师模块）</p>
+<p>开放模块意外着第三方开发者可以写 HTML, 写 CSS, 而且可以写 JavaScript, 在当时（2010？）的技术条件下，主要使用了两个库：</p>
+<ul>
+<li>Caja: 负责三方代码的安全问题，出自于谷歌</li>
+<li>KISSY 1.3: 作用跟之于我们的业务类似，工具库</li>
+</ul>
+<p>KISSY 1.3 自不必多说，Caja 是什么呢，借用其官方介绍：</p>
+<blockquote>
+<p>Caja is a tool for safely embedding third party HTML, CSS and JavaScript in your website.</p>
+</blockquote>
+<p>值得一提的是，经过这套开发体系的编译，最终我们存储的设计师代码是这样的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;  ___.loadModule(&#123;      </span><br><span class="line">  <span class="string">'instantiate'</span>: <span class="function"><span class="keyword">function</span> (<span class="params">___, IMPORTS___</span>) </span>&#123;        </span><br><span class="line">    <span class="keyword">return</span> ___.prepareModule(&#123;            </span><br><span class="line">      <span class="string">'instantiate'</span>: <span class="function"><span class="keyword">function</span> (<span class="params">___, IMPORTS___</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> dis___ = IMPORTS___;              </span><br><span class="line">        <span class="keyword">var</span> moduleResult___, x0___, x1___, x2___, x3___, x4___, x5___,              </span><br><span class="line">              x6___, x7___, x8___, x9___, x10___, x11___, x12___, x13___,              </span><br><span class="line">              x14___, x15___, x16___, x17___, x18___, x19___, x20___, x21___,              </span><br><span class="line">              x22___, x23___, x24___, x25___, x26___, x27___, x28___, x29___,              </span><br><span class="line">              x30___, x31___, x32___, x33___, x34___, x35___, x36___, x37___,              </span><br><span class="line">              x38___, x39___, x40___, x41___, x42___, x43___;              </span><br><span class="line">        moduleResult___ = ___.NO_RESULT;              </span><br><span class="line">        <span class="keyword">try</span> &#123;                </span><br><span class="line">          &#123;                  </span><br><span class="line">            &#123;                    </span><br><span class="line">              <span class="function"><span class="keyword">function</span> <span class="title">log</span>(<span class="params">x</span>) </span>&#123;                      </span><br><span class="line">                <span class="keyword">var</span> x0___;</span><br><span class="line">                <span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p><strong>压缩的、混淆的，同时更是不可控的。</strong></p>
+<p>另一方面，基于 Caja 我们定制了自己的 shop-caja, 其中在初始化设计师模块时会对 KISSY 做一些改写，负责这部分的代码是 Caja-adapter，因此，我猜测，选择这套方案的同学一定是考虑到未来 KISSY 版本的升级问题，而对应的策略就是在 Caja-adapter 这一层做文章：<strong>无论是 KISSY 哪个版本，在 adapter 里总会让其 API 兼容 KISSY 1.3.</strong></p>
+<p>以上只是个人猜测，因为人员的变动这些猜测很难去考证或者考证了也没什么意义。最终的结果就是：前任同学在接手了进行一半的升级工作之后，试图通过这样方式去实现，然而在一年之后还是把这个半成品交接到我这个现任手中。</p>
+<h3 id="多版本引发的问题"><a href="#多版本引发的问题" class="headerlink" title="多版本引发的问题"></a>多版本引发的问题</h3><p>因为上文说的 KISSY 版本问题，引发了一些不良后果：</p>
+<h4 id="1-凌晨的惊悚"><a href="#1-凌晨的惊悚" class="headerlink" title="1. 凌晨的惊悚"></a>1. 凌晨的惊悚</h4><p>大促活动有个超级顶通，各个业务方都要引入，店铺当然也不例外，之前作为日常需求接入，因为顶通开起来就是一个很简单的展示区块，因此和开发在预发上看了几个店铺没有什么问题于是就推到预发，然后这个顶通是凌晨才会推送上线的，因此这时候线上也自然不会有任何感知。</p>
+<p>直到凌晨一点左右，之前的缓存基本失效，预发环境超级顶通生效，使用 KISSY 1.3 的店铺脚本无法执行，很多模块初始化失败，排查之后才发现超级顶通里没有兼容 1.3 的语法，其中最为严重的一点是 <code>use</code> io 模块失效，这里不得不提两个点：</p>
+<ol>
+<li>KISSY 臭名昭著的核心模块改名事件：ajax(1.3) -&gt; io(1.4)</li>
+<li><code>KISSY.use</code> 失败之后会导致页面其他依赖 KISSY 的脚本都无法执行</li>
+</ol>
+<p>然后开发同学紧急下掉了超级顶通，我当时惊出了一身冷汗，然而负责超级顶通的然姐倒是很淡定 LOL…</p>
+<p>所以出现这个问题可能是因为很多因素：<strong>测试的时候没有回归 1.3 的店铺、超级顶通没有兼容 1.3 语法、<code>KISSY.use</code> 的机制太过脆弱</strong>……但是原罪还是店铺里竟然还存在 KISSY 1.3 版本这一事实。</p>
+<h4 id="2-难以升级的开发模式"><a href="#2-难以升级的开发模式" class="headerlink" title="2. 难以升级的开发模式"></a>2. 难以升级的开发模式</h4><p>店铺目前的整个开发模式很落后 + 繁琐：KISSY 1.3 的语法，自写的打包脚本 <code>Gruntfile</code>, 异常落后的模块组织体系……自我然不会将这些都归罪于 KISSY 版本，但是如果不解决 KISSY 版本的问题，我们未来无法升级到 KISSY 6.0, 无法升级到 cake, 无法重新梳理店铺的模块机制，无法切换到新版的发布系统，接下来就是一步一步的老死？NO!</p>
+<h4 id="3-时不时的线上问题"><a href="#3-时不时的线上问题" class="headerlink" title="3. 时不时的线上问题"></a>3. 时不时的线上问题</h4><p>因为两种版本同时存在，导致了线上的情况会变复杂，进而就是时不时的线上问题。是的，每次线上问题花两到三个小时都可以解决，然而这些付出几乎是毫无意义的，每次排查类似的线上问题我都会很头疼：</p>
+<ul>
+<li>技术提升了吗？No</li>
+<li>会更加了解业务吗？Maybe</li>
+<li>会帮助到业务成长吗？Very little</li>
+<li>所以，有意义吗？Who knows……</li>
+</ul>
+<p>所以，基于这些原因，必须要扛起担子解决问题，接着我们就来聊聊方案吧。</p>
+<h3 id="解决方案的探索"><a href="#解决方案的探索" class="headerlink" title="解决方案的探索"></a>解决方案的探索</h3><p>在这个问题上，大致的解决思路有两个：</p>
+<h4 id="1-利用-caja-adapter-保证-KISSY-代码兼容-1-3-的语法"><a href="#1-利用-caja-adapter-保证-KISSY-代码兼容-1-3-的语法" class="headerlink" title="1. 利用 caja-adapter 保证 KISSY 代码兼容 1.3 的语法"></a>1. 利用 caja-adapter 保证 KISSY 代码兼容 1.3 的语法</h4><p>这个方案，上文已经简单提过，并且店铺前任前端同学之前也有做一些尝试，但是因为 1.4 跟 1.3 的 <code>anim</code> 模块差别太大，一直没有进展，最终随着人员变动无疾而终。简单总结下优缺点：</p>
+<ul>
+<li>优点：比较优雅，始终只会加载一份 KISSY</li>
+<li>缺点：<ul>
+<li>可持续升级难度太大，1.4 到 1.3 的语法兼容已经停顿了一年多，更不用提 6.0 到 1.3</li>
+<li>方案相对复杂，需要熟悉 shop-caja 的整个机制，然而熟悉了还不一定能搞定</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-隔离设计师模块和官方代码所依赖的-KISSY-版本"><a href="#2-隔离设计师模块和官方代码所依赖的-KISSY-版本" class="headerlink" title="2. 隔离设计师模块和官方代码所依赖的 KISSY 版本"></a>2. 隔离设计师模块和官方代码所依赖的 KISSY 版本</h4><p>这个方案是之前跟@展炎、@释然、@乔福、@林谦一起讨论出来的结果，大体思路：有设计师模块的店铺引入两份 KISSY，一份供官方代码依赖，另一份供 shop-caja 和设计师模块使用。同样优缺点：</p>
+<ul>
+<li>优点：一劳永逸，未来店铺官方代码做技术升级时基本不会影响到设计师模块</li>
+<li>缺点：稍稍有点粗暴，有设计师模块的页面会加载两份 KISSY 以及用到的核心模块，多多少少会影响性能</li>
+</ul>
+<p>对比了两种方案之后，最终选择了方案 2, 原因呢：一方面方案 1 已经有同学尝试未果，另一方面自身没有太多的精力去研究 shop-caja 以及 KISSY 的核心代码。 确定方案之后就是 step by step 的行动啦~</p>
+<h3 id="Just-Do-IT"><a href="#Just-Do-IT" class="headerlink" title="Just Do IT"></a>Just Do IT</h3><p>整个方案实施起来并没有花费太多精力，大体的步骤如下：</p>
+<ol>
+<li>基于 KISSY 1.3 迁出一个 kissy-caja 的仓库，其中包括 KISSY 所有的核心模块</li>
+<li>为了保证两个 KISSY 互不影响，将 kissy-caja 里所有的 KISSY 全局变量替换为 KISSY_CAJA</li>
+<li><p>同时将 shop-caja 里所有用到 KISSY 的地方替换为 KISSY_CAJA, 其中较为重要的是初始化设计师模块的地方：</p>
+ <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">prepareEnv.run(&#123;</span><br><span class="line">  <span class="comment">// KISSY 就是从这里传进设计师模块脚本里的</span></span><br><span class="line">  KISSY: exposed_kissy,</span><br><span class="line">  GS: tameGlobalService,</span><br><span class="line">  onerror: onerror</span><br><span class="line"> &#125;, <span class="function"><span class="keyword">function</span> (<span class="params">re, a</span>) </span>&#123;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在页面中 shop-caja 之前引入 kissy-caja</p>
+</li>
+<li>测试：或许这一步花费时间最多了吧，找了 N 多个有设计师的模块在预发上测试，中间遇到了一些小问题下文会提及</li>
+<li><p>线上验证：发布完成后，观察了 jstracker 的异常数据，每 PV 报错率跟之前差别不大，基本稳定在 10% 左右，基本确保问题解决。</p>
+<p> <img src="https://img.alicdn.com/tps/TB1g0VwLpXXXXahXFXXXXXXXXXX-1666-418.png" alt></p>
+</li>
+</ol>
+<h4 id="过程中遇到问题"><a href="#过程中遇到问题" class="headerlink" title="过程中遇到问题"></a>过程中遇到问题</h4><p>比较欣慰的是用了这个方案之后，预发上只出现了一个问题：<strong>jsonp 方法 callback 同名导致报错</strong>。KISSY 中 jsonp 的回调名是通过 <code>jsonp + S.guid()</code> 来生成的，而这个 guid 是挂载在 KISSY 下而非全局变量下，因此两个版本的 KISSY 很大几率会生成相同的 guid, 而多个 jsonp 回调名相同之后就会导致后面执行的方法出错，解决方案也很简单，因为 guid 是从 0 开始累加的，所以我直接将 kissy-caja 的 guid 基准值从 0 改为 12306, 别问我为什么是 12306, 任性！</p>
+<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><p>最后，虽然我对于开放第三方代码没有做过研究，但是因为这件事对开放三方代码有一点自己的认识：</p>
+<p><strong>对于第三方代码，安全问题自不用去提，在此基础上，对于官方代码和三方代码一定要做技术方案的隔离，否则当未来官方代码需要升级技术方案的时候就会步履维艰。</strong></p>
+<p>比如说，如果当时店铺的设计师模块直接基于 jQuery 某个指定版本去开发，现在也就不会遇到这些问题了，当然这只是个马后炮，希望对类似应用会有帮助吧。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/03/17/kissy-version-solution/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/03/17/kissy-version-solution/" data-id="cjt6lbxzb005vjeu1ftggpqz2" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/03/17/kissy-version-solution/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代码安全/">代码安全</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/第三方/">第三方</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/03/18/error-handling-in-koa/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          如何优雅的在 koa 中处理错误
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/11/react-web-intro/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">三步将 React Native 项目运行在 Web 浏览器上面</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

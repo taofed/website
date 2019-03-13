@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>一个前端的自我修养 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="今天给大家分享的主题是前端的自我成长，这是一个关于成长的话题。 很多人都有这样的感觉：听了很多技术圈子的分享，有的有深度，有的循循善诱，深入浅出，但是呢，几年下来，到底哪些用上了，哪些对自己真的有帮助了?反而有些模糊。 2015 年我在不同的场合分享了很多内容：有移动端的性能、有适配、有 Web vs Native，也有 hybrid，但是其实我一直比较担心，真正有深度的内容，其实面向的是比较小">
+<meta name="keywords" content="鸡汤,分享">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一个前端的自我修养">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/03/23/the-growth-of-front-end/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="今天给大家分享的主题是前端的自我成长，这是一个关于成长的话题。 很多人都有这样的感觉：听了很多技术圈子的分享，有的有深度，有的循循善诱，深入浅出，但是呢，几年下来，到底哪些用上了，哪些对自己真的有帮助了?反而有些模糊。 2015 年我在不同的场合分享了很多内容：有移动端的性能、有适配、有 Web vs Native，也有 hybrid，但是其实我一直比较担心，真正有深度的内容，其实面向的是比较小">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1x3hvMXXXXXcrXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1CPRlMXXXXXafaXXXXXXXXXXX-826-222.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1L5FfMXXXXXXaapXXXXXXXXXX-1501-789.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1L9VmMXXXXXc0XVXXXXXXXXXX-1729-990.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1COtpMXXXXXbwXVXXXXXXXXXX-1224-924.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1_AJIMXXXXXXeXXXXXXXXXXXX-1202-352.png">
+<meta property="og:image" content="http://gw.alicdn.com/mt/TB1DbJqMXXXXXbBXVXXXXXXXXXX-800-1173.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1d1XsMXXXXXXBXVXXXXXXXXXX-2263-430.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1lEdkMXXXXXXOaXXXXXXXXXXX-1388-551.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1S9XiMXXXXXaLaXXXXXXXXXXX-751-477.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1wVBmMXXXXXX0aXXXXXXXXXXX-975-767.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1KQhAMXXXXXXUXpXXXXXXXXXX-1732-973.png">
+<meta property="og:image" content="http://gw.alicdn.com/bao/uploaded/TB1CPJFMXXXXXbSXXXXXXXXXXXX-624-819.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一个前端的自我修养">
+<meta name="twitter:description" content="今天给大家分享的主题是前端的自我成长，这是一个关于成长的话题。 很多人都有这样的感觉：听了很多技术圈子的分享，有的有深度，有的循循善诱，深入浅出，但是呢，几年下来，到底哪些用上了，哪些对自己真的有帮助了?反而有些模糊。 2015 年我在不同的场合分享了很多内容：有移动端的性能、有适配、有 Web vs Native，也有 hybrid，但是其实我一直比较担心，真正有深度的内容，其实面向的是比较小">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1x3hvMXXXXXcrXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/团队生活/">团队生活</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-the-growth-of-front-end" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      一个前端的自我修养
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 寒泉（winter）</span>
+        
+        <span>发表于: <a href="/blog/2016/03/23/the-growth-of-front-end/" class="article-date">
+  <time datetime="2016-03-23T12:30:27.000Z" itemprop="datePublished">2016-03-23</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1x3hvMXXXXXcrXFXXXXXXXXXX-900-500.jpg" alt="一个前端的自我修养"></p>
+<p>今天给大家分享的主题是前端的自我成长，这是一个关于成长的话题。</p>
+<p>很多人都有这样的感觉：听了很多技术圈子的分享，有的有深度，有的循循善诱，深入浅出，但是呢，几年下来，到底哪些用上了，哪些对自己真的有帮助了?反而有些模糊。</p>
+<p>2015 年我在不同的场合分享了很多内容：有移动端的性能、有适配、有 Web vs Native，也有 hybrid，但是其实我一直比较担心，真正有深度的内容，其实面向的是比较小众的群体，比如说 Hybrid，其实它在大部分公司里面，是只能用现成的。</p>
+<p>所以我这一次尝试分享一个我认为可以帮助到所有前端的话题，关于前端的成长，如果说这个分享的内容，听众里面有那么几十个人拿到 BAT 的 offer，或者升职加薪，那么我觉得我就认为我取得了成功。</p>
+<p>前端其实是个特别苦逼的职业，因为前端技术一直革命的特别快，新技术、新技巧在不断地被发明出来。之前我有一个朋友，他讲说他对自己的认知是了解前端、熟悉前端、精通前端、熟悉前端、不懂前端。为什么呢，他说当他觉得自己对前端所有的东西觉得无所不知，无所不能的时候，忽然看到了一段代码，他完全无法理解，于是整个世界就崩塌了，从此再也不敢说自己会前端。</p>
+<p>我就跟他说，这里，缺少的是一种正确的方法，你觉得无所不知、无所不能的标准是什么，是工作中很久没遇到解决不了的问题么？他说还真是这样。我就又问他，那你系统学过前端么？他想了想，还真没学过，大学里不开这个课。的确如此，到目前为止，还没有任何一个大学会教前端，倒是有些培训班，会讲网页开发三剑客。</p>
+<p>我这里讲的内容，希望带给大家的，就是该如何学习前端，实现自身成长。</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1CPRlMXXXXXafaXXXXXXXXXXX-826-222.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1CPRlMXXXXXafaXXXXXXXXXXX-826-222.png" alt="img"></a></p>
+<p>关于成长，首先我得发一个免责声明，不是我对我讲的内容没有信心，而是成长是自己的事，英文有句话，在外企工作的人会经常听到，叫做：</p>
+<p>You are the owner of your career.</p>
+<p>你是你职业发展的责任人。这句话潜台词是，你（不是你老板，也不是你爸妈，也不是你女朋友）是你职业发展的责任人。</p>
+<p>这句话我在我职业生涯的起点听说，一直指导我的职业发展，甚至在我带团队，培养团队的时候，也是中心的指导思想，之前我带的团队的同学，他们有不少人也在带团队，其实他们也在实践这句话，所以我这里，也把这句话、把这个道理分享给给大家。</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1L5FfMXXXXXXaapXXXXXXXXXX-1501-789.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1L5FfMXXXXXXaapXXXXXXXXXX-1501-789.png" alt="img"></a></p>
+<p>我们讲前端成长，<strong>我认为，主要在两个方面，一部分是“能力”，一部分是“知识”</strong>。我个人的观点，能力占百分之八十，知识占百分之二十。</p>
+<p>从这个图上，大家可以看到，其实我们认为变化快的东西，最新出来的 Angular、React、ES2015，其实都在知识里面，知识又分成两部分，一部分我把它叫做标准，它是相对而言比较稳定的，很少会出现一个标准被推翻的事情。另一部分则是技术，像是 jQ、React 这些框架啦，像是 MVC、FLUX 这些架构的东西，这些东西是由各个公司主导的，变化就非常快，你看 Grunt 发展了没多久，Gulp 就来挑战他了，然后又有 browserify、webpack 这些东西。</p>
+<p>而我认为占重点的能力，则是非常稳定的，我认为能力是三大块：编程能力、架构能力、工程能力。</p>
+<p><strong>编程能力</strong>，就是用代码解决问题的能力，你编程能力越强，就能解决越复杂的问题，细分又有调试、算法、数据结构、OS 原理等这些的支撑，你才能解决各种麻烦的问题。</p>
+<p><strong>架构能力</strong>，则是解决代码规模的问题，当一个系统足够复杂，你会写每一块，能解决每一个问题，不等于你能搞定整个系统，这就需要架构能力，架构能力包含了一些意识，比如解耦、接口隔离，也包含认识业务建立抽象模型，也有一些常见的模式，比如经典的 MVC，还有设计层面，面向对象、设计模式等等。</p>
+<p>最后<strong>工程能力</strong>，则是解决协作的问题，当系统规模更大，光靠一个人，是没办法完成的，如何保证几个高手互相能够配合好？如何保证项目里面水平最差的人不拖后腿？这个工程化建设，往往会跨越多个业务，以汇报关系上的团队为单位来做。包括前后端解耦，模块化，质量保证，代码风格，等等。</p>
+<p>其实不难看出来，这三项，其实是有顺序的，低等级、小团队，编程能力一项就能应付，越资深的前端，越大的公司和团队，越是需要后面的技能，但是这里我要强调一点，其实资深前端，大团队，对能力的需求，是既要还要——不是说资深的前端，编程能力就可以变差。</p>
+<p>社区总会有一些声音，对工程能力，对架构能力持有一种抵触的态度，觉得比较虚，觉得不需要。实际上以某些人所在的岗位来说，也没错，毕竟公司、团队的状态确实可能用不到，但是以个人成长的角度来看，就是大错特错。</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1L9VmMXXXXXc0XVXXXXXXXXXX-1729-990.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1L9VmMXXXXXc0XVXXXXXXXXXX-1729-990.png" alt="img"></a></p>
+<p>下面我们来具体讲讲，关于知识的学习。</p>
+<p>对知识，我一直有个观点，叫做宁缺毋滥，这个图片上写了一句好前端才分对错，是的，其实很多人，他学习东西的时候就喜欢挑，挑简单的学，书选择最”深入浅出”的，在这种心态下，没有任何一丝学好的可能性，</p>
+<p>所以我对知识学习的目标，理解为亮点，一曰准确，二曰全面。当年学习一部分知识，如果你能做到这两点，那你将来在业务上做技术决策的时候，你面对面试官技术问题的时候，信心跟你只看过皮毛是完全不一样的。</p>
+<p>怎么做到这两点呢？我想路子肯定有很多，而我的答案，我这里要分享的，是“建立自己的知识体系”。</p>
+<p>如何建立自己的知识体系呢？我个人总结的经验，是下面几个步骤：</p>
+<p><strong>第一步，寻找线索。</strong></p>
+<p>你要了解一个知识，比如我想学 Web 平台的 API 了，当然可以先找一本书，看看别人都写了什么，但是我不喜欢这么干。</p>
+<p>我大学里，学前端的东西，为了找个 id 和 name 的区别，曾经要借十几本书来，对比着看，那个时候，是真的没人告诉我，什么书比较好。所以我对别人总结好的知识，第一反应是质疑，不信。</p>
+<p>所以我比较推荐，找一些比较准确的，你可以确定它真的足够全面的资料当作线索。对 Web 平台的 API，我就用反射：</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1COtpMXXXXXbwXVXXXXXXXXXX-1224-924.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1COtpMXXXXXbwXVXXXXXXXXXX-1224-924.png" alt="img"></a></p>
+<p>浏览器里给出来的这个属性列表是不会骗人的，用这个东西作为线索，我就很有信心。</p>
+<p>同样可能比较适合做的资料，还有一些标准文档的附录，和源代码里的结构定义。</p>
+<p><strong>第二步，是建立联系。</strong></p>
+<p>比如说，看下面几个 DOM 属性：</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1_AJIMXXXXXXeXXXXXXXXXXXX-1202-352.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1_AJIMXXXXXXeXXXXXXXXXXXX-1202-352.png" alt="img"></a></p>
+<p>这里，左边一列是操作 Node 的，右边一列是操作 Element 的，它就存在一定的对应关系。</p>
+<p>一般来说，我们找对应关系的方式有以下几个依据：</p>
+<ul>
+<li>美感</li>
+<li>完备性</li>
+<li>操作同一组数据</li>
+</ul>
+<p>特别提一下，操作同一组数据，正是面向对象的核心概念，对前端而言，有点不一样的是，所有的 API，根都是 window，所以，其实大部分的 API，可以依据面向对象的数据和操作的观点进行划分。</p>
+<p><strong>第三步，是分类。</strong></p>
+<p>这里我给出一个实际一些的例子，下图是我对 zepto(移动简化版jQuery)，的 API 分类</p>
+<p><a href="http://gw.alicdn.com/mt/TB1DbJqMXXXXXbBXVXXXXXXXXXX-800-1173.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/mt/TB1DbJqMXXXXXbBXVXXXXXXXXXX-800-1173.png" alt="img"></a></p>
+<p>建立联系以后，我们依据知识之间的联系，进行分类，就可以得到一张图谱，在这个图里面，你就可以非常清楚地知道，哪些知识，是非常重要的，哪些，其实是可以互相替代的。</p>
+<p>而一旦有你之前没见过的东西，你又能通过把它放到图谱里，来快速理解它，或者找出一些很好的替代方案。</p>
+<p>比如说面试的时候，如果面试官问你 bind 和 unbind 怎么用，你还不会，这时候，如果你心里有这张图，你就不至于一脸懵了，你可以说，虽然我不知道 bind 和 unbind，但是我知道 live 和 die 啊，我又知道 on 和 off 啊。</p>
+<p>这张图里我们就可以看出，collection 里面的东西，多半没什么用，而节点操作里，肯定就都很有用。</p>
+<p>第四步，是追本溯源。</p>
+<p>当我对一个知识体系的全貌有了概念以后，占了全面两个字，接下来需要确认它的准确性。很多知识，在社区，会有很多的争议，该相信谁呢，这是个问题。而我的答案，就是追本溯源，去找它最初的讨论和定义。</p>
+<p>有一个真实的案例，就是闭包这个概念，曾经我们很多人的理解都是错的，把闭包和 scope 的概念给混淆起来，认为闭包是函数的执行环境上下文，但是有一个叫做 hax 的（很多人应该都认识他，哈哈），他就对此提出了质疑，认为闭包就是函数。于是我就去查证闭包的概念。</p>
+<p>大家都知道，wiki 其实是不准确的，但是其中有一段，基本不会太有问题，就是历史。下图是 closure 这个词条的历史部分：</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1d1XsMXXXXXXBXVXXXXXXXXXX-2263-430.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1d1XsMXXXXXXBXVXXXXXXXXXX-2263-430.png" alt="img"></a></p>
+<p>从这段历史里，我找到了一个名字， Peter J Landin，他是提出者，那么，我就去看看他到底是怎么说的，于是我去 google 学术搜索，找他的文章</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1lEdkMXXXXXXOaXXXXXXXXXXX-1388-551.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1lEdkMXXXXXXOaXXXXXXXXXXX-1388-551.png" alt="img"></a></p>
+<p>果然找到了，于是我们看看原始的文件</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1S9XiMXXXXXaLaXXXXXXXXXXX-751-477.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1S9XiMXXXXXaLaXXXXXXXXXXX-751-477.png" alt="img"></a></p>
+<p>这个定义，对应到我们今天 JS 里的闭包，是稍微有点区别的，但是它毫无疑问，是包含了两个部分环境部分和控制（代码）部分，所以其实，闭包就是对应着 JS 的函数，而之前，普遍的观点是认为闭包只包含环境。</p>
+<p>所以这个追溯的过程，能够帮我们真正搞清楚对错。</p>
+<p>除了 wiki-google 学术搜索的组合，还有一些邮件列表和 github 提交历史，也是非常适合去查证一些概念和技术的历史的。</p>
+<p>最后说，我讲的这个建立知识体系的过程，是不断接受新知识，挑战、质疑原有的体系，推翻再重建，每一次循环，你的知识体系都变得更加坚固，更加强大。</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1wVBmMXXXXXX0aXXXXXXXXXXX-975-767.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1wVBmMXXXXXX0aXXXXXXXXXXX-975-767.png" alt="img"></a></p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1KQhAMXXXXXXUXpXXXXXXXXXX-1732-973.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1KQhAMXXXXXXUXpXXXXXXXXXX-1732-973.png" alt="img"></a></p>
+<p>下面分享的一部分，是关于能力培养。</p>
+<p>能力培养其实重要性很高，但是其实说起来，内容却很少。只有两点: 教材、训练。</p>
+<p>对知识学习，我是主张建立自己的体系，不要去相信书，但是对能力培养，我的观点就刚好相反，我觉得能力的体系，恰恰是难以自己建立的，需要教材去指导。这是由两者的复杂程度和变化速度决定的。</p>
+<p>想培养能力，就要找经典的教材来学习，像算法导论，The C++ Programming Language这些经典，几十年都没有过时。</p>
+<p>注意这里我用了教材，而不是书。</p>
+<p>教材和书最大的区别，就是有没有习题。</p>
+<p>在我看来，内容再难的书可以一星期读两本，但是教材一定不行，教材一定得花几个月的时间，一边读一边做习题。</p>
+<p>于是谈到训练。</p>
+<p>其实有个事实是，工作以后，只有极少数人仍然能够做到训练，比如我自己的编程能力，我自觉工作 7、8 年，几乎没有过进步。</p>
+<p>训练应该是系统的（需要教材）、主动的，这两个特点不可或缺，有人会觉得，我真的工作很辛苦，每天都要加班，但是其实，任何被动的痛苦，都没法给人带来进步，你的痛苦倒是可能给老板带来更多收入。</p>
+<p>如果面临困境，可以选择系统训练来提升自己，但是对大部分人来说，可能更乐于选择一个一个变通的办法: 养成习惯，让工作变得更有挑战。</p>
+<p>这个事情其实有不少理论，比较有名的是 Noel Tichy 提出的心理舒适区、学习区和恐慌区。选择一份对自己来说具有挑战性的工作，正面解决问题。</p>
+<p>技术圈里流行一个笑话，说的是一个人，工作了三年，却只有一年的经验，因为后面两年都在重复第一年的工作。</p>
+<p>所以我们要做的事，就是永远不重复劳动，当你觉得现在的工作，越来越舒适，越来越缺少风险的时候，就应该引起警惕了。</p>
+<p>而虽然训练是个很困难的事情，其实大家也不必过于担忧，虽然到处都是“一万小时训练”的言论，现在各大公司的招聘门槛，在我看来应该都卡在几百小时训练的程度。所以我想说，一万小时太久，只争朝夕。希望看到大家成为更好的前端，做更好的自己。</p>
+<p>以上是我分享的所有内容。</p>
+<p><a href="http://gw.alicdn.com/bao/uploaded/TB1CPJFMXXXXXbSXXXXXXXXXXXX-624-819.png" target="_blank" rel="noopener"><img src="http://gw.alicdn.com/bao/uploaded/TB1CPJFMXXXXXbSXXXXXXXXXXXX-624-819.png" alt="img"></a></p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/03/23/the-growth-of-front-end/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/03/23/the-growth-of-front-end/" data-id="cjt6lby1l00bhjeu1a67mh3tf" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/03/23/the-growth-of-front-end/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/分享/">分享</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/鸡汤/">鸡汤</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/03/25/seller-bigpipe-coding/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          新版卖家中心 Bigpipe 实践（二）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/21/internationalization/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">淘宝前端国际化方案探索</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

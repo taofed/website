@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>如何定位 Node.js 的内存泄漏 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="在 《一次 Node.js 应用内存暴涨分析》中，我们处理了一个 Node.js vm 引发的内存泄漏问题，处理过程也是比较艰辛。而在我们实际开发中，可能经常会碰到内存泄漏的问题，但很多情况下，我们对于这种问题的处理是有些迷茫的，没有一定的操作流程，效率比较低。虽然这种问题对于经验的要求比较高，但如果有一个简单的排查流程，还是会有一定帮助的。 这里简单整理一个流程，欢迎一起探讨，补充。 基础知识">
+<meta name="keywords" content="Node.js,memory leak">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何定位 Node.js 的内存泄漏">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/04/16/how-to-find-memory-leak/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="在 《一次 Node.js 应用内存暴涨分析》中，我们处理了一个 Node.js vm 引发的内存泄漏问题，处理过程也是比较艰辛。而在我们实际开发中，可能经常会碰到内存泄漏的问题，但很多情况下，我们对于这种问题的处理是有些迷茫的，没有一定的操作流程，效率比较低。虽然这种问题对于经验的要求比较高，但如果有一个简单的排查流程，还是会有一定帮助的。 这里简单整理一个流程，欢迎一起探讨，补充。 基础知识">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Fs7jMpXXXXabXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1ejYNMpXXXXcsXVXXXXXXXXXX-2880-1708.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1utodMpXXXXcWXXXXXXXXXXXX-2876-660.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1FYDUMpXXXXc1XFXXXXXXXXXX-2880-474.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1DUz4MpXXXXXLXFXXXXXXXXXX-2876-852.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB17UkfMpXXXXbEXXXXXXXXXXXX-2358-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1J8gkMpXXXXXuXXXXXXXXXXXX-1194-914.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何定位 Node.js 的内存泄漏">
+<meta name="twitter:description" content="在 《一次 Node.js 应用内存暴涨分析》中，我们处理了一个 Node.js vm 引发的内存泄漏问题，处理过程也是比较艰辛。而在我们实际开发中，可能经常会碰到内存泄漏的问题，但很多情况下，我们对于这种问题的处理是有些迷茫的，没有一定的操作流程，效率比较低。虽然这种问题对于经验的要求比较高，但如果有一个简单的排查流程，还是会有一定帮助的。 这里简单整理一个流程，欢迎一起探讨，补充。 基础知识">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB1Fs7jMpXXXXabXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-how-to-find-memory-leak" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      如何定位 Node.js 的内存泄漏
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 凌恒</span>
+        
+        <span>发表于: <a href="/blog/2016/04/16/how-to-find-memory-leak/" class="article-date">
+  <time datetime="2016-04-15T17:58:18.000Z" itemprop="datePublished">2016-04-16</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://img.alicdn.com/tps/TB1Fs7jMpXXXXabXXXXXXXXXXXX-900-500.jpg" alt="如何定位 Node.js 的内存泄漏"></p>
+<p>在 <a href="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/">《一次 Node.js 应用内存暴涨分析》</a>中，我们处理了一个 Node.js vm 引发的内存泄漏问题，处理过程也是比较艰辛。而在我们实际开发中，可能经常会碰到内存泄漏的问题，但很多情况下，我们对于这种问题的处理是有些迷茫的，没有一定的操作流程，效率比较低。虽然这种问题对于经验的要求比较高，但如果有一个简单的排查流程，还是会有一定帮助的。</p>
+<p>这里简单整理一个流程，欢迎一起探讨，补充。</p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p>Node.js 进程的内存管理，都是有 V8 自动处理的，包括内存分配和释放。那么 V8 什么时候会将内存释放呢？</p>
+<p>在 V8 内部，会为程序中的所有变量构建一个图，来表示变量间的关联关系，当变量从根节点无法触达时，就意味着这个变量不会再被使用了，就是可以回收的了。<br>而这个回收是一个过程性的，从快速 GC 到 最后的 Full GC，是需要一段时间的。<br>另外，Full GC 是有触发阈值的，所以可能会出现内存长期占用在一个高值，也可以算是一种内存泄漏，可以从《一次 Node.js 应用内存暴涨分析》中找到例子。还有一种就是引用不释放，导致无法进入 GC 环节，并且一直产生新的占用，这一般会发生在 Javascript 层面。</p>
+<p>所以，定位内存泄漏问题，一般方案就是找那些不被使用又不会被释放的变量，处理了这些变量，问题一般就可以解决了。如果是 Node.js 底层变量不释放，除了提交 issue 等待解决外，只能通过优化启动参数来解决。</p>
+<h2 id="如何找出并解决问题"><a href="#如何找出并解决问题" class="headerlink" title="如何找出并解决问题"></a>如何找出并解决问题</h2><h3 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h3><p>工欲善其事必先利其器，在排查时，我们还是需要一些工具来帮忙的。</p>
+<h4 id="devTool"><a href="#devTool" class="headerlink" title="devTool"></a>devTool</h4><p>这个是今年初出的 Node.js 调试工具，基于 Electron 将 Node.js 和 Chromium 的功能融合在了一起。操作起来比 node-inspector 方便，开放的 Timeline 功能还是比较实用的，虽然不是实时显示。<br>仅需要 <code>devtool xxx.js</code>，还可以通过 .devtoolrc 来进行参数定制，具体见 <a href="https://github.com/Jam3/devtool" target="_blank" rel="noopener">GitHub</a></p>
+<h4 id="heapdump-chrome-devTool"><a href="#heapdump-chrome-devTool" class="headerlink" title="heapdump + chrome devTool"></a>heapdump + chrome devTool</h4><p>这个是比较传统的定位内存泄漏的组合。heapdump 可以直接在代码中调用生成内存快照，然后将快照文件导入到 chrome devTool 进行分析，之后操作其实和前者就差不多了。不过，这个方案和前者有一点区别就是，前者实际还是在浏览器环境中，所以生成的内存快照会有一些 DOM 对象的存在，会有一定的干扰。而这个方案，是直接调用底层 V8 的方法，生成的快照只有 Node.js 环境中的对象。</p>
+<h4 id="memwatch"><a href="#memwatch" class="headerlink" title="memwatch"></a>memwatch</h4><p>这个可以在代码里直接使用，实时检测内存动态，当发生内存泄漏的时候，会触发 ‘leak’ 事件，会传递当前的堆状态，配合 heapdump 有奇效。详见 <a href="https://www.npmjs.com/package/memwatch" target="_blank" rel="noopener">memwatch</a>。</p>
+<h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><h4 id="一、重现问题"><a href="#一、重现问题" class="headerlink" title="一、重现问题"></a>一、重现问题</h4><p>对于垃圾回收，V8 引擎有很复杂的逻辑来决定什么时候进行回收。很多时候，当我们发现 Node.js 进程所使用的内存快速增长的时候，并不能确定是否是内存泄漏导致的，很有可能是程序设计问题，导致内存的不合理利用。只有当垃圾回收触发，未使用内存被释放后，内存增长还在持续，我们才能确定是发生了内存泄漏。</p>
+<p>隐藏的内存泄漏问题，大多是有触发条件的，重现问题是需要这些条件的，所以我们在平时写代码的时候，可以将一些重要环节的参数细节打印在 log 中，这样我们在重现问题是就不会摸不着头脑，乱试一气。</p>
+<p>有了参数可以用来重现问题，接下来要确定问题。我们要确定，这部分内存是否没有被 GC 正确释放。那么问题来了，我们如何知道程序进行了垃圾回收呢？很显然，等待并不是办法，我们要主动。</p>
+<p>在 Node.js 的启动参数中，提供了暴露手动调用 GC 方法的参数，即 <code>--expose-gc</code>。我们用这个参数来启动应用后，就可以在代码中调用 <code>global.gc()</code> 手动触发垃圾回收操作。同时，使用 <code>process.memoryUsage().heapUsed</code> 获取进程运行时所占用的内存。如果 GC 之后，内存依然没有下降，就可以确定是内存泄露了。</p>
+<h4 id="二、生成内存快照"><a href="#二、生成内存快照" class="headerlink" title="二、生成内存快照"></a>二、生成内存快照</h4><p>既然内存是问题，我们就需要获取程序运行的内存快照来帮助定位问题。但内存快照并不是随便打得，是有一定技巧的。</p>
+<p>我们<strong>至少要生成三次内存快照</strong>，才能更好的定位问题。这三次中又一次要在问题出现前生成，之后可以在问题持续的过程中生成两次或更多。</p>
+<p>为什么要这样做呢？理解起来很简单。第一次是为了获取正常情况下的堆栈信息，而在问题出现后，堆栈信息一定会发生变化，有了第一次的信息，我们才好进行后面的比对，过滤一些无用的信息。而后两次的快照，用来比对某一对象的堆栈变化，来确定是否是有问题的对象。下面会详细应用到。</p>
+<h4 id="三、定位问题"><a href="#三、定位问题" class="headerlink" title="三、定位问题"></a>三、定位问题</h4><p>用 devTool 的可以忽略下面的过程：</p>
+<blockquote>
+<p>打开 Chrome Devtools ，进入到 Profiles 选项卡，点 Load 按钮，加载之前生成的快照。</p>
+</blockquote>
+<p>对于内存快照，有四个视图，Summary，Comparison，Containment，Statistics，这里面常用的是前三个。</p>
+<p>在 Summary 视图中，我们可以看到当前快照的全部信息，以及多个快照之间的信息。在列表里显示的都是对象的构造函数名字，可以先忽略被括号包裹的对象，优先观察其他的对象，最后再来看他们。后面的 <code>shallow size</code> 表示的是对象自身的大小，<code>retained size</code> 表示的是对象和它依赖对象的大小，一般是 GC 不可达的。</p>
+<p>在 Comparison 视图中，我们可以进行多个快照之间的对比，这个用处比较大，如果我们将前两次快照进行对比，可能比较快速的定位出问题的对象。注意观察 New、Deleted、Delta，如果是内存泄漏的对象，可能是一直在 New，而没有 Deleted。</p>
+<p>在 Containment 视图中，我们可以查看整个 GC 路径，当然一般不会用到。因为展开在 Summary 和 Comparison 列举的每一项，都可以看到从 GC roots 到这个对象的路径。通过这些路径，你可以看到这个对象的句柄被什么持有，从而定位问题产生的原因。值的注意的是，其中背景色黄色的，表示这个对象在 Javascript 中还存在引用，所以可能没有被清除。如果是红色的，表示的是这个对象在 Javascript 中不存在引用，但是依然存活在内存中，一般常见于 DOM 对象，它们存放的位置和 Javascript 中对象还是有不同的，在 Node.js 中很少遇见。</p>
+<p>更多的操作方法，可以看这个视频 <a href="https://youtu.be/L3ugr9BJqIs" target="_blank" rel="noopener">Memory Profiling with Chrome DevTools</a> 和 <a href="https://youtu.be/LaxbdIyBkL0" target="_blank" rel="noopener">Memory Management Masterclass</a>。还有 Chrome 的文档 <a href="https://developer.chrome.com/devtools/docs/javascript-memory-profiling" target="_blank" rel="noopener">Memory Profiling</a>（旧） 和 <a href="https://developers.google.com/web/tools/chrome-devtools/profile/memory-problems/memory-diagnosis" target="_blank" rel="noopener">Memory Diagnosis</a>（新）。讲的还是很详细的。（请自备梯子）</p>
+<h4 id="四、解决问题"><a href="#四、解决问题" class="headerlink" title="四、解决问题"></a>四、解决问题</h4><p>一般在 Javascript 中存在引用而导致内存泄漏的情况，是比较好处理的，只需要在使用后及时的将引用释放掉即可。</p>
+<p>但像 <a href="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/">《一次 Node.js 应用内存暴涨分析》</a> 所存在的那种内存问题，是属于底层机制的问题，如果等不了 bugfix，就只能先通过一些启动参数来优化内存管理。常用的参数：</p>
+<ul>
+<li><code>--max-old-space-size</code> 限制老生区大小，可以控制内存占用的最大值，即使发生泄漏，也不会让内存占用保持很高。可以根据开启进程数以及是否同机部署来优化。</li>
+<li><code>--gc_global</code> 这其实是个 V8 的 debug flag，让 GC 永远都是 Full GC，使用上会有一定的性能损耗，根据应用复杂度不同，损耗不同。</li>
+</ul>
+<p>当我们找到问题，进行修复后，重复上面的步骤，确认问题已经被解决。有时可能一次并不能解决问题，所以耐心还是很重要的。</p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>可以在这里下载使用到的代码， <a href="https://github.com/taobaofed/demo" target="_blank" rel="noopener">GitHub</a>，进入 memory-leak 文件夹。<br>我们来举个例子，应用上面的步骤排查问题，使用 leak-memory 的例子，代码还有另外一个例子，可以自己实践。</p>
+<p>这里我们为了方便，我们使用了 devTool。</p>
+<p><code>devTool leak-memory.js</code></p>
+<p>然后在打开的界面中进入内存快照界面，生成第一次快照。当控制台有输出后，间隔的生成两次快照，结果如下。</p>
+<p><img src="http://img.alicdn.com/tps/TB1ejYNMpXXXXcsXVXXXXXXXXXX-2880-1708.jpg" alt="screenshot"></p>
+<p>我们切换视图，对比下三次快照间的区别，可以看到 <code>Foo</code> 这个对象一直在创建而没有被删除。</p>
+<p><img src="http://img.alicdn.com/tps/TB1utodMpXXXXcWXXXXXXXXXXXX-2876-660.jpg" alt="screenshot"></p>
+<p><img src="http://img.alicdn.com/tps/TB1FYDUMpXXXXc1XFXXXXXXXXXX-2880-474.jpg" alt="screenshot"></p>
+<p>我们展开 <code>Foo</code>，选择下面的一个实例，查看它的 GC path，可以看到它一直被 neverRelease 持有引用（黄色），所以没有被释放，之后就可以进行问题的处理了。</p>
+<p><img src="http://img.alicdn.com/tps/TB1DUz4MpXXXXXLXFXXXXXXXXXX-2876-852.jpg" alt="screenshot"></p>
+<p>去掉 <code>// neverRelease.splice(index, 1);</code>  前的注释，然后在重复上面的步骤，你会发现内存的变化已经正常了。</p>
+<blockquote>
+<p>在使用 devTool 时，可以查看运行时的 memory timeline，如果图像呈现阶梯式增长，一般就是存在内存泄漏问题了。正常的应用曲线会类似于锯齿，如图：</p>
+</blockquote>
+<p><img src="http://img.alicdn.com/tps/TB17UkfMpXXXXbEXXXXXXXXXXXX-2358-500.jpg" alt="screenshot"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li><p>内存泄漏问题的定位，经验很重要，但有了良好工具的辅助，可以节省很多时间。如果懒得自己一步步的操作，可以接入 <a href="http://alinode.aliyun.com/" target="_blank" rel="noopener">alinode</a>，这个可以帮助你很方便的生成快照等运行时数据，并有一定的分析辅助，还是方便的。</p>
+</li>
+<li><p>你可能看到很多内存分析的文章会有一些图来表示内存的增长，可以使用 python 来快速生成相关的图片，使用 <code>matplotlib.pyplot</code> 这个包。</p>
+</li>
+</ol>
+<p><img src="http://img.alicdn.com/tps/TB1J8gkMpXXXXXuXXXXXXXXXXXX-1194-914.jpg" alt="screenshot"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://developers.google.com/web/tools/chrome-devtools/profile/memory-problems/memory-diagnosis" target="_blank" rel="noopener">memory-diagnosis</a></li>
+<li><a href="https://www.youtube.com/watch?v=L3ugr9BJqIs&amp;feature=youtu.be" target="_blank" rel="noopener">Memory Profiling with Chrome DevTools</a></li>
+<li><a href="http://www.alexkras.com/simple-guide-to-finding-a-javascript-memory-leak-in-node-js/" target="_blank" rel="noopener">Simple Guide to Finding a JavaScript Memory Leak in Node.js</a></li>
+<li><a href="http://jayconrod.com/posts/55/a-tour-of-v8-garbage-collection" target="_blank" rel="noopener">A tour of V8: Garbage Collection</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/04/16/how-to-find-memory-leak/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/04/16/how-to-find-memory-leak/" data-id="cjt6lbxyt004ajeu1gv7m4d5r" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/04/16/how-to-find-memory-leak/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/memory-leak/">memory leak</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/04/25/performance-composite/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          无线性能优化：Composite
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/04/12/webfont-practice/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">H5 页面高级字体应用实践</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

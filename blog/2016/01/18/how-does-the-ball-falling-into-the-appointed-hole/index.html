@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>小球是怎么落入指定球洞的？ | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="游戏回顾不知大家是否还有印象，淘宝玩法平台（一个内部系统）前不久发布了一款新的游戏 —— 小球入洞，该游戏伴随着淘宝技术部去年双 11 当天举办的一次抽奖活动，第一次在大家面前亮相。  游戏支持预先设定必中奖项：离开发射器的小球在来回弹跳一阵之后，不偏不倚的落入到指定奖项对应的球洞中。体验该功能，可在游戏测试页右侧选项区进行如下的设置：  本文试着介绍游戏的这个「掉落至指定球洞」的功能，讲的偏思">
+<meta name="keywords" content="游戏,算法,寻路,暴力破解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小球是怎么落入指定球洞的？">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="游戏回顾不知大家是否还有印象，淘宝玩法平台（一个内部系统）前不久发布了一款新的游戏 —— 小球入洞，该游戏伴随着淘宝技术部去年双 11 当天举办的一次抽奖活动，第一次在大家面前亮相。  游戏支持预先设定必中奖项：离开发射器的小球在来回弹跳一阵之后，不偏不倚的落入到指定奖项对应的球洞中。体验该功能，可在游戏测试页右侧选项区进行如下的设置：  本文试着介绍游戏的这个「掉落至指定球洞」的功能，讲的偏思">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB108t6LpXXXXbpXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1iPFLLpXXXXXxXVXXXXXXXXXX-128-50.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1mI8NLpXXXXcgXFXXXXXXXXXX-474-231.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1v8lALpXXXXaJaXXXXXXXXXXX-272-334.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1RjBSLpXXXXayXVXXXXXXXXXX-272-334.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB17oJFLpXXXXcsXVXXXXXXXXXX-401-330.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1VnXRLpXXXXaIXVXXXXXXXXXX-272-334.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1DBJPLpXXXXbDXFXXXXXXXXXX-340-361.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="小球是怎么落入指定球洞的？">
+<meta name="twitter:description" content="游戏回顾不知大家是否还有印象，淘宝玩法平台（一个内部系统）前不久发布了一款新的游戏 —— 小球入洞，该游戏伴随着淘宝技术部去年双 11 当天举办的一次抽奖活动，第一次在大家面前亮相。  游戏支持预先设定必中奖项：离开发射器的小球在来回弹跳一阵之后，不偏不倚的落入到指定奖项对应的球洞中。体验该功能，可在游戏测试页右侧选项区进行如下的设置：  本文试着介绍游戏的这个「掉落至指定球洞」的功能，讲的偏思">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB108t6LpXXXXbpXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-how-does-the-ball-falling-into-the-appointed-hole" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      小球是怎么落入指定球洞的？
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 一位</span>
+        
+        <span>发表于: <a href="/blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/" class="article-date">
+  <time datetime="2016-01-18T10:25:09.000Z" itemprop="datePublished">2016-01-18</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB108t6LpXXXXbpXpXXXXXXXXXX-900-500.jpg" alt="小球是怎么落入指定球洞的？"></p>
+<h2 id="游戏回顾"><a href="#游戏回顾" class="headerlink" title="游戏回顾"></a>游戏回顾</h2><p>不知大家是否还有印象，淘宝玩法平台（一个内部系统）前不久发布了一款新的游戏 —— 小球入洞，该游戏伴随着淘宝技术部去年双 11 当天举办的一次抽奖活动，第一次在大家面前亮相。</p>
+<p><a href="http://codepen.io/taobaofed/full/VeMJqL/" target="_blank"><img src="https://img.alicdn.com/tps/TB1iPFLLpXXXXXxXVXXXXXXXXXX-128-50.png" alt="Try Button.png"></a></p>
+<p>游戏支持预先设定必中奖项：离开发射器的小球在来回弹跳一阵之后，不偏不倚的落入到指定奖项对应的球洞中。体验该功能，可在游戏测试页右侧选项区进行如下的设置：</p>
+<p><img src="https://img.alicdn.com/tps/TB1mI8NLpXXXXcgXFXXXXXXXXXX-474-231.png" alt="Options.png"></p>
+<p>本文试着介绍游戏的这个「掉落至指定球洞」的功能，讲的偏思路，并不涉及公式和代码，我尽可能直白，如果你觉得晦涩，可以在评论处我们接着探讨。在继续之前，为了表达上的方便，我将对游戏在视觉上进行如下图的划分：</p>
+<p><img src="https://img.alicdn.com/tps/TB1v8lALpXXXXaJaXXXXXXXXXXX-272-334.png" alt="Area Division.png"></p>
+<h2 id="为什么需要指定球洞？"><a href="#为什么需要指定球洞？" class="headerlink" title="为什么需要指定球洞？"></a>为什么需要指定球洞？</h2><p>做过抽奖 UI 组件的同学都知道，抽奖结果一定是由后端计算之后返回的，原因主要有两个：1）安全方面考虑，抽奖结果的产生过程不能在前端实现；2）只有中间服务才能更加准确的分配多端的抽奖结果。</p>
+<p>鉴于此，所有抽奖 UI 组件都必须满足：可事先抽得结果之后再播放动画（显示结果）。抽奖大转盘便是一个很典型的例子，在转盘滚动的时候，根据 AJAX 请求的返回，JS 其实已经知道它最终会停在哪个扇区上了。</p>
+<p>小球入洞是一个抽奖类 UI 组件，所以当然也必须支持指定结果的抽奖，那么问题来了，小球的整个过程并不是一段简单的动画，怎么才能使之落入到指定球洞呢？</p>
+<h2 id="小球如何落入指定球洞？"><a href="#小球如何落入指定球洞？" class="headerlink" title="小球如何落入指定球洞？"></a>小球如何落入指定球洞？</h2><p>如上图示意，游戏的主场景三面环壁（小球反弹），一面布满小洞（小球穿过），由于重力的关系，小球在有限次碰撞弹跳之后，最终一定会通过下面的小洞穿出。</p>
+<p>「落入指定球洞」自然成了完成该游戏的第一个也是最棘手的一个难点，因为小球从发射器射出时（离开黄色区域瞬间），方向是确定的（水平向左），难以从指定球洞开始，逆向地推导运动路径并使之最终以确定的方向（水平向右）进入发射器中，此方法非常容易导致路径太长或者无解，寻路耗时将不可控。基于逆向推导在之前也尝试过多种优化方案，均以失败告终。</p>
+<p>最终采用的方式是正向推导路径，即：从离开发射器开始，模拟小球的物理运动，迭代式演算，找出一条刚好能穿过指定球洞的路径。</p>
+<blockquote>
+<p>受场景其它物体影响（碰撞），小球的运动路径并不能用一个公式描述出来，它的整个过程应该由多段的抛物线组成，每一次碰撞都结束一段并开始一段新的路径，所以需要迭代法逐帧推进，才能描绘出完整路径，下图是一条路径的演算过程：</p>
+</blockquote>
+<p><img src="https://img.alicdn.com/tps/TB1RjBSLpXXXXayXVXXXXXXXXXX-272-334.png" alt="Precalc.png"></p>
+<p>假设重力加速度、空气阻力以及所有钢体的弹性都是恒定的，并且墙壁和障碍物都静止不动，小球在离开发射器之后，运动路径就固定下来了。换句话说，影响小球轨迹的就只剩下小球离开发射器那一瞬间时的速度（离开瞬间的方向固定水平向左）。</p>
+<p>让小球落至指定球洞，起关键决定作用的就是离开发射器时的初始速度。如果能找出落向每个球洞所需的初始速度，问题就解决了。</p>
+<p><img src="https://img.alicdn.com/tps/TB17oJFLpXXXXcsXVXXXXXXXXXX-401-330.png" alt="Ball Init Speed.png"></p>
+<h2 id="暴破"><a href="#暴破" class="headerlink" title="暴破"></a>暴破</h2><p>不知怎么给这个含义扣个名堂，我估且称之为暴破法吧，暴破即暴力破解，通常用于破解密码，拿大量不同的钥匙试开一把锁，如果刚好其中一把钥匙能打开锁，那么暴破就成功了。</p>
+<p>包括我在内的多数人，可能会认为暴破的时间成本很高，所以在最开始的思考中首先会自觉地把此方案屏蔽掉，在多次其它方案的实验失败后，我偶然一试此法，发现其实不然。</p>
+<p>在本游戏中，我用不断递增的初始速度（钥匙）来试算路径，由于没有 DOM 操作，且计算量并不是很大，很快就可以找出经过指定球洞（锁）的其中一条路径。</p>
+<p>下图是根据两个不同初始速度试算出来的两个不同结果：</p>
+<p><img src="https://img.alicdn.com/tps/TB1VnXRLpXXXXaIXVXXXXXXXXXX-272-334.png" alt="Scanning Path.png"></p>
+<p>暴破的耗时有多方面的影响，本例中我用 <strong>2000</strong> 个不同的速度（从 <strong>13</strong> 到 <strong>15</strong>，步进为 <strong>0.001</strong>），在某一次实验中，跑了 <strong>10</strong> 万次自动用例，平均一次搜索出结果尝试次数（使用的初始速度的个数）是 <strong>11.6</strong> 次，平均一次搜索出结果用时只有 <strong>4.65ms</strong>，这个数值让我很意外，几乎没有优化的必要。</p>
+<p>在以上的 Demo 中，「搜索路径」这个动作发生在玩家释放弹簧之后，小球弹出之前，5ms 就消耗在这里，可以体会体会 ：）</p>
+<blockquote>
+<p>暴破有时可以成为迅速解决问题的有效手段，比起折腾 AI 来说更加节省研发成本，对于复杂度不高的小游戏，可行性还是满高的，也因为没有 DOM 操作，甚至可以放在 WebWorker 里面进行。</p>
+<p>人机对战的台球游戏，机器的 AI 就完全可以使用此法。</p>
+</blockquote>
+<h2 id="路径拼接"><a href="#路径拼接" class="headerlink" title="路径拼接"></a>路径拼接</h2><p>搜索路径解决了，剩下的问题就简单得多，小球的整个运动，在本游戏中我将之分成三个阶段：</p>
+<ul>
+<li>小球弹出后，来到发射器右上拐角之前，此为第一阶段，为了简便，下文记为 A 阶段；</li>
+<li>小球经过拐角后，离开发射器之前，此为第二阶段，也就是 B 阶段；</li>
+<li>小球离开发射器，直到落洞结束，此为第三阶段，C 阶段；</li>
+</ul>
+<p>三个阶段如下图所示：</p>
+<p><img src="https://img.alicdn.com/tps/TB1DBJPLpXXXXbDXFXXXXXXXXXX-340-361.png" alt="Animation Segments.png"></p>
+<p>前面探讨的搜索路径一直指的都是 C 阶段，为了使整个动画看起来连贯，小球的速度变化一定得平稳，也就是：C 阶段开头的瞬时速度，等于 B 阶段结尾的瞬时速度；B 阶段开头的瞬时速度，等于 A 阶段结尾的瞬时速度。</p>
+<p>如果不考虑磨擦和撞击后的动能衰减，其实阶段 A 加阶段 B 在速度变化上就是自由落体的逆过程，为了简便，我将阶段 A 和阶段 B 做了合并，以同一个抛物线公式（自由落体）表示，根据 C 开头的瞬时速度，可以生成 AB 的完整路径，这样就得到小球的整个运动路径了，这个过程应该好理解，不再赘述。</p>
+<h2 id="小插曲"><a href="#小插曲" class="headerlink" title="小插曲"></a>小插曲</h2><p>由于必须落入指定球洞，所以 A 阶段的初始速度自然也是固定的了，慢着！这里似乎有点儿不对劲？</p>
+<p>弹簧的存在增加了整个过程的违合，正常人的理解，应该是弹簧压缩得越厉害，小球射出时的初始速度越大，这跟合成路径所需的初始速度不匹配：一个是变化的，一个是固定的。</p>
+<p>有两个解决办法：</p>
+<ul>
+<li>1）使阶段 A 的初始速度受弹簧影响，利用阶段 A 或阶段 AB 的路程来逐渐消除该影响，使之看起来变化是平滑的；</li>
+<li>2）分两种情况：弹簧压缩比小于 0.75 时（轻轻拉），小球初始速度受弹簧影响，但使小球弹射不成功（发出去又掉回来）；弹簧压缩比大于 0.75 时（用力拉），小球初始速度直接等于合成路径所需的初始速度（正常发出去）；</li>
+</ul>
+<p>我采用的是后一种解决办法，因为前一种在动画上看起来反物理，似乎重力加速度是在变化的；而后一种方案至少弹簧压缩比在 0-0.75 区间时都是正常的，而 0.75 以上实际体验后违合感并不太明显。</p>
+<p>最后的这个问题其实正是因为非得「射入指定球洞」这件事情引起的，将这一枚小瑕疵掩藏于弹簧的这 25% 的空间里，个人感觉不算太破坏完美，所谓一快遮百丑，这就是现实版弹珠台和电子版的区别。</p>
+<p>（本文完）</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/" data-id="cjt6lbxyq0043jeu1ittaqojk" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/寻路/">寻路</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/暴力破解/">暴力破解</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/游戏/">游戏</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/19/feders-should-kown-some-docker-1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前端也应该了解点 docker 知识：docker 的理念与场景
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/14/nodejs-memory-leak-analyze/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">记一次 Node.js 应用内存暴涨分析</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

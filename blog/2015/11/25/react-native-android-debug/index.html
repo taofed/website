@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>使用 JS 构建跨平台的原生应用：React Native for Android 调试技术剖析 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="通过上篇文章开发环境的准备，调试命令的启动，我们的第一个 React Native for Android 应用已经成功运行在了虚拟机环境里了。 react-native run-android 这个调试命令的背后涉及到 RN 的整个执行流程，值得进行剖析。  React Native 的更新非常活跃，本文以 0.14.0 版本为例 下文简称 React Native 为 RN 下文部分链接访问">
+<meta name="keywords" content="ReactNative,无线开发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 JS 构建跨平台的原生应用：React Native for Android 调试技术剖析">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/25/react-native-android-debug/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="通过上篇文章开发环境的准备，调试命令的启动，我们的第一个 React Native for Android 应用已经成功运行在了虚拟机环境里了。 react-native run-android 这个调试命令的背后涉及到 RN 的整个执行流程，值得进行剖析。  React Native 的更新非常活跃，本文以 0.14.0 版本为例 下文简称 React Native 为 RN 下文部分链接访问">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1oapLKFXXXXX0XXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Lp3NKpXXXXXbXFXXXXXXXXXX-844-559.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1YfjwKpXXXXckXFXXXXXXXXXX-819-246.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1L0ZkKpXXXXbOXXXXXXXXXXXX-1009-206.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB19rglKpXXXXbyXXXXXXXXXXXX-1019-450.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB11MfxKpXXXXbRXFXXXXXXXXXX-1000-890.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1IA3eKpXXXXXDXFXXXXXXXXXX-1007-239.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1ydg1KpXXXXXQXXXXXXXXXXXX-678-822.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1jpcVKpXXXXXXXpXXXXXXXXXX-1018-609.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1dAb1KpXXXXbGXXXXXXXXXXXX-550-743.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1ElvuKpXXXXXaapXXXXXXXXXX-550-743.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1OXoGKpXXXXboXFXXXXXXXXXX-932-688.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1iN7qKpXXXXaQaXXXXXXXXXXX-946-801.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1QpwTKpXXXXcAXXXXXXXXXXXX-946-819.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1xx.LKpXXXXa7XpXXXXXXXXXX-958-486.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1V6QGKpXXXXcXXFXXXXXXXXXX-671-487.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1bi.PKpXXXXbAXpXXXXXXXXXX-670-346.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB10fILKpXXXXcGXpXXXXXXXXXX-666-417.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1SGEsKpXXXXXYaXXXXXXXXXXX-747-832.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1nNQTKpXXXXXNXpXXXXXXXXXX-1018-596.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB15SEgKpXXXXXqaXXXXXXXXXXX-655-110.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1OuofKpXXXXXAaXXXXXXXXXXX-658-92.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Gh.PKpXXXXbJXpXXXXXXXXXX-660-979.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1DQ3JKpXXXXX8XFXXXXXXXXXX-651-295.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1b2gzKpXXXXXtXVXXXXXXXXXX-654-820.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1FqqHJVXXXXbnaXXXXXXXXXXX-536-882.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 JS 构建跨平台的原生应用：React Native for Android 调试技术剖析">
+<meta name="twitter:description" content="通过上篇文章开发环境的准备，调试命令的启动，我们的第一个 React Native for Android 应用已经成功运行在了虚拟机环境里了。 react-native run-android 这个调试命令的背后涉及到 RN 的整个执行流程，值得进行剖析。  React Native 的更新非常活跃，本文以 0.14.0 版本为例 下文简称 React Native 为 RN 下文部分链接访问">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1oapLKFXXXXX0XXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-react-native-android-debug" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      使用 JS 构建跨平台的原生应用：React Native for Android 调试技术剖析
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 梧忌</span>
+        
+        <span>发表于: <a href="/blog/2015/11/25/react-native-android-debug/" class="article-date">
+  <time datetime="2015-11-25T10:16:27.000Z" itemprop="datePublished">2015-11-25</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1oapLKFXXXXX0XXXXXXXXXXXX-900-500.jpg" alt="使用 JS 构建跨平台的原生应用：React Native for Android 调试技术剖析"></p>
+<p>通过<a href="http://taobaofed.org/blog/2015/11/18/react-native-for-android-hello-world/">上篇文章</a>开发环境的准备，调试命令的启动，我们的第一个 React Native for Android 应用已经成功运行在了虚拟机环境里了。</p>
+<p><code>react-native run-android</code> 这个调试命令的背后涉及到 RN 的整个执行流程，值得进行剖析。</p>
+<ul>
+<li>React Native 的更新非常活跃，本文以 0.14.0 版本为例</li>
+<li>下文简称 React Native 为 RN</li>
+<li>下文部分链接访问可能需要翻墙</li>
+</ul>
+<h2 id="run-android"><a href="#run-android" class="headerlink" title="run-android"></a>run-android</h2><p><code>react-native run-android</code> 命令启动后你能看到：</p>
+<ul>
+<li>当前窗口编译打包了一个 Android apk 并且把它安装、运行在了虚拟机环境里</li>
+<li>新开一个命令行窗口起了一个 HTTP 服务在监听 8081 端口</li>
+</ul>
+<p>前者好理解，后者是为什么呢？</p>
+<p>还记得我们上文修改的 index.android.js 文件吗？它是应用的 JS 入口文件。为方便调试，RN 将编译打包一个 debug 版本的 APK 把它安装到虚拟机环境，App 内是靠发送 HTTP 请求到开发机上获取这个 JS<br>文件来进行 UI 渲染的：</p>
+<p><img src="https://img.alicdn.com/tps/TB1Lp3NKpXXXXXbXFXXXXXXXXXX-844-559.png" alt="react-native-run-android"></p>
+<p>那么这两步在 RN 内是如何实现的呢？</p>
+<p><code>react-native</code> 命令执行的是上文安装的 <a href="https://www.npmjs.com/package/react-native-cli" target="_blank" rel="noopener">react-native-cli</a>，但这个包没有做实际的事情，真正执行的代码是在 <a href="https://github.com/facebook/react-native/tree/0.14.0" target="_blank" rel="noopener">react-native</a> 这个库的 <a href="https://github.com/facebook/react-native/tree/0.14.0/local-cli" target="_blank" rel="noopener">local-cli</a> 文件夹里。</p>
+<p>就拿 <code>react-native run-android</code> 来说，它实际执行的代码是 <a href="https://github.com/facebook/react-native/blob/0.14.0/private-cli/src/runAndroid/runAndroid.js" target="_blank" rel="noopener">react-native/private-cli/src/runAndroid/runAndroid.js</a></p>
+<p>执行后，命令行窗口的输出如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1YfjwKpXXXXckXFXXXXXXXXXX-819-246.png" alt="react-native run-android"></p>
+<p>这两个输出寓意着 RN 要执行的两个函数：</p>
+<ul>
+<li>startServerInNewWindow</li>
+<li>buildAndRun</li>
+</ul>
+<p><img src="https://img.alicdn.com/tps/TB1L0ZkKpXXXXbOXXXXXXXXXXXX-1009-206.png" alt="run-android"></p>
+<h2 id="启动-HTTP-服务在新窗口"><a href="#启动-HTTP-服务在新窗口" class="headerlink" title="启动 HTTP 服务在新窗口"></a>启动 HTTP 服务在新窗口</h2><p>startServerInNewWindow 的执行效果跟在项目根目录下运行 <code>node start</code> 是一样的，都会去调用 <a href="https://github.com/facebook/react-native/blob/0.14.0/private-cli/src/server/server.js" target="_blank" rel="noopener">react-native/private-cli/src/server/server.js</a>，其调用过程如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB19rglKpXXXXbyXXXXXXXXXXXX-1019-450.png" alt="server.js"></p>
+<p>我们真正需要关心的是 <a href="https://github.com/facebook/react-native/blob/0.14.0/private-cli/src/server/runServer.js" target="_blank" rel="noopener">react-native/private-clil/src/server/runServer.js</a> 这个文件里的内容：它将创建一个 HTTP 服务并默认监听 8081 端口：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//react-native/private-cli/src/server/runServer.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> connect = <span class="built_in">require</span>(<span class="string">'connect'</span>);</span><br><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">runServer</span>(<span class="params">args, config, readyCallback</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> app = connect()</span><br><span class="line">        <span class="comment">//code...</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> http.createServer(app).listen(args.port, <span class="string">'::'</span>, readyCallback);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">module</span>.exports = runServer;</span><br></pre></td></tr></table></figure>
+<p>接下来，我们以 startServerInNewWindow 唤起的命令行窗口内的输出为线索，了解启动这个 HTTP 服务背后做了些什么：</p>
+<p><img src="https://img.alicdn.com/tps/TB11MfxKpXXXXbRXFXXXXXXXXXX-1000-890.png" alt="startServerInNewWindow"></p>
+<p>窗口内有 8 个输出，它们分别是（见括号数字）：</p>
+<ol>
+<li>createServer<ul>
+<li>Building Dependency Graph（1）<ol>
+<li>Crawling File System（2）</li>
+<li>Building in-memory fs for JavaScript（4）</li>
+<li>Building Haste Map（5）</li>
+</ol>
+</li>
+<li>Loading bundles layout（3）</li>
+</ul>
+</li>
+<li>processRequest</li>
+<li>request:/index.android.bundle?platform=android&amp;dev=true（6）<ol>
+<li>find dependencies（7）</li>
+<li>transform（8）</li>
+</ol>
+</li>
+</ol>
+<p>（1）－（5）是服务启动阶段中主动的 console ，（6）－（8）是 App 访问服务时触发的 console 。</p>
+<h3 id="创建一个响应对象"><a href="#创建一个响应对象" class="headerlink" title="创建一个响应对象"></a>创建一个响应对象</h3><p><img src="https://img.alicdn.com/tps/TB1IA3eKpXXXXXDXFXXXXXXXXXX-1007-239.png" alt="ReactPackagerMiddleware"></p>
+<p>（提示：通过上图我们可以得知，程序执行流程掉入了 <a href="https://github.com/facebook/react-native/tree/0.14.0/packager" target="_blank" rel="noopener">/packager</a> 这个文件夹里。这是一个重要的文件夹，它的职责是打包 JS 。它是独立于平台的，无论是 Android 还是 iOS ，都会调用它去进行打包 JS 的工作）</p>
+<p>HTTP 服务启动过程中，将会<a href="https://github.com/facebook/react-native/blob/0.14.0/private-cli/src/server/runServer.js#L25" target="_blank" rel="noopener">创建多个响应中间件</a>，其中有一个最重要的中间件就是 <a href="https://github.com/facebook/react-native/blob/0.14
+.0/packager/react-packager/index.js#L19" target="_blank" rel="noopener">ReactPackagerMiddleware</a>。这个中间件就是响应后面我们 buildAndRun 流程里创建并运行在虚拟环境内的 App 发送的 request:/index.android.bundle 请求的。</p>
+<p>ReactPackagerMiddleware <a href="https://github.com/facebook/react-native/blob/0.14.0/packager/react-packager/index.js#L20" target="_blank" rel="noopener">将创建一个 Server 对象</a>，Server 则会<a href="https://github.com/facebook/react-native/blob/0.14.0/packager/react-packager/src/Server/index.js#L157" target="_blank" rel="noopener">创建 Bundler 对象</a>，它的作用如名字一样，负责具体的 JS 打包工作。</p>
+<p>但在启动服务的这一步，Bundler 主要做的是准备工作：它会在内存<a href="https://github.com/facebook/react-native/blob/0.14.0/packager/react-packager/src/Bundler/index.js#L97" target="_blank" rel="noopener">建立 DependencyResolver</a>，方便将来打包时可以快速地操作文件。</p>
+<h4 id="构建依赖树"><a href="#构建依赖树" class="headerlink" title="构建依赖树"></a>构建依赖树</h4><p>DependencyResolver 的调用栈如下：</p>
+<ol>
+<li><a href="https://github.com/facebook/react-native/blob/0.14.0/packager/react-packager/src/DependencyResolver/crawlers/index.js" target="_blank" rel="noopener">Crawling File System</a><ul>
+<li>递归项目目录找出所有文件</li>
+</ul>
+</li>
+<li><a href="https://github.com/facebook/react-native/blob/0.14.0/packager/react-packager/src/DependencyResolver/fastfs/index.js" target="_blank" rel="noopener">Building in-memory fs for JavaScript</a><ul>
+<li>在内存内文件系统，将项目目录下的 .js .json 文件以依赖树状结构存储到上面</li>
+</ul>
+</li>
+<li><a href="https://github.com/facebook/react-native/blob/0.14.0/packager/react-packager/src/DependencyResolver/DependencyGraph/HasteMap.js" target="_blank" rel="noopener">Building Haste Map</a><ul>
+<li>快速索引文件系统，里面会排除掉 node_modules/</li>
+</ul>
+</li>
+</ol>
+<h3 id="挂载响应"><a href="#挂载响应" class="headerlink" title="挂载响应"></a>挂载响应</h3><p>Server 对象创建完毕，程序将 Server 的 processRequest 方法作为一个响应中间件挂载到刚启动的 HTTP 服务上用于响应请求：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">exports.middleware = function(options) &#123;</span><br><span class="line">  var server = createServer(options);</span><br><span class="line">  return server.processRequest.bind(server);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>自此，前期工作已经准备完毕。后面（6）－（8）输出，则是来自于 App 请求 /index.android.bundle?platform=android&amp;dev=true 的响应。</p>
+<h3 id="响应请求"><a href="#响应请求" class="headerlink" title="响应请求"></a>响应请求</h3><p>安装和运行到虚拟机环境里的 App 在启动完成后会发送一个 HTTP 请求到 <code>http://yourDevIP:port/index.android.bundle?platform=android&amp;dev=true</code> 以获取 bundle 资源。</p>
+<p>Server.processRequest 捕获到这个请求，并且响应一个打包好的 JS 文件：</p>
+<p><img src="https://img.alicdn.com/tps/TB1ydg1KpXXXXXQXXXXXXXXXXXX-678-822.png" alt="processRequest"></p>
+<p>前面介绍过，Server 在初始化时会创建一个 Bundler 对象，而在收到请求后 Server 就是用这个 Bundler 进行打包 JS 文件的。</p>
+<p>最后的控制台输出告诉了我们 Bundler 的打包过程：</p>
+<ol>
+<li>find dependencies（7）：在 Bundler 创建时生成的 DependencyResolver 查找依赖关系树</li>
+<li>transform（8）：将查找到的 JS 模块进行编译</li>
+</ol>
+<p>有关于 build 的全过程，我将在未来的文章中更深入地进行讲解，现在你只需要知道：</p>
+<p><img src="https://img.alicdn.com/tps/TB1jpcVKpXXXXXXXpXXXXXXXXXX-1018-609.png" alt="createServer"></p>
+<h3 id="热部署技术"><a href="#热部署技术" class="headerlink" title="热部署技术"></a>热部署技术</h3><h4 id="Reload-JS"><a href="#Reload-JS" class="headerlink" title="Reload JS"></a>Reload JS</h4><p><img src="https://img.alicdn.com/tps/TB1dAb1KpXXXXbGXXXXXXXXXXXX-550-743.png" alt="Reload JS"></p>
+<p>在虚拟机环境内，打开 App 的菜单，点击 Reload JS ，如果开发机脚本有被修改，则 App 内 UI 会重新渲染。这是怎么做到的呢？</p>
+<p>原来，点击 Reload JS 后，App 会重新发送 HTTP 请求到开发机，开发机上的服务器收到请求后根据参数决定是否重新 build 返回 bundle 文件。</p>
+<h4 id="Auto-reload-on-JS-change"><a href="#Auto-reload-on-JS-change" class="headerlink" title="Auto reload on JS change"></a>Auto reload on JS change</h4><p><img src="https://img.alicdn.com/tps/TB1ElvuKpXXXXXaapXXXXXXXXXX-550-743.png" alt="Auto reload on JS change"></p>
+<p>Reload JS 通过重新发送请求就能做到了，那在 Dev Settings 中设置 Auto reload on JS change 选项后，每次开发机 JS 代码有改动，App 内 UI 就会重新渲染，这又是怎么做到的呢？</p>
+<ol>
+<li><p>Dev Settings 更新后将会触发 App 内的 reload 方法，reload 时将会去检查当前的 mDevSettings 内有无开启 Auto reload on JS change ，如果有，则开启轮询 <code>startPollingOnChangeEndpoint</code>：</p>
+<p> <img src="https://img.alicdn.com/tps/TB1OXoGKpXXXXboXFXXXXXXXXXX-932-688.png" alt="startPollingOnChangeEndpoint"></p>
+</li>
+<li><p>startPollingOnChangeEndpoint 将启动一个 HTTP 客户端然后发送请求到 <code>http://yourDevIP:port/onchange</code></p>
+<p> <img src="https://img.alicdn.com/tps/TB1iN7qKpXXXXaQaXXXXXXXXXXX-946-801.png" alt="enqueueOnChangeEndpointLongPolling"></p>
+</li>
+<li><p>无论请求成功还是失败，App 都会继续通过这个 HTTP 客户端发送同样的请求（轮询）：</p>
+<p> <img src="https://img.alicdn.com/tps/TB1QpwTKpXXXXcAXXXXXXXXXXXX-946-819.png" alt="handleOnChangePollingResponse"></p>
+</li>
+<li>而如果请求返回的状态码是 205，则调用 <a href="https://github.com/facebook/react-native/blob/0.14.0/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevServerHelper.java#L234" target="_blank" rel="noopener">mOnServerContentChangeListener.onServerContentChanged</a> 做出响应，<a href="https://github.com/facebook/react-native/blob/0.14.0/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L602" target="_blank" rel="noopener">onServerContentChanged 会做的动作则是 handleReloadJS</a>, <a href="https://github.com/facebook/react-native/blob/0.14.0/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L469" target="_blank" rel="noopener">handleReloadJS 这一步</a>则会如 App<br>初始化时的一样，发送一个 HTTP 请求到 <code>http://yourDevIP:port/index.android
+.bundle?platform=android&amp;dev=true</code> 获取最新的 bundle 并且进行编译渲染。</li>
+</ol>
+<p><img src="https://img.alicdn.com/tps/TB1xx.LKpXXXXa7XpXXXXXXXXXX-958-486.png" alt="Auto reload on JS change"></p>
+<p>接下来看看开发机上的 HTTP 服务接收到 <code>/onchange</code> 请求将会做出怎样的响应：</p>
+<ol>
+<li><p>服务器接受到 <code>/onchange</code> 的请求后没有做成任何响应，而是默默地把请求通过 <code>_processOnChangeRequest</code> 方法存储在了 Server._changeWatchers 中。当请求太久没有响应而超时关闭时，就把 Server._changeWatchers 清空：</p>
+<p> <img src="https://img.alicdn.com/tps/TB1V6QGKpXXXXcXXFXXXXXXXXXX-671-487.png" alt="processOnChangeRequest"><br> <img src="https://img.alicdn.com/tps/TB1bi.PKpXXXXbAXpXXXXXXXXXX-670-346.png" alt="processOnChangeRequest"></p>
+</li>
+<li><p>在服务器收到 <code>/onchange</code> 请求时，直到关闭这个请求的过程前，如果服务器内的 JS 文件发生任何变更，服务器将会重新 build 并且响应这个 <code>/onchange</code> 。这里就涉及到 FileWatcher 模块的引入：在 Server 初始化时，引入了 FileWatcher 模块并把它传递给了 Bundler 。还记得上一节中我们讲过的吗？Bundler 会初始化 DependencyResolver ，在这一步里，Bundler 会使用 FileWatcher 监听依赖树里的每一个文件，当它们发生变化时，FileWatcher 会抛出相应的事件。</p>
+<p> <img src="https://img.alicdn.com/tps/TB10fILKpXXXXcGXpXXXXXXXXXX-666-417.png" alt="FileWatcher"></p>
+</li>
+<li><p>Server 内，监听了 FileWatcher 的事件，接受到事件后，进行 rebuild ，响应 <code>/onchange</code> 请求：</p>
+<p> <img src="https://img.alicdn.com/tps/TB1SGEsKpXXXXXYaXXXXXXXXXXX-747-832.png" alt="x"></p>
+</li>
+</ol>
+<p>至此，用一张图来总结 startServerInNewWindow 的执行流程：</p>
+<p><img src="https://img.alicdn.com/tps/TB1nNQTKpXXXXXNXpXXXXXXXXXX-1018-596.png" alt="startServerInNewWindow"></p>
+<h2 id="编译和运行应用"><a href="#编译和运行应用" class="headerlink" title="编译和运行应用"></a>编译和运行应用</h2><p>另外一边，RN CLI 编译打包了一个 APK 并且把它安装运行在了虚拟机内。观察 Shell 的输出：</p>
+<p><img src="https://img.alicdn.com/tps/TB15SEgKpXXXXXqaXXXXXXXXXXX-655-110.png" alt="x"><br><img src="https://img.alicdn.com/tps/TB1OuofKpXXXXXAaXXXXXXXXXXX-658-92.png" alt="x"></p>
+<p>定位到 buildAndRun 的<a href="https://github.com/facebook/react-native/blob/0.14.0/private-cli/src/runAndroid/runAndroid.js#L60" target="_blank" rel="noopener">源码</a>：</p>
+<p><img src="https://img.alicdn.com/tps/TB1Gh.PKpXXXXbJXpXXXXXXXXXX-660-979.png" alt="x"></p>
+<p>由此可得知，编译打包安装、运行 App 是分 2 步来执行的，最终执行的命令是：</p>
+<ul>
+<li><code>cd android &amp;&amp; ./gradlew installDebug</code></li>
+<li><code>&lt;ANDROID_HOME&gt;/platform-tools/adb shell am start -n com.awesomeproject/.MainActivity</code></li>
+</ul>
+<h3 id="Gradle：编译、打包、安装"><a href="#Gradle：编译、打包、安装" class="headerlink" title="Gradle：编译、打包、安装"></a>Gradle：编译、打包、安装</h3><p><code>cd android &amp;&amp; ./gradlew installDebug</code> </p>
+<p>最终执行的命令是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xdock:name=Gradle -Xdock:icon=&lt;Project_Dir&gt;/android/media/gradle.icns -Dorg.gradle.appname=gradlew -classpath &lt;Project_Dir&gt;/android/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain installDebug</span><br></pre></td></tr></table></figure>
+<p>原来，RN 中打包编译是由 <a href="https://docs.gradle.org/current/userguide/gradle_wrapper.html" target="_blank" rel="noopener">Gradle Wrapper</a> 来实现的。Gradle Wrapper 是一种方便的使用 <a href="https://github.com/gradle/gradle" target="_blank" rel="noopener">Gradle</a> 的方法，他包括了为支持 Windows 的批处理脚本和支持类 Unix 的 shell 脚本。这些脚本在不安装 Gradle 时候，也可以用 Gradle。</p>
+<p>通过 <a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/bin/gradle/wrapper/gradle-wrapper.properties" target="_blank" rel="noopener">&lt;Project_Dir&gt;/android/gradle/wrapper/gradle-wrapper.properties</a> 我们还可以知道 RN 使用的是 2.4 版本的 Gradle 。</p>
+<p>接下来针对 Gradle 做一个简单的介绍。</p>
+<h4 id="Gradle-是什么？"><a href="#Gradle-是什么？" class="headerlink" title="Gradle 是什么？"></a>Gradle 是什么？</h4><p>参考它官网的介绍：</p>
+<pre><code>Gradle is a build tool with a focus on build automation and support for multi-language development.
+</code></pre><p>Gradle 遵循约定优于配置的原则，它的主要配置文件是 build.gradle 。打开 <code>&lt;Project_Dir&gt;/android/</code> 文件夹，就可以看到这个配置文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── app</span><br><span class="line">├── build</span><br><span class="line">├── build.gradle</span><br><span class="line">├── gradle</span><br><span class="line">├── gradle.properties</span><br><span class="line">├── gradlew</span><br><span class="line">├── gradlew.bat</span><br><span class="line">└── settings.gradle</span><br></pre></td></tr></table></figure>
+<h4 id="Projects-和-tasks"><a href="#Projects-和-tasks" class="headerlink" title="Projects 和 tasks"></a>Projects 和 tasks</h4><p>Gradle 里的任何东西都是基于这两个基础概念：</p>
+<ul>
+<li>projects（项目）</li>
+<li>tasks（任务）</li>
+</ul>
+<p>每一个构建都是由一个或多个 projects 构成的。一个 project 到底代表什么依赖于你想用 Gradle 做什么。举个例子，一个 project 可以代表一个 JAR 或者一个网页应用。它也可能代表一个发布的 ZIP 压缩包， 这个 ZIP 可能是由许多其他项目的 JARs 构成的。但是一个 project 不一定非要代表被构建的某个东西。它可以代表一件要做的事，比如部署你的应用.</p>
+<p>每一个 project 是由一个或多个 tasks 构成的。一个 task 代表一些更加细化的构建。可能是编译一些 classes，创建一个 JAR， 生成 javadoc，或者生成某个目录的压缩文件。</p>
+<p>我们来看一下 RN Andorid 下有多少个 project，运行 <code>gralde projects</code> （使用 <code>brew install gralde</code> 安装 gralde CLI）</p>
+<p><img src="https://img.alicdn.com/tps/TB1DQ3JKpXXXXX8XFXXXXXXXXXX-651-295.png" alt="gralde projects"></p>
+<p>可见我们有 2 个 project ，一个是根项目 <code>AwesomeProject</code>，另一个是其子项目 <code>app</code> 。 这是在 <a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/settings.gradle" target="_blank" rel="noopener">&lt;Project_Dir&gt;/android/settings.gradle</a>配置的。 Gradle 将会根据 project 文件夹内的 build.gradle 依次执行构建。</p>
+<p>接下来看看我们有哪些 tasks，运行 <code>gralde tasks</code>：</p>
+<p><img src="https://img.alicdn.com/tps/TB1b2gzKpXXXXXtXVXXXXXXXXXX-654-820.png" alt="gralde tasks"></p>
+<p>tasks 比较多，不一一展开，重点是，找到了我们此次运行的 task：installDebug</p>
+<p>这个 tasks 来自于哪里？它是在哪里定义的？你会发现，你搜遍你的项目文件夹，也没有找到这个 task 定义的地方。</p>
+<p>原来，Gradle 有一个<a href="https://docs.gradle.org/current/userguide/plugins.html" target="_blank" rel="noopener">插件机制</a>，<a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/app/build.gradle#L1" target="_blank" rel="noopener">&lt;Project_Dir&gt;/android/app/build.gradle</a> 中有这一行代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: &quot;com.android.application&quot;</span><br></pre></td></tr></table></figure>
+<p>它加载了 <a href="http://developer.android.com/tools/building/plugin-for-gradle.html" target="_blank" rel="noopener">Android Plugin for Gradle</a> ，installDebug 正是它提供的一个 task。</p>
+<h4 id="build-gradle"><a href="#build-gradle" class="headerlink" title="build.gradle"></a>build.gradle</h4><p>gradle 命令会在当前目录中查找一个叫 build.gradle 的文件。我们称这个 build.gradle 文件为一个构建脚本 (build script)， 但是严格来说它是一个构建配置脚本 (build configuration script)。这个脚本定义了一个 project 和它的 tasks。</p>
+<p>我们的 android 项目有两个 build.gradle 对应着两个 project，分别是：</p>
+<ul>
+<li><a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/build.gradle" target="_blank" rel="noopener">&lt;Project_Dir&gt;/android/build.gradle</a></li>
+<li><a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/app/build.gradle" target="_blank" rel="noopener">&lt;Project_Dir&gt;/android/app/build.gradle</a></li>
+</ul>
+<p>关于这 build.gradle 内配置项的介绍，请阅读：<a href="http://developer.android.com/intl/zh-cn/tools/building/configuring-gradle.html" target="_blank" rel="noopener">《Configuring Gradle Builds》</a> 。这里我们需要了解的是，我们的 JS 资源打包时如何进行配置的。</p>
+<p>&lt;Project_Dir&gt;/android/app/build.gradle 中<a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/app/build.gradle#L50" target="_blank" rel="noopener">加载了</a> <a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/app/react.gradle#L65" target="_blank" rel="noopener">&lt;Project_Dir&gt;/android/app/react.gradle</a>，正是这个文件内的配置把 bundleDebugJsAndAssets 的逻辑添加进了 android build process ：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">gradle.projectsEvaluated &#123;</span><br><span class="line">    // hook bundleDebugJsAndAssets into the android build process</span><br><span class="line">    bundleDebugJsAndAssets.dependsOn mergeDebugResources</span><br><span class="line">    bundleDebugJsAndAssets.dependsOn mergeDebugAssets</span><br><span class="line">    processDebugResources.dependsOn bundleDebugJsAndAssets</span><br><span class="line"></span><br><span class="line">    // hook bundleReleaseJsAndAssets into the android build process</span><br><span class="line">    bundleReleaseJsAndAssets.dependsOn mergeReleaseResources</span><br><span class="line">    bundleReleaseJsAndAssets.dependsOn mergeReleaseAssets</span><br><span class="line">    processReleaseResources.dependsOn bundleReleaseJsAndAssets</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于我们执行的是 <code>./gradlew installDebug</code> ，这是 debug 模式，所以 bundleDebugJsAndAssets <a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/src/app/react.gradle#L42" target="_blank" rel="noopener">默认是不执行的</a>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">enabled config.bundleInDebug ?: false</span><br></pre></td></tr></table></figure>
+<p>所以说在 <code>./gradlew installDebug</code> 时，默认不会打包 JS 。</p>
+<p>RN android 的编译打包和普通 android 应用没有区别，android 的开发体系<a href="http://developer.android.com/sdk/index.html" target="_blank" rel="noopener">非常庞大</a>，在这篇文章中不再展开，编译打包的具体流程可通过下图概括：</p>
+<p><img src="https://img.alicdn.com/tps/TB1FqqHJVXXXXbnaXXXXXXXXXXX-536-882.png" alt="Build System Overview"></p>
+<p>（ 图片来源：<a href="http://developer.android.com/sdk/installing/studio-build.html" target="_blank" rel="noopener">http://developer.android.com/sdk/installing/studio-build.html</a> ）</p>
+<p>打包成功后的 APK 文件在 &lt;Project_Dir&gt;/android/app/build/outputs/ ，然后 Gradle 会查找当前的虚拟设备，把该 APK 安装到上面。</p>
+<h3 id="Native-入口"><a href="#Native-入口" class="headerlink" title="Native 入口"></a>Native 入口</h3><p><code>./gradlew installDebug</code> 没有打包 JS 资源，那我们的应用是怎样加载 JS 呢？</p>
+<p>正像我们一开始说的那样，debug 版的 App 是通过去访问开发机上的服务器去获取 JS 资源的。RN Andorid 分为几步来实现：</p>
+<ol>
+<li><p>App 程序主入口 <a href="https://github.com/facebook/react-native/blob/0.14.0/local-cli/generator-android/templates/package/MainActivity.java#L29" target="_blank" rel="noopener">MainActivity</a> 在 debug 模式时开启 DeveloperSupport：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ReactInstanceManager.builder().setUseDeveloperSupport(BuildConfig.DEBUG)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><a href="https://github.com/facebook/react-native/blob/0.14.0/ReactAndroid/src/main/java/com/facebook/react/ReactInstanceManager.java#L196" target="_blank" rel="noopener">ReactInstanceManager</a>（构建 React 的运行环境，发送事件到 JS， 驱动整个 React 的运转。 通过 builder 可以创建不同的 React 环境：例如内置 JS 文件路径， 开发环境 dev 的 JS 名字，是否支持调试等）：创建 DevSupportManager：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mDevSupportManager = new DevSupportManager(...);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><a href="https://github.com/facebook/react-native/blob/0.14.0/ReactAndroid/src/main/java/com/facebook/react/ReactRootView.java#L294" target="_blank" rel="noopener">ReactRootView</a>（Android 标准的 FrameLayout 对象，另外一个功能是提供 React 入口）：初始化 React 世界：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mReactInstanceManager.attachMeasuredRootView(this)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>ReactInstanceManager 根据当前 DeveloperSupport 是否开启来决定从哪里加载 JS（<a href="https://github.com/facebook/react-native/blob/0.14.0/ReactAndroid/src/main/java/com/facebook/react/ReactInstanceManager.java#L232" target="_blank" rel="noopener">createReactContextInBackground</a>）：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public void createReactContextInBackground() &#123;</span><br><span class="line">    if (mUseDeveloperSupport) &#123;</span><br><span class="line">      if (mDevSupportManager.hasUpToDateJSBundleInCache()) &#123;</span><br><span class="line">        // If there is a up-to-date bundle downloaded from server, always use that</span><br><span class="line">        onJSBundleLoadedFromServer();</span><br><span class="line">        return;</span><br><span class="line">      &#125; else if (mBundleAssetName == null ||</span><br><span class="line">          !mDevSupportManager.hasBundleInAssets(mBundleAssetName)) &#123;</span><br><span class="line">        // Bundle not available in assets, fetch from the server</span><br><span class="line">        mDevSupportManager.handleReloadJS();</span><br><span class="line">        return;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    // Use JS file from assets</span><br><span class="line">    recreateReactContextInBackground(</span><br><span class="line">        new JSCJavaScriptExecutor(),</span><br><span class="line">        JSBundleLoader.createAssetLoader(</span><br><span class="line">            mApplicationContext.getAssets(),</span><br><span class="line">            mBundleAssetName));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://docs.gradle.org/current/userguide/userguide.html" target="_blank" rel="noopener">Gradle User Guide</a></li>
+<li><a href="http://tools.android.com/tech-docs/new-build-system/user-guide" target="_blank" rel="noopener">Gradle Plugin User Guide</a></li>
+<li><a href="http://developer.android.com/tools/building/plugin-for-gradle.html" target="_blank" rel="noopener">Android Plugin for Gradle</a></li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇文章跟大家一起深入了解了 <code>react-native run-android</code> 背后的执行逻辑，通过对此的学习，我们基本了解了：</p>
+<ul>
+<li>RN JS 层面的打包流程</li>
+<li>RN android 应用的打包流程和技术背景</li>
+</ul>
+<p>题图：不可阻挡的阳光。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/25/react-native-android-debug/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/25/react-native-android-debug/" data-id="cjt6lby1c00aijeu13ym540p5" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/25/react-native-android-debug/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ReactNative/">ReactNative</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/无线开发/">无线开发</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/26/graphql-basics-server-implementation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Node.js 服务端实践之 GraphQL 初探
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/24/nodejs-php-process-manager/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">浅谈 Node.js 和 PHP 进程管理</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

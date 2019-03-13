@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>GCanvas 渲染引擎介绍 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="GCanvas 已经正式开源，开源官方主页，传送门 GCanvas 提供了一套类似于 H5 Canvas 标准的 JavaScript API。基于这套 API 可以方便的去做图形绘制、动画渲染等，开发的体验与 H5 Canvas 是完全一样的。 GCanvas 介绍GCanvas发展经历了两个阶段。  第一阶段，2014 年中到 2015 年底，解决 Android 平台 WebView Ca">
+<meta name="keywords" content="渲染,GCanvas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GCanvas 渲染引擎介绍">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/07/27/gcanvas/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="GCanvas 已经正式开源，开源官方主页，传送门 GCanvas 提供了一套类似于 H5 Canvas 标准的 JavaScript API。基于这套 API 可以方便的去做图形绘制、动画渲染等，开发的体验与 H5 Canvas 是完全一样的。 GCanvas 介绍GCanvas发展经历了两个阶段。  第一阶段，2014 年中到 2015 年底，解决 Android 平台 WebView Ca">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1sakpSpXXXXaAXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1oRSZSpXXXXb_XXXXXXXXXXXX-1143-708.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1rlWvSpXXXXX7XVXXXXXXXXXX-1194-742.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB10OLSSpXXXXajXXXXXXXXXXXX-1264-2230.png">
+<meta property="og:image" content="http://git.cn-hangzhou.oss-cdn.aliyun-inc.com/uploads/gcanvas/gcanvas/c20f34aafadc65bfa6c7af91f817c02c/GCanvas_brief_iOS.png">
+<meta property="og:image" content="http://git.cn-hangzhou.oss.aliyun-inc.com/uploads/gcanvas/gcanvas/97d10777075cbe0f9134beeea94a54e3/GCanvas_Render_Core_Layer_Detail_Design.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GCanvas 渲染引擎介绍">
+<meta name="twitter:description" content="GCanvas 已经正式开源，开源官方主页，传送门 GCanvas 提供了一套类似于 H5 Canvas 标准的 JavaScript API。基于这套 API 可以方便的去做图形绘制、动画渲染等，开发的体验与 H5 Canvas 是完全一样的。 GCanvas 介绍GCanvas发展经历了两个阶段。  第一阶段，2014 年中到 2015 年底，解决 Android 平台 WebView Ca">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1sakpSpXXXXaAXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-gcanvas" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      GCanvas 渲染引擎介绍
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 韦青</span>
+        
+        <span>发表于: <a href="/blog/2017/07/27/gcanvas/" class="article-date">
+  <time datetime="2017-07-26T16:49:59.000Z" itemprop="datePublished">2017-07-27</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1sakpSpXXXXaAXFXXXXXXXXXX-900-500.jpg" alt="GCanvas 渲染引擎介绍"></p>
+<p>GCanvas 已经正式开源，开源官方主页，<a href="https://alibaba.github.io/GCanvas/" target="_blank" rel="noopener">传送门</a></p>
+<p>GCanvas 提供了一套类似于 H5 Canvas 标准的 JavaScript API。基于这套 API 可以方便的去做图形绘制、动画渲染等，开发的体验与 H5 Canvas 是完全一样的。</p>
+<h2 id="GCanvas-介绍"><a href="#GCanvas-介绍" class="headerlink" title="GCanvas 介绍"></a>GCanvas 介绍</h2><p>GCanvas发展经历了两个阶段。</p>
+<ul>
+<li>第一阶段，2014 年中到 2015 年底，解决 Android 平台 WebView Canvas 渲染性能差的问题。</li>
+<li>第二阶段，2016 年 11 月到现在，为前端提供 Native 图形绘制能力。</li>
+</ul>
+<p>用一句话来概括 GCanvas，即遵循 W3C 标准，移动端的跨平台的高性能图形渲染引擎。可以从三个方面来解释。 </p>
+<ul>
+<li><p><strong>遵循 W3C 标准</strong><br>GCanvas 提供了一套类似于 H5 Canvas 标准的 JavaScript API，开发人员基于这套 API 可以方便的去做图形绘制、动画渲染等。开发的体验与 H5 Canvas 是完全一样的。</p>
+</li>
+<li><p><strong>跨平台</strong><br>GCanvas 的内核基于 OpenGL ES， 用 C++ 实现了一套用于描述 Canvas 标准 API 的接口实现。我们将其称为渲染引擎内核。并通过交叉编译，使得可以适配 Android、iOS 这两大主流移动平台，因而具有跨平台的特性。</p>
+</li>
+<li><p><strong>高性能</strong><br>早期移动平台上 H5 Canvas 去做一些复杂的动画或游戏，在 WebView 上的体验非常差。 主要原因是 WebView 对 GPU 硬件加速的支持差。高性能则是充分利用了 GPU 硬件的渲染能力，主要体现两个方面：</p>
+<ul>
+<li>对于 Android 3.0 以前的系统，Android 的渲染管线是不支持硬件加速的，WebView 中的 Canvas 不能获得 GPU 的图形渲染能力的支持。对于这类系统，通过 GCanvas 可以获得更底层的 OpenGL ES 的硬件加速能力提高渲染效率。</li>
+<li>链路上来看，缩短了调用路径，提高了渲染性能。使用了 GCanvas 则不需要经过 WebView 内部的复杂逻辑处理和图层树渲染，而是让 JavaScript 通过桥接方式直接调用渲染引擎内核（OpenGL ES）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="GCanvas-组成"><a href="#GCanvas-组成" class="headerlink" title="GCanvas 组成"></a>GCanvas 组成</h2><p><img src="https://img.alicdn.com/tfs/TB1oRSZSpXXXXb_XXXXXXXXXXXX-1143-708.png" alt></p>
+<p>如上图所示 GCanvas 由三层组成 JavaScript 层、插件层、核心渲染库。</p>
+<ul>
+<li><p>JavaScript 层<br>JavaScript 提供对外统一的 API，支持 Canvas 2D 和 WebGL 的功能接口。接口支持情况请参考 <a href="#GCanvasAPI">API 覆盖</a>。</p>
+</li>
+<li><p>插件层<br>插件层核心包含三部分。 </p>
+<ul>
+<li><p>Bridge 桥接<br>JavaScript 到 Native 的桥接，比较主流的方式 JSBridge 和 JSBinding。JSBridge 实现方式，如 Cordva、WebviewJavascriptBridge 等。 还可以用 JSBinding 方式来实现，如 V8、JavascriptCore 等。实际的应用场景中这两种桥接方式都有支持。</p>
+</li>
+<li><p>通用插件<br>通用插件包含了通用插件接口与实现、GCanvas 的管理、渲染命令队列管理、纹理缓存等。支持不同类型桥接方式下的扩展。</p>
+</li>
+<li><p>系统适配<br>系统适配涉及 Android 和 iOS 对 OpenGL ES 实现的差异，网络图片下载，字体渲染等方面。</p>
+</li>
+</ul>
+</li>
+<li><p>核心渲染库<br>核心渲染库包括对外统一的接口，以及 Contex2D 和 WebGL 模块，底层则是对 OpenGL ES API 等分装。</p>
+</li>
+</ul>
+<h2 id="GCanvas-流程"><a href="#GCanvas-流程" class="headerlink" title="GCanvas 流程"></a>GCanvas 流程</h2><p><img src="https://img.alicdn.com/tfs/TB1rlWvSpXXXXX7XVXXXXXXXXXX-1194-742.png" alt></p>
+<p>上图是 JavaScript 层渲染核心库的概要流程，关键的两个流程是初始化和渲染。 </p>
+<ul>
+<li><p>初始化<br>初始化，JavaSript 层获取配置判断运行环境，通过桥接层，插件层完成视图和 GCanvas 的创建。进一步完成对 OpenGL 环境的初始化。</p>
+</li>
+<li><p>渲染<br>渲染，JavaScript 层将所有的API调用托管，并且转换成自定义的命令格式（命令类型 + 参数的组合）。渲染触发则由 JavaScript 定时器触发或者手动触发的方式，将这些命令下发到渲染核心库执行。</p>
+</li>
+</ul>
+<p>以 Weex 为例, 绘制图形和图片的测试代码如下。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">        &lt;gcanvas v-<span class="keyword">if</span>=<span class="string">"isWeex"</span> ref=<span class="string">"canvas_holder"</span> style=<span class="string">"top: 0; width:750;height:1000;position:absolute;"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">gcanvas</span>&gt;</span></span></span><br><span class="line">        &lt;canvas v-<span class="keyword">if</span>=<span class="string">"!isWeex"</span> ref=<span class="string">"canvas_holder"</span> style=<span class="string">"width:750px;height:1000px;"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span></span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">&lt;/</span>template&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> isWeex = weex.config.env.platform !== <span class="string">'Web'</span></span><br><span class="line">    <span class="keyword">const</span> &#123; enable, WeexBridge, <span class="attr">Image</span>: GImage &#125; = <span class="built_in">require</span>(<span class="string">'gcanvas.js'</span>);</span><br><span class="line">    <span class="keyword">const</span> EnvImage = !isWeex ? Image : GImage;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">        data() &#123;</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                isWeex: isWeex ? <span class="number">1</span> : <span class="number">0</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        mounted: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">let</span> ref = <span class="keyword">this</span>.$refs.canvas_holder;</span><br><span class="line">            <span class="keyword">if</span> (isWeex) &#123;</span><br><span class="line">                ref = enable(ref, &#123;<span class="attr">bridge</span>: WeexBridge&#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">var</span> ctx = ref.getContext(<span class="string">'2d'</span>);</span><br><span class="line"></span><br><span class="line">			<span class="comment">//rect</span></span><br><span class="line">			ctx.fillStyle = <span class="string">'red'</span>;</span><br><span class="line">			ctx.fillRect(<span class="number">0</span>, <span class="number">0</span>, <span class="number">100</span>, <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">			<span class="comment">//rect</span></span><br><span class="line">			ctx.fillStyle = <span class="string">'black'</span>;</span><br><span class="line">			ctx.fillRect(<span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>);</span><br><span class="line">			ctx.fillRect(<span class="number">25</span>, <span class="number">210</span>, <span class="number">700</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">			<span class="comment">//circle</span></span><br><span class="line">			ctx.arc(<span class="number">450</span>, <span class="number">200</span>, <span class="number">100</span>, <span class="number">0</span>, <span class="built_in">Math</span>.PI * <span class="number">2</span>, <span class="literal">true</span>);</span><br><span class="line">			ctx.fill();</span><br><span class="line"></span><br><span class="line">			<span class="comment">//drawImage</span></span><br><span class="line">			<span class="keyword">var</span> image = <span class="keyword">new</span> EnvImage();</span><br><span class="line">			image.onload = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">				ctx.drawImage(image, <span class="number">100</span>, <span class="number">330</span>);</span><br><span class="line">				ctx.drawImage(image, <span class="number">100</span>+<span class="number">300</span>, <span class="number">330</span>, <span class="number">225</span>, <span class="number">75</span>);</span><br><span class="line">			&#125;</span><br><span class="line">			image.src = <span class="string">'https://gw.alicdn.com/tfs/TB1KwRTlh6I8KJjy0FgXXXXzVXa-225-75.png'</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>通过 Weex Playground 运行结果如下</p>
+<p><img src="https://img.alicdn.com/tfs/TB10OLSSpXXXXajXXXXXXXXXXXX-1264-2230.png" width="80%"></p>
+<p>具体分析下整个流程。结合插件层和核心渲染库来分析。</p>
+<ul>
+<li><p>插件层流程<br>以 iOS 为例分析，Android 的过程是类似的。<br><img src="http://git.cn-hangzhou.oss-cdn.aliyun-inc.com/uploads/gcanvas/gcanvas/c20f34aafadc65bfa6c7af91f817c02c/GCanvas_brief_iOS.png" alt></p>
+<ul>
+<li>GLKView 视图创建，并且与 GCanvas 对象建立绑定关系；</li>
+<li>GCVCommon，资源加载与纹理绑定；</li>
+<li>GCanvasPlugin，设置位置信息、设备比率、下发渲染命令；</li>
+</ul>
+</li>
+<li><p>渲染库流程</p>
+</li>
+</ul>
+<p><img src="http://git.cn-hangzhou.oss.aliyun-inc.com/uploads/gcanvas/gcanvas/97d10777075cbe0f9134beeea94a54e3/GCanvas_Render_Core_Layer_Detail_Design.png" alt></p>
+<p>  渲染命令的解析，最终通过调用 OpenGL ES 的方法或组合方法来实现 Context2D 和 WebGL 的效果，生成帧缓存，提交给 GPU 渲染，最后在绑定的 GLKView 视图上显示。</p>
+<ul>
+<li>Context2D，需要实现诸如 GPath、GTexture、GTransform、GTriangulate 等来实现 Canvas 的渲染效果；</li>
+<li>WebGL 相对简单，WebGL1.0 的 API 基本都能与从 OpenGL ES2.0 找到与之相对应的 API；</li>
+</ul>
+<h2 id="GCanvas-测试例子"><a href="#GCanvas-测试例子" class="headerlink" title="GCanvas 测试例子"></a>GCanvas 测试例子</h2><p>下面给出一些 GCanvas 的案例。</p>
+<ul>
+<li><p>GCanvas 与 H5 Canvas 性能对比</p>
+<p><video width="100%" height="100%" autoplay loop muted markdown="1"><source src="http://vodcdn.video.taobao.com/oss/taobao-ugc/fd61eb81603c4875a5ea5bdc12f90b01/1490608620/video.mp4" type="video/mp4" markdown="1"></video><br><strong>Android 平台，左边是 GCanvas，右边是 H5 Canvas。同屏渲染图片越多，性能差异越明显。</strong></p>
+</li>
+<li><p>Hilo 2D<br><a href="http://v.youku.com/v_show/id_XMjkwODMwODYzNg==.html?spm=a2hzp.8244740.0.0" target="_blank" rel="noopener">100条鱼</a></p>
+<p>基于 Hilo 2D 动画库，满屏鱼的动画测试。</p>
+</li>
+<li><p>Chart 图标渲染<br><a href="http://v.youku.com/v_show/id_XMjkwODMxMTQ4MA==.html?spm=a2h3j.8428770.3416059.1" target="_blank" rel="noopener">Chart 图标库的渲染效果</a></p>
+<p>基于图表库，不同类型的图表渲染测试。</p>
+</li>
+</ul>
+<p><span id="GCanvasAPI"></span></p>
+<h2 id="附：GCanvas-API-支持情况"><a href="#附：GCanvas-API-支持情况" class="headerlink" title="附：GCanvas API 支持情况"></a>附：GCanvas API 支持情况</h2><p>最后附上 GCanvas Contex2D 和 WebGL API 的支持列表，支持常用的接口。API 覆盖情况请参考官网内容。<br>详见官网链接: <a href="https://alibaba.github.io/GCanvas/docs/Graphics%202D.html" target="_blank" rel="noopener">Context2D</a> 和 <a href="https://alibaba.github.io/GCanvas/docs/WebGL.html" target="_blank" rel="noopener">WebGL</a></p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/y3KZwM_nBTQ" target="_blank" rel="noopener">https://unsplash.com/photos/y3KZwM_nBTQ</a> By @Trevor Paterson</p>
+</blockquote>
+<style>
+.article-entry ol, .article-entry ul {
+  list-style-position: outside;
+}
+</style>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/07/27/gcanvas/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/07/27/gcanvas/" data-id="cjt6lbxyi003jjeu1v0d75rkj" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/07/27/gcanvas/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GCanvas/">GCanvas</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/渲染/">渲染</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/08/31/nodejs-stream/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          深入理解 Node.js Stream 内部机制
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/07/05/leveldb-analysis/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">LevelDB 实现分析</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>基于有限状态机的交互组件设计与实现 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="有限状态机（FSM）（维基百科）是设计和实现事件驱动程序内复杂行为组织原则的有力工具。 早在 2007 年，IBM 的工程师就提出在在 JavaScript 中使用有限状态机来实现组件的方法，原文地址如下： 《JavaScript 中的有限状态机》 现在结合 KISSY 等现代 JS 库和框架提供的强大的自定义事件的功能，我们可以利用有限状态机设计出代码层次清晰，结构优雅的前端交互组件。 今天，">
+<meta name="keywords" content="有限状态机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于有限状态机的交互组件设计与实现">
+<meta property="og:url" content="http://taobaofed.org/blog/2012/10/11/fsm-based-component-design-and-implementation/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="有限状态机（FSM）（维基百科）是设计和实现事件驱动程序内复杂行为组织原则的有力工具。 早在 2007 年，IBM 的工程师就提出在在 JavaScript 中使用有限状态机来实现组件的方法，原文地址如下： 《JavaScript 中的有限状态机》 现在结合 KISSY 等现代 JS 库和框架提供的强大的自定义事件的功能，我们可以利用有限状态机设计出代码层次清晰，结构优雅的前端交互组件。 今天，">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1AVm8QpXXXXbtXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1PfYAQXXXXXXDapXXXXXXXXXX-229-64.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1F02_QXXXXXarXpXXXXXXXXXX-217-170.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB18KDHQXXXXXXeapXXXXXXXXXX-510-412.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1xUjCQXXXXXc7aXXXXXXXXXXX-510-412.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于有限状态机的交互组件设计与实现">
+<meta name="twitter:description" content="有限状态机（FSM）（维基百科）是设计和实现事件驱动程序内复杂行为组织原则的有力工具。 早在 2007 年，IBM 的工程师就提出在在 JavaScript 中使用有限状态机来实现组件的方法，原文地址如下： 《JavaScript 中的有限状态机》 现在结合 KISSY 等现代 JS 库和框架提供的强大的自定义事件的功能，我们可以利用有限状态机设计出代码层次清晰，结构优雅的前端交互组件。 今天，">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1AVm8QpXXXXbtXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-fsm-based-component-design-and-implementation" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      基于有限状态机的交互组件设计与实现
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: admin</span>
+        
+        <span>发表于: <a href="/blog/2012/10/11/fsm-based-component-design-and-implementation/" class="article-date">
+  <time datetime="2012-10-11T11:05:00.000Z" itemprop="datePublished">2012-10-11</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1AVm8QpXXXXbtXXXXXXXXXXXX-900-500.jpg" alt="基于有限状态机的交互组件设计与实现"></p>
+<p>有限状态机（FSM）（<a href="http://zh.wikipedia.org/wiki/%E6%9C%89%E9%99%90%E7%8A%B6%E6%80%81%E6%9C%BA" target="_blank" rel="noopener">维基百科</a>）是设计和实现事件驱动程序内复杂行为组织原则的有力工具。</p>
+<p>早在 2007 年，IBM 的工程师就提出在在 JavaScript 中使用有限状态机来实现组件的方法，原文地址如下：</p>
+<p>《<a href="http://www.ibm.com/developerworks/cn/web/wa-finitemach/" target="_blank" rel="noopener">JavaScript 中的有限状态机</a>》</p>
+<p>现在结合 KISSY 等现代 JS 库和框架提供的强大的自定义事件的功能，我们可以利用有限状态机设计出代码层次清晰，结构优雅的前端交互组件。</p>
+<p>今天，我们会通过设计并实现一个下拉选择（模拟 select）组件来一步步说明如何利用 FSM 和 KISSY 来设计和实现一个有复杂行为的交互组件。</p>
+<p>我们的工作会分成三个步骤来进行：</p>
+<ul>
+<li>第一步：设计组件状态，用户行为和组件行为</li>
+<li>第二步：通过代码来描述设计出来的内容</li>
+<li>第三步：实现一个有限状态机让组件工作起来</li>
+</ul>
+<h3 id="第一步：设计阶段"><a href="#第一步：设计阶段" class="headerlink" title="第一步：设计阶段"></a>第一步：设计阶段</h3><p>首先，我们需要确定组件的状态和状态间的转换关系</p>
+<p>通过对组件可能会发生的行为进行研究，我们为组件设计了以下三个状态：</p>
+<p>1. 收起状态（fold）:</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1PfYAQXXXXXXDapXXXXXXXXXX-229-64.png" alt></p>
+<p>组件的初始状态，用户可能会进行以下操作：</p>
+<ul>
+<li>展开下拉框（unfoldmenu）转移到展开状态（unfold）</li>
+</ul>
+<p>2. 展开状态（unfold）:</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1F02_QXXXXXarXpXXXXXXXXXX-217-170.png" alt></p>
+<p>用户展开下拉框的状态，用户可能会进行以下操作：</p>
+<ul>
+<li>收起下拉框（foldmenu）转移到收起状态（fold）</li>
+<li>鼠标经过选项（overitem）转移到高亮状态（highlight）</li>
+</ul>
+<p>3. 高亮状态（highlight）:</p>
+<p>!{](<a href="https://gw.alicdn.com/tfs/TB1cD2RQXXXXXaZXVXXXXXXXXXX-242-186.png" target="_blank" rel="noopener">https://gw.alicdn.com/tfs/TB1cD2RQXXXXXaZXVXXXXXXXXXX-242-186.png</a>)</p>
+<p>鼠标经过选项时，高亮经过的选项，用户可能会进行以下操作：</p>
+<ul>
+<li>收起下拉框（foldmenu）转移到收起状态（fold）</li>
+<li>点击选项（clickitem）转移到收起状态（fold）</li>
+<li>鼠标经过选项（overitem）转移到高亮状态（highlight）</li>
+</ul>
+<p>以上就是这个小组件可能会有的三种状态，用一个状态转换图来表示如下：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB18KDHQXXXXXXeapXXXXXXXXXX-510-412.png" alt></p>
+<ul>
+<li>在状态描述中包含了触发状态发生转移的动作（事件）</li>
+<li>可以很明显的看出这些事件并不是浏览器中原生的事件。</li>
+<li>这里，我们使用自定义事件来描述用户的行为，这样我们可以使得用户行为和组件行为的逻辑完全分离，代码将会更容易理解和维护。</li>
+</ul>
+<p>定义用户行为：</p>
+<p>在这个组件里，我们有以下四种用户行为：</p>
+<ul>
+<li>展开下拉框（unfoldmenu）：鼠标点击橙色区域时触发</li>
+<li>收起下拉框（foldmenu）：鼠标离开组件区域达到 2 秒，点击橙色区域，点击组件外部区域</li>
+<li>点击选项（clickitem）：点击下拉框中的某个选项</li>
+<li>鼠标经过选项（overitem）：鼠标经过下拉框中的某个选项<br>定义组件行为：</li>
+</ul>
+<p>在状态转移的过程中，组件本身会有很多动作，如显示下拉框等，我们接下来在上面的状态图中加入转移过程中组件的动作</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1xUjCQXXXXXc7aXXXXXXXXXXX-510-412.png" alt></p>
+<ul>
+<li>fold():收起下拉框</li>
+<li>unfold():展开下拉框</li>
+<li>highlightItem():高亮某个选项</li>
+<li>selectItem():选中某个选项，并把值填充到橘黄色区域</li>
+</ul>
+<h3 id="第二步：实现阶段（基于-KISSY-实现）"><a href="#第二步：实现阶段（基于-KISSY-实现）" class="headerlink" title="第二步：实现阶段（基于 KISSY 实现）"></a>第二步：实现阶段（基于 KISSY 实现）</h3><p><code>全局变量：S=KISSY, D=S.DOM, E=S.Event</code></p>
+<p>1. 描述状态</p>
+<p>跟设计过程一样，我们需要用一个结构来描述状态的转移以及转移过程中的动作</p>
+<p>我们在这里使用对象来描述：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">fold: &#123;</span><br><span class="line">  unfoldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">    _this.unfold();</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'unfold'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上面这段代码就描述了在 fold 状态下，可以触发 unfoldmenu 这个用户行为来转移到 unfold 状态，</p>
+<p>我们通过函数返回值的形式来通知 FSM 下一步的状态。</p>
+<p>这样，我们就可以通过这种形式描述所有的状态，结构如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">states: &#123;</span><br><span class="line">  <span class="comment">// 收起（初始状态）</span></span><br><span class="line">  fold: &#123;</span><br><span class="line">    unfoldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">      _this.unfold();</span><br><span class="line">      <span class="keyword">return</span> <span class="string">'unfold'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 展开状态</span></span><br><span class="line">  unfold: &#123;</span><br><span class="line">    foldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">      _this.fold();</span><br><span class="line">      <span class="keyword">return</span> <span class="string">'fold'</span>;</span><br><span class="line">    &#125;,</span><br><span class="line">    overitem: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">      _this.highlightItem(event.currentItem);</span><br><span class="line">      <span class="keyword">return</span> <span class="string">'highlight'</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 高亮状态</span></span><br><span class="line">  highlight: &#123;</span><br><span class="line">    foldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">      _this.fold();</span><br><span class="line">      <span class="keyword">return</span> <span class="string">'fold'</span>;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 选中条目</span></span><br><span class="line">    clickitem: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">      _this.selectItem(event.currentItem);</span><br><span class="line">      <span class="keyword">return</span> <span class="string">'fold'</span>;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    overitem: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">      _this.highlightItem(event.currentItem);</span><br><span class="line">      <span class="keyword">return</span> <span class="string">'highlight'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在定义好状态后，我们还需要设定一个初始状态：</p>
+<p><code>initState: &#39;fold&#39;</code></p>
+<p>2. 描述用户行为</p>
+<p>我们使用一个方法来描述用户行为，即驱动 FSM 发生状态转移的事件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">foldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> timeout;</span><br><span class="line">  </span><br><span class="line">  E.on(_this.container, <span class="string">'mouseleave'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (timeout) clearTimeout(timeout);</span><br><span class="line">    timeout = setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      fn();</span><br><span class="line">    &#125;, <span class="number">1000</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">  E.on([_this.container, _this.slideBox], <span class="string">'mouseenter'</span>,</span><br><span class="line">    <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (timeout) clearTimeout(timeout);</span><br><span class="line">    &#125;);</span><br><span class="line">  E.on(<span class="string">'body'</span>, <span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> target = e.target;</span><br><span class="line">    <span class="keyword">if</span> (!D.get(target, _this.container)) &#123;</span><br><span class="line">      <span class="keyword">if</span> (timeout) clearTimeout(timeout);</span><br><span class="line">      fn();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如上面这个代码就定义了 foldmenu 这个用户行为，同时，FSM 会自动将它定义为一个自定义事件，我们通过传入的回调函数 fn 来通知 FSM 触发这个事件的时机。</p>
+<p>通过上边的例子可以看出，我们可以将一个很复杂的动作定义为一个用户行为，也可以将几个不同的动作定义为一个用户行为，将用户行为和组件的动作彻底分开。</p>
+<p>与状态相同，我们也将所有的用户行为放在一个对象中。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">events: &#123;</span><br><span class="line">  unfoldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;,</span><br><span class="line">  foldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;,</span><br><span class="line">  overitem: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;,</span><br><span class="line">  clickitem: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>3. 描述组件行为</p>
+<p>由于组件行为一般都包含对组件本身的一些直接操作，可以作为 API 开放给用户使用，因此我们把描述组件行为的方法放在组件的 prototype 上，这部分代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">S.augment(SlideMenu, S.EventTarget, &#123;</span><br><span class="line">  setText: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">var</span> select = _this.select;</span><br><span class="line"></span><br><span class="line">    D.html(select, _this.text);</span><br><span class="line">  &#125;,</span><br><span class="line">  unfold: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">var</span> slideBox = _this.slideBox;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!_this.isFold) <span class="keyword">return</span>;</span><br><span class="line">    _this.isFold = <span class="literal">false</span>;</span><br><span class="line">    D.show(slideBox);</span><br><span class="line">  &#125;,</span><br><span class="line">  fold: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">var</span> options = _this.options;</span><br><span class="line">    <span class="keyword">var</span> slideBox = _this.slideBox;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_this.isFold) <span class="keyword">return</span>;</span><br><span class="line">    D.removeClass(options, <span class="string">'hover'</span>);</span><br><span class="line">    _this.isFold = <span class="literal">true</span>;</span><br><span class="line">    D.hide(slideBox);</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  highlightItem: <span class="function"><span class="keyword">function</span>(<span class="params">curItem</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">var</span> options = _this.options;</span><br><span class="line"></span><br><span class="line">    D.removeClass(options, <span class="string">'hover'</span>);</span><br><span class="line">    D.addClass(curItem, <span class="string">'hover'</span>);</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  selectItem: <span class="function"><span class="keyword">function</span>(<span class="params">curItem</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">var</span> value = D.attr(curItem, <span class="string">'data-value'</span>);</span><br><span class="line">    <span class="keyword">var</span> text = D.attr(curItem, <span class="string">'data-text'</span>);</span><br><span class="line"></span><br><span class="line">    _this.value = value;</span><br><span class="line">    _this.text = text;</span><br><span class="line">    _this.setText()</span><br><span class="line">    _this.fold();</span><br><span class="line">    _this.fire(<span class="string">'select'</span>, &#123;</span><br><span class="line">      value: value,</span><br><span class="line">      text: text</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="第三步：实现有限状态机（基于-KISSY-实现）"><a href="#第三步：实现有限状态机（基于-KISSY-实现）" class="headerlink" title="第三步：实现有限状态机（基于 KISSY 实现）"></a>第三步：实现有限状态机（基于 KISSY 实现）</h3><p>前面我们定义了组件的状态，用户行为，以及组件本身的动作，<br>接下来我们来实现一个有限状态机（FSM），让整个组件工作起来。通过上面实现的代码，我们可以看出 FSM 的输入有以下三个：</p>
+<ul>
+<li>初始状态</li>
+<li>状态描述对象</li>
+<li>用户行为描述对象</li>
+</ul>
+<p>代码结构如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">initState: <span class="string">'fold'</span>,</span><br><span class="line">  states: &#123;</span><br><span class="line">    <span class="comment">// 收起（初始状态）</span></span><br><span class="line">    fold: &#123;&#125;,</span><br><span class="line">    <span class="comment">// 展开状态</span></span><br><span class="line">    unfold: &#123;&#125;,</span><br><span class="line">    <span class="comment">// 高亮状态</span></span><br><span class="line">    highlight: &#123;&#125;</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  events: &#123;</span><br><span class="line">    unfoldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;,</span><br><span class="line">    foldmenu: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;,</span><br><span class="line">    overitem: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;,</span><br><span class="line">    clickitem: <span class="function"><span class="keyword">function</span>(<span class="params">fn</span>) </span>&#123;&#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>FSM 需要两个功能：</p>
+<ul>
+<li>将用户行为与自定义事件相关联（defineEvents）</li>
+<li>在用户行为发生时（即触发自定义事件时），根据状态描述对象来转移状态（handleEvents）</li>
+</ul>
+<p>代码如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">functionFSM(config) &#123;</span><br><span class="line">  <span class="keyword">this</span>.config = config;</span><br><span class="line">  <span class="keyword">this</span>.currentState = <span class="keyword">this</span>.config.initState;</span><br><span class="line">  <span class="keyword">this</span>.nextState = <span class="literal">null</span>;</span><br><span class="line">  <span class="keyword">this</span>.states = <span class="keyword">this</span>.config.states;</span><br><span class="line">  <span class="keyword">this</span>.events = <span class="keyword">this</span>.config.events;</span><br><span class="line">  <span class="keyword">this</span>.defineEvents();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> proto = &#123;</span><br><span class="line">  <span class="comment">// 事件驱动状态转换(表现层)</span></span><br><span class="line">  handleEvents: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.currentState) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> actionTransitionFunction = <span class="keyword">this</span>.states[<span class="keyword">this</span>.currentState][event.type];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!actionTransitionFunction) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> nextState = actionTransitionFunction.call(<span class="keyword">this</span>, event);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.currentState = nextState;</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 定义事件 (行为层)</span></span><br><span class="line">  defineEvents: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">    varevents = <span class="keyword">this</span>.events;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (k <span class="keyword">in</span> events) &#123;</span><br><span class="line">      (<span class="function"><span class="keyword">function</span>(<span class="params">k</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> fn = events[k];</span><br><span class="line"></span><br><span class="line">        fn.call(_this, <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">          _this.fire(k, event);</span><br><span class="line">        &#125;);</span><br><span class="line">        _this.on(k, _this.handleEvents);</span><br><span class="line">      &#125;)(k)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">S.augment(FSM, S.EventTarget, proto);</span><br></pre></td></tr></table></figure>
+<p>然后，只需要实例化一个 FSM 即可</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> FSM(&#123;</span><br><span class="line">  initState: <span class="string">'fold'</span>,</span><br><span class="line">  states: &#123;...&#125;,</span><br><span class="line">  events: &#123;...&#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>最后，总结一下。</p>
+<p>使用 FSM 模式设计和实现交互组件，可以获得以下特性：</p>
+<ul>
+<li>交互逻辑清晰</li>
+<li>用户行为和组件行为完全分离，代码具有良好的分层结构</li>
+<li>对设计具有良好的纠错特性，当设计上对状态和状态的转移有遗漏时，在实现阶段很容易流程出现走不通的情况，可以促进交互设计对细节的补充。</li>
+</ul>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/hyquz5mHdok" target="_blank" rel="noopener">https://unsplash.com/photos/hyquz5mHdok</a> By @Nathan Hulsey</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2012/10/11/fsm-based-component-design-and-implementation/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2012/10/11/fsm-based-component-design-and-implementation/" data-id="cjt6lbxyh003hjeu15l27r78g" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2012/10/11/fsm-based-component-design-and-implementation/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/有限状态机/">有限状态机</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2012/10/12/front-end-dsl/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          构建前端 DSL
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2012/04/23/juicer-template/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Juicer – 一个 JavaScript 模板引擎的实现和优化</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

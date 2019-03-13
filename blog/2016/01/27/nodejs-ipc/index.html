@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>进程间通信的另类实现 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="背景Node.js 内置的进程间通信使用非常简单，但也有一定的局限性，只能在父子进程间通信。下面是官方文档给的一个例子。 首先是父进程的 parent.js : 12345678const cp = require(&amp;apos;child_process&amp;apos;);const n = cp.fork(`$&amp;#123;__dirname&amp;#125;/sub.js`);n.on(&amp;apos;me">
+<meta name="keywords" content="Node.js,多进程,通信">
+<meta property="og:type" content="article">
+<meta property="og:title" content="进程间通信的另类实现">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/27/nodejs-ipc/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="背景Node.js 内置的进程间通信使用非常简单，但也有一定的局限性，只能在父子进程间通信。下面是官方文档给的一个例子。 首先是父进程的 parent.js : 12345678const cp = require(&amp;apos;child_process&amp;apos;);const n = cp.fork(`$&amp;#123;__dirname&amp;#125;/sub.js`);n.on(&amp;apos;me">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1dzEoLpXXXXbXaXXX2AXZ8pXX-900-500.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="进程间通信的另类实现">
+<meta name="twitter:description" content="背景Node.js 内置的进程间通信使用非常简单，但也有一定的局限性，只能在父子进程间通信。下面是官方文档给的一个例子。 首先是父进程的 parent.js : 12345678const cp = require(&amp;apos;child_process&amp;apos;);const n = cp.fork(`$&amp;#123;__dirname&amp;#125;/sub.js`);n.on(&amp;apos;me">
+<meta name="twitter:image" content="http://gtms02.alicdn.com/tps/i2/TB1dzEoLpXXXXbXaXXX2AXZ8pXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-ipc" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      进程间通信的另类实现
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 淘杰</span>
+        
+        <span>发表于: <a href="/blog/2016/01/27/nodejs-ipc/" class="article-date">
+  <time datetime="2016-01-26T16:25:49.000Z" itemprop="datePublished">2016-01-27</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms02.alicdn.com/tps/i2/TB1dzEoLpXXXXbXaXXX2AXZ8pXX-900-500.png" alt="进程间通信的另类实现"></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>Node.js 内置的进程间通信使用非常简单，但也有一定的局限性，只能在父子进程间通信。下面是官方文档给的一个例子。</p>
+<p>首先是父进程的 parent.js :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const cp = require(&apos;child_process&apos;);</span><br><span class="line">const n = cp.fork(`$&#123;__dirname&#125;/sub.js`);</span><br><span class="line"></span><br><span class="line">n.on(&apos;message&apos;, (m) =&gt; &#123;</span><br><span class="line">  console.log(&apos;PARENT got message:&apos;, m);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">n.send(&#123; hello: &apos;world&apos; &#125;);</span><br></pre></td></tr></table></figure>
+<p>接着再看看子进程 sub.js 的实现：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">process.on(&apos;message&apos;, (m) =&gt; &#123;</span><br><span class="line">  console.log(&apos;CHILD got message:&apos;, m);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">process.send(&#123; foo: &apos;bar&apos; &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>如果两个进程间没有父子这种亲缘关系又如何通信呢，本文就为大家讲解 <code>Midway 5.0</code> 中如何使用更灵活的 socket 实现任意进程间的通信。</p>
+<h2 id="协议设计"><a href="#协议设计" class="headerlink" title="协议设计"></a>协议设计</h2><p>既然是通信，那么通信协议的设计是必不可少的。就像以前经常在电影里看到的两个人通话时，都会加上一句 <code>over</code> 来告知对方自己要说的已经说完了。父子进程间的通信协议也采用了这种最简单最高效的方式，双方在发送消息时都会在消息末尾加上一个回车符 <code>\n</code>，表示本次发送的消息就这么多，也就是对方就收消息时遇到 <code>\n</code> 表明本次消息接收完毕。</p>
+<p>消息接收后需要对其进行解码，或者说是反序列化，最终便于识别和使用。父子进程间通信就采用了 JSON.encode 和  JSON.decode 来实现消息的编码和解码。</p>
+<p>父子进程间采用的这种通信协议非常的简单，但是也非常高效，能够满足大部分使用场景。像 HSF 这类 RPC 调用通信协议就比较复杂了，我们平时遇到最多的就是 HTTP 协议，做 web 开发的同学肯定都比较清楚协议的规则了。</p>
+<p>本次实现的利用 socket 实现进程间通信也采用这种最简单的方式。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>实现协议之前回想一下整个通信的流程，首先双方建立一条全双工的通信信道，待 2 边都 ready 后消息便可以发送消息了，2 边既是消息的接收方也是消息的发送方。我们平时会将一方称为 <code>server</code>，另一方称为 <code>client</code>，这是在功能上的划分，一般 server 会有多个client 同时连接。</p>
+<h3 id="协议解析"><a href="#协议解析" class="headerlink" title="协议解析"></a>协议解析</h3><p>在双方开始通信之前，我们先来实现协议的解析 <code>parse.js</code>，非常的简单。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">const StringDecoder = require(&apos;string_decoder&apos;).StringDecoder;</span><br><span class="line">const EventEmitter = require(&apos;events&apos;);</span><br><span class="line"></span><br><span class="line">class Parser extends EventEmitter &#123;</span><br><span class="line">    constructor() &#123;</span><br><span class="line">        super();</span><br><span class="line">        this.decoder = new StringDecoder(&apos;utf8&apos;);</span><br><span class="line">        this.jsonBuffer = &apos;&apos;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    encode(message) &#123;</span><br><span class="line">        return JSON.stringify(message) + &apos;\n&apos;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    feed(buf) &#123;</span><br><span class="line">        let jsonBuffer = this.jsonBuffer;</span><br><span class="line">        jsonBuffer += this.decoder.write(buf);</span><br><span class="line">        let i, start = 0;</span><br><span class="line">        while ((i = jsonBuffer.indexOf(&apos;\n&apos;, start)) &gt;= 0) &#123;</span><br><span class="line">            const json = jsonBuffer.slice(start, i);</span><br><span class="line">            const message = JSON.parse(json);</span><br><span class="line">            this.emit(&apos;message&apos;, message);</span><br><span class="line">            start = i + 1;</span><br><span class="line">        &#125;</span><br><span class="line">        this.jsonBuffer = jsonBuffer.slice(start);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module.exports = Parser;</span><br></pre></td></tr></table></figure></p>
+<h3 id="socket-通信"><a href="#socket-通信" class="headerlink" title="socket 通信"></a>socket 通信</h3><p>我们平时用到的 socket 大都是 TCP 类型的，因为要涉及到两个远程进程间的通信。如果只是实现本地进程间通信，可以选择更高效的文件 socket，同时也避免额外占用一个端口的情况。</p>
+<h3 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h3><p>在使用上 TCP socket 和 file socket 差别不大，前者监听某个端口，后者监听某个临时文件，需要注意的是监听文件的路径在 Windows 和 Unix 上有些不一样。</p>
+<blockquote>
+<p>On Windows, the local domain is implemented using a named pipe. The path must refer to an entry in \?\pipe\ or \.\pipe. </p>
+</blockquote>
+<p>开始之前，大致列出客户端需要有哪些功能</p>
+<ul>
+<li>连接到服务器</li>
+<li>监听服务器发送的数据，按照协议规则解析出消息实体</li>
+<li>提供向服务器发送消息的接口</li>
+</ul>
+<p><code>client.js</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">const path = require(&apos;path&apos;);</span><br><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const Parser = require(&apos;./parser&apos;);</span><br><span class="line">const EventEmitter = require(&apos;events&apos;);</span><br><span class="line">const os = require(&apos;os&apos;);</span><br><span class="line">const tmpDir = os.tmpDir();</span><br><span class="line">let sockPath = path.join(tmpDir, &apos;midway.sock&apos;);</span><br><span class="line"></span><br><span class="line">if (process.platform === &apos;win32&apos;) &#123;</span><br><span class="line">    sockPath = sockPath.replace(/^\//, &apos;&apos;);</span><br><span class="line">    sockPath = sockPath.replace(/\//g, &apos;-&apos;);</span><br><span class="line">    sockPath = &apos;\\\\.\\pipe\\&apos; + sockPath;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Client extends EventEmitter&#123;</span><br><span class="line">    constructor(options) &#123;</span><br><span class="line">        options = options || &#123;&#125;;</span><br><span class="line">        super();</span><br><span class="line">        if (options.socket) &#123;</span><br><span class="line">            this.socket = options.socket;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            this.socket = net.connect(sockPath);</span><br><span class="line">        &#125;</span><br><span class="line">        this.bind();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    bind() &#123;</span><br><span class="line">        const parser = new Parser();</span><br><span class="line">        const socket = this.socket;</span><br><span class="line">        socket.on(&apos;data&apos;, (buf) =&gt; &#123;</span><br><span class="line">            parser.feed(buf);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        parser.on(&apos;message&apos;, (message) =&gt; &#123;</span><br><span class="line">            this.emit(&apos;message&apos;, message);</span><br><span class="line">        &#125;);</span><br><span class="line">        this.parser = parser;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    send(message) &#123;</span><br><span class="line">        this.socket.write(this.parser.encode(message));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module.exports = Client;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h3><p>实现之前先梳理下 server 端要有哪些基础的功能，</p>
+<ul>
+<li>创建一个 net server</li>
+<li>监听某个文件</li>
+<li>接收新连接上的客户端</li>
+<li>根据接收到的数据按协议规则解析出消息实体，处理客户端请求</li>
+</ul>
+<p>下面就是一个简单的 server 实现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">const path = require(&apos;path&apos;);</span><br><span class="line">const fs = require(&apos;fs&apos;);</span><br><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const Client = require(&apos;./client&apos;);</span><br><span class="line">const EventEmitter = require(&apos;events&apos;);</span><br><span class="line">const os = require(&apos;os&apos;);</span><br><span class="line">const tmpDir = os.tmpDir();</span><br><span class="line">let sockPath = path.join(tmpDir, &apos;midway.sock&apos;);</span><br><span class="line"></span><br><span class="line">if (process.platform === &apos;win32&apos;) &#123;</span><br><span class="line">    sockPath = sockPath.replace(/^\//, &apos;&apos;);</span><br><span class="line">    sockPath = sockPath.replace(/\//g, &apos;-&apos;);</span><br><span class="line">    sockPath = &apos;\\\\.\\pipe\\&apos; + sockPath;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Server extends EventEmitter&#123;</span><br><span class="line">    constructor() &#123;</span><br><span class="line">        super();</span><br><span class="line">        this.server = net.createServer((socket)=&gt; this.handleConnection(socket));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    listen(callback) &#123;</span><br><span class="line">        if (fs.existsSync(sockPath)) &#123;</span><br><span class="line">            fs.unlinkSync(sockPath);</span><br><span class="line">        &#125;</span><br><span class="line">        this.server.listen(sockPath, callback);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    handleConnection(socket) &#123;</span><br><span class="line">        const client = new Client(&#123;</span><br><span class="line">            socket: socket</span><br><span class="line">        &#125;);</span><br><span class="line">        client.on(&apos;message&apos;, (message) =&gt; &#123;</span><br><span class="line">            this.handleRequest(message, client);</span><br><span class="line">        &#125;);</span><br><span class="line">        this.emit(&apos;connect&apos;, client);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    handleRequest(message, client) &#123;</span><br><span class="line">        this.emit(&apos;message&apos;, message, client);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module.exports = Server;</span><br></pre></td></tr></table></figure></p>
+<h3 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h3><p>至此，我们已经实现了类似父子进程间通信的功能了。还记得上篇<a href="http://taobaofed.org/blog/2015/12/15/nodejs-cluster-cov/">《多进程下的测试覆盖率》</a>中使用到的那个简单的 RPC demo，现在我们使用上面提到的 socket 通信方式重新实现一个。</p>
+<p>client.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">const Client = require(&apos;../lib/Client&apos;);</span><br><span class="line"></span><br><span class="line">let rid = 0;</span><br><span class="line">const service = &#123;&#125;;</span><br><span class="line">const queue = [];</span><br><span class="line">const requestQueue = new Map();</span><br><span class="line"></span><br><span class="line">function start(ready) &#123;</span><br><span class="line">    const client = new Client();</span><br><span class="line"></span><br><span class="line">    function send() &#123;</span><br><span class="line">        rid++;</span><br><span class="line">        let args = [].slice.call(arguments);</span><br><span class="line">        const method = args.slice(0,1)[0];</span><br><span class="line">        const callback = args.slice(-1)[0];</span><br><span class="line"></span><br><span class="line">        const req = &#123;</span><br><span class="line">            rid: rid,</span><br><span class="line">            method:method,</span><br><span class="line">            args:args.slice(1,-1)</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        requestQueue.set(rid,Object.assign(&#123;</span><br><span class="line">            callback: callback</span><br><span class="line">        &#125;, req));</span><br><span class="line"></span><br><span class="line">        client.send(req);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    client.on(&apos;message&apos;, function(message)&#123;</span><br><span class="line">        if (message.action === &apos;register&apos;) &#123;</span><br><span class="line">            message.methods.forEach((method) =&gt; &#123;</span><br><span class="line">                service[method] = send.bind(null, method);</span><br><span class="line">            &#125;);</span><br><span class="line">            ready(service);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            const req = requestQueue.get(message.rid);</span><br><span class="line">            const callback = req.callback;</span><br><span class="line">            if (message.success) &#123;</span><br><span class="line">                callback(null, message.data);</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                callback(new Error(message.error));</span><br><span class="line">            &#125;</span><br><span class="line">            requestQueue.delete(message.rid);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">start((service)=&gt; &#123;</span><br><span class="line">    service.add(1,2,3,4,5, function(err, result) &#123;</span><br><span class="line">        console.log(`1+2+3+4+5 = $&#123;result&#125;`);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    service.time(1,2,3,4,5, function(err, result) &#123;</span><br><span class="line">        console.log(`1*2*3*4*5 = $&#123;result&#125;`);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>server.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">const Server = require(&apos;../lib/server&apos;);</span><br><span class="line">const server = new Server();</span><br><span class="line">server.listen();</span><br><span class="line"></span><br><span class="line">const service = &#123;</span><br><span class="line">    add() &#123;</span><br><span class="line">        const args = [].slice.call(arguments);</span><br><span class="line">        return args.slice().reduce(function(a,b) &#123;</span><br><span class="line">            return a+b;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    time() &#123;</span><br><span class="line">        const args = [].slice.call(arguments);</span><br><span class="line">        return new Promise((resolve, reject)=&gt; &#123;</span><br><span class="line">            setTimeout( ()=&gt; &#123;</span><br><span class="line">                const ret = args.slice().reduce(function(a,b) &#123;</span><br><span class="line">                    return a*b;</span><br><span class="line">                &#125;);</span><br><span class="line">                resolve(ret);</span><br><span class="line">            &#125;, 1000);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">server.on(&apos;connect&apos;, (client) =&gt; &#123;</span><br><span class="line">    client.send(&#123;</span><br><span class="line">        action:&apos;register&apos;,</span><br><span class="line">        methods: Object.keys(service)</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">server.on(&apos;message&apos;, function(message, client) &#123;</span><br><span class="line">    let ret = &#123; success: false, rid: message.rid &#125;;</span><br><span class="line">    const method = message.method;</span><br><span class="line">    if (service[method]) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            const result = service[method].apply(service, message.args);</span><br><span class="line">            ret.success = true;</span><br><span class="line">            if(result.then) &#123;</span><br><span class="line">                return result.then((data)=&gt; &#123;</span><br><span class="line">                    ret.data = data;</span><br><span class="line">                    client.send(ret);</span><br><span class="line">                &#125;).catch((err)=&gt;&#123;</span><br><span class="line">                    ret.success = false;</span><br><span class="line">                    ret.error = err.message;</span><br><span class="line">                    client.send(err);</span><br><span class="line">                &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">            ret.data = result;</span><br><span class="line">        &#125; catch (err) &#123;</span><br><span class="line">            ret.error = err.message;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    client.send(ret);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>先启动 server，然后运行 client，控制台输出<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1+2+3+4+5 = 15</span><br><span class="line">1*2*3*4*5 = 120</span><br></pre></td></tr></table></figure></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>不论是本文讲解的简单进程间通信，还是更复杂的 RPC 调用，整个的设计实现流程相差不大。生产环境中还需要处理各种异常，网络连接错误，协议解析错误等等，有兴趣的同学可以继续在本 demo上继续完善～</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/27/nodejs-ipc/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/27/nodejs-ipc/" data-id="cjt6lby00007njeu1tgqb9k5x" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/27/nodejs-ipc/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/多进程/">多进程</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/通信/">通信</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/29/fe-engineering-width-cloud-build/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前端工程化：云构建
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/25/jsonschema/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">JSON Schema 那些事儿：基本概念</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

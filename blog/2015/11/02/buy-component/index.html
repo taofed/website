@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>已买到的宝贝前端组件化探索 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="随着已买到的宝贝组件化全网回归完成，项目开发工作终于告一段落了，接下来便是 Beta ，灰度发布。我也终于有了时间来总结一下整个项目。 同学们普遍对 PC 业务如何进行组件化感兴趣，在此就把我在项目中的思考过程，积累的经验写出来与大家分享。 先来介绍一下已买到的宝贝这个业务： 已买到的宝贝是全网（淘宝／天猫）买家进行订单相关操作的平台（订单相关的操作如：取消订单，确认收货，订单搜索等），承载了全">
+<meta name="keywords" content="组件化,React,Flux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="已买到的宝贝前端组件化探索">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/02/buy-component/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="随着已买到的宝贝组件化全网回归完成，项目开发工作终于告一段落了，接下来便是 Beta ，灰度发布。我也终于有了时间来总结一下整个项目。 同学们普遍对 PC 业务如何进行组件化感兴趣，在此就把我在项目中的思考过程，积累的经验写出来与大家分享。 先来介绍一下已买到的宝贝这个业务： 已买到的宝贝是全网（淘宝／天猫）买家进行订单相关操作的平台（订单相关的操作如：取消订单，确认收货，订单搜索等），承载了全">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1FYNoKpXXXXc_XpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1toR2JXXXXXX2XXXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1eRdCJXXXXXXIapXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1sWFVJXXXXXaYXpXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1wUREJXXXXXbBaXXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB108X8JXXXXXa1XpXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1YPqcJXXXXXaaXXXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1KbdZJXXXXXcMXFXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1IPVYJXXXXXcYXXXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1gkFFJXXXXXXraXXXwQWjIXXX-247-312.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1hPRxJXXXXXayapXX6Oa5PXXX-929-401.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1Rw4NJXXXXXcdXFXXIWcvKVXX-264-51.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1VTFNJXXXXXaYXFXXTG0wVpXX-495-81.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1I_0RJXXXXXc3XpXXx.gV9XXX-832-29.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1dcdLJXXXXXahXVXXWeLo8FXX-789-65.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB19wFUJXXXXXa0XpXXyr0w_pXX-847-67.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1fFN3JXXXXXXgXXXXSxHCUXXX-506-70.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1_JVFJXXXXXXhaXXXwxPi7VXX-1014-501.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB13QJFJXXXXXaKaXXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1Fg80JXXXXXXJXFXXH3beFXXX-1024-768.jpg">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/288c1d70489f1fb633be3cc7329863041e3ced9a">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1aThVJXXXXXXoXFXXURNdFFXX-877-438.png">
+<meta property="og:image" content="http://img4.tbcdn.cn/L1/461/1/37ba07f36a5d5bb53e49673852d2900ba7e4da80">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/f96d8ee3c5aeeb8a92492bb478e11c90142bd977">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="已买到的宝贝前端组件化探索">
+<meta name="twitter:description" content="随着已买到的宝贝组件化全网回归完成，项目开发工作终于告一段落了，接下来便是 Beta ，灰度发布。我也终于有了时间来总结一下整个项目。 同学们普遍对 PC 业务如何进行组件化感兴趣，在此就把我在项目中的思考过程，积累的经验写出来与大家分享。 先来介绍一下已买到的宝贝这个业务： 已买到的宝贝是全网（淘宝／天猫）买家进行订单相关操作的平台（订单相关的操作如：取消订单，确认收货，订单搜索等），承载了全">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1FYNoKpXXXXc_XpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-buy-component" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      已买到的宝贝前端组件化探索
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 梧忌</span>
+        
+        <span>发表于: <a href="/blog/2015/11/02/buy-component/" class="article-date">
+  <time datetime="2015-11-02T13:44:27.000Z" itemprop="datePublished">2015-11-02</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1FYNoKpXXXXc_XpXXXXXXXXXX-900-500.jpg" alt="已买到的宝贝前端组件化探索"></p>
+<p>随着已买到的宝贝组件化全网回归完成，项目开发工作终于告一段落了，接下来便是 Beta ，灰度发布。我也终于有了时间来总结一下整个项目。</p>
+<p>同学们普遍对 PC 业务如何进行组件化感兴趣，在此就把我在项目中的思考过程，积累的经验写出来与大家分享。</p>
+<p>先来介绍一下已买到的宝贝这个业务：</p>
+<p><strong>已买到的宝贝是全网（淘宝／天猫）买家进行订单相关操作的平台（订单相关的操作如：取消订单，确认收货，订单搜索等），承载了全网业务的订单模型</strong> 。</p>
+<ul>
+<li>线上网址： <a href="https://trade.taobao.com/trade/itemlist/list_bought_items.htm" target="_blank" rel="noopener">https://trade.taobao.com/trade/itemlist/list_bought_items.htm</a></li>
+<li>主要入口：淘宝／天猫吊顶</li>
+</ul>
+<h2 id="我们为什么要做组件化？"><a href="#我们为什么要做组件化？" class="headerlink" title="我们为什么要做组件化？"></a>我们为什么要做组件化？</h2><h3 id="技术建模的需要"><a href="#技术建模的需要" class="headerlink" title="技术建模的需要"></a>技术建模的需要</h3><p>在订单管理中，不同的业务订单在其生命周期中会有不同的状态和对应的操作，我们把这些订单生命周期进行抽象，得出订单模型。例如，基础的订单模型是这样的：</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1toR2JXXXXXX2XXXXH3beFXXX-1024-768.jpg" alt="基础订单模型"></p>
+<p>普通的集市商品下单后其订单生命周期如上所示。但订单模型是可定制的，不同的业务会针对自己商品的特点对订单模型进行定制。例如大额商品的一种定制：预售二阶段订单模型是这样的：</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1eRdCJXXXXXXIapXXH3beFXXX-1024-768.jpg" alt="预售二阶段订单模型"></p>
+<p>可以看到，它实际上是对基础订单模型的一种扩充。两种订单模型在实际产品（已买到的宝贝）的展示如下：</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1sWFVJXXXXXaYXpXXH3beFXXX-1024-768.jpg" alt="订单模型展示对比"></p>
+<p>从 UI 层面来看，预售二阶段订单模型虽然看起来比基础订单模型复杂了不少，但两者是有共性的。预售的第二行和第三行的展示结构和内容形式与基础订单模型的第一行是一模一样的。实际上，哪怕再有新的业务接入，设计师也会遵循着这套设计规则：复用，扩充。</p>
+<p>订单模型会随着业务的多样化而不断变更、增加。而我们原有的系统抽象能力是非常弱的，基本上把不同的业务订单模型都写一份，这样的开发效率十分低下，维护成本也非常高。</p>
+<p>所以这时候产品的技术抽象建模就很有必要了。</p>
+<p>我们发现，尽管业务千变万化，但是其 UI 是可抽象的，在前端上我们可以基于 UI 的抽象进行技术抽象。</p>
+<p>在技术抽象上，一种思路就是，把具有相同布局结构和展示的业务逻辑抽象成前端组件，比方说上面的 SubOrder，SubOrder 既可以用于实现基础订单模型，也可以用于一些复杂的订单模型：例如预售二阶段订单模型，例如拍卖订单模型，例如婚纱摄影分阶段订单模型。</p>
+<p><strong>利用组件化的抽象方式，有助于我们提高代码复用率，从而提高开发效率。</strong></p>
+<h3 id="协作模式的变革"><a href="#协作模式的变革" class="headerlink" title="协作模式的变革"></a>协作模式的变革</h3><p>然后是协作层面。协作分为2个方面：一个是我们系统内各个角色人员间的协作，另外一个方面是我们的开发人员和其他业务方开发人员间的协作。</p>
+<p>先来看看前者，我们的现状是这样的：</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1wUREJXXXXXbBaXXXH3beFXXX-1024-768.jpg" alt="协作模式"></p>
+<p>View 层是设计及前后端集体工作的结果，可以说是设计及前后端沟通的桥梁。它一方面是对设计的还原，另一方面赋予数据生命力。传统的 Java 应用把 View 层放在了应用项目里，例如 Webx 的 velocity。随着 Web 工业化的发展，前端工程师的出现，View 层的管理都交给了前端。但目前一些糟糕的问题是：</p>
+<ol>
+<li>职责界限模糊：在多人协作项目中，前后端对 VM 都有操作权限，并且 Webx 赋予 VM 的能力强大（例如可以直接调用 Java 类的方法），导致这个原本属于前端管理的范畴却失去了控制力。</li>
+<li>Velocity 的学习成本高昂：这种模板语法并不在主流的前端知识体系内。可以在 View 层调用 Java 工具类，这也很难让前端开发人员产生好感。</li>
+<li>View 层职能界限模糊：由于可以在 View 层调用 Java Model 层，不少后端开发人员对这种能力的滥用，导致业务逻辑和展现逻辑混淆在一起，越来越难以进行新业务的介入和系统的维护。</li>
+</ol>
+<p>无论如何，前端对 View 层管理权的回收是无可争议的了。但回收后怎样设计才能使得设计及前后端的协作更高效呢？</p>
+<p>不卖关子，直接说结果。基于组件化的协作模式，它可以是这样的：</p>
+<p><img src="https://img.alicdn.com/tps/TB108X8JXXXXXa1XpXXXXXXXXXX-1024-768.jpg" alt="基于组件化的协作模式"></p>
+<p>因为组件化是基于 UI 的建模，由数据进行驱动。所以设计、前后端的沟通纬度都限定在了组件层面。这种更小的粒度的沟通纬度，集中化管理的方式，可以让协作成本更低。</p>
+<p>除了应用人员的协作，因为订单业务是平台产品，所以我们的系统实际上还面临着和其他业务方进行协作问题。现有的协作模式是这样：</p>
+<p><img src="https://img.alicdn.com/tps/TB1YPqcJXXXXXaaXXXXXXXXXXXX-1024-768.jpg" alt="业务协作模式"></p>
+<p>可以看到，这种协作模式导致订单管理的前端开发人员频繁地成为了业务的最终实现者，这显然和我们产品对开发的定位是不一致的：</p>
+<p><strong>订单管理平台化的产品特性要求我们技术需要提供一种平台化的方案，让外部业务方能够对自己的业务有定制权，同时我们还需要有能力去去管控这些权力。</strong></p>
+<p>当组件化应用到我们系统中后，我们与业务方的协作模式将会是这样的：</p>
+<p><img src="https://img.alicdn.com/tps/TB1KbdZJXXXXXcMXFXXXXXXXXXX-1024-768.jpg" alt="基于组件化的协作模式"></p>
+<h2 id="我们的组件化是怎么做的？"><a href="#我们的组件化是怎么做的？" class="headerlink" title="我们的组件化是怎么做的？"></a>我们的组件化是怎么做的？</h2><h3 id="组件的封装方式"><a href="#组件的封装方式" class="headerlink" title="组件的封装方式"></a>组件的封装方式</h3><p>首先是为组件选择一种封装方式。也许你不知道，其实我们走了不少弯路。@紫英 @修名 @锂锌 @自寒 和 我曾经基于 KISSY实现了一套组件化方案，但最终我还是决定拥抱社区。我们知道目前流行的组件库有：Angular，Polymer，React。网上关于这三者的对比文章有很多，感兴趣的话可以看一下这几篇：</p>
+<ul>
+<li><a href="http://www.zhihu.com/question/26644904/answer/33634518" target="_blank" rel="noopener">2014 年末有哪些比较火的 Web 开发技术？</a></li>
+<li><a href="https://github.com/xufei/blog/issues/19" target="_blank" rel="noopener">2015前端组件化框架之路–当下最时髦的前端组件化框架/库</a></li>
+<li><a href="http://www.cnblogs.com/sskyy/p/4264371.html" target="_blank" rel="noopener">2015前端框架何去何从</a></li>
+</ul>
+<p>促使我们选择 React 的原因主要是下面四点：</p>
+<ul>
+<li><strong>兼容 IE8：</strong>在我们的业务中有20%左右的用户数，它非常重要，不可忽视</li>
+<li><strong>专注于 View：</strong>很容易和公司内部已有的技术栈结合，而且的其配套技术方案比较成熟</li>
+<li><strong>多 Targets</strong>： “React 让我们做到 Web 以外的 target。Virtual DOM 更像是 UI Virual Machine，自动帮你映射到真正的实现上。可以是 浏览器 DOM 、iOS UI、Android UI等”－－by <a href="https://github.com/dfguo/blog/issues/1" target="_blank" rel="noopener">Dafeng</a></li>
+<li><strong>有服务器端渲染方案来加速首屏</strong></li>
+</ul>
+<h3 id="规划、开发组件"><a href="#规划、开发组件" class="headerlink" title="规划、开发组件"></a>规划、开发组件</h3><h4 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h4><p>所谓组件化，核心意义莫过于提取真正有复用价值的东西。那怎样的东西有复用价值呢？</p>
+<ul>
+<li>公共样式</li>
+<li>控件</li>
+<li>稳定的业务逻辑</li>
+</ul>
+<p>因此，我们会把组件进行分层，有三层：</p>
+<p>第一层是公共样式部分，例如像以前的 <a href="http://baike.baidu.com/view/5186496.htm" target="_blank" rel="noopener">reset.css</a>。现在也会有这样的部分。我也将所有的标签进行了一些重置和默认赋值，把它们封装成 @ali/rc-trade-tag，调用方式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">var A = require(&apos;@ali/rc-trade-tag/lib/A&apos;);</span><br><span class="line"></span><br><span class="line">//...</span><br><span class="line"></span><br><span class="line">render()&#123;</span><br><span class="line">    return &lt;div&gt;</span><br><span class="line">        &lt;A href=&quot;&quot;&gt;Link&lt;/A&gt;</span><br><span class="line">    &lt;/div&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//...</span><br></pre></td></tr></table></figure>
+<p>再之上是通用组件，它们不带有任何的业务逻辑，只负责展示或者交互的抽象。这一层就类似于 <a href="http://react-bootstrap.github.io" target="_blank" rel="noopener">Bootstrap</a> 了。调用方式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">var Dialog = require(&apos;@ali/rc-trade-common/lib/Dialog&apos;);</span><br><span class="line"></span><br><span class="line">//...</span><br><span class="line"></span><br><span class="line">render()&#123;</span><br><span class="line">    return &lt;div&gt;</span><br><span class="line">        &lt;Dialog</span><br><span class="line">            ref=&apos;dialog&apos;</span><br><span class="line">            visible=&#123;this.state.visible&#125;</span><br><span class="line">            onClose=&#123;this.handleClose&#125;</span><br><span class="line">            style=&#123;&#123;width: 360&#125;&#125;</span><br><span class="line">        &gt;</span><br><span class="line">            test</span><br><span class="line">        &lt;/Dialog&gt;</span><br><span class="line">    &lt;/div&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//...</span><br></pre></td></tr></table></figure>
+<p>最上层就是是业务组件，它是稳定的业务逻辑的抽象。它的意义在于，有些业务逻辑是在页面中或者我们整个应用中是通用的，复用性很高；另一方面，业务组件的抽象可以让不同的业务方自己去管理这些组件。</p>
+<p>整个组件层的架构如下：</p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1IPVYJXXXXXcYXXXXH3beFXXX-1024-768.jpg" alt="组件架构"></p>
+<h4 id="样式"><a href="#样式" class="headerlink" title="样式"></a>样式</h4><p>在组件的封装上，有一个问题是比较头疼的，就是样式的封装。</p>
+<p>按照我们的设想，各组件应该是自我管理，自我约束，互相相不受影响的。但是如果用 CSS 来管理样式的话，就会有命名空间等问题（<a href="https://speakerdeck.com/vjeux/react-css-in-js" target="_blank" rel="noopener">React: CSS in JS</a>）。</p>
+<p>一种做法是使用 <a href="https://facebook.github.io/react/tips/inline-styles.html" target="_blank" rel="noopener">Inline Styles</a>。但它不是万能的，它面临着另外一些问题，例如无法使用伪类选择器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">a&#123;</span><br><span class="line">    color: blue;</span><br><span class="line">&#125;</span><br><span class="line">a:hover&#123;</span><br><span class="line">    //....</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&lt;a style=&#123;&#123;color: &apos;blue&apos;&#125;&#125;&gt;</span><br><span class="line">    ...</span><br><span class="line">&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+<p>为了能够使用伪类选择器，我在社区中狩猎到了 <a href="https://github.com/FormidableLabs/radium" target="_blank" rel="noopener">Radium</a> ，它可以让 Inline Style 的写法支持伪类选择器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">var Radium = require(&apos;radium&apos;);</span><br><span class="line">var React = require(&apos;react&apos;);</span><br><span class="line"></span><br><span class="line">@Radium</span><br><span class="line">class Button extends React.Component &#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        return &lt;button style=&#123;styles.base&#125;&gt;</span><br><span class="line">            &#123;this.props.children&#125;</span><br><span class="line">        &lt;/button&gt;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var styles = &#123;</span><br><span class="line">    base: &#123;</span><br><span class="line">        color: &apos;#fff&apos;,</span><br><span class="line">        &apos;:hover&apos;: &#123;</span><br><span class="line">            backgroundColor: &apos;#0074d9&apos;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>我们曾经在周会上讨论过这个库，认为它有三个问题：</p>
+<ul>
+<li>它是嵌入式的，对于我们而言是个黑盒</li>
+<li>不支持 React Native：无法满足我们跨终端的需求</li>
+<li>完全不兼容 IE8：实践证明浏览器兼容性不足，无法满足我们的产品需求</li>
+</ul>
+<p>最终我们还是回到了 Inline Style 的方式，那或许你会问 Browser state styles to support? Media queries? –  请看 <a href="https://github.com/js-next/react-style#not-supported-css-features" target="_blank" rel="noopener">Not supported CSS features</a> 中的观点。</p>
+<h3 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h3><p>解决了组件这个层面的问题后，还有几个问题需要我们思考：</p>
+<ul>
+<li>组件需要的数据从哪里来？</li>
+<li>组件间如何进行通讯？</li>
+<li>前后端如何进行通讯？</li>
+</ul>
+<h4 id="组件需要的数据从哪里来？"><a href="#组件需要的数据从哪里来？" class="headerlink" title="组件需要的数据从哪里来？"></a>组件需要的数据从哪里来？</h4><p>业务组件是有业务逻辑的，我们应该如何处理呢？</p>
+<p>比如说，性别选择的下拉框，它是一个非常通用化的功能，照理说是很适合被当做组件来提供的。但是究竟如何封装它，我们就有些犯难了。这个组件里除了界面，还有数据，这些数据应当内置在组件里吗？理论上从组件的封装性来说，是都应当在里面的，于是就这么造了一个组件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;GenderSelect&gt;&lt;/GenderSelect&gt;</span><br></pre></td></tr></table></figure>
+<p>这个组件非常美好，只需直接放在任意的界面中，就能显示带有性别数据的下拉框了。性别的数据很自然地是放在组件的实现内部，一个写死的数组中。这个例子太简单了，我们改一下，改成交易状态的下拉框。</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1gkFFJXXXXXXraXXXwQWjIXXX-247-312.png" alt="交易状态的下拉框"></p>
+<p>表面上看，这个没什么区别。但是，交易状态是统一配置的，也就是说，这个数据来源于服务端。这时候，你是不是想把一个 HTTP 请求封装到这组件里？</p>
+<p>这样做也不是不可以，但存在至少两个问题：</p>
+<ul>
+<li>如果这类组件在同一个界面中出现多次，就可能存在请求的浪费，因为有一个组件实例就会产生一个请求。</li>
+<li>如果交易状态的配置界面与这个组件同时存在，当我们在配置界面中新增一个状态了，下拉框组件中的数据并不会实时刷新。</li>
+</ul>
+<p>第一个问题只是资源的浪费，第二个就是数据的不一致了。曾经在很多系统中，大家都是手动刷新当前页面来解决这问题的，但到了这个时代，人们都是追求体验的，在一个组件化的解决方案中，不应再出现此类问题。</p>
+<p>如何解决这样的问题呢？那就是引入一层 Store 的概念，每个组件不直接去到服务端请求数据，而是到对应的前端数据缓存中去获取数据，让这个缓存自己去跟服务端保持同步。</p>
+<h4 id="组件间如何进行通讯？"><a href="#组件间如何进行通讯？" class="headerlink" title="组件间如何进行通讯？"></a>组件间如何进行通讯？</h4><p>前面的组件数据章节中，也有介绍到组件通讯的部分：交易状态配置和交易状态列表的显示，并谈到了我们的架构需要引入 Store 一层。</p>
+<p>现在，我们已经决定通过 Store 来维持并统一管理状态，但是 Component 如何触发状态的变更并且最后更新视图呢？</p>
+<p>也许你就可以下结论说，组件间的通讯就通过操作 Store 来同步就行了。但是在实际项目中，如果在 Component 层操作 Store ，会引起一些问题。比方说 Store 的读写权限无法控制。</p>
+<p>在思考过程中，我有去看看社区中是否有相关的经验沉淀，于是注意到了 <a href="https://facebook.github.io/flux/docs/overview.html" target="_blank" rel="noopener">Flux</a> 。为什么选择它，我觉得这篇文章讲得会比我好：<a href="http://www.infoq.com/cn/news/2014/05/facebook-mvc-flux" target="_blank" rel="noopener">Facebook：MVC不适合大规模应用，改用Flux</a></p>
+<p>我们来看看实际中的应用：</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1hPRxJXXXXXayapXX6Oa5PXXX-929-401.png" alt="组件间通讯"></p>
+<p>“全选”是业务组件 <code>OrdersOperate</code> 里面的一个操作，“单选”则在 <code>OrderHead</code> 业务组件内。如何在点击全选的时候把所有单选都勾上？</p>
+<ul>
+<li><p>首先，为 <code>OrderStore</code> 设置一个是否选中的状态：<code>_selected</code>（为什么是下划线开头？因为在 Store 中的数据都是从服务端获取的，字段名都是服务端给出，所有前端自定义的状态字段都会以下划线开头用以区分）：</p>
+<p>  <img src="http://gtms04.alicdn.com/tps/i4/TB1Rw4NJXXXXXcdXFXXIWcvKVXX-264-51.png" alt="_selected"></p>
+</li>
+<li><p>然后 <code>OrderHead</code> 中的 input 通过读取 OrderStore 中的 <code>_selected</code> 来决定是否选中：</p>
+<p>  <img src="http://gtms02.alicdn.com/tps/i2/TB1VTFNJXXXXXaYXFXXTG0wVpXX-495-81.png" alt><br>  <img src="http://gtms01.alicdn.com/tps/i1/TB1I_0RJXXXXXc3XpXXx.gV9XXX-832-29.png" alt></p>
+</li>
+<li><p><code>OrdersOperate</code> 中“全选”动作触发一个 action （canSelectOrderIds 中存储的是当前列表所有可进行选择的 OrderID）：</p>
+<p>  <img src="http://gtms02.alicdn.com/tps/i2/TB1dcdLJXXXXXahXVXXWeLo8FXX-789-65.png" alt><br>  <img src="http://gtms02.alicdn.com/tps/i2/TB19wFUJXXXXXa0XpXXyr0w_pXX-847-67.png" alt></p>
+</li>
+<li><p><code>OrderStore</code> 中监听了这个 action ，根据传过来的 orderIds 和需要设置的值找出相关 Order 进行设置：</p>
+<p>  <img src="http://gtms01.alicdn.com/tps/i1/TB1fFN3JXXXXXXgXXXXSxHCUXXX-506-70.png" alt></p>
+</li>
+</ul>
+<p>由于 <code>OrderHead</code> 这个 Component 是通过读取 <code>OrderStore</code> 的数据来决定是否选中 input 的，所以 Store 的变化会触发 Component 的刷新。</p>
+<p><strong>Flux 只是 Facebook 提出的一套模式思路，它并没有具体的实现。我们自己实现了一套 Flux 的 API ，命名为 Relax(@ali/relax)。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╔═════════╗       ╔════════╗       ╔═════════════════╗</span><br><span class="line">║ Actions ║──────&gt;║ Stores ║──────&gt;║ View Components ║</span><br><span class="line">╚═════════╝       ╚════════╝       ╚═════════════════╝</span><br><span class="line">     ^                                      │</span><br><span class="line">     └──────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<h4 id="前后端如何进行通讯？"><a href="#前后端如何进行通讯？" class="headerlink" title="前后端如何进行通讯？"></a>前后端如何进行通讯？</h4><p>接下来需要处理的则是前后端间的通讯问题。在没有进行组件化之前，页面上的所有操作都是同步的，组件化后为了提高用户体验，页面上的操作都改成异步的方式实现了，例如翻页、搜索、删除订单。</p>
+<p>具体到删除订单这个异步操作，我们需要怎么做呢？</p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1_JVFJXXXXXXhaXXXwxPi7VXX-1014-501.png" alt="删除订单"></p>
+<p>我的做法是：继续沿用 Flux 模式，引入 IO 层。</p>
+<p>Component 会发出一个删除的 action ，IO 中监听该 action 并请求 Server ，Server 如果成功则返回最新的列表数据给 IO，IO 再触发一个删除成功的 action 传入最新列表数据，OrderStore 监听删除成功 action ，拿到最新的列表数据，刷新 Component 。</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB13QJFJXXXXXaKaXXXH3beFXXX-1024-768.jpg" alt="flux2"></p>
+<p>再来看看我们整个应用的架构，它就是这样：</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1Fg80JXXXXXXJXFXXH3beFXXX-1024-768.jpg" alt="架构"></p>
+<h3 id="和老系统和平相处"><a href="#和老系统和平相处" class="headerlink" title="和老系统和平相处"></a>和老系统和平相处</h3><p>一切看起来是一个闭环了，最后要解决的问题是如何和老系统和平相处？为什么会有这样的问题呢，因为我们的页面某些功能还是要依赖吊顶插件，还有一些功能需要使用一些第三方插件。比方说：旺旺点灯，比方说 TBC。</p>
+<p>在已买到的宝贝中，和老系统打交道的内容有：</p>
+<h4 id="吊顶插件"><a href="#吊顶插件" class="headerlink" title="吊顶插件"></a>吊顶插件</h4><p>旺旺点灯：对于一个异步渲染的页面来说，点灯工作需要自己完成。</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/288c1d70489f1fb633be3cc7329863041e3ced9a" alt="旺旺点灯"></p>
+<p>吊顶本身提供了 <code>TB.Global.use</code> 方法来调用插件，所以还是比较省心的。我们只需要找到合适的时机去调用它就行了。</p>
+<p>对于我们的页面需要使用的旺旺点灯功能，只需要在列表渲染完成后以及列表刷新时调用一下吊顶插件即可。</p>
+<p>正当我踌躇满志地：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TB.Global.use(&apos;fn-webww&apos;, function(G, webww) &#123;</span><br><span class="line">    webww.init();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>发现并不 work 。后才知道这个模块并没有 exports 出来。再查看就知道自己需要曲线救国了：</p>
+<ul>
+<li><p>新建一个 plugin：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">var _ = require(&apos;lodash&apos;);</span><br><span class="line"></span><br><span class="line">var time = 0;</span><br><span class="line">var webww = &#123;</span><br><span class="line">    init: function()&#123;</span><br><span class="line">        if(_.isObject(window.Light) &amp;&amp; _.isFunction(window.Light.light))&#123;</span><br><span class="line">            window.Light.light();</span><br><span class="line">            time = 0;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            if(5&gt;time)&#123;</span><br><span class="line">                setTimeout(function()&#123;</span><br><span class="line">                    webww.init();</span><br><span class="line"></span><br><span class="line">                    time++;</span><br><span class="line">                &#125;, 500);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">module.exports = webww;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>列表渲染完成后及刷新时调用该 plugin:</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">var webww = require(&apos;../plugins/webww&apos;);</span><br><span class="line"></span><br><span class="line">React.createClass(&#123;</span><br><span class="line"></span><br><span class="line">    componentDidMount()&#123;</span><br><span class="line">        webww.init();</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    componentDidUpdate()&#123;</span><br><span class="line">        webww.init();</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    //...</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="TBC-插件"><a href="#TBC-插件" class="headerlink" title="TBC 插件"></a>TBC 插件</h4><p>TBC分享：</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1aThVJXXXXXXoXFXXURNdFFXX-877-438.png" alt="TBC分享"></p>
+<p>TBC 和原有的系统并不冲突，只需要直接使用 <code>@ali/kissy-loader</code>  的 <code>use</code> 方法调用即可。但是出于以下原因，我建议做一层封装：</p>
+<ul>
+<li>对系统屏蔽掉 KISSY loader 的细节</li>
+<li>统一调用方式</li>
+<li>Gallery 插件集中版本化管理</li>
+<li>缓存</li>
+</ul>
+<p>实现的代码非常简单：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">var _ = require(&apos;lodash&apos;);</span><br><span class="line">var RSVP = require(&apos;rsvp&apos;);</span><br><span class="line">var loader = require(&apos;@ali/kissy-loader&apos;);</span><br><span class="line"></span><br><span class="line">var ROOT = &apos;tbc&apos;;</span><br><span class="line">var INDEX = &apos;index&apos;;</span><br><span class="line"></span><br><span class="line">var config = &#123;</span><br><span class="line">    share: &apos;2.0.3&apos;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">var TBC = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">var getUrl = function(name, index)&#123;</span><br><span class="line">    return [ROOT, name, config[name], index || INDEX].join(&apos;/&apos;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">var getPlugin = function(name, index)&#123;</span><br><span class="line">    return new RSVP.Promise(function(resolve)&#123;</span><br><span class="line">        if( ! TBC[name])&#123;</span><br><span class="line">            loader.use(getUrl(name, index), function(S, O)&#123;</span><br><span class="line">                TBC[name] = O;</span><br><span class="line">                resolve(O);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            resolve(TBC[name]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">module.exports = &#123;</span><br><span class="line">    getPlugin: function(name, index)&#123;</span><br><span class="line">        if(_.indexOf(_.keys(config), name)&gt;-1)&#123;</span><br><span class="line">            return getPlugin(name, index);</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            //@TODO:log 记录该错误</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在调用端，使用方式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">var share = require(&apos;@ali/trade-util/lib/TBC&apos;).getPlugin(&apos;share&apos;);</span><br><span class="line"></span><br><span class="line">share.then(function(share)&#123;</span><br><span class="line">    share.init(self.props.param);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="第三方插件"><a href="#第三方插件" class="headerlink" title="第三方插件"></a>第三方插件</h4><p>问答机器人：</p>
+<p><img src="http://img4.tbcdn.cn/L1/461/1/37ba07f36a5d5bb53e49673852d2900ba7e4da80" alt="screenshot"></p>
+<p>问答机器人是客满团队维护的一个 KISSY 插件，对于这类功能，业务方短时间内是无法将它切换到我们的组件化方案的，所以我们这一版我们需要自己处理它。</p>
+<p>好在并不复杂，只需要在我们的页面渲染完成后调用一下该脚本即可：</p>
+<ul>
+<li><p>新建一个 plugin：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">var loader = require(&apos;@ali/kissy-loader&apos;);</span><br><span class="line"></span><br><span class="line">module.exports = &#123;</span><br><span class="line">    init()&#123;</span><br><span class="line">        loader.use(&apos;tb/support/1.8.0/robot/js/kissy_robot_recommend&apos;,function(S, robot) &#123;</span><br><span class="line">            robot.init();</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>页面渲染完成后调用：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">var robot = require(&apos;../plugins/robot&apos;);</span><br><span class="line"></span><br><span class="line">var App = React.createClass(&#123;</span><br><span class="line"></span><br><span class="line">    componentDidMount()&#123;</span><br><span class="line">        robot.init();</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    //...</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="多语言"><a href="#多语言" class="headerlink" title="多语言"></a>多语言</h3><p><img src="http://img3.tbcdn.cn/L1/461/1/f96d8ee3c5aeeb8a92492bb478e11c90142bd977" alt="screenshot"></p>
+<p>还有一个问题就是多语言，已买到的宝贝本身就是支持多语言的（多的是，你不知道的事～）。</p>
+<p>关于多语言，我们的处理方式是这样的：</p>
+<ul>
+<li>服务端：通过用户地域 IP 的判断，决定显示哪种语言</li>
+<li>数据：后端通过插件进行输出的翻译，最终输出给前端的数据就是特定的语言</li>
+<li>前端：后端会在初始化数据中指定当前需要前端显示的语言类型，前端根据该字段设置前端应用语言</li>
+</ul>
+<p>具体到前端这边怎么实现：</p>
+<ul>
+<li>语言管理库：<code>@ali/trade-util/lib/i18n</code> （该工具由@锂锌 提供）</li>
+<li><p>组件创建时，配置语言包：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">var I18N = require(&apos;@ali/trade-util/lib/i18n&apos;);</span><br><span class="line"></span><br><span class="line">I18N.register(&#123;</span><br><span class="line">    &apos;zh-CN&apos;: &#123;</span><br><span class="line">        &apos;combinDo.note&apos;: &apos;淘宝提醒您：&apos;</span><br><span class="line">    &#125;,</span><br><span class="line">    &apos;zh-TW&apos;: &#123;</span><br><span class="line">        &apos;combinDo.note&apos;: &apos;淘寶提醒您：&apos;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">module.exports = React.createClass(&#123;</span><br><span class="line">    render: function()&#123;</span><br><span class="line">        return &lt;div&gt;</span><br><span class="line">            &#123;I18N.t(&apos;combinDo.note&apos;)&#125;</span><br><span class="line"></span><br><span class="line">            .......</span><br><span class="line">        &lt;/div&gt;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>应用启动时，指定语言：</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var langs = [&apos;zh-CN&apos;, &apos;zh-TW&apos;];</span><br><span class="line">var I18N = require(&apos;@ali/trade-util/lib/i18n&apos;);</span><br><span class="line">var i18n = _.isString(window.i18n) &amp;&amp; _.indexOf(langs, window.i18n)&gt;-1 ? window.i18n : langs[0];</span><br><span class="line">I18N.lang(i18n);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="工程化"><a href="#工程化" class="headerlink" title="工程化"></a>工程化</h3><p>完成了架构的部分，再上一层便是工程。感谢 DEF（淘宝前端集成开发环境） ，使用它可以轻松地搭建起任何一种架构模式的工程套件。基于 DEF 我产出了对应的插件：def-relax，它包含的功能有：</p>
+<ul>
+<li>脚手架：generator</li>
+<li>本地开发：dev</li>
+<li>代码校验：lint</li>
+<li>构建打包：build</li>
+<li>线上发布：publish</li>
+</ul>
+<p>该套件在这里就不继续展开。</p>
+<p><strong>要说明的是，def-relax 是一个历史阶段性产物，它的出现是由于团队在 React 方向上工程套件的短缺。目前 @妙净 正在做一整套基于 CMD 的工程套件，未来我们项目也将转向使用团队规范化的工程套件。</strong></p>
+<p>除了工程套件，在工程管理方面，我觉得还有一些事情是需要做的：</p>
+<ul>
+<li><p><strong>组件测试</strong></p>
+<p>  未来所有接入交易平台的组件库都需要进行测试</p>
+</li>
+<li><p><strong>组件化数据协议</strong></p>
+<p>  规范化，版本化管理</p>
+</li>
+<li><p><strong>组件化管理平台</strong></p>
+<p>  所有组件库可视化管理，设计、前后端的协作平台</p>
+</li>
+</ul>
+<h3 id="性能瓶颈"><a href="#性能瓶颈" class="headerlink" title="性能瓶颈"></a>性能瓶颈</h3><p>然后再来谈谈项目中遇到的性能问题和解决办法。</p>
+<p>第一个问题是，由于我们的组件的粒度非常细，组件嵌套非常深，vdom 的重渲计算量会非常的大。这一方面，可以通过 <a href="http://facebook.github.io/react/docs/pure-render-mixin.html" target="_blank" rel="noopener">PureRenderMixin</a> 来避免不必要的 vdom diff 。</p>
+<p>第二个问题是，随着 Store 的数据变大，操作的复杂度在提高，安全性变低，每一次数据操作的成本变得异常昂贵。<a href="http://facebook.github.io/immutable-js/" target="_blank" rel="noopener">Immutable.js</a> 可以在一定程度上解决这个问题。</p>
+<h2 id="了不起的一步"><a href="#了不起的一步" class="headerlink" title="了不起的一步"></a>了不起的一步</h2><p>最后，我觉得这个项目很 awesome 的二点：</p>
+<ul>
+<li>可能是第一个在淘宝核心产品上使用 React ，探索前端组件化的</li>
+<li>是的，我们拉响了不再支持 IE6、IE7 的号角</li>
+</ul>
+<p>回想起我刚到阿里时的躇踌满志，整理过过《淘宝订单管理前端的困境与未来》。这一念之间的想法，把它真正做出来竟然用了大半。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/02/buy-component/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/02/buy-component/" data-id="cjt6lbxxg0011jeu1xhlk1o58" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/02/buy-component/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Flux/">Flux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/组件化/">组件化</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/03/nodejs-cluster/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          当我们谈论 cluster 时我们在谈论什么(上)
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/10/31/nodejs-timer/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">timer 的优化故事</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

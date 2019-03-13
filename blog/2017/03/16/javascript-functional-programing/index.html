@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>我眼中的 JavaScript 函数式编程 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="JavaScript 函数式编程是一个存在了很久的话题，但似乎从 2016 年开始，它变得越来越火热。这可能是因为 ES6 语法对于函数式编程更为友好，也可能是因为诸如 RxJS (ReactiveX) 等函数式框架的流行。 看过许多关于函数式编程的讲解，但是其中大部分是停留在理论层面，还有一些是仅针对 Haskell 等纯函数式编程语言的。而本文旨在聊一聊我眼中的函数式编程在 JavaScri">
+<meta name="keywords" content="函数式编程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我眼中的 JavaScript 函数式编程">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/03/16/javascript-functional-programing/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="JavaScript 函数式编程是一个存在了很久的话题，但似乎从 2016 年开始，它变得越来越火热。这可能是因为 ES6 语法对于函数式编程更为友好，也可能是因为诸如 RxJS (ReactiveX) 等函数式框架的流行。 看过许多关于函数式编程的讲解，但是其中大部分是停留在理论层面，还有一些是仅针对 Haskell 等纯函数式编程语言的。而本文旨在聊一聊我眼中的函数式编程在 JavaScri">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1xJN9QXXXXXbXXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="我眼中的 JavaScript 函数式编程">
+<meta name="twitter:description" content="JavaScript 函数式编程是一个存在了很久的话题，但似乎从 2016 年开始，它变得越来越火热。这可能是因为 ES6 语法对于函数式编程更为友好，也可能是因为诸如 RxJS (ReactiveX) 等函数式框架的流行。 看过许多关于函数式编程的讲解，但是其中大部分是停留在理论层面，还有一些是仅针对 Haskell 等纯函数式编程语言的。而本文旨在聊一聊我眼中的函数式编程在 JavaScri">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1xJN9QXXXXXbXXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-javascript-functional-programing" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      我眼中的 JavaScript 函数式编程
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 化辰</span>
+        
+        <span>发表于: <a href="/blog/2017/03/16/javascript-functional-programing/" class="article-date">
+  <time datetime="2017-03-16T07:18:05.000Z" itemprop="datePublished">2017-03-16</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1xJN9QXXXXXbXXpXXXXXXXXXX-900-500.jpg" alt="我眼中的 JavaScript 函数式编程"></p>
+<p>JavaScript 函数式编程是一个存在了很久的话题，但似乎从 2016 年开始，它变得越来越火热。这可能是因为 ES6 语法对于函数式编程更为友好，也可能是因为诸如 RxJS (ReactiveX) 等函数式框架的流行。</p>
+<p>看过许多关于函数式编程的讲解，但是其中大部分是停留在理论层面，还有一些是仅针对 Haskell 等纯函数式编程语言的。而本文旨在聊一聊我眼中的函数式编程在 <strong>JavaScript</strong> 中的具体实践，之所以是 “我眼中的” 即我所说的仅代表个人观点，可能和部分 <strong>严格概念</strong> 是有冲突的。</p>
+<p>本文将略去一大堆形式化的概念介绍，重点展示在 JavaScript 中到底什么是函数式的代码、函数式代码与一般写法有什么区别、函数式的代码能给我们带来什么好处以及常见的一些函数式模型都有哪些。</p>
+<h2 id="我理解的函数式编程"><a href="#我理解的函数式编程" class="headerlink" title="我理解的函数式编程"></a>我理解的函数式编程</h2><p>我认为函数式编程可以理解为，<strong>以函数作为主要载体的编程方式</strong>，用函数去拆解、抽象一般的表达式</p>
+<p>与命令式相比，这样做的好处在哪？主要有以下几点：</p>
+<ul>
+<li>语义更加清晰</li>
+<li>可复用性更高</li>
+<li>可维护性更好</li>
+<li>作用域局限，副作用少</li>
+</ul>
+<h3 id="基本的函数式编程"><a href="#基本的函数式编程" class="headerlink" title="基本的函数式编程"></a>基本的函数式编程</h3><p>下面例子是一个具体的函数式体现</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数组中每个单词，首字母大写</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 一般写法</span></span><br><span class="line"><span class="keyword">const</span> arr = [<span class="string">'apple'</span>, <span class="string">'pen'</span>, <span class="string">'apple-pen'</span>];</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">const</span> i <span class="keyword">in</span> arr)&#123;</span><br><span class="line">  <span class="keyword">const</span> c = arr[i][<span class="number">0</span>];</span><br><span class="line">  arr[i] = c.toUpperCase() + arr[i].slice(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(arr);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数式写法一</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">upperFirst</span>(<span class="params">word</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> word[<span class="number">0</span>].toUpperCase() + word.slice(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">wordToUpperCase</span>(<span class="params">arr</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> arr.map(upperFirst);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(wordToUpperCase([<span class="string">'apple'</span>, <span class="string">'pen'</span>, <span class="string">'apple-pen'</span>]));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数式写法二</span></span><br><span class="line"><span class="built_in">console</span>.log(arr.map([<span class="string">'apple'</span>, <span class="string">'pen'</span>, <span class="string">'apple-pen'</span>], word =&gt; word[<span class="number">0</span>].toUpperCase() + word.slice(<span class="number">1</span>)));</span><br></pre></td></tr></table></figure>
+<p>当情况变得更加复杂时，表达式的写法会遇到几个问题：</p>
+<ol>
+<li>表意不明显，逐渐变得难以维护</li>
+<li>复用性差，会产生更多的代码量</li>
+<li>会产生很多中间变量</li>
+</ol>
+<p>函数式编程很好的解决了上述问题。首先参看 <strong>函数式写法一</strong>，它利用了函数封装性将功能做拆解（粒度不唯一），并封装为不同的函数，而再利用组合的调用达到目的。这样做使得表意清晰，易于维护、复用以及扩展。其次利用 <strong>高阶函数</strong>，<code>Array.map</code> 代替 <code>for…of</code> 做数组遍历，减少了中间变量和操作。</p>
+<p>而 <strong>函数式写法一</strong> 和 <strong>函数式写法二</strong> 之间的主要差别在于，可以考虑函数是否后续有复用的可能，如果没有，则后者更优。</p>
+<h3 id="链式优化"><a href="#链式优化" class="headerlink" title="链式优化"></a>链式优化</h3><p>从上面 <strong>函数式写法二</strong> 中我们可以看出，函数式代码在写的过程中，很容易造成 <strong>横向延展</strong>，即产生多层嵌套，下面我们举个比较极端点的例子。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算数字之和</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 一般写法</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="number">1</span> + <span class="number">2</span> + <span class="number">3</span> - <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 函数式写法</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sum</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sub</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> a - b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(sub(sum(sum(<span class="number">1</span>, <span class="number">2</span>), <span class="number">3</span>), <span class="number">4</span>);</span><br></pre></td></tr></table></figure>
+<p>本例仅为展示 <strong>横向延展</strong> 的比较极端的情况，随着函数的嵌套层数不断增多，导致代码的可读性大幅下降，还很容易产生错误。</p>
+<p>在这种情况下，我们可以考虑多种优化方式，比如下面的 <strong>链式优化</strong> 。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化写法 (嗯，你没看错，这就是 lodash 的链式写法)</span></span><br><span class="line"><span class="keyword">const</span> utils = &#123;</span><br><span class="line">  chain(a) &#123;</span><br><span class="line">    <span class="keyword">this</span>._temp = a;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;,</span><br><span class="line">  sum(b) &#123;</span><br><span class="line">    <span class="keyword">this</span>._temp += b;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;,</span><br><span class="line">  sub(b) &#123;</span><br><span class="line">    <span class="keyword">this</span>._temp -= b;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">  &#125;,</span><br><span class="line">  value() &#123;</span><br><span class="line">    <span class="keyword">const</span> _temp = <span class="keyword">this</span>._temp;</span><br><span class="line">    <span class="keyword">this</span>._temp = <span class="literal">undefined</span>;</span><br><span class="line">    <span class="keyword">return</span> _temp;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(utils.chain(<span class="number">1</span>).sum(<span class="number">2</span>).sum(<span class="number">3</span>).sub(<span class="number">4</span>).value());</span><br></pre></td></tr></table></figure>
+<p>这样改写后，结构会整体变得比较清晰，而且链的每一环在做什么也可以很容易的展现出来。函数的嵌套和链式的对比还有一个很好的例子，那就是 <strong>回调函数 和 Promise 模式</strong>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 顺序请求两个接口</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 回调函数</span></span><br><span class="line"><span class="keyword">import</span> $ <span class="keyword">from</span> <span class="string">'jquery'</span>;</span><br><span class="line">$.post(<span class="string">'a/url/to/target'</span>, (rs) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span>(rs)&#123;</span><br><span class="line">    $.post(<span class="string">'a/url/to/another/target'</span>, (rs2) =&gt; &#123;</span><br><span class="line">      <span class="keyword">if</span>(rs2)&#123;</span><br><span class="line">        $.post(<span class="string">'a/url/to/third/target'</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// Promise</span></span><br><span class="line"><span class="keyword">import</span> request <span class="keyword">from</span> <span class="string">'catta'</span>;  <span class="comment">// catta 是一个轻量级请求工具，支持 fetch,jsonp,ajax，无依赖</span></span><br><span class="line">request(<span class="string">'a/url/to/target'</span>)</span><br><span class="line">  .then(<span class="function"><span class="params">rs</span> =&gt;</span> rs ? $.post(<span class="string">'a/url/to/another/target'</span>) : <span class="built_in">Promise</span>.reject())</span><br><span class="line">  .then(<span class="function"><span class="params">rs2</span> =&gt;</span> rs2 ? $.post(<span class="string">'a/url/to/third/target'</span>) : <span class="built_in">Promise</span>.reject());</span><br></pre></td></tr></table></figure>
+<p>随着回调函数嵌套层级和单层复杂度增加，它将会变得臃肿且难以维护，而 <code>Promise</code> 的链式结构，在高复杂度时，仍能纵向扩展，而且层次隔离很清晰。</p>
+<h2 id="常见的函数式编程模型"><a href="#常见的函数式编程模型" class="headerlink" title="常见的函数式编程模型"></a>常见的函数式编程模型</h2><h3 id="闭包（Closure）"><a href="#闭包（Closure）" class="headerlink" title="闭包（Closure）"></a>闭包（Closure）</h3><blockquote>
+<p>可以保留局部变量不被释放的代码块，被称为一个闭包</p>
+</blockquote>
+<p>闭包的概念比较抽象，相信大家都或多或少知道、用到这个特性</p>
+<p>那么闭包到底能给我们带来什么好处？</p>
+<p>先来看一下如何创建一个闭包：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建一个闭包</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">makeCounter</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> k = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> ++k;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> counter = makeCounter();</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(counter());  <span class="comment">// 1</span></span><br><span class="line"><span class="built_in">console</span>.log(counter());  <span class="comment">// 2</span></span><br></pre></td></tr></table></figure>
+<p><code>makeCounter</code> 这个函数的代码块，在返回的函数中，对局部变量 <code>k</code> ，进行了引用，导致局部变量无法在函数执行结束后，被系统回收掉，从而产生了闭包。而这个闭包的作用就是，“保留住“ 了局部变量，使内层函数调用时，可以重复使用该变量；而不同于全局变量，该变量只能在函数内部被引用。</p>
+<p>换句话说，闭包其实就是创造出了一些函数私有的 ”持久化变量“。</p>
+<p>所以从这个例子，我们可以总结出，闭包的创造条件是：</p>
+<ol>
+<li>存在内、外两层函数</li>
+<li>内层函数对外层函数的局部变量进行了引用</li>
+</ol>
+<h4 id="闭包的用途"><a href="#闭包的用途" class="headerlink" title="闭包的用途"></a>闭包的用途</h4><p>闭包的主要用途就是可以定义一些作用域局限的持久化变量，这些变量可以用来做缓存或者计算的中间量等等。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 简单的缓存工具</span></span><br><span class="line"><span class="comment">// 匿名函数创造了一个闭包</span></span><br><span class="line"><span class="keyword">const</span> cache = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> store = &#123;&#125;;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="keyword">get</span>(key) &#123;</span><br><span class="line">      <span class="keyword">return</span> store[key];</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">set</span>(key, val) &#123;</span><br><span class="line">      store[key] = val;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;());</span><br><span class="line"></span><br><span class="line">cache.set(<span class="string">'a'</span>, <span class="number">1</span>);</span><br><span class="line">cache.get(<span class="string">'a'</span>);  <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+<p>上面例子是一个简单的缓存工具的实现，匿名函数创造了一个闭包，使得 <code>store</code> 对象 ，一直可以被引用，不会被回收。</p>
+<h4 id="闭包的弊端"><a href="#闭包的弊端" class="headerlink" title="闭包的弊端"></a>闭包的弊端</h4><p>持久化变量不会被正常释放，持续占用内存空间，很容易造成内存浪费，所以一般需要一些额外手动的清理机制。</p>
+<h3 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h3><blockquote>
+<p>接受或者返回一个函数的函数称为高阶函数</p>
+</blockquote>
+<p>听上去很高冷的一个词汇，但是其实我们经常用到，只是原来不知道他们的名字而已。JavaScript 语言是原生支持高阶函数的，因为 JavaScript 的函数是一等公民，它既可以作为参数又可以作为另一个函数的返回值使用。</p>
+<p>我们经常可以在 JavaScript 中见到许多原生的高阶函数，例如 <code>Array.map</code> , <code>Array.reduce</code> , <code>Array.filter</code></p>
+<p>下面以 <code>map</code> 为例，我们看看他是如何使用的</p>
+<h4 id="map-（映射）"><a href="#map-（映射）" class="headerlink" title="map （映射）"></a>map （映射）</h4><blockquote>
+<p>映射是对集合而言的，即把集合的每一项都做相同的变换，产生一个新的集合</p>
+</blockquote>
+<p><code>map</code> 作为一个高阶函数，他接受一个函数参数作为映射的逻辑</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数组中每一项加一，组成一个新数组</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 一般写法</span></span><br><span class="line"><span class="keyword">const</span> arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">const</span> rs = [];</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">const</span> n <span class="keyword">of</span> arr)&#123;</span><br><span class="line">  rs.push(++n);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(rs)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// map改写</span></span><br><span class="line"><span class="keyword">const</span> arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">const</span> rs = arr.map(<span class="function"><span class="params">n</span> =&gt;</span> ++n);</span><br></pre></td></tr></table></figure>
+<p>上面一般写法，利用 <code>for...of</code> 循环的方式遍历数组会产生额外的操作，而且有改变原数组的风险</p>
+<p>而 <code>map</code> 函数封装了必要的操作，使我们仅需要关心映射逻辑的函数实现即可，减少了代码量，也降低了副作用产生的风险。</p>
+<h3 id="柯里化（Currying）"><a href="#柯里化（Currying）" class="headerlink" title="柯里化（Currying）"></a>柯里化（Currying）</h3><blockquote>
+<p>给定一个函数的部分参数，生成一个接受其他参数的新函数</p>
+</blockquote>
+<p>可能不常听到这个名词，但是用过 <code>undescore</code> 或 <code>lodash</code> 的人都见过他。</p>
+<p>有一个神奇的 <code>_.partial</code> 函数，它就是柯里化的实现</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取目标文件对基础路径的相对路径</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 一般写法</span></span><br><span class="line"><span class="keyword">const</span> BASE = <span class="string">'/path/to/base'</span>;</span><br><span class="line"><span class="keyword">const</span> relativePath = path.relative(BASE, <span class="string">'/some/path'</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// _.parical 改写</span></span><br><span class="line"><span class="keyword">const</span> BASE = <span class="string">'/path/to/base'</span>;</span><br><span class="line"><span class="keyword">const</span> relativeFromBase = _.partial(path.relative, BASE);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> relativePath = relativeFromBase(<span class="string">'/some/path'</span>);</span><br></pre></td></tr></table></figure>
+<p>通过 <code>_.partial</code> ，我们得到了新的函数 <code>relativeFromBase</code> ，这个函数在调用时就相当于调用 <code>path.relative</code> ，并默认将第一个参数传入 <code>BASE</code> ，后续传入的参数顺序后置。</p>
+<p>本例中，我们真正想完成的操作是每次获得相对于 <code>BASE</code> 的路径，而非相对于任何路径。柯里化可以使我们只关心函数的部分参数，使函数的用途更加清晰，调用更加简单。</p>
+<h3 id="组合（Composing）"><a href="#组合（Composing）" class="headerlink" title="组合（Composing）"></a>组合（Composing）</h3><blockquote>
+<p>将多个函数的能力合并，创造一个新的函数</p>
+</blockquote>
+<p>同样你第一次见到他可能还是在 <code>lodash</code> 中，<code>compose</code> 方法（现在叫 <code>flow</code>）</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数组中每个单词大写，做 Base64</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 一般写法 (其中一种)</span></span><br><span class="line"><span class="keyword">const</span> arr = [<span class="string">'pen'</span>, <span class="string">'apple'</span>, <span class="string">'applypen'</span>];</span><br><span class="line"><span class="keyword">const</span> rs = [];</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">const</span> w <span class="keyword">of</span> arr)&#123;</span><br><span class="line">  rs.push(btoa(w.toUpperCase()));</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(rs);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// _.flow 改写</span></span><br><span class="line"><span class="keyword">const</span> arr = [<span class="string">'pen'</span>, <span class="string">'apple'</span>, <span class="string">'applypen'</span>];</span><br><span class="line"><span class="keyword">const</span> upperAndBase64 = _.partialRight(_.map, _.flow(_.upperCase, btoa));</span><br><span class="line"><span class="built_in">console</span>.log(upperAndBase64(arr));</span><br></pre></td></tr></table></figure>
+<p><code>_.flow</code> 将转大写和转 Base64 的函数的能力合并，生成一个新的函数。方便作为参数函数或后续复用。</p>
+<h2 id="自己的观点"><a href="#自己的观点" class="headerlink" title="自己的观点"></a>自己的观点</h2><p>我理解的 JavaScript 函数式编程，可能和许多传统概念不同。我并不只认为 <em>高阶函数</em> 算函数式编程，其他的诸如普通函数结合调用、链式结构等，我都认为属于函数式编程的范畴，只要他们是以函数作为主要载体的。</p>
+<p>而我认为函数式编程并不是必须的，它也不应该是一个强制的规定或要求。与面向对象或其他思想一样，它也是其中一种方式。我们更多情况下，应该是几者的结合，而不是局限于概念。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://lodash.com/" target="_blank" rel="noopener">https://lodash.com/</a></li>
+<li><a href="http://reactivex.io/" target="_blank" rel="noopener">http://reactivex.io/</a></li>
+</ul>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/XJXWbfSo2f0" target="_blank" rel="noopener">https://unsplash.com/photos/XJXWbfSo2f0</a> By Luca Bravo</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/03/16/javascript-functional-programing/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/03/16/javascript-functional-programing/" data-id="cjt6lbxz10050jeu10fq4oxty" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/03/16/javascript-functional-programing/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/函数式编程/">函数式编程</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/03/24/node-subway-season-4-nanjing/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          「深入实践中的 Node.js」- Node 地下铁第四期南京站线下沙龙总结
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/03/09/head-first-typescript/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">认识 TypeScript</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>timer 的优化故事 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="前段时间 Node.js 发布了新版本 4.0，其中涉及到一个更新比较多的模块，那就是下面要介绍的 timer 模块。  timers: Improved timer performance from porting the 0.12 implementation, plus minor fixes (Jeremiah Senkpiel)#2540, (Julien Gilli)nodejs/n">
+<meta name="keywords" content="nodejs,timer,优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="timer 的优化故事">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/10/31/nodejs-timer/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="前段时间 Node.js 发布了新版本 4.0，其中涉及到一个更新比较多的模块，那就是下面要介绍的 timer 模块。  timers: Improved timer performance from porting the 0.12 implementation, plus minor fixes (Jeremiah Senkpiel)#2540, (Julien Gilli)nodejs/n">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1meIvKXXXXXayXpXX2AXZ8pXX-900-500.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1r0H9JpXXXXXaXpXXDezOOXXX-2004-1220.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="timer 的优化故事">
+<meta name="twitter:description" content="前段时间 Node.js 发布了新版本 4.0，其中涉及到一个更新比较多的模块，那就是下面要介绍的 timer 模块。  timers: Improved timer performance from porting the 0.12 implementation, plus minor fixes (Jeremiah Senkpiel)#2540, (Julien Gilli)nodejs/n">
+<meta name="twitter:image" content="http://gtms04.alicdn.com/tps/i4/TB1meIvKXXXXXayXpXX2AXZ8pXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-timer" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      timer 的优化故事
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 淘杰</span>
+        
+        <span>发表于: <a href="/blog/2015/10/31/nodejs-timer/" class="article-date">
+  <time datetime="2015-10-30T16:05:19.000Z" itemprop="datePublished">2015-10-31</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms04.alicdn.com/tps/i4/TB1meIvKXXXXXayXpXX2AXZ8pXX-900-500.png" alt="timer 的优化故事"></p>
+<p>前段时间 Node.js 发布了新版本 4.0，其中涉及到一个更新比较多的模块，那就是下面要介绍的 timer 模块。</p>
+<blockquote>
+<p>timers: Improved timer performance from porting the 0.12 implementation, plus minor fixes (Jeremiah Senkpiel)#2540, (Julien Gilli)nodejs/node-v0.x-archive#8751nodejs/node-v0.x-archive#8905 </p>
+</blockquote>
+<p>之前也对 timer 模块有过比较多的研究，断断续续的看过这个模块在 github 上的一些改动，于是借着这次机会整理一下自己对 timer 模块的理解，和小伙伴们一起分享 timer 模块的优化过程。</p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><p>也许你在使用 Node.js 开发项目时并没有使用到 timer 模块，诸如 setTimeout 以及 setInterval 和 setImediate 方法等等。但如果你开发的是 web 项目，那么你的项目中一定涉及到了 timer 模块。</p>
+<p>细心的同学在平时的 http 接口开发调试中可能会注意到，每个 http 的 request header 里都有一个 <code>Connection:keep-alive</code> 标识，这是 http/1.1 开始引入的，表示客户端需要和服务端一直保持着 tcp 连接。当然了，这个连接不能就这么一直保持着，所以一般都会有一个超时时间，超过这个时间客户端还没有发送新的 http 请求，那么服务器就需要自动断开从而继续为其他客户端提供服务。</p>
+<p>Node.js 提供的 http 服务器便是采用 timer 模块来满足这种请求，每一个新的连接到来构造出一个 socket 对象，便会调用 socket.setTimeout 设置一个定时器用于超时后自动断开连接。</p>
+<h2 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h2><p>在 Node.js 开发的 web 项目中，timer 模块的使用频率是非常高的，每一个新的连接到来都会设置它的超时时间，而且每个连接的超时时间都一样，在 http server 中默认是 2*60*1000ms。Node.js 使用 c++ 包裹的 Timer 对象来实现定时器功能，下面的代码示例了使用 Timer 对象来实现一个非常简单的定时器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">const Timer = process.binding(&apos;timer_wrap&apos;).Timer;</span><br><span class="line">const kOnTimeout = Timer.kOnTimeout | 0;</span><br><span class="line"></span><br><span class="line">var mySetTimeout = function (fn, ms) &#123;</span><br><span class="line">	var timer  = new Timer();</span><br><span class="line">	timer.start(ms, 0);</span><br><span class="line">	timer[kOnTimeout] = fn;</span><br><span class="line">	return timer;	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var myClearTimeout = function(timer)&#123;</span><br><span class="line">	if(timer &amp;&amp; timer.close) &#123;</span><br><span class="line">		timer.close();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">mySetTimeout(function() &#123;</span><br><span class="line">	console.log(&apos;timeout!&apos;);</span><br><span class="line">&#125;,1000);</span><br></pre></td></tr></table></figure>
+<p>那我们是否就可以用上面实现的 mySetTimeout 来对每个 socket 进行超时操作呢</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mySetTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;socket.close();&#125;,<span class="number">2</span> * <span class="number">60</span> * <span class="number">1000</span>);</span><br></pre></td></tr></table></figure>
+<p>可以是可以，但是这样真的好吗？设想我们做的是一个非常棒的产品，每天好几百万上千万的用户，高峰期在 2*  60* 1000ms这段时间内会产生非常多的新连接，必然会创建非常多的 Timer 对象，这个开销还真不小！</p>
+<p>Node.js 在设计之初就非常非常注重性能，所以像上面这种这么简单的方案必然是不能接受的。</p>
+<p>实际上在这2分钟之内，Node.js 中的 timer 模块只会创建一个 Timer 对象，一个 Timer 对象如何来满足这么多连接的超时处理呢？</p>
+<p>timer 模块会使用一个链表来保存所有超时时间相同的对象，每个对象中都会存储开始时间 _idleStart 以及超时时间 _idleTimeout。链表中第一个加入的对象一定会比后面加入的对象先超时，当第一个对象超时完成处理后，重新计算下一个对象是否已经到时或者还有多久到时，之前创建的 Timer 对象便会再次启动并设置新的超时时间，直到当链表上所有的对象都已经完成超时处理，此时便会关闭这个 Timer 对象。</p>
+<p>通过这种巧妙的设计，使得一个 Timer 对象得到了最大的重用，从而极大的提升了 timer 模块的性能。这一场景其实在 libev 中已早有研究  <a href="http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#Be_smart_about_timeouts" target="_blank" rel="noopener">http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#Be_smart_about_timeouts</a> </p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>上面说到 timer 模块通过 c++ 提供的 Timer 对象，最终生成 setTimeout 以及 setInterval 等函数暴露给用户使用。那 Timer 对象是如何实现的呢，下面我们就来一探究竟。</p>
+<h3 id="一个最底层的-timer"><a href="#一个最底层的-timer" class="headerlink" title="一个最底层的 timer"></a>一个最底层的 timer</h3><p>熟悉 linux 网络编程的同学一定听说过 epoll 吧，</p>
+<blockquote>
+<p>epoll 是什么？按照 man 手册的说法：是为处理大批量句柄而作了改进的 poll。当然，这不是 2.6 内核才有的，它是在 2.5.44 内核中被引进的 (epoll(4) is a new API introduced in Linux kernel 2.5.44)，它几乎具备了之前所说的一切优点，被公认为 Linux2.6 下性能最好的多路 I/O 就绪通知方法。</p>
+</blockquote>
+<p>其中有这么一个函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">epoll_wait</span><span class="params">(<span class="keyword">int</span> epfd, struct epoll_event * events, <span class="keyword">int</span> maxevents, <span class="keyword">int</span> timeout)</span></span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>收集在 epoll 监控的事件中已经发送的事件。参数 events 是分配好的 epoll_event 结构体数组，epoll 将会把发生的事件赋值到 events 数组中（events 不可以是空指针，内核只负责把数据复制到这个 events 数组中，不会去帮助我们在用户态中分配内存）。maxevents 告之内核这个 events 有多大，这个 maxevents 的值不能大于创建 epoll_create() 时的 size，参数 timeout 是超时时间（毫秒，0 会立即返回，-1 将不确定，也有说法说是永久阻塞）。如果函数调用成功，返回对应 I/O 上已准备好的文件描述符数目，如返回 0 表示已超时。</p>
+</blockquote>
+<p>当我们监听一个 fd 上的事件时，可以设置等待事件发生的超时时间。利用这个特性便可以非常简单的实现一个定时器功能。</p>
+<p>由于我使用的是 mac 系统，所以就用 kqueue 来代替 epoll(它们之间非常相似,具体的详细介绍以及使用方法感兴趣的可以自行查阅相关资料)。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/event.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> MAX_EVENT_COUNT = <span class="number">5000</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> <span class="title">t_start</span>,<span class="title">t_end</span>;</span></span><br><span class="line">  <span class="keyword">int</span> fd = <span class="number">-1</span>;<span class="comment">//构造一个不会有任何事件发生的fd</span></span><br><span class="line">  <span class="keyword">int</span> kq = kqueue();</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">kevent</span> <span class="title">changes</span>[1];</span></span><br><span class="line">  EV_SET(&amp;changes[<span class="number">0</span>], fd, EVFILT_READ, EV_ADD, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">  <span class="keyword">int</span> timeout = <span class="number">3500</span>;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">kevent</span> <span class="title">events</span>[<span class="title">MAX_EVENT_COUNT</span>];</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">timespec</span> <span class="title">spec</span>;</span></span><br><span class="line">  spec.tv_sec = timeout / <span class="number">1000</span>;</span><br><span class="line">  spec.tv_nsec = (timeout % <span class="number">1000</span>) * <span class="number">1000000</span>;</span><br><span class="line">  gettimeofday(&amp;t_start, <span class="literal">NULL</span>);</span><br><span class="line">  kevent(kq, <span class="literal">NULL</span>, <span class="number">0</span>, events, MAX_EVENT_COUNT, &amp;spec);</span><br><span class="line">  gettimeofday(&amp;t_end, <span class="literal">NULL</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"timeout = %d, run time is %ld\n"</span>, timeout,  t_end.tv_sec*<span class="number">1000</span>+t_end.tv_usec/<span class="number">1000</span> - (t_start.tv_sec*<span class="number">1000</span>+t_start.tv_usec/<span class="number">1000</span>));</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>至此我们便利用 kqueue 实现了一个非常简单非常底层的定时器。</p>
+<h3 id="libuv-中的-timer"><a href="#libuv-中的-timer" class="headerlink" title="libuv 中的 timer"></a>libuv 中的 timer</h3><p>前面讲到，在 http server 中每一个新的连接并不会真的就去创建一个 Timer 对象。同样，在 Node.js 底层的定时器中，并不会每次创建一个 Timer 对象就在 kqueue 上注册一个事件等待超时。优化的思路和 Node.js 中的 timer 模块很相似，只不过现在不能保证每个定时器的超时时间都一样。</p>
+<p>定时器有一个非常显著的特征，超时时间最短的定时器一定最先触发，假设我们有很多的定时任务，每个任务的执行时间都不同。当第一个定时器超时后，便从这些任务中查找出已经到点的任务并执行对应的超时处理，然后再重新计算余下任务中最先执行的时间，并根据这个时间再次开启一个定时器。</p>
+<p>对应的算法需求就是每次都需要查找集合中最小的元素，显然二叉堆中的最小堆(父结点的键值总是小于或等于任何一个子节点的键值)是最适合不过的一种数据结构了。由于最小的元素总是处于根节点，我们可以以 O(1) 时间找到最小值。对于插入操作，在最坏的情况下，新插入的节点需要不断的和它的父节点进行交换，直到它为根节点为止。假设堆的高度为 h, 二叉树最多有 2^(h+1) - 1 个 节点. 因此新插入一个节点最多需要 log(n+1) -1 次比较，其算法复杂度为 O(logn)。</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1r0H9JpXXXXXaXpXXDezOOXXX-2004-1220.png" alt="http://gtms02.alicdn.com/tps/i2/TB1r0H9JpXXXXXaXpXXDezOOXXX-2004-1220.png"></p>
+<p>libuv 中已经实现了一个最小二叉堆的算法 <a href="https://github.com/joyent/libuv/blob/master/src/heap-inl.h" target="_blank" rel="noopener">https://github.com/joyent/libuv/blob/master/src/heap-inl.h</a>, 下面我们就用这个算法来实现一个支持设置不同超时时间的定时器。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/event.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/time.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//https://github.com/joyent/libuv/blob/master/src/heap-inl.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"heap-inl.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> container_of(ptr, type, member) \</span></span><br><span class="line">  ((type *) ((<span class="keyword">char</span> *) (ptr) - offsetof(type, member)))</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> MAX_EVENT_COUNT = <span class="number">5000</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">heap_node</span>* <span class="title">heap_node</span>[3];</span></span><br><span class="line">    <span class="keyword">int</span> value;</span><br><span class="line">&#125;<span class="keyword">node_t</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">less_than</span><span class="params">(<span class="keyword">const</span> struct heap_node* ha, <span class="keyword">const</span> struct heap_node* hb)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">node_t</span>* a;</span><br><span class="line">      <span class="keyword">const</span> <span class="keyword">node_t</span>* b;</span><br><span class="line"></span><br><span class="line">    a = container_of(ha, <span class="keyword">const</span> <span class="keyword">node_t</span>, heap_node);</span><br><span class="line">    b = container_of(hb, <span class="keyword">const</span> <span class="keyword">node_t</span>, heap_node);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (a-&gt;value &lt; b-&gt;value)</span><br><span class="line">      <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">heap</span> *<span class="title">heap_p</span> = <span class="title">malloc</span>(<span class="title">sizeof</span>(<span class="title">node_t</span>));</span></span><br><span class="line">  heap_init(heap_p);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> a[] = &#123;<span class="number">10</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">2</span>&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> len = <span class="keyword">sizeof</span>(a)/<span class="keyword">sizeof</span>(<span class="keyword">int</span>);</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;len;i++)&#123;</span><br><span class="line">    <span class="keyword">node_t</span> *node_p = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">node_t</span>));</span><br><span class="line">    node_p-&gt;value = a[i]*<span class="number">1000</span>;</span><br><span class="line">    heap_insert(heap_p, (struct heap_node*)node_p-&gt;heap_node, less_than);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> fd = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">int</span> kq = kqueue();</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">kevent</span> <span class="title">changes</span>[1];</span></span><br><span class="line">  EV_SET(&amp;changes[<span class="number">0</span>], fd, EVFILT_READ, EV_ADD, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">kevent</span> <span class="title">events</span>[<span class="title">MAX_EVENT_COUNT</span>];</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">timeval</span> <span class="title">t_start</span>,<span class="title">t_end</span>;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(heap_p-&gt;nelts) &#123;</span><br><span class="line">      <span class="keyword">node_t</span> *node_p = container_of(heap_p-&gt;min, <span class="keyword">node_t</span>, heap_node);</span><br><span class="line">      <span class="class"><span class="keyword">struct</span> <span class="title">timespec</span> <span class="title">spec</span>;</span></span><br><span class="line">      spec.tv_sec = node_p-&gt;value / <span class="number">1000</span>;</span><br><span class="line">      spec.tv_nsec = (node_p-&gt;value % <span class="number">1000</span>) * <span class="number">1000000</span>;</span><br><span class="line">      gettimeofday(&amp;t_start, <span class="literal">NULL</span>);</span><br><span class="line">      kevent(kq, <span class="literal">NULL</span>, <span class="number">0</span>, events, MAX_EVENT_COUNT, &amp;spec);</span><br><span class="line">      gettimeofday(&amp;t_end, <span class="literal">NULL</span>);</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"timeout = %d, run time is %ld\n"</span>, node_p-&gt;value,  t_end.tv_sec*<span class="number">1000</span>+t_end.tv_usec/<span class="number">1000</span> - (t_start.tv_sec*<span class="number">1000</span>+t_start.tv_usec/<span class="number">1000</span>));</span><br><span class="line">      heap_dequeue(heap_p, less_than);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"timer is over!\n"</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行 gcc timer.c -o timer &amp;&amp; ./timer 后输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">timeout = 2000, run time is 2004</span><br><span class="line">timeout = 3000, run time is 3000</span><br><span class="line">timeout = 4000, run time is 4003</span><br><span class="line">timeout = 5000, run time is 5005</span><br><span class="line">timeout = 6000, run time is 6005</span><br><span class="line">timeout = 7000, run time is 7005</span><br><span class="line">timeout = 8000, run time is 8004</span><br><span class="line">timeout = 9000, run time is 9000</span><br><span class="line">timeout = 10000, run time is 10005</span><br><span class="line">timer is over!</span><br></pre></td></tr></table></figure>
+<p>可以看到我们设置的 9 个定时器都预期执行了，除了有 5ms 以内的偏差。这就是 Node.js 中最底层的定时器实现了。</p>
+<h3 id="nodejs-中的-timer"><a href="#nodejs-中的-timer" class="headerlink" title="nodejs 中的 timer"></a>nodejs 中的 timer</h3><p>我们再回到 Node.js 中的 timer 模块，为了不影响到 Node.js 中的 event loop，timer 模块专门提供了一些内部的 api(timers._unrefActive) 给像 socket 这样的对象使用。</p>
+<p>timer 内部会维护一个 unrefList 链表以及一个 unrefTimer Timer 对象，当有新的超时任务到来时便会添加到 unrefList 中，超时后便从 unrefList 中取出任务执行。</p>
+<p>在最初的设计中，每次执行 _unrefActive 添加任务时都会维持着 unrefList 的顺序，保证超时时间最小的处于前面。这样在定时器超时后便可以以最快的速度处理超时任务并设置下一个定时器，但是在添加任务时最坏的情况下需要遍历 unrefList 链表中的所有节点。具体实现可参考<a href="https://github.com/nodejs/node/blob/5abd4ac079b390467360d671a186a061b5aba736/lib/timers.js" target="_blank" rel="noopener">https://github.com/nodejs/node/blob/5abd4ac079b390467360d671a186a061b5aba736/lib/timers.js</a></p>
+<p>很显然，在 web 开发中建立连接是最频繁的操作，那么向 unrefList 链表中添加节点也就非常频繁了，而且最开始设置的定时器其实最后真正会超时的非常少，因为中间涉及到 io 的正常操作时便会取消定时器。所以问题就变成最耗性能的操作非常频繁，而几乎不花时间的操作却很少被执行到。</p>
+<p>针对这种情况，如何解决呢？目前在node社区主要有2种方案。</p>
+<h3 id="使用不排序的链表"><a href="#使用不排序的链表" class="headerlink" title="使用不排序的链表"></a>使用不排序的链表</h3><p>主要思路就是将对 unrefList 链表的遍历操作，移到unrefTimeout定时器超时处理中。这样每次查找出已经超时的任务就需要花比较多的时间了 O(n)，但是插入操作却变得非常简单 O(1)，而插入节点正是最频繁的操作。</p>
+<h3 id="使用二叉堆"><a href="#使用二叉堆" class="headerlink" title="使用二叉堆"></a>使用二叉堆</h3><p>原理和 libuv 中的 timer 实现一样，添加和查找一个节点都能达到 O(log(n)) 的复杂度(找出最小节点本身很快，但是删除它需要 O(log(n)) 的复杂度)，能够在二者之间保持一个很好的平衡。</p>
+<h3 id="benchamark"><a href="#benchamark" class="headerlink" title="benchamark"></a>benchamark</h3><p>这2种方案都有比较详细 benchamark 数据， 具体可参考<a href="https://github.com/nodejs/node-v0.x-archive/wiki/Optimizing-_unrefActive" target="_blank" rel="noopener">https://github.com/nodejs/node-v0.x-archive/wiki/Optimizing-_unrefActive</a>。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>在高并发连接到来并且很少有实际的超时事件发生时 unrefList 使用没有排序的链表来存储超时任务时性能是非常棒的。但是一旦出现很多超时事件都发生的情况下，对超时事件的处理会再次变成一个瓶颈。</p>
+<p>而使用二叉堆来存储超时任务时，当有大量超时事件发生时性能会比链表好很多，没有超时事件触发时性能比链表稍差。</p>
+<p>可见 Node.js 在不同的场景中使用的定时器实现也不都一样，说 Node.js 对性能的追求达到极致一点也不为过。当我们自己在实际的开发时，如果需要使用到定时器功能，不妨好好思考下哪种方案更适合业务场景，能够最大的提升 timer 模块的性能。</p>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="http://blog.chinaunix.net/uid-28304615-id-3579872.html" target="_blank" rel="noopener">HTTP Keep Alive分析与优化总结</a></li>
+<li><a href="http://www.ibm.com/developerworks/cn/aix/library/1105_huangrg_kqueue/" target="_blank" rel="noopener">使用 kqueue 在 FreeBSD 上开发高性能应用服务器</a></li>
+<li><a href="https://github.com/nodejs/node/blob/master/lib/timers.js" target="_blank" rel="noopener">https://github.com/nodejs/node/blob/master/lib/timers.js</a></li>
+<li><a href="https://github.com/nodejs/node/commit/e5bb66886bfa40818de7a96e982c5964eef9eb78" target="_blank" rel="noopener">https://github.com/nodejs/node/commit/e5bb66886bfa40818de7a96e982c5964eef9eb78</a></li>
+<li><a href="https://github.com/nodejs/node-v0.x-archive/wiki/Optimizing-_unrefActive" target="_blank" rel="noopener">https://github.com/nodejs/node-v0.x-archive/wiki/Optimizing-_unrefActive</a></li>
+<li><a href="http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#Be_smart_about_timeouts" target="_blank" rel="noopener">http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#Be_smart_about_timeouts</a></li>
+<li><a href="http://courses.cs.washington.edu/courses/cse373/06sp/handouts/lecture10.pdf" target="_blank" rel="noopener">binary heap</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/10/31/nodejs-timer/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/10/31/nodejs-timer/" data-id="cjt6lby06007zjeu1mvze9b6r" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/10/31/nodejs-timer/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/timer/">timer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/优化/">优化</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/02/buy-component/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          已买到的宝贝前端组件化探索
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/10/29/deep-into-node-1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Node.js 探秘：初识单线程的 Node.js</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

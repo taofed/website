@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Math.random() 二三事 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="随机数随机数是统计学领域的一个重要概念，对于游戏来说同样意义非凡，用好随机数，可以使你的游戏更真实、更人性、富有魅力。 举例子来说：一个打靶游戏，子弹每次都命中准心所示位置是不科学的，加上抖动误差，会使真实感更加强烈；再如，抽奖大转盘程序，每当转盘停止转动时，指针恰好都指向奖品图片的正中点，人们会觉得这个转盘很不自然，指向一个随机位置效果要好得多。 学过 JavaScript 的人都知道，应用随">
+<meta name="keywords" content="游戏,算法,随机">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Math.random() 二三事">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/07/some-thing-about-random/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="随机数随机数是统计学领域的一个重要概念，对于游戏来说同样意义非凡，用好随机数，可以使你的游戏更真实、更人性、富有魅力。 举例子来说：一个打靶游戏，子弹每次都命中准心所示位置是不科学的，加上抖动误差，会使真实感更加强烈；再如，抽奖大转盘程序，每当转盘停止转动时，指针恰好都指向奖品图片的正中点，人们会觉得这个转盘很不自然，指向一个随机位置效果要好得多。 学过 JavaScript 的人都知道，应用随">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1JmPuKFXXXXaGXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1NKjyKFXXXXXqXpXXXXXXXXXX-360-280.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1xKYEKFXXXXbwXXXXXXXXXXXX-296-316.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1w2fqKFXXXXbXXFXXXXXXXXXX-296-316.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1XWflKFXXXXc.XFXXXXXXXXXX-296-316.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1gdPCKFXXXXaUXXXXXXXXXXXX-1080-280.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1e5DhKFXXXXayXVXXXXXXXXXX-360-280.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB13fzdKFXXXXcUXVXXXXXXXXXX-360-280.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Math.random() 二三事">
+<meta name="twitter:description" content="随机数随机数是统计学领域的一个重要概念，对于游戏来说同样意义非凡，用好随机数，可以使你的游戏更真实、更人性、富有魅力。 举例子来说：一个打靶游戏，子弹每次都命中准心所示位置是不科学的，加上抖动误差，会使真实感更加强烈；再如，抽奖大转盘程序，每当转盘停止转动时，指针恰好都指向奖品图片的正中点，人们会觉得这个转盘很不自然，指向一个随机位置效果要好得多。 学过 JavaScript 的人都知道，应用随">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1JmPuKFXXXXaGXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-some-thing-about-random" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Math.random() 二三事
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 一位</span>
+        
+        <span>发表于: <a href="/blog/2015/12/07/some-thing-about-random/" class="article-date">
+  <time datetime="2015-12-07T11:38:58.000Z" itemprop="datePublished">2015-12-07</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1JmPuKFXXXXaGXpXXXXXXXXXX-900-500.jpg" alt="Math.random() 二三事"></p>
+<h2 id="随机数"><a href="#随机数" class="headerlink" title="随机数"></a>随机数</h2><p>随机数是统计学领域的一个重要概念，对于游戏来说同样意义非凡，用好随机数，可以使你的游戏更真实、更人性、富有魅力。</p>
+<p>举例子来说：一个打靶游戏，子弹每次都命中准心所示位置是不科学的，加上抖动误差，会使真实感更加强烈；再如，抽奖大转盘程序，每当转盘停止转动时，指针恰好都指向奖品图片的正中点，人们会觉得这个转盘很不自然，指向一个随机位置效果要好得多。</p>
+<p>学过 JavaScript 的人都知道，应用随机数很简单，只要一个 <code>Math.random()</code> 就可以获得一个大于等于 0 小于 1 的浮点数。从一个集合中随机选择对象时，使用浮点数离散化后的结果作为选择集的索引：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> objects = [...];</span><br><span class="line"><span class="keyword">var</span> randomIndex = <span class="built_in">Math</span>.floor( objects.length * <span class="built_in">Math</span>.random() ); </span><br><span class="line"><span class="keyword">var</span> object = objects[ randomIndex ];</span><br></pre></td></tr></table></figure>
+<h2 id="随机数的分布规律"><a href="#随机数的分布规律" class="headerlink" title="随机数的分布规律"></a>随机数的分布规律</h2><p>前面代码中 <code>Math.random()</code> 和 <code>randomIndex</code> 的取值，在「<a href="https://zh.wikipedia.org/wiki/%E6%A6%82%E7%8E%87%E5%88%86%E5%B8%83" target="_blank" rel="noopener">概率分布</a>」理论中属于「连续型分布」和「离散型分布」，分布用来描述随机变量的概率性质。其中，不论是连续型还是离散型，均匀分布都是最最常用的分布类型（没有之一）。在大转盘的例子中，决定转盘「停在哪个奖品上」和「停到该奖品的哪个位置」，都可以采用均匀分布。</p>
+<p>均匀分布的特点是：所有基本事件的可能性相等，以下是 100 万次 <code>Math.random()</code> 实验的取值发生次数直方图：</p>
+<p><img src="https://img.alicdn.com/tps/TB1NKjyKFXXXXXqXpXXXXXXXXXX-360-280.png" alt></p>
+<blockquote>
+<p>可以看出，即便是伪随机数，它的分布仍然是均匀到无可挑剔，如果样本数足够大，上面直方图将呈现出一条直线。</p>
+</blockquote>
+<p>再考虑一下打靶游戏的例子，假设对命中准心所示位置做了「均匀分布」的抖动误差，来看看 2000 次实验之后的样子：</p>
+<p><img src="https://img.alicdn.com/tps/TB1xKYEKFXXXXbwXXXXXXXXXXXX-296-316.png" alt></p>
+<p>如此均匀肯定不符合现实，人们会认为这杆枪的准心实在糟糕极了，而实际上，我们期望在大多数的情况下，子弹总是能命中准心所示位置，换句话说：正中准心的概率最高，随着误差距离的增大，概率减小。</p>
+<p>这时我们需要优化一下随机函数，让吐出的值更多的接近于 0 而疏远于 1，一个简单的做法就是，引入第二个随机量与之相乘，实验 2000 次的结果如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1w2fqKFXXXXbXXFXXXXXXXXXX-296-316.png" alt></p>
+<p>更多个随机数，效果更甚（想想屋檐下鸟巢正下方地板上的鸟屎堆）：</p>
+<p><img src="https://img.alicdn.com/tps/TB1XWflKFXXXXc.XFXXXXXXXXXX-296-316.png" alt></p>
+<blockquote>
+<p>以上的实验，可 <a href="http://codepen.io/taobaofed/full/yeyBJq/?count=2000" target="_blank" rel="noopener">移步这里</a> 查看。</p>
+</blockquote>
+<p>我们再来看看，这三种情况随机数的直方图（每图样本数 100 万次）：</p>
+<p><img src="https://img.alicdn.com/tps/TB1gdPCKFXXXXaUXXXXXXXXXXXX-1080-280.png" alt></p>
+<blockquote>
+<p>关于不均匀的随机，历史上有多位名人总结了多种分布规律，离散型的诸如 <a href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E9%A0%85%E5%88%86%E4%BD%88" target="_blank" rel="noopener">二项分布</a>、<a href="https://zh.wikipedia.org/wiki/%E5%B9%BE%E4%BD%95%E5%88%86%E4%BD%88" target="_blank" rel="noopener">几何分布</a>、<a href="https://zh.wikipedia.org/wiki/%E8%B6%85%E5%87%A0%E4%BD%95%E5%88%86%E5%B8%83" target="_blank" rel="noopener">超几何分布</a> 等，连续型的有 <a href="https://zh.wikipedia.org/wiki/%E6%8C%87%E6%95%B0%E5%88%86%E5%B8%83" target="_blank" rel="noopener">指数分布</a>、<a href="https://zh.wikipedia.org/wiki/%CE%93%E5%87%BD%E6%95%B0" target="_blank" rel="noopener">伽马分布</a> 和 <a href="https://zh.wikipedia.org/wiki/%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83" target="_blank" rel="noopener">正态分布</a> 等等，这些我也没有深入研究过，所以只能点点名，感兴趣的可自行琢磨。</p>
+</blockquote>
+<h2 id="产生符合指定概率模型的随机数"><a href="#产生符合指定概率模型的随机数" class="headerlink" title="产生符合指定概率模型的随机数"></a>产生符合指定概率模型的随机数</h2><p>就像我们做动效一样，缓动算子可以令动画更加动感，应用合适的概率分布也能让页面/游戏更有表现力。与缓动动效不同的是，概率分布需要足够大的样本集才能体现出效果，在 codepen 上经常看到的各种粒子（烟花、火焰、炫光、烟雾、飘絮等）都离不开概率分布。</p>
+<p>上面描述的场景似乎华而不实，而抽奖需求就有用得多了，在抽奖活动的所有奖品中，Macbook 怎可能和移动电源均匀分布？为每种奖品配置不同的概率是任何一款抽奖平台的基本功能。</p>
+<p>假设某次抽奖活动，奖品概率设置如下：</p>
+<ul>
+<li>登山包：<strong>0.01</strong></li>
+<li>旅行箱：<strong>0.03</strong></li>
+<li>​移动电源：<strong>0.06</strong></li>
+<li>不中奖（也看成是一种奖品）：<strong>0.9</strong></li>
+</ul>
+<p>即，期望 1000 次抽奖中，约 10 次命中登山包，约 30 次命中旅行箱，约 60 次命中移动电源，约 900 次不中奖。</p>
+<p>基本思路：设计一个 <code>updateRandom()</code> 函数，返回一个大于等于 0 小于 1 的浮点数，将 0 到 1 之间等分成四段，每一段对应一个奖品，根据函数的返回值来决定命中哪个奖品。那么 <code>updateRandom()</code> 函数的返回值需要满足：</p>
+<ul>
+<li>返回值期间 <strong>[0, 0.25)</strong>，概率 <strong>0.01</strong></li>
+<li>返回值期间 <strong>[0.25, 0.5)</strong>，概率 <strong>0.03</strong></li>
+<li>返回值期间 <strong>[0.5, 0.75)</strong>，概率 <strong>0.06</strong></li>
+<li>返回值期间 <strong>[0.75, 1)</strong>，概率 <strong>0.9</strong></li>
+</ul>
+<p>JavaScript 实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateRandom</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> p = <span class="built_in">Math</span>.random(), n = <span class="built_in">Math</span>.random() / <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>( p &lt; <span class="number">0.01</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span> + n;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>( p &lt; <span class="number">0.04</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.25</span> + n;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>( p &lt; <span class="number">0.1</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.5</span> + n;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>( p &lt; <span class="number">1</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0.75</span> + n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用的时候，依然可以继续采取最熟悉的方式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> objects = [ <span class="string">'登山包'</span>, <span class="string">'旅行箱'</span>, <span class="string">'移动电源'</span>, <span class="string">'不中奖'</span> ];</span><br><span class="line"><span class="keyword">var</span> randomIndex = <span class="built_in">Math</span>.floor( objects.length * updateRandom() ); </span><br><span class="line"><span class="keyword">var</span> object = objects[ randomIndex ];</span><br></pre></td></tr></table></figure>
+<p>100 万次 <code>updateRandom()</code> 实验的取值直方图如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1e5DhKFXXXXayXVXXXXXXXXXX-360-280.png" alt></p>
+<h2 id="概率的可配置化"><a href="#概率的可配置化" class="headerlink" title="概率的可配置化"></a>概率的可配置化</h2><p>上一段代码演示了如何生成符合指定概率模型的随机浮点数，它的缺限在于模型的数据硬编码在函数体内，维护起来有困难。</p>
+<p>如果设计一个工厂函数，根据输入的权重数据来动态创建随机函数，会给实际应用中带来很大便利。</p>
+<p>JavaScript 实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">randomInProbability</span>(<span class="params"> weights </span>)</span>&#123;</span><br><span class="line">  <span class="keyword">if</span>( <span class="built_in">arguments</span>.length &gt; <span class="number">1</span> )&#123;</span><br><span class="line">    weights = [].slice.call( <span class="built_in">arguments</span> );</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> total, current = <span class="number">0</span>, parts = [],</span><br><span class="line">      i = <span class="number">0</span>, l = weights.length;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// reduce 方法的简单兼容</span></span><br><span class="line">  total = weights.reduce ? weights.reduce( <span class="function"><span class="keyword">function</span>(<span class="params"> a, b </span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">  &#125; ) : <span class="built_in">eval</span>( weights.join( <span class="string">'+'</span> ) );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span>( ; i &lt; l; i ++ )&#123;</span><br><span class="line">    current += weights[ i ];</span><br><span class="line">    parts.push( <span class="string">'if( p &lt; '</span>, current / total, <span class="string">' ) return '</span>, i / l, <span class="string">' + n;'</span> );</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Function</span>( <span class="string">'var p = Math.random(), n = Math.random() / '</span> + l + <span class="string">';'</span> + parts.join( <span class="string">''</span> ) );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样一来，就可以很方便得到任意概率模型的随机函数了，还是上面的例子，创建一个 <code>updateRandom()</code> 函数很简单：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> updateRandom = randomInProbability( <span class="number">0.01</span>, <span class="number">0.03</span>, <span class="number">0.06</span>, <span class="number">.09</span> );</span><br></pre></td></tr></table></figure>
+<p>玩在，我们来玩个花样：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> model = [];</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>( <span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i ++ )&#123;</span><br><span class="line">  model.push( <span class="number">2</span> + sin( PI * <span class="number">2</span> * i / <span class="number">50</span> ) );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> randomInSin = randomInProbability( model );</span><br></pre></td></tr></table></figure>
+<p>来看看函数 <code>randomInSin()</code> 100 万次取值直方图长什么样：</p>
+<p><img src="https://img.alicdn.com/tps/TB13fzdKFXXXXcUXVXXXXXXXXXX-360-280.png" alt></p>
+<p>一点小把戏，抛砖引玉，怎么样，是不是觉得离实现酷炫效果更进一步了？最后，<a href="http://codepen.io/taobaofed/full/VeYZvL/?count=1000000" target="_blank" rel="noopener">进入这里</a>查看所有的实验。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/07/some-thing-about-random/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/07/some-thing-about-random/" data-id="cjt6lby1j00bbjeu1ytxi7oxp" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/07/some-thing-about-random/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/游戏/">游戏</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/随机/">随机</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/08/efficient-node-dev-cli-setup/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          高效 Node.js 开发环境之命令行工具篇
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/04/cpu-allocation-profiler/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">如何检测移动端 CPU 以及内存占用率</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

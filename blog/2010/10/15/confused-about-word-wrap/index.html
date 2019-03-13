@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>word-wrap 解惑 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="源起我们经常需要“修复”一个老生常谈的“bug”，那就是文本的自动换行问题。在专业术语上，这种期望得到的渲染现象被称作“word wrap”，即文本处理器有能力把超出页边的整个词自动传到下一行。 在现实项目中，尤其是在测试阶段，鉴于测试使用非常极端的测试用例，我们经常需要“修复”如图所示的这个问题： 长单词溢出 图中，极长的这个英文单词（虽然是生造的）为了保证完整的显示，无奈地超出了容器的限制，">
+<meta name="keywords" content="word-wrap,排版">
+<meta property="og:type" content="article">
+<meta property="og:title" content="word-wrap 解惑">
+<meta property="og:url" content="http://taobaofed.org/blog/2010/10/15/confused-about-word-wrap/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="源起我们经常需要“修复”一个老生常谈的“bug”，那就是文本的自动换行问题。在专业术语上，这种期望得到的渲染现象被称作“word wrap”，即文本处理器有能力把超出页边的整个词自动传到下一行。 在现实项目中，尤其是在测试阶段，鉴于测试使用非常极端的测试用例，我们经常需要“修复”如图所示的这个问题： 长单词溢出 图中，极长的这个英文单词（虽然是生造的）为了保证完整的显示，无奈地超出了容器的限制，">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1DCaNQpXXXXXuXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1KPlfQpXXXXaKapXXXXXXXXXX-420-113.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1fiFqQpXXXXXmaXXXXXXXXXXX-107-194.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1JQJcQpXXXXb8apXXXXXXXXXX-731-337.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1rQ4jQpXXXXbYaXXXXXXXXXXX-731-190.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB18n4SQpXXXXbxXXXXXXXXXXXX-725-120.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1gTVCQpXXXXaGXFXXXXXXXXXX-727-195.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1WTRcQpXXXXcgaXXXXXXXXXXX-108-355.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1dSBqQpXXXXcRXVXXXXXXXXXX-112-325.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1RMRxQpXXXXaZXVXXXXXXXXXX-569-290.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="word-wrap 解惑">
+<meta name="twitter:description" content="源起我们经常需要“修复”一个老生常谈的“bug”，那就是文本的自动换行问题。在专业术语上，这种期望得到的渲染现象被称作“word wrap”，即文本处理器有能力把超出页边的整个词自动传到下一行。 在现实项目中，尤其是在测试阶段，鉴于测试使用非常极端的测试用例，我们经常需要“修复”如图所示的这个问题： 长单词溢出 图中，极长的这个英文单词（虽然是生造的）为了保证完整的显示，无奈地超出了容器的限制，">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1DCaNQpXXXXXuXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-confused-about-word-wrap" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      word-wrap 解惑
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 法海</span>
+        
+        <span>发表于: <a href="/blog/2010/10/15/confused-about-word-wrap/" class="article-date">
+  <time datetime="2010-10-14T17:38:00.000Z" itemprop="datePublished">2010-10-15</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1DCaNQpXXXXXuXVXXXXXXXXXX-900-500.jpg" alt="word-wrap 解惑"></p>
+<h3 id="源起"><a href="#源起" class="headerlink" title="源起"></a>源起</h3><p>我们经常需要“修复”一个老生常谈的“bug”，那就是文本的自动换行问题。在专业术语上，这种期望得到的渲染现象被称作“word wrap”，即文本处理器有能力把超出页边的整个词自动传到下一行。</p>
+<p>在现实项目中，尤其是在测试阶段，鉴于测试使用非常极端的测试用例，我们经常需要“修复”如图所示的这个问题：</p>
+<p><img src="https://img.alicdn.com/tfs/TB1KPlfQpXXXXaKapXXXXXXXXXX-420-113.png" alt="长单词溢出"><br>长单词溢出</p>
+<p>图中，极长的这个英文单词（虽然是生造的）为了保证完整的显示，无奈地超出了容器的限制，它溢出了。为了“修复”这个“问题”，使得无论东亚还是西欧文字都能被限定在容器的尺寸范围内，我们一般会加上诸如“word-wrap: break-word; word-break: break-all”这样的属性，令我们满意（好吧，其实是令测试满意）的结果如图所示：</p>
+<p><img src="https://img.alicdn.com/tfs/TB1fiFqQpXXXXXmaXXXXXXXXXXX-107-194.png" alt="长单词被强行断行"><br>长单词被强行断行</p>
+<p>从以结果现象为导向的观点出发，这个“bug”被“修复”了，但是在做了三五次这样的重复工作后，我开始产生这样几个疑问：</p>
+<ol>
+<li>word-wrap 和 word-break 究竟是什么？</li>
+<li>为什么会乐此不疲地重复碰到这个问题？</li>
+<li>这个问题是问题么？</li>
+</ol>
+<h3 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h3><p>在解惑之前，有几个关乎问题本质的客观现实需要指出，因为这些“常识”最容易被人忽视：</p>
+<p>CJK 文字和 !CJK 文字有各自的排版规则。</p>
+<p>在这里，CJK 代表 Chinese, Japanese, and Korean，即东亚文字，!CJK 就是非东亚文字，大多数情况下是西欧文字。</p>
+<p>在文字的呈现规则上，两者很不相同，CJK 文字中，一个字母就是一个字素（单词），独立成义，!CJK 文字中，一些字母组成一个字素，并且字素们由连接符“-”连接，或由空格“ ”分隔。</p>
+<ul>
+<li>有关 CJK 文字更多的排版规则上，比较有代表性的是：对中文来说，标点符号不能成为行首（特殊除外）；双字长的标点符号（省略号、破折号）不能断开。</li>
+<li>对于 !CJK，主要是：单词不能在中间不合法地断开（合法情况例如从连接符处断开）；标点符号不能成为行首（特殊除外）</li>
+</ul>
+<h3 id="解惑一"><a href="#解惑一" class="headerlink" title="解惑一"></a>解惑一</h3><p>word-wrap 和 word-break 究竟是什么？对于这个问题，直接拜访 W3C 官方，找到 CSS3 草案：<a href="http://www.w3.org/TR/2010/WD-css3-text-20101005/" target="_blank" rel="noopener">http://www.w3.org/TR/2010/WD-css3-text-20101005/</a>，再访问微软，借鉴诸如 <a href="http://msdn.microsoft.com/en-us/library/ms531184(VS.85" target="_blank" rel="noopener">http://msdn.microsoft.com/en-us/library/ms531184(VS.85).aspx</a>.aspx)</p>
+<p>得出的结论如下：</p>
+<p>word-wrap, line-break, word-break 这几个属性都是 MS 的独立实现，随后其他浏览器也不同程度地实现了其中的某些，之后，这几个属性都被吸纳为 CSS3 标准。在对文字排版的渲染上，微软还是走在前面的。</p>
+<p>在现有的 CSS3 草案中，关乎到文字排版的几个重要属性有：white-space，text-wrap，word-wrap，line-break，word-break。</p>
+<p>根据 CSS3 的描述，列出这些属性各自的要点，这部分读者可以跳过……</p>
+<ul>
+<li><p>white-space 是 white-space-collapsing 和 text-wrap 的缩写</p>
+<p><img src="https://img.alicdn.com/tfs/TB1JQJcQpXXXXb8apXXXXXXXXXX-731-337.png" alt></p>
+</li>
+<li><p>text-wrap 定义文本的自动换行效果</p>
+<p><img src="https://img.alicdn.com/tfs/TB1rQ4jQpXXXXbYaXXXXXXXXXXX-731-190.png" alt></p>
+</li>
+</ul>
+<ul>
+<li>word-wrap 执行最激进的单词断行控制，从单词的内部断开以防止文本溢出容器并且完全适应容器的宽度</li>
+<li><p>在 IE 的实际效果中，word-break 的效果要激进得多，它穷凶极恶地断开所有单词（如果到达边界的话）</p>
+<p><img src="https://img.alicdn.com/tfs/TB18n4SQpXXXXbxXXXXXXXXXXXX-725-120.png" alt></p>
+</li>
+<li><p>line-break 是断行的规则，针对东亚文字</p>
+</li>
+<li>基本是针对日文的换行规则</li>
+<li>word-break 是断行的规则，针对非东亚文字</li>
+</ul>
+<p><img src="https://img.alicdn.com/tfs/TB1gTVCQpXXXXaGXFXXXXXXXXXX-727-195.png" alt></p>
+<p>做一个归纳：专门用于控制文本自动换行功能的属性是 text-wrap 和 word-wrap，而 line-break 和 word-break 用来控制断行和单词边界分隔，根据 W3C 的描述来说，word-wrap 是最激进的自动换行方式，可以强行断开单词。而现实情况是，word-break: break-all 的方式要更为激进，如图：</p>
+<p><img src="https://img.alicdn.com/tfs/TB1WTRcQpXXXXcgaXXXXXXXXXXX-108-355.png" alt="word-wrap"><br>word-wrap</p>
+<p><img src="https://img.alicdn.com/tfs/TB1dSBqQpXXXXcRXVXXXXXXXXXX-112-325.png" alt="word-break"><br>word-break</p>
+<p>对比 word-wrap: break-word 和 word-break: break-all，两者都将文本限定在了容器的范围内，只是 break-all 将所有单词，不论长短地，通通截断，break-word 则非如此，它尽量地遵从了排版规则。</p>
+<h3 id="兼容性"><a href="#兼容性" class="headerlink" title="兼容性"></a>兼容性</h3><p>由于几个属性都来自于微软（部分来自于 CSS3），那么理所当然 IE 是支持最良好的，不过对于浮动元素，IE 6/7 的表现会有些 bug（可在文后给出的 demo 中验证）。</p>
+<p>至于其他浏览器，FF 3.6 不支持 word-break；Chrome 7 支持良好；Safari 5 同 Chrome；Opera 10 同 FF</p>
+<h3 id="解惑二三"><a href="#解惑二三" class="headerlink" title="解惑二三"></a>解惑二三</h3><p>碰到相关问题的场景大体是两个：</p>
+<ol>
+<li>测试使用了很极端的测试用例（比如 asdfasdfasdfasdfasdfasdfasdf）</li>
+<li><p>IE 6/7 下，在宽度不大的容器中使用了浮动元素，同时浮动元素内包含了长的串，如图：</p>
+<p><img src="https://img.alicdn.com/tfs/TB1RMRxQpXXXXaZXVXXXXXXXXXX-569-290.png" alt="IE 6/7 中浮动盒子杯具"><br>IE 6/7 中浮动盒子杯具</p>
+</li>
+</ol>
+<p>对于场景一，使用 word-wrap: break-word。</p>
+<p>对于场景二，使用 IE 6/7 的 hack，word-break: keep-all 或者用 inline-block 来代替浮动（IE 6/7 中，hasLayout 的 inline 盒子大体等同于 inline-block）。</p>
+<p>回头看疑问二，我们为什么会乐此不疲地重复碰到这个问题？原则上，各个浏览器默认的文字排版方式已经很好地顾及了 CJK 文字和 !CJK 文字，根据各个语言自己的规则来呈现排版，不应该出现诡异的问题。所以，对于上面的两个问题场景，之所以产生场景一，是因为使用了极端的测试用例，但是在现实中，这种极长的英文单词是根本不存在的（特殊行业除外），又，即使英文单词较长，也不应该突兀地截断，这有违西欧文字的排版规则。所以我认为，如果在现实环境下发生场景一中的问题，责任应该在于版面的设计，比如容器宽度太小，而不是去截断文本；对于场景二，应该归咎于 IE 6/7 的渲染 bug，这时，使用 inline-block 代替，或用 word-break: keep-all 来给犯错的浏览器擦屁股。</p>
+<h3 id="实践方案"><a href="#实践方案" class="headerlink" title="实践方案"></a>实践方案</h3><ul>
+<li>对于我们输出的内容（可控的），不使用任何 word-wrap 和 word-break 等属性，对于可能产生的长单词溢出这种小概率事件，首先考虑容器宽度是否合理，其次可以为长单词添加连字符“-”以便合理地断开，最后设置 overflow: hidden 避免视觉上的溢出。</li>
+<li>对于用户输出的内容（不可控的），比如评论等，由于不排除用户会输入“dddddddddddd”这样没营养的垃圾数据，使用 word-wrap: break-word 来强行截断。</li>
+</ul>
+<h2 id="最后的观点"><a href="#最后的观点" class="headerlink" title="最后的观点"></a>最后的观点</h2><ul>
+<li>不能完全迁就测试用例，因为有时不合现实情理。</li>
+<li>浏览器默认已经做得够好，强加诸如 break-all 这样的指令是不优雅的。</li>
+<li>问题大多不在于实现，而在于设计（如容器太窄）。</li>
+<li>对于 bug 浏览器使用 hack 即可，这是它们的错。</li>
+</ul>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><ul>
+<li>CSS3 草案：<a href="http://www.w3.org/TR/2010/WD-css3-text-20101005/" target="_blank" rel="noopener">http://www.w3.org/TR/2010/WD-css3-text-20101005/</a></li>
+</ul>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/FKqH1QhUqaw" target="_blank" rel="noopener">https://unsplash.com/photos/FKqH1QhUqaw</a> By @Julian Santa Ana</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2010/10/15/confused-about-word-wrap/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2010/10/15/confused-about-word-wrap/" data-id="cjt6lbxxq001djeu1ia3wqtwm" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2010/10/15/confused-about-word-wrap/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/word-wrap/">word-wrap</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/排版/">排版</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2010/12/24/closure-compiler-advanced-mode/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Closure Compiler 高级模式及更多思考
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2010/08/05/css-border-hack/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">CSS Border 使用小分享</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Webkit远程调试协议实战 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="上一篇文章 介绍了 DevTools 和 Webkit Debug Protocol 这两个 Web 开发利器的内部原理。本篇主要讲解 iOS 的 Safari 远程调试。 iOS 的 Safari 远程调试，是 iOS7 引入的新功能。它允许开发者通过桌面端 Safari 的调试工具远程检视移动端浏览器打开的页面。这套调试工具，彻底解决了无线开发纯靠 “alert” 的调试困境。Safari">
+<meta name="keywords" content="debug,devtools,webkit">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Webkit远程调试协议实战">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/27/webkit-remote-debug-action/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="上一篇文章 介绍了 DevTools 和 Webkit Debug Protocol 这两个 Web 开发利器的内部原理。本篇主要讲解 iOS 的 Safari 远程调试。 iOS 的 Safari 远程调试，是 iOS7 引入的新功能。它允许开发者通过桌面端 Safari 的调试工具远程检视移动端浏览器打开的页面。这套调试工具，彻底解决了无线开发纯靠 “alert” 的调试困境。Safari">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1ELe_KFXXXXaoXVXXXXXXXXXX-900-500.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Webkit远程调试协议实战">
+<meta name="twitter:description" content="上一篇文章 介绍了 DevTools 和 Webkit Debug Protocol 这两个 Web 开发利器的内部原理。本篇主要讲解 iOS 的 Safari 远程调试。 iOS 的 Safari 远程调试，是 iOS7 引入的新功能。它允许开发者通过桌面端 Safari 的调试工具远程检视移动端浏览器打开的页面。这套调试工具，彻底解决了无线开发纯靠 “alert” 的调试困境。Safari">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1ELe_KFXXXXaoXVXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-webkit-remote-debug-action" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Webkit远程调试协议实战
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 竹暄</span>
+        
+        <span>发表于: <a href="/blog/2015/11/27/webkit-remote-debug-action/" class="article-date">
+  <time datetime="2015-11-27T10:50:12.000Z" itemprop="datePublished">2015-11-27</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1ELe_KFXXXXaoXVXXXXXXXXXX-900-500.png" alt="Webkit远程调试协议实战"></p>
+<p><a href="http://taobaofed.org/blog/2015/11/20/webkit-remote-debug-test/">上一篇文章</a> 介绍了 DevTools 和 Webkit Debug Protocol 这两个 Web 开发利器的内部原理。本篇主要讲解 iOS 的 Safari 远程调试。</p>
+<p>iOS 的 Safari 远程调试，是 iOS7 引入的新功能。它允许开发者通过桌面端 Safari 的调试工具远程检视移动端浏览器打开的页面。这套调试工具，彻底解决了无线开发纯靠 “alert” 的调试困境。Safari 的远程调试中使用到的调试协议，与 Google 开放的 <a href="https://developer.chrome.com/devtools/docs/debugger-protocol" target="_blank" rel="noopener">Chrome Debug Protocol</a> 有牵丝万缕的关系，体现了这两家互联网巨头相爱相杀的本质：</p>
+<ol>
+<li>这两套协议本质都是 Webkit Debug Protocol 的衍生产物。大部分的实际功能是一模一样的，例如 DOM 检视、网络请求监控、Console 等。</li>
+<li>自从 Google 与 Webkit 项目撇清关系，分道扬镳后生下亲儿子 blink 后，自己的调试功能越来越强大，并逐渐产生了一些和 Webkit 调试协议不一样的功能，故自成一套 Chrome Debug Protocol。</li>
+<li>Apple Safari 这个养在深闺里小女子，虽然主导 Webkit，但是在实际产品使用中，却并没有直接使用 Webkit Debug Protocol，不仅仅使用了 <a href="https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man5/plist.5.html" target="_blank" rel="noopener">binary plist</a> 来作为序列化方法，还抛弃了 WebSocket 的通讯手段。没有文档、没有代码，我们姑且叫这个不舍得露面的东西叫做 Safari 调试协议吧。</li>
+</ol>
+<h2 id="webinspectord-和-lockdown"><a href="#webinspectord-和-lockdown" class="headerlink" title="webinspectord 和 lockdown"></a>webinspectord 和 lockdown</h2><p>iOS7 以后，每个 iOS 都有一个 webinspectord 守护进程，负责远程调试的通讯。这个进程暴露了一个服务接口，供外部应用（例如桌面端的 Safari 调试工具）使用。</p>
+<p>iOS 上所有的服务（文件浏览、消息推送、app 安装等）都是通过一个 lockdown 服务管理连接上的。</p>
+<p>自然的，调试工具也需要透过 USB 接口，通过 lockdown 界面，连接到 webinspector 服务。</p>
+<p>由于 iOS 的各种系统组件都极为神秘，没有更多可以解释的了。伟大的开源社区，通过各种手段实现了这些服务的接口，大家可以前去<a href="http://libimobiledevice.org/" target="_blank" rel="noopener">膜拜</a>。</p>
+<h2 id="Safari-远程调试服务概述"><a href="#Safari-远程调试服务概述" class="headerlink" title="Safari 远程调试服务概述"></a>Safari 远程调试服务概述</h2><p>抛开 USB 通讯、lockdown 接口不谈，Safari 远程调试服务所使用的协议本身其实就是 Webkit 调试协议的二次包装。也就是共享了 Webkit 调试协议的大部分功能。</p>
+<p>先分析这个协议里面的主体：</p>
+<ul>
+<li>iOS 设备，iPad、iPhone 等物理设备<ul>
+<li>UDID: 以 40 位 UDID 字符串唯一识别一个设备</li>
+</ul>
+</li>
+<li>Application：iOS 设备上运行的开启了 WebView 应用程序，设备上可以同时运行多个 Application<ul>
+<li>Identifier：应用标示符</li>
+<li>BundleIdentifier：应用的 main bundle 标示符</li>
+</ul>
+</li>
+<li>Page：每个 Application 可以打开多个页面<ul>
+<li>Identifier：页面标示符</li>
+<li>Title</li>
+<li>URL</li>
+</ul>
+</li>
+</ul>
+<p>还有一些概念字段：</p>
+<ul>
+<li>ConnectionId, 标示当前连接到 webinspector 服务的连接</li>
+<li>SenderId, 标示请求方（例如 DevTools ）实体</li>
+</ul>
+<p>大体可以看出，这个调试服务的接口是有状态的。设备和 DevTools 建立连接后，拥有可以复用的链接作为后续通讯的通道。</p>
+<p>假设我们需要发送一条调试指令到 iOS 上的某个 Webkit 内核，它的整个编码流程应该是是这样：</p>
+<ol>
+<li>Webkit 能识别的消息对象进行 JSON 序列化为字符串</li>
+<li>构建 Safari 调试协议中使用的 bplist 消息体，来包装之前得到的字符串。这里用到的 selector 就是 <code>_rpc_forwardSocketData</code></li>
+<li>将消息题通过 Socket 传输到 iOS 上的调试服务</li>
+<li>iOS 上调试服务识别消息，并解析 bplist，得倒 Webkit 能识别的消息对象</li>
+<li>将上一步得倒的消息对象传输给 Webkit</li>
+</ol>
+<p>所有的消息，都是以 Apple 自己定义的 RPC 消息提格式进行的。但它实际传输的有效数据，还是 Webkit<br>能够识别的指令。另外，Safari 没有如同 Chrome 那样，使用了 WebSocket 作为暴露出去的应用层协议。它选择了最基本的 Socket 通讯方式和 bplist 作为传输格式。</p>
+<h2 id="调试消息的大冒险"><a href="#调试消息的大冒险" class="headerlink" title="调试消息的大冒险"></a>调试消息的大冒险</h2><p>下面以一个具体的消息作为例子，来说说这整个过程。</p>
+<h3 id="JSON-消息和-Safari-的-RPC-协议"><a href="#JSON-消息和-Safari-的-RPC-协议" class="headerlink" title="JSON 消息和 Safari 的 RPC 协议"></a>JSON 消息和 Safari 的 RPC 协议</h3><p>假设我们要开启<a href="https://developer.chrome.com/devtools/docs/protocol/1.1/network#command-enable" target="_blank" rel="noopener">网络监控</a>这个面板，需要发送一个 JSON 指令。指令序列化之后我们的到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;id&quot;:0,&quot;method&quot;:&quot;Network.enable&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>就像之前说的，Safari 不直接使用 JSON 字符串作为传输的序列化方案。Safari 远程调试协议有自己的 RPC 规范，所有的消息都都有 <code>__selector</code> 和 <code>__arguments</code> 两个字段。前者说明调用的方法，后者说明调用时的参数。</p>
+<p>常见的一些方法（其实是 ObjC <code>selector</code> 的字符串表达）如下：</p>
+<ul>
+<li><code>_rpc_reportIdentifier:</code>：向 webinspector 服务注册当前链接 （传输 connectionId ）</li>
+<li><code>_rpc_getConnectedApplications:</code>：要求获取连接到 webinspector 的 iOS 应用列表</li>
+<li><code>_rpc_forwardGetListing:</code>：获取某个应用的页面列表（传输 connectionId, appId ）</li>
+<li><code>_rpc_forwardSocketSetup:</code>：注册当前会话 （传输 connectionId、senderId ）</li>
+<li><code>_rpc_forwardSocketData:</code>：利用某个会话传输数据（传输 connectionId、senderId、data ）。Webkit 调试协议所传输的 JSON 就是通过这个方法传递的，JSON 字符串的二进制表达被通过这个接口传递到 iOS 设备上的调试服务。</li>
+</ul>
+<p>另一方面，iOS 端也会传过来很多消息，同样遵循基本消息提的格式，常见的 <code>__selector</code> 有：</p>
+<ul>
+<li><code>_rpc_reportConnectedApplicationList:</code>：回报连接到 webinspector 的应用列表</li>
+<li><code>_rpc_applicationSentListing:</code>：回报某个应用的页面列表</li>
+<li><code>_rpc_applicationConnected:</code>：某个 iOS 应用连接到了调试服务</li>
+<li><code>_rpc_applicationDisconnected:</code>：某个 iOS 应用从调试服务断开</li>
+</ul>
+<p>Safari 不选择 WebSocket 作为传输协议应该是从安全性、复杂性的角度去考虑。但选择 bplist 作为传输格式，应该没有太多理由，大概因为 Apple 体系内部都是用 bplist 的。</p>
+<h3 id="JSON-到-plist-的转换"><a href="#JSON-到-plist-的转换" class="headerlink" title="JSON 到 plist 的转换"></a>JSON 到 plist 的转换</h3><p>plist 和 bplist 都是 Apple 的通讯格式。其中 plist 非常常见。加入你做过 iOS 或者 Mac 开发，你一定写过不少 plist。plist 就是一种拥有自有 DTD 的 XML 文档类型。说白了，它就是 XML 文档。</p>
+<p>例如之前的 JSON 指令，转换为 Safari 调试协议能够理解的 plist 文档：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line">&lt;plist version=&quot;1.0&quot;&gt;</span><br><span class="line">  &lt;dict&gt;</span><br><span class="line">    &lt;key&gt;__selector&lt;/key&gt;</span><br><span class="line">    &lt;string&gt;_rpc_forwardSocketData:&lt;/string&gt;</span><br><span class="line">    &lt;key&gt;__argument&lt;/key&gt;</span><br><span class="line">    &lt;dict&gt;</span><br><span class="line">      &lt;key&gt;WIRConnectionIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;e0e68c53-5cc9-4dd4-9ebb-a7e69e98ef74&lt;/string&gt;</span><br><span class="line">      &lt;key&gt;WIRApplicationIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;PID:1300&lt;/string&gt;</span><br><span class="line">      &lt;key&gt;WIRPageIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;integer&gt;1&lt;/integer&gt;</span><br><span class="line">      &lt;key&gt;WIRSenderKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;50c2e189-a91f-4df5-b33a-741225e9bd85&lt;/string&gt;</span><br><span class="line">      &lt;key&gt;WIRSocketDataKey&lt;/key&gt;</span><br><span class="line">      &lt;data&gt;eyJpZCI6MCwibWV0aG9kIjoiTmV0d29yay5lbmFibGUifQ==&lt;/data&gt;</span><br><span class="line">    &lt;/dict&gt;</span><br><span class="line">  &lt;/dict&gt;</span><br><span class="line">&lt;/plist&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到 plist 拥有多种标签来定义数据类型，例如 dict、string、data 等；同时节点的顺序，都是遵循 key、value 的顺序编写。<strong>也就是说 JSON 是可以和 plist 互相转换的。</strong></p>
+<p>这个转换过程中，唯一麻烦的是 data 类型。这个标签是用来存储二进制数据的，JSON 中没有定义。但是在 Node.js 中，可以无缝转换为一个 Buffer。</p>
+<p>细心的你一定注意到上面 plist 中的两个问题：</p>
+<ol>
+<li>没发现任何 JSON 字符串的内容</li>
+<li>WIRSocketDataKey 里面的竟然是 base64 编码的字符串</li>
+</ol>
+<p>事实上，Safari 的调试协议中，要求 JSON 字符串是被当作 payload data 传输的。而 plist 标准中，data 数据类型，就是进行 base64 编码的。</p>
+<h3 id="plist-到-bplist-的转换"><a href="#plist-到-bplist-的转换" class="headerlink" title="plist 到 bplist 的转换"></a>plist 到 bplist 的转换</h3><p>bplist 是 binary plist 的简称。它以二进制编码为基础，可以用来存储 plist 格式中同样的内容。这在 Socket 通讯中十分有用。</p>
+<p>要知道 Safari 调试协议只接受 bplist 格式。具体客户端的开发中，没有规定一定要像本文中将一个指令先转换为 plist，再转换为 bplist。安排这样的转换，只是方便大家理解。你完全可以直接将一个 JSON 构造为 bplist。</p>
+<p>前文的那段 plist，转换为 binary plist 就是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">00 00 01 C2 62 70 6C 69 73 74 30 30 D1 01 02 5F 10 12 57  ....bplist00..._..W</span><br><span class="line"> 49 52 46 69 6E 61 6C 4D 65 73 73 61 67 65 4B 65 79 4F 11  IRFinalMessageKeyO.</span><br><span class="line"> 01 77 62 70 6C 69 73 74 30 30 D2 01 03 02 04 5A 5F 5F 73  .wbplist00.....Z__s</span><br><span class="line"> 65 6C 65 63 74 6F 72 5F 10 17 5F 72 70 63 5F 66 6F 72 77  elector_.._rpc_forw</span><br><span class="line"> 61 72 64 53 6F 63 6B 65 74 44 61 74 61 3A 5A 5F 5F 61 72  ardSocketData:Z__ar</span><br><span class="line"> 67 75 6D 65 6E 74 D5 05 07 09 0B 0D 06 08 0A              gument.........</span><br><span class="line"> 0C 0E 5F 10 1A 57 49 52 43 6F 6E 6E 65 63 74 69 6F 6E 49  .._..WIRConnectionI</span><br><span class="line"> 64 65 6E 74 69 66 69 65 72 4B 65 79 5F 10 24 65 30 65 36  dentifierKey_.$e0e6</span><br><span class="line"> 38 63 35 33 2D 35 63 63 39 2D 34 64 64 34 2D 39 65 62 62  8c53-5cc9-4dd4-9ebb</span><br><span class="line"> 2D 61 37 65 36 39 65 39 38 65 66 37 34 5F 10 1B 57 49 52  -a7e69e98ef74_..WIR</span><br><span class="line"> 41 70 70 6C 69 63 61 74 69 6F 6E 49 64 65 6E 74 69 66 69  ApplicationIdentifi</span><br><span class="line"> 65 72 4B 65 79 58 50 49 44 3A 31 33 30 30 5F 10 14 57 49  erKeyXPID:1300_..WI</span><br><span class="line"> 52 50 61 67 65 49 64 65 6E 74 69 66 69 65 72 4B 65 79 10  RPageIdentifierKey.</span><br><span class="line"> 01 5C 57 49 52 53 65 6E 64 65 72 4B 65 79 5F 10 24 35 30  .\WIRSenderKey_.$50</span><br><span class="line"> 63 32 65 31 38 39 2D 61 39 31 66 2D 34 64 66 35 2D 62 33  c2e189-a91f-4df5-b3</span><br><span class="line"> 33 61 2D 37 34 31 32 32 35 65 39 62 64 38 35 5F 10 10 57  3a-741225e9bd85_..W</span><br><span class="line"> 49 52 53 6F 63 6B 65 74 44 61 74 61 4B 65 79 4F 10 22 7B  IRSocketDataKeyO.&quot;&#123;</span><br><span class="line"> 22 69 64 22 3A 30 2C 22 6D 65 74 68 6F 64 22 3A 22 4E 65  &quot;id&quot;:0,&quot;method&quot;:&quot;Ne</span><br><span class="line"> 74 77 6F 72 6B 2E 65 6E 61 62 6C 65 22 7D A0 00 08 00 0D  twork.enable&quot;&#125;.....</span><br><span class="line"> 00 18 00 32 00 3D 00 48 00 65 00 8C 00 AA 00 B3 00 CA 00  ...2.=.H.e.........</span><br><span class="line"> CC 00 D9 01 00 01 13 00 00 00 00 00 00 02 01 00 00 00 00  ...................</span><br><span class="line"> 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01  ...................</span><br><span class="line"> 39 A0 00 08 00 0B 00 20 00 00 00 00 00 00 02 01 00 00 00  9...... ...........</span><br><span class="line"> 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ...................</span><br><span class="line"> 01 9C                                                     ..</span><br></pre></td></tr></table></figure>
+<p>plist 和 bplist 都是有相关文档的，所以大家还是制作了不少第三方工具的：</p>
+<ul>
+<li><a href="https://github.com/libimobiledevice/libplist" target="_blank" rel="noopener">https://github.com/libimobiledevice/libplist</a></li>
+<li><a href="https://github.com/mgcrea/node-plist-native" target="_blank" rel="noopener">https://github.com/mgcrea/node-plist-native</a></li>
+<li><a href="https://github.com/joeferner/node-bplist-creator" target="_blank" rel="noopener">https://github.com/joeferner/node-bplist-creator</a></li>
+<li><a href="https://github.com/joeferner/node-bplist-parser" target="_blank" rel="noopener">https://github.com/joeferner/node-bplist-parser</a></li>
+</ul>
+<h3 id="最后一步"><a href="#最后一步" class="headerlink" title="最后一步"></a>最后一步</h3><p>iOS 上的 webinspector 服务接受到这个 bplist 消息，自然会进行一个逆向操作，得倒 JSON 的字符串表达以及其他信息（appId、pageId、senderId）。</p>
+<p>最后，通过 Safair 调试协议中的其他辅助信息，将这个 JSON 指令传输给正确的 Webkit 实例。</p>
+<h2 id="Safari-调试协议的会话流程"><a href="#Safari-调试协议的会话流程" class="headerlink" title="Safari 调试协议的会话流程"></a>Safari 调试协议的会话流程</h2><p>调试协议的会话，本身是有一定流程的。只有一些初始操作完成后，DevTools 才能正确的发送调试指令。</p>
+<p>为了方便阅读，消息全部以 plist 格式做演示，实际上我们传输的 bplist。</p>
+<p>首先，当主机和 iOS 设备的 webinspector 服务连接（PC<->USB<->webinspectord）创立的时候，会要求汇报这个连接的标示符。例如：</-></-></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line">&lt;plist version=&quot;1.0&quot;&gt;</span><br><span class="line">  &lt;dict&gt;</span><br><span class="line">    &lt;key&gt;__selector&lt;/key&gt;</span><br><span class="line">    &lt;string&gt;_rpc_reportIdentifier:&lt;/string&gt;</span><br><span class="line">    &lt;key&gt;__argument&lt;/key&gt;</span><br><span class="line">    &lt;dict&gt;</span><br><span class="line">      &lt;key&gt;WIRConnectionIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;3b417e9a-9635-4059-a63e-ca88c98744bf&lt;/string&gt;</span><br><span class="line">    &lt;/dict&gt;</span><br><span class="line">  &lt;/dict&gt;</span><br><span class="line">&lt;/plist&gt;</span><br></pre></td></tr></table></figure>
+<p>然后，我们要获取到已经连接到调试服务的 iOS 应用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line">&lt;plist version=&quot;1.0&quot;&gt;</span><br><span class="line">  &lt;dict&gt;</span><br><span class="line">    &lt;key&gt;__selector&lt;/key&gt;</span><br><span class="line">    &lt;string&gt;_rpc_getConnectedApplications:&lt;/string&gt;</span><br><span class="line">    &lt;key&gt;__argument&lt;/key&gt;</span><br><span class="line">    &lt;dict&gt;</span><br><span class="line">      &lt;key&gt;WIRConnectionIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;3b417e9a-9635-4059-a63e-ca88c98744bf&lt;/string&gt;</span><br><span class="line">    &lt;/dict&gt;</span><br><span class="line">  &lt;/dict&gt;</span><br><span class="line">&lt;/plist&gt;</span><br></pre></td></tr></table></figure>
+<p>针对某个应用，获取其内部的页面列表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line">&lt;plist version=&quot;1.0&quot;&gt;</span><br><span class="line">  &lt;dict&gt;</span><br><span class="line">    &lt;key&gt;__selector&lt;/key&gt;</span><br><span class="line">    &lt;string&gt;_rpc_forwardGetListing:&lt;/string&gt;</span><br><span class="line">    &lt;key&gt;__argument&lt;/key&gt;</span><br><span class="line">    &lt;dict&gt;</span><br><span class="line">      &lt;key&gt;WIRConnectionIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;3b417e9a-9635-4059-a63e-ca88c98744bf&lt;/string&gt;</span><br><span class="line">      &lt;key&gt;WIRApplicationIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;PID:26&lt;/string&gt;</span><br><span class="line">    &lt;/dict&gt;</span><br><span class="line">  &lt;/dict&gt;</span><br><span class="line">&lt;/plist&gt;</span><br></pre></td></tr></table></figure>
+<p>拿到了 appId、pageId 之后，就可以开始一个调试会话（注册一个 senderId）了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;</span><br><span class="line">&lt;plist version=&quot;1.0&quot;&gt;</span><br><span class="line">  &lt;dict&gt;</span><br><span class="line">    &lt;key&gt;__selector&lt;/key&gt;</span><br><span class="line">    &lt;string&gt;_rpc_forwardSocketSetup:&lt;/string&gt;</span><br><span class="line">    &lt;key&gt;__argument&lt;/key&gt;</span><br><span class="line">    &lt;dict&gt;</span><br><span class="line">      &lt;key&gt;WIRConnectionIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;2819b1eb-27ae-4c48-b195-6e5df02d0260&lt;/string&gt;</span><br><span class="line">      &lt;key&gt;WIRApplicationIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;PID:2851&lt;/string&gt;</span><br><span class="line">      &lt;key&gt;WIRPageIdentifierKey&lt;/key&gt;</span><br><span class="line">      &lt;integer&gt;1&lt;/integer&gt;</span><br><span class="line">      &lt;key&gt;WIRSenderKey&lt;/key&gt;</span><br><span class="line">      &lt;string&gt;4e9f5b1b-d9b7-4bcf-a315-25c10146a74d&lt;/string&gt;</span><br><span class="line">    &lt;/dict&gt;</span><br><span class="line">  &lt;/dict&gt;</span><br><span class="line">&lt;/plist&gt;</span><br></pre></td></tr></table></figure>
+<p>之后，就可以传输具体的调试指令了。指令的编码过程，就是之前演示的那样。这里不再赘述。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文分析了 Apple 在 iOS 设备上开放的 Safari 调试协议的原理以及具体通讯方式，目前还有若干缺陷需要进一步研究：</p>
+<ul>
+<li>调试协议仅仅在 Development Provision Profile 签名的应用以及 iOS 端 Safari 中开放</li>
+<li>受限于 Apple 的开发政策，还无法通过 Wifi 方式连接到调试服务，进行真正的无线调试</li>
+<li>在具体使用 DevTools 的时候，发现有一部分功能无法正常使用。原因可能在于 DevTools 前端应用的更新，也有可能在于 Safari 真的不支持全部的调试指令</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/27/webkit-remote-debug-action/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/27/webkit-remote-debug-action/" data-id="cjt6lby2800cyjeu1usarrvzd" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/27/webkit-remote-debug-action/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/debug/">debug</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/devtools/">devtools</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webkit/">webkit</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/30/animation-bone/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          骨骼动画原理与前端实现浅谈
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/26/graphql-basics-server-implementation/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Node.js 服务端实践之 GraphQL 初探</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

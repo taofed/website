@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>骨骼动画原理与前端实现浅谈 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="人的运动——走，跑，跳，是由骨骼带动躯干和四肢完成的。「骨骼动画」，顾名思义，就是模拟骨骼运动的机制而制作的动画。比如下面这条奔跑的小龙。参考 Demo。  素材来自开源骨骼动画编辑器 Dragonbones 用到的素材，额，其实是他大卸八块后的样子。  骨骼动画主要被用游戏场景中，做 Logo 、彩蛋也不错（比如 2014 年双 11 的喵喵舞就是天猫的同学基于骨骼动画原理实现的）。其实，在">
+<meta name="keywords" content="动画,canvas,css3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="骨骼动画原理与前端实现浅谈">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/30/animation-bone/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="人的运动——走，跑，跳，是由骨骼带动躯干和四肢完成的。「骨骼动画」，顾名思义，就是模拟骨骼运动的机制而制作的动画。比如下面这条奔跑的小龙。参考 Demo。  素材来自开源骨骼动画编辑器 Dragonbones 用到的素材，额，其实是他大卸八块后的样子。  骨骼动画主要被用游戏场景中，做 Logo 、彩蛋也不错（比如 2014 年双 11 的喵喵舞就是天猫的同学基于骨骼动画原理实现的）。其实，在">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB166rCKFXXXXclXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB15qLcKFXXXXceXpXXXXXXXXXX-310-270.gif">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1rZG9KFXXXXX3XFXXXXXXXXXX-369-272.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB17XvsKFXXXXXoXXXXXXXXXXXX-500-400.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1umjqKFXXXXXeXFXXXXXXXXXX-439-514.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB159_dKFXXXXcgXVXXXXXXXXXX-439-514.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1BqHDKFXXXXaEXXXXXXXXXXXX-546-633.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB15qLcKFXXXXceXpXXXXXXXXXX-310-270.gif">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="骨骼动画原理与前端实现浅谈">
+<meta name="twitter:description" content="人的运动——走，跑，跳，是由骨骼带动躯干和四肢完成的。「骨骼动画」，顾名思义，就是模拟骨骼运动的机制而制作的动画。比如下面这条奔跑的小龙。参考 Demo。  素材来自开源骨骼动画编辑器 Dragonbones 用到的素材，额，其实是他大卸八块后的样子。  骨骼动画主要被用游戏场景中，做 Logo 、彩蛋也不错（比如 2014 年双 11 的喵喵舞就是天猫的同学基于骨骼动画原理实现的）。其实，在">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB166rCKFXXXXclXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-animation-bone" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      骨骼动画原理与前端实现浅谈
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 叶斋</span>
+        
+        <span>发表于: <a href="/blog/2015/11/30/animation-bone/" class="article-date">
+  <time datetime="2015-11-30T10:55:07.000Z" itemprop="datePublished">2015-11-30</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://img.alicdn.com/tps/TB166rCKFXXXXclXXXXXXXXXXXX-900-500.jpg" alt="骨骼动画原理与前端实现浅谈"></p>
+<p>人的运动——走，跑，跳，是由骨骼带动躯干和四肢完成的。「骨骼动画」，顾名思义，就是模拟骨骼运动的机制而制作的动画。比如下面这条奔跑的小龙。参考 <a href="http://codepen.io/taobaofed/pen/xwozdd" target="_blank" rel="noopener">Demo</a>。</p>
+<p><img src="http://img.alicdn.com/tps/TB15qLcKFXXXXceXpXXXXXXXXXX-310-270.gif" alt="奔跑的小龙"></p>
+<p>素材来自开源骨骼动画编辑器 <a href="http://dragonbones.github.io/" target="_blank" rel="noopener">Dragonbones</a></p>
+<p>用到的素材，额，其实是他大卸八块后的样子。</p>
+<p><img src="http://img.alicdn.com/tps/TB1rZG9KFXXXXX3XFXXXXXXXXXX-369-272.jpg" alt="奔跑的小龙素材"></p>
+<p>骨骼动画主要被用游戏场景中，做 Logo 、彩蛋也不错（比如 2014 年双 11 的喵喵舞就是天猫的同学基于骨骼动画原理实现的）。其实，在 CSS <code>transform</code> 或 Canvas 的帮助下，Web 前端播放骨骼动画，可谓举手之劳矣。</p>
+<h2 id="组装骨骼"><a href="#组装骨骼" class="headerlink" title="组装骨骼"></a>组装骨骼</h2><p>骨骼当然不是随便排列的，它们需要以树状结构组织起来。</p>
+<p><img src="http://img.alicdn.com/tps/TB17XvsKFXXXXXoXXXXXXXXXXXX-500-400.png" alt="骨骼解析"></p>
+<p>光有树状的结构还是远远不够的，每片骨骼还需要描述 <strong>自身的位移是多少（x，y），旋转的角度是多少（θ）</strong> 。注意， <strong>骨骼的位移和角度是相对「父骨骼」（的坐标系）而言的</strong> 。</p>
+<p>举个例子，左臂的位移是（78，-40），角度是 -30°，表示左臂在躯干的基础上，沿 X 轴平移 78，沿 Y 轴平移 -40，然后旋转 -30°，才是左臂目前的位置。同样，左前臂的位移是（-45，100），角度是 55°，表示左前臂在左臂的基础上，沿 X 轴平移 -45，沿 Y 轴平移 100，然后旋转 55°，才是左前臂的位置。依此类推。</p>
+<p><img src="http://img.alicdn.com/tps/TB1umjqKFXXXXXeXFXXXXXXXXXX-439-514.png" alt="躯干-左臂-左前臂 骨骼系统"></p>
+<p>位移和角度统称「变换参数」。用相对于父骨骼（而非全局）的变换参数描述子骨骼本身，其好处在于。当右臂（父骨骼）运动起来（变换参数变化起来）的时候，右前臂（子骨骼）自身即使不动（变换参数不变），它实际上还能够 <strong>随着</strong> 右臂运动。</p>
+<p>先不论如何使骨骼动起来，我们先研究下，如何把组装好的静态骨骼渲染/展示出来。这里分两种情况讨论：</p>
+<h3 id="DOM-元素："><a href="#DOM-元素：" class="headerlink" title="DOM 元素："></a>DOM 元素：</h3><p>很容易想到，用固定尺寸且绝对定位的 <code>div</code>，配合 CSS <code>transform</code> 属性实现。比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;div class=“躯干” style=“transform:躯干的位移和角度; position: absolute; …”&gt;</span><br><span class="line">  &lt;div class=“左臂” style=“transform:左臂的位移和角度; position: absolute; …”&gt;</span><br><span class="line">    &lt;div class=“左前臂” style=“..”&gt;</span><br><span class="line">      &lt;div class=“左爪” style=“..”&gt;</span><br><span class="line">      &lt;/div&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;!--其余部分--&gt;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>你看，DOM 元素被 CSS <code>transform</code> 作用时，所有子元素随之被 <code>transform</code> 了，和骨骼动画完美契合！</p>
+<p>想法固然不错， <strong>但是</strong> ，请考虑一下这样一种情况：</p>
+<ul>
+<li>骨骼 A：div A （z=1）<ul>
+<li>骨骼 B：div B （z=4：B 显示在 D 前面） </li>
+</ul>
+</li>
+<li>骨骼 C：div C （z=2：C 显示在 A 前面）<ul>
+<li>骨骼 D：div D （z=3）</li>
+</ul>
+</li>
+</ul>
+<p>我们知道，在 <code>position:absolute</code> 时，DOM 元素会创建自己的 Stack Context。也就是说，只要 div A 的 <code>z-index</code> 值小于了 div C，那么作为 A 的子元素 B，即使 <code>z-index</code> 大过天，也不可能覆盖 C 及其子元素。</p>
+<p>所以，我们只能将所有骨骼平铺下来：</p>
+<ul>
+<li>骨骼 A （z=1）</li>
+<li>骨骼 B （z=4）</li>
+<li>骨骼 C （z=2）</li>
+<li>骨骼 D （z=3）</li>
+</ul>
+<p>这带来了新的问题：我们所具有的 B 的变换参数，是相对其父骨骼 A 的，而在渲染时，我们需要的是 B 直接相对于最外层骨骼的位移和角度。</p>
+<h3 id="Canvas："><a href="#Canvas：" class="headerlink" title="Canvas："></a>Canvas：</h3><p>对使用 Canvas 的情况，我们知道 <code>context.transform</code> 方法会变换当前画笔坐标系，于是很容易想到这么做。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">context.transform(躯干位置)</span><br><span class="line">context.save();  // 1</span><br><span class="line">context.transform(左臂位置)</span><br><span class="line">context.draw(左臂)</span><br><span class="line">context.transform(在左臂左前臂位置)</span><br><span class="line">context.draw(左前臂)</span><br><span class="line">context.transform(左爪位置)</span><br><span class="line">context.draw(左爪)</span><br><span class="line">context.restore() // 回到了 1 状态</span><br><span class="line">// 继续绘制其他部分</span><br></pre></td></tr></table></figure>
+<p>这样做也存在问题。实际上，这种方法是按照深度优先的原则，遍历了以最外层骨骼为根的骨骼树，绘制了树上的每个节点（骨骼）。 <strong>这限制了我们绘制 Canvas 对象的顺序。</strong></p>
+<p>Canvas 2D 绘图没有 3D 绘图的「深度缓存」机制，所以在 2D 绘图中，对某一个像素而言，后绘制的内容一定会覆盖（至少影响）之前绘制的内容。但是，每片骨骼的 Z 值是定义好的，它们的前后关系可不能随便乱来，要使绘制的效果和定义的相同，就先得对骨骼进行深度排序，先画后面的，再画前面的。</p>
+<p>深度缓存机制，可以这样理解：我「画」了，但由于这个像素之前已经画过，而且 z 值比我大，所以我硬是没「画」上去。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">context.setTransform(躯干的绝对位置)</span><br><span class="line">context.draw(躯干)</span><br><span class="line">context.setTransform(左臂的绝对位置)</span><br><span class="line">context.draw(左臂)</span><br><span class="line">//  按照深度顺序进行绘制</span><br></pre></td></tr></table></figure>
+<p>这时，我们需要的位移和角度，便不再是相对于父骨骼的了，而是相对于最外层骨骼的。遇到的问题和使用 DOM 时一模一样。</p>
+<h2 id="从相对到绝对"><a href="#从相对到绝对" class="headerlink" title="从相对到绝对"></a>从相对到绝对</h2><p>仍然以躯干-左臂-左前臂系统为例。我们知道，左臂（相对躯干）的变换参数是（78，-40，-30°），左前臂（相对左臂）的变换参数是（-45，100，55°）。那么，左前臂相对躯干的变换参数如何求算呢？</p>
+<p>躯干也是有变换参数的，它的「父骨骼」是 Root ——一个「隐形」、「固定」的最外层骨骼，所以实际上我们需要求算相对 Root 的变换参数。不过原理是完全一致的。</p>
+<p>也许你会猜：左前臂相对躯干的变换参数是（78-45=33，-40+100=60，-30°+55°=25°）。这是错误的。</p>
+<p>实际上，位移和旋转会相互影响，不能直接加和。这里。我们需要使用「变换矩阵」来求算（还记得 <code>transform: matrix(…)</code> 的形式吗）。对于不了解图形学基础的同学，这也许有点难，不过没关系，我们只需要知道，通过一个 3 x 3 的矩阵，有办法算出左前臂相对躯干的变换参数。</p>
+<p>算出来的结果是 （89，69，25°）。</p>
+<p><img src="http://img.alicdn.com/tps/TB159_dKFXXXXcgXVXXXXXXXXXX-439-514.png" alt></p>
+<p>这样，我们就能在不依赖左臂的情况下，把左前臂的位置确定下来了。所有的骨骼都按照这种方式处理，万事大吉了！</p>
+<h2 id="动起来"><a href="#动起来" class="headerlink" title="动起来"></a>动起来</h2><p>骨骼拼装好的对象，当然是要动起来的。而骨骼动画最重要的特征，就是「父骨骼」的运动带动了所有「后代骨骼」（手臂挥舞的时候，巴掌当然要跟着动咯），所以骨骼动画才比较精致。</p>
+<p>一个完整的骨骼动画的 <strong>动作</strong> ，可以分解到每片骨骼上。而每一片骨骼的动作，则由关键帧所定义。举个例子，一个跑步的动作，分解到各个骨骼上，无非包括：</p>
+<ul>
+<li>躯干：上下起伏。</li>
+<li>腿部：抬起和落下。</li>
+<li>手臂：前后摆动。</li>
+<li>手前臂：肘部的弯曲变化。</li>
+</ul>
+<p>如果还想做细腻一些，自然还有头部的摆动，毛发颤动，眼珠转动等等……而每一片骨骼的变化，只需要三五个关键帧。比如，示例骨骼动画（小龙跑步）的关键帧定义如下图所示。每个关键帧包含的信息包括：关键帧在动画周期中的位置，以及骨骼的变换参数。</p>
+<p><img src="http://img.alicdn.com/tps/TB1BqHDKFXXXXaEXXXXXXXXXXXX-546-633.png" alt="小龙跑步关键帧"></p>
+<p>接下来，还有什么好说的呢？动画最基本的原理，就是随着时间更新对象的视觉状态。那么，对骨骼动画而言，就是在每一帧的时候，根据当前帧在一个动画周期内的位置，线性内插出每一片骨骼的位移和角度，然后算出全局的位移和角度，再画出来。</p>
+<p>内插，就是根据离散的值求取中间值的过程。最简单是线性内插，中间值仅与左右两个离散值，和中间值的位置有关。比如，当中间值位置为 0.5，左右两侧的值为 1 和 2，那么内插值就是 1.5，即 f(1, 2, 0.5) = 1.5；同理，f(1, 2, 0.7) = 1.7，f(1, 2, 0.3) = 1.3。</p>
+<p>如上图所示，一个动画周期的长度是 6 个单位（这里是 DragonBones 定义的长度单位，默认是 1/24 秒，实际播放时可以随意改变），那么在任意时刻（比如播放到 1 个单位时长之时），都需要根据左右最近的关键帧，内插出一个变换参数值，然后根据这个参数值，按照前一节所述的方法渲染或更新动画的状态。</p>
+<p>这样，我们就能看到下面的情形了：参考 <a href="http://codepen.io/taobaofed/pen/xwozdd" target="_blank" rel="noopener">Demo</a>。</p>
+<p><img src="http://img.alicdn.com/tps/TB15qLcKFXXXXceXpXXXXXXXXXX-310-270.gif" alt="奔跑的小龙"></p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>开源软件 DragonBones 是设计 2D 骨骼动画的不二之选，它支持将动画数据导出成 JSON 格式。DragonBones 中有 bone（骨骼）、slot（插槽）、skin（皮肤）的概念。骨骼本身不包含实体，只有变换（位移、旋转等）的数据，骨骼包含一些插槽，Z 值定义在插槽上，而插槽里可以插入皮肤，皮肤除了描述对应哪张图（甚至图上的某个区域），还具有变换数据（但不会变化）。这些设计即方便了设计师在软件中的操作和编辑，也方便开发者使用这份数据来播放精灵动画。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/30/animation-bone/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/30/animation-bone/" data-id="cjt6lbxx7000hjeu1iqiwcsyx" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/30/animation-bone/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/canvas/">canvas</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/css3/">css3</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动画/">动画</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/01/kissy-badminton-open/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          首届 KISSY 杯羽毛球双打公开赛赛况
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/27/webkit-remote-debug-action/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Webkit远程调试协议实战</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>karma 测试框架的前世今生 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="这篇文章主要来自 karma 作者的一篇论文，主要是说 karma 的由来，通过这篇文章，可以了解下 karma 的设计思想，这样大家在做前端单元测试时，也能了然于心。  背景JavaScript 作为 web 端使用最广泛的编程语言，它是动态语言，缺乏静态类型检查，所以在代码编译期间，很难发现像变量名写错，调用不存在的方法等错误，除非在运行时才能暴露出来，所以非常有必要有一个测试工具来验证">
+<meta name="keywords" content="karma,分析,框架,测试">
+<meta property="og:type" content="article">
+<meta property="og:title" content="karma 测试框架的前世今生">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/08/karma-origin/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="这篇文章主要来自 karma 作者的一篇论文，主要是说 karma 的由来，通过这篇文章，可以了解下 karma 的设计思想，这样大家在做前端单元测试时，也能了然于心。  背景JavaScript 作为 web 端使用最广泛的编程语言，它是动态语言，缺乏静态类型检查，所以在代码编译期间，很难发现像变量名写错，调用不存在的方法等错误，除非在运行时才能暴露出来，所以非常有必要有一个测试工具来验证">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gw.alicdn.com/tps/i3/TB1D9a2LXXXXXctXFXXlzJZ8pXX-900-500.jpg">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1eweqLXXXXXbvaXXX0ucn3VXX-964-384.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB13X9xLXXXXXXoaXXXDUoU9pXX-902-329.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1WhqVLXXXXXXxXpXXZcaBRpXX-587-609.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1TkWsLXXXXXcnaXXXmovN1VXX-639-230.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1jTKwLXXXXXX.aXXX0KhCSFXX-619-472.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1JJayLXXXXXXYaXXXE4qXKVXX-466-246.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1Z4C3LXXXXXXCXXXX3GTmGXXX-908-709.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1XXuILXXXXXcAXFXX.hdJKpXX-918-179.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1PvisLXXXXXcqaXXXEHlCNpXX-896-103.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="karma 测试框架的前世今生">
+<meta name="twitter:description" content="这篇文章主要来自 karma 作者的一篇论文，主要是说 karma 的由来，通过这篇文章，可以了解下 karma 的设计思想，这样大家在做前端单元测试时，也能了然于心。  背景JavaScript 作为 web 端使用最广泛的编程语言，它是动态语言，缺乏静态类型检查，所以在代码编译期间，很难发现像变量名写错，调用不存在的方法等错误，除非在运行时才能暴露出来，所以非常有必要有一个测试工具来验证">
+<meta name="twitter:image" content="http://gw.alicdn.com/tps/i3/TB1D9a2LXXXXXctXFXXlzJZ8pXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-karma-origin" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      karma 测试框架的前世今生
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 亦才</span>
+        
+        <span>发表于: <a href="/blog/2016/01/08/karma-origin/" class="article-date">
+  <time datetime="2016-01-08T10:10:44.000Z" itemprop="datePublished">2016-01-08</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gw.alicdn.com/tps/i3/TB1D9a2LXXXXXctXFXXlzJZ8pXX-900-500.jpg" alt="karma 测试框架的前世今生"></p>
+<blockquote>
+<p> 这篇文章主要来自 karma 作者的一篇论文，主要是说 karma 的由来，通过这篇文章，可以了解下 karma 的设计思想，这样大家在做前端单元测试时，也能了然于心。</p>
+</blockquote>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><code>JavaScript</code> 作为 <code>web</code> 端使用最广泛的编程语言，它是动态语言，缺乏静态类型检查，所以在代码编译期间，很难发现像<code>变量名写错</code>，<code>调用不存在的方法</code>等错误，除非在运行时才能暴露出来，所以非常有必要有一个测试工具来验证你的代码。</p>
+<p><code>karma</code> 就是在这样的背景下产生的， 它是一个 <code>runner</code> ， 旨在帮助开发者简单而又快速的进行自动化单元测试， 目前已经用在很多大型的项目， <code>google</code> 和 <code>youtube</code> 这些公司都在用它， 在 <code>npm</code> 官方网站上， 它也是一个比较流行的 <code>npm</code> 模块。</p>
+<p>下面会讲述 <code>karma</code> 的由来， 以及现有解决方案的比较， 最后会谈及 <code>karma</code> 的设计与实现。</p>
+<h1 id="为什么需要测试"><a href="#为什么需要测试" class="headerlink" title="为什么需要测试"></a>为什么需要测试</h1><p>下面从两方面来说明</p>
+<h2 id="从语言角度"><a href="#从语言角度" class="headerlink" title="从语言角度"></a>从语言角度</h2><ul>
+<li>JavaScript 是动态语言， 缺少类型检查，编译期间无法定位到错误</li>
+<li>JavaScript 宿主的兼容性问题， 比如 <code>DOM</code> 操作在不同浏览器上的表现</li>
+</ul>
+<h2 id="从工程角度"><a href="#从工程角度" class="headerlink" title="从工程角度"></a>从工程角度</h2><ul>
+<li><code>TDD</code> 被证明是有效的软件编写原则，它能覆盖更多的功能接口</li>
+<li>测试可以<code>快速反馈</code>你的功能输出，验证你的想法</li>
+<li>测试可以保证<code>代码重构的安全性</code>，<code>没有一成不变的代码</code>，测试用例能给你多变的代码结构一个定心丸。</li>
+<li>测试用例其实可以看成<code>代码 API 使用文档</code>，而且还是定时更新的，对 <code>API</code> 的使用者有很大的帮助</li>
+<li>易于测试的代码，说明是一个好的设计，这里可以稍微说明一下<ul>
+<li>做单元测试之前，肯定要实例化一个东西，假如这个东西有很多依赖的话，这个测试构造过程将会非常耗时，会影响你的测试效率，怎么办呢？要依赖分离，一个类尽量保证功能单一，比如<code>视图</code>与<code>功能</code>分离，这样的话，你的代码也便于维护和理解。</li>
+</ul>
+</li>
+</ul>
+<h1 id="目前我们面临的现状"><a href="#目前我们面临的现状" class="headerlink" title="目前我们面临的现状"></a>目前我们面临的现状</h1><p>相信现在前端开发者对测试都不是很依赖，因为缺少好用的工具，甚至都不会去写测试。</p>
+<p>其它语言像 <code>Java， Python ，C#</code>， 测试工具基本都会集成到 IDE 中，基本都能马上看到测试结果，而且像 <code>C++</code> 这种编译性语言，在<code>编译</code>期间基本都会找到代码里的错误</p>
+<p>当我们把焦点放在前端开发中的 <code>JavaScript</code> 上来时，上面语言的一些优点完全没有了，关键就是缺少一个流程控制的测试工具。</p>
+<h1 id="karma-的目标"><a href="#karma-的目标" class="headerlink" title="karma 的目标"></a>karma 的目标</h1><ul>
+<li>在真实环境中测试</li>
+<li>支持远程控制</li>
+<li>执行速度快</li>
+<li>可以跟第三方 IDE 进行交互</li>
+<li>支持 ci 服务</li>
+<li>高扩展性，支持插件开发</li>
+<li>支持调试</li>
+</ul>
+<h1 id="已有的解决方案"><a href="#已有的解决方案" class="headerlink" title="已有的解决方案"></a>已有的解决方案</h1><h2 id="Selenium"><a href="#Selenium" class="headerlink" title="Selenium"></a>Selenium</h2><p><code>Selenium</code> 是一个完整的测试工具，它是一个比较成熟的古老测试工具之一，它比较适合用来做高级测试，比如 <code>e2e</code> 测试。</p>
+<p>它的核心思想就是<code>代理注入</code>，<code>Selenium</code> 通过代理打开浏览器 URL， 有一个后台的 <code>server</code> 在监听，当有请求时，会往浏览器中注入脚本，之后就通过这个脚本来跟 <code>server</code> 端通讯。</p>
+<p>开发者可以使用 <code>Selenium</code> 客户端 API 来编写单测， 比如<code>跳转 URL</code>或者<code>单击按钮</code></p>
+<p><code>Selenium</code> 客户端有多种实现，比如 <code>Java</code>，<code>Python</code>，<code>Ruby</code>，开发者可以使用自己熟悉的语言来编写单例</p>
+<h2 id="WebDriver-Selenium-2"><a href="#WebDriver-Selenium-2" class="headerlink" title="WebDriver/Selenium 2"></a>WebDriver/Selenium 2</h2><p><code>WebDriver</code> 是基于 HTTP 协议来跟浏览器通讯的，<code>Selenium 2</code> 实现了完整的 <code>WebDriver</code> 协议</p>
+<p><code>WebDriver</code> 可以调用更底层的 <code>DOM</code> API， 像 <code>Safari</code> 不支持这种协议的话，就采用 <code>Selenium 1</code> 那种<code>代理注入</code>的方式通讯</p>
+<h2 id="Mocha"><a href="#Mocha" class="headerlink" title="Mocha"></a>Mocha</h2><p><code>Mocha</code> 既是测试框架，也是一个测试 runner ，它主要用在 <code>Node.js</code>里的单元测试，当然也可以用在浏览器端，不过得手动配置各种适配脚本。</p>
+<h2 id="JsTestDriver"><a href="#JsTestDriver" class="headerlink" title="JsTestDriver"></a>JsTestDriver</h2><p><code>JsTestDriver</code> 是直接在浏览器里执行的，所以可以直接调用 <code>DOM</code> 和浏览器端 API， 不过先得开启一个服务端程序， 它的核心是一个 runner 程序，当运行单测时，runner 会通知服务端来更新浏览器端，比如重新加载 <code>js</code> 脚本，返回测试结果到服务端。</p>
+<h2 id="HTML-Runners"><a href="#HTML-Runners" class="headerlink" title="HTML Runners"></a>HTML Runners</h2><p>大部分的测试框架，像 <code>Jasmine</code> 和 <code>QUnit</code> 都包含一个 <code>HTML</code> runner， 开发者要自己维护加载的前端资源， 手动刷新页面， 测试结果以 HTML 形式显示</p>
+<h2 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h2><p>下面主要比较下，上面这些工具框架的优缺点</p>
+<ul>
+<li><p><code>Selenium</code> 和 <code>WebDriver</code> 不支持直接访问 JavaScript 代码能力，只是在浏览器里执行，通过各种命令来操作，它的最大优点就是可以访问原生 DOM 事件，这个是 JavaScript 里是很难模拟的，所以这非常适合做 <code>e2e</code> 测试，<code>WebDriver</code> 基本是 <code>e2e</code> 测试的标准了。</p>
+</li>
+<li><p><code>HTML runners</code> 仅仅是一个测试框架，可以在浏览器端执行然后输出结果，它缺少一种流程管理机制，而且跟第三方编辑器以及 CI Servers 都不能进行通讯</p>
+</li>
+<li><p><code>Mocha</code> 提供了一种很好的测试控制，但是它比较适合用在 <code>Node.js</code> 环境里，浏览端运行的话，也会产生 <code>HTML runners</code> 类似的问题</p>
+</li>
+<li><p><code>JsTestDriver</code> 是最接近完美的测试工具了，它可以直接访问浏览器端 API ， 而且也有管理工具，可以在命令行里进行控制，但是它有两个主要的问题</p>
+<ul>
+<li>代码设计有缺陷，不稳定以及不容易扩展</li>
+<li>没有文件监听，以及文件预处理功能，这些都很影响使用的无缝接入</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><code>Karma</code> 就是对 <code>JsTestDriver</code> 的改进，提供了文件监听以及预处理能力， <code>文件监听</code>很重要，它方便与各种编辑器接入， 减少用户运行单测的成本，直接保存文件就可以了， 下面是一张各种工具的对比图</li>
+</ul>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1eweqLXXXXXbvaXXX0ucn3VXX-964-384.png" alt="tests_tools_comparison"></p>
+<h1 id="Karma-设计分析"><a href="#Karma-设计分析" class="headerlink" title="Karma 设计分析"></a>Karma 设计分析</h1><p><code>karma</code> 设计目标主要有下面四点：</p>
+<ul>
+<li>高效</li>
+<li>扩展性</li>
+<li>运行在真实设备</li>
+<li>无缝的使用流程</li>
+</ul>
+<p><code>karma</code> 是一个典型的 <code>C/S</code> 程序，包含 client 和 server ，通讯方式基于 <code>Http</code> ，通常情况下，客户端和服务端基本都运行在开发者本地机器上。</p>
+<p>一个服务端实例对应一个项目，假如想同时运行多个项目，得同时开启多个服务端实例。</p>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p><code>Server</code> 是框架的主要组成部分之一，它内部保存了所有的程序运行状态，比如 client 连接，当前运行的单测文件，根据这些数据状态，它提供了下面几个功能， 下图是 server 的结构</p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB13X9xLXXXXXXoaXXXDUoU9pXX-902-329.png" alt="karma_server"></p>
+<ul>
+<li>监听文件</li>
+<li>与 client 进行通讯</li>
+<li>向开发者输出测试结果</li>
+<li>提供 client 端所需的资源文件</li>
+</ul>
+<p>注意：连接 server 的 client 浏览器有多种类型，比如 PC，iphone，TV 端等</p>
+<p><code>Server</code> 端运行在开发者机器上，根据测试配置文件，它能快速的访问本地测试文件</p>
+<p>下面主要说下 <code>Server</code> 端的 4 个组成部分：</p>
+<h3 id="1-Manager"><a href="#1-Manager" class="headerlink" title="1. Manager"></a>1. Manager</h3><p><code>Manager</code> 的主要责任就是跟 client 进行通讯，比如广播信号通知 client 开始测试以及收集 client 返回的测试结果</p>
+<p><code>Manager</code> 内部维护了两个数据模型：</p>
+<ul>
+<li>一个用来保存所有连接的 client 实例（包含浏览器名称和版本号，以及一个标明它是闲置还是当前正在运行的状态）</li>
+<li>一个用来保存当前测试状态（多少测试成功和多少测试失败）</li>
+</ul>
+<p>作为通讯网关，它会利用这两种数据模型去通知服务端其它组成部分，比如测试完成之后，通知输出结果展示。</p>
+<h3 id="2-Web-Server"><a href="#2-Web-Server" class="headerlink" title="2. Web Server"></a>2. Web Server</h3><p>基于 <code>connect</code> 的一个 server ， 主要是提供访问本地静态资源用的，这里的资源包含：JS 测试框架，断言库，测试用例以及它的依赖等。</p>
+<h3 id="3-Reporter"><a href="#3-Reporter" class="headerlink" title="3. Reporter"></a>3. Reporter</h3><p>利用上面的测试数据模型，reporter 展示输出结果，输出端包含本地命令行，文件或者一个 ci server。</p>
+<h3 id="4-File-System-Watcher"><a href="#4-File-System-Watcher" class="headerlink" title="4. File System Watcher"></a>4. File System Watcher</h3><p>watcher 主要是监听本地文件改变，内部维护了一个数据模型，包含所有测试相关的文件，它能保证 <code>Web Server</code>拉取的静态资源都是最新的，同时也能保证文件访问成本以及网络成本，永远只加载修改的文件。</p>
+<h2 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h2><p><code>Client</code> 是测试文件真正运行的地方，比如一个 PC，iphone，tablet 端的浏览器，通常情况下跟 <code>server</code> 是同一个物理机，当然也可以运行在不同的机器，通过 <code>HTTP</code> 来通讯</p>
+<p>多个 <code>Client</code> 可以与一个 <code>Server</code> 进行通讯</p>
+<h3 id="1-Manager-1"><a href="#1-Manager-1" class="headerlink" title="1. Manager"></a>1. Manager</h3><p>这里主要是跟 <code>server</code> 进行消息通讯，以及与其它 <code>client</code> 组成部分进行交互，比如测试框架 <code>mocha</code> </p>
+<h3 id="2-Testing-Framework"><a href="#2-Testing-Framework" class="headerlink" title="2. Testing Framework"></a>2. Testing Framework</h3><p>测试框架不是系统的一部分，<code>karma</code> 灵活支持第三方测试框架，以插件的形式接入。</p>
+<h3 id="3-Tests-and-Code-under-Test"><a href="#3-Tests-and-Code-under-Test" class="headerlink" title="3. Tests and Code under Test"></a>3. Tests and Code under Test</h3><p>这里包含用户所有的测试相关文件，它是通过 <code>web-server</code> 模块来获取，测试文件由 <code>test framework</code> 来执行。</p>
+<h2 id="Communication-Protocal"><a href="#Communication-Protocal" class="headerlink" title="Communication Protocal"></a>Communication Protocal</h2><p>主要描述 <code>server</code> 与 <code>client</code> 的通讯时机</p>
+<h3 id="1-Client-to-Server-Messages"><a href="#1-Client-to-Server-Messages" class="headerlink" title="1. Client to Server Messages"></a>1. Client to Server Messages</h3><ul>
+<li>当 client 连接以后，会向 server 发送一个唯一标识 id ， 以及它的 name 和 version </li>
+<li>当一个单测文件测试完成之后，会向 server 发送一条消息，消息会包含成功或者失败等</li>
+<li>当所有单测文件测试完成之后，会向 server 发送一条消息</li>
+<li>当有 error 产生时，不管是在 client 启动时还是测试代码运行时，都会向 server 发送一条消息</li>
+</ul>
+<h3 id="2-Server-to-Client-Messages"><a href="#2-Server-to-Client-Messages" class="headerlink" title="2. Server to Client Messages"></a>2. Server to Client Messages</h3><ul>
+<li>当 server 决定开始运行单测时，会向所有 client 发送一条消息</li>
+</ul>
+<h1 id="Karma-实现分析"><a href="#Karma-实现分析" class="headerlink" title="Karma 实现分析"></a>Karma 实现分析</h1><p>Karma 是用 JavaScript 实现的， server 端运行在 Node.js 环境下， client 运行在浏览器环境下， 为什么选择使用 <code>Node.js</code> ，下面是作者的几点看法：</p>
+<ul>
+<li>支持多个平台</li>
+<li>用一种编程语言来解决 server 和 client 端的实现</li>
+<li>它是一个多产的平台（ npm 上有很多不错的模块）</li>
+<li>想深入探索异步编程</li>
+</ul>
+<p>上面啰嗦了这么多，终于要说到正题了，下面主要说下 server 和 client 的核心实现</p>
+<h2 id="Server-1"><a href="#Server-1" class="headerlink" title="Server"></a>Server</h2><p>这部分主要说下 server 的核心实现，下图中实线代表直接方法调用，虚线代表通过事件通讯</p>
+<p>如图 server 的组成部分</p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1WhqVLXXXXXXxXpXXZcaBRpXX-587-609.png" alt="karma_impl_server"></p>
+<h3 id="1-File-System-Watcher"><a href="#1-File-System-Watcher" class="headerlink" title="1. File System Watcher"></a>1. File System Watcher</h3><p>文件监听是基于 <code>chokidar</code> npm 模块来实现的，它是对 Node.js 底层 API 的封装（fs.watch 和 fs.watchFile）， 系统启动时，<code>chokidar</code> 根据配置文件会对 <code>glob</code> 形式的文件字符串进行监听</p>
+<p><code>chokidar</code> 屏蔽了不同系统之间的差异问题，而且提供了一些 Node.js 底层 API 不支持的功能，比如对整个文件目录进行监听</p>
+<h3 id="2-File-System-Model"><a href="#2-File-System-Model" class="headerlink" title="2. File System Model"></a>2. File System Model</h3><p>文件模型主要是为了提高访问本地文件以及网络文件的性能， 它包含跟测试相关文件的原数据描述，这些文件是通过 <code>karma.conf.js</code> 配置文件里的 <code>files</code> 字段， <code>glob</code> 形式的文件字符串， 比如 <code>js/src/*.js</code> ， <code>test/**/*.js</code> ，来绑定监听的。</p>
+<p>当你<code>添加</code>，<code>删除</code>，<code>修改</code>文件，都会触发文件模型里定义的 <code>file_list_modified</code> 事件，该事件有两个<code>观察者</code></p>
+<ul>
+<li><code>web server</code>， 接收到最新的文件数据列表</li>
+<li><code>manager</code> ， 刷新浏览器，重新执行测试文件</li>
+</ul>
+<p>内部主要有两个类，<code>FileList</code>，<code>File</code>， 前者包含多个 <code>File</code> 实例， <code>File</code> 单个实例会保存测试文件的一些基本数据，比如路径等。</p>
+<p>如下图描述</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1TkWsLXXXXXcnaXXXmovN1VXX-639-230.png" alt="karma_impl_fs"></p>
+<h3 id="3-Web-Server"><a href="#3-Web-Server" class="headerlink" title="3. Web Server"></a>3. Web Server</h3><p>这块是基于 <code>connect</code> 来实现的，然后系统提供不同的 <code>handlers</code> 来解决不同的请求，主要有下面四种 handle :</p>
+<ul>
+<li>karma client files（跟 server 端通讯的 JS 文件）</li>
+<li>testing framework and adapter</li>
+<li>source and test files</li>
+<li>proxy</li>
+</ul>
+<p>当 <code>web server</code> 请种各种文件时，需要跟上面的 <code>fs model</code> 进行交互，拿到具体的文件原数据之后，做最合适的请求响应</p>
+<h3 id="4-Reporter"><a href="#4-Reporter" class="headerlink" title="4. Reporter"></a>4. Reporter</h3><p>reporter 会接收来自 client 端的请求，然后展示相对应的单测成功或者失败消息，这块 <code>karma</code> 支持以插件的形式扩展自己想要的 reporter 效果。</p>
+<h2 id="Client-1"><a href="#Client-1" class="headerlink" title="Client"></a>Client</h2><p>client 是单测最终运行的地方，类似一个 web app ， 跟 server 端通讯利用 <code>socket.io</code>， 执行单测在一个独立的 <code>iframe</code> 中。下面是它的结构图</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1jTKwLXXXXXX.aXXX0KhCSFXX-619-472.png" alt="karma_impl_client"></p>
+<h3 id="1-Manager-2"><a href="#1-Manager-2" class="headerlink" title="1. Manager"></a>1. Manager</h3><p>client manager 是对<code>socket.io</code>调用的一个简单的包装，它提供了一些 API ， 给 test framework adapter 来调用， 方便与 server 端通讯， 下面是它的一些 API 列表</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1JJayLXXXXXXYaXXXE4qXKVXX-466-246.png" alt="karma_impl_client_API"></p>
+<p>manager 运行在 HTML 里的主窗口内，它提供的 API 会暴露给 iframe 里的 test framework adapter 来调用</p>
+<h3 id="2-Iframe"><a href="#2-Iframe" class="headerlink" title="2. Iframe"></a>2. Iframe</h3><p>client 包含一个独立的 iframe ， 它会加载框架自带的 <code>context.html</code> 文件，头部会引用一堆以 <code>script</code> 标签的资源文件，这些文件来源于你的配置文件，通过 <code>web server</code> 里的 <code>handle</code> 来构建完整的 <code>context.html</code> 文件内容。</p>
+<p>用独立的 <code>iframe</code> 来执行单测有很多好处，不会污染全局的 window 对象， 方便文件更新后， 重新执行单测</p>
+<h3 id="3-Adapter"><a href="#3-Adapter" class="headerlink" title="3. Adapter"></a>3. Adapter</h3><p>这是第三方测试框架对应的 <code>karma</code> 适配器，本身不是框架的一部分，是以插件的形式加载到 HTML 里的， 这样就可以保证， 无论什么测试框架，<code>karma</code> 都可以无缝接入， 想要系统适应不同框架的问题，就得提供一套约束出来，想要开发一个适配器，至少得实现 <code>__karma__.start</code> 方法， 这个方法最终会被 <code>manager</code> 来调来， 它是执行本地单测的入口方法，下面是 <code>Jasmine</code> 测试框架的适配器代码</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1Z4C3LXXXXXXCXXXX3GTmGXXX-908-709.png" alt="karma_impl_client_adapter"></p>
+<h2 id="Communication-Between-Server-and-Client"><a href="#Communication-Between-Server-and-Client" class="headerlink" title="Communication Between Server and Client"></a>Communication Between Server and Client</h2><p>client 和 server 端通讯采用 <code>socket.io</code></p>
+<ul>
+<li>client 端会发送这些消息</li>
+</ul>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1XXuILXXXXXcAXFXX.hdJKpXX-918-179.png" alt="karma_impl_client_message_c"></p>
+<ul>
+<li>server 端会发送这些消息</li>
+</ul>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1PvisLXXXXXcqaXXXEHlCNpXX-896-103.png" alt="karma_impl_client_message_s"></p>
+<h2 id="Dependency-Injection-Framework"><a href="#Dependency-Injection-Framework" class="headerlink" title="Dependency Injection Framework"></a>Dependency Injection Framework</h2><p><code>karma</code> 框架是基于 <code>di</code> 开发的，<code>di</code> 这个 npm 模块也是 <code>karma</code> 作者自己开发的，是一个依赖注入库，这里主要应用了设计模式里的 <code>ioc</code> 原则， 简单的说， 就是函数的参数不是手动实例，而是通过依赖注入进去的，这样可以极大提高系统的扩展性以及灵活性， 而且代码本身更容易测试了，推荐大家在开发复杂系统时，使用这种设计思想。</p>
+<h1 id="为什么写这篇文章？"><a href="#为什么写这篇文章？" class="headerlink" title="为什么写这篇文章？"></a>为什么写这篇文章？</h1><ul>
+<li>学习 karma 框架的设计思想</li>
+<li>增加前端同学对测试的理解与认识</li>
+<li>希望大家开始编写前端单元测试</li>
+</ul>
+<h1 id="相关引用"><a href="#相关引用" class="headerlink" title="相关引用"></a>相关引用</h1><ul>
+<li><a href="https://github.com/karma-runner/karma/raw/master/thesis.pdf" target="_blank" rel="noopener">Karma 作者的设计论文</a></li>
+<li><a href="https://www.npmjs.com/package/karma" target="_blank" rel="noopener">Karma npm 模块</a></li>
+<li><a href="http://karma-runner.github.io/" target="_blank" rel="noopener">Karma</a></li>
+<li><a href="http://www.w3.org/TR/webdriver/" target="_blank" rel="noopener">WebDriver 协议</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%B5%8B%E8%AF%95%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91" target="_blank" rel="noopener">TDD</a></li>
+<li><a href="http://mochajs.org/" target="_blank" rel="noopener">Mocha</a></li>
+<li><a href="http://jasmine.github.io/" target="_blank" rel="noopener">Jasmine</a></li>
+<li><a href="http://docs.seleniumhq.org/" target="_blank" rel="noopener">Selenium</a></li>
+<li><a href="https://code.google.com/p/js-test-driver/" target="_blank" rel="noopener">JsTestDriver</a></li>
+<li><a href="https://www.npmjs.com/package/socket.io" target="_blank" rel="noopener">socket.io</a></li>
+<li><a href="https://www.npmjs.com/package/connect" target="_blank" rel="noopener">connect</a></li>
+<li><a href="https://www.npmjs.com/package/chokidar" target="_blank" rel="noopener">chokidar</a></li>
+<li><a href="https://www.npmjs.com/package/di" target="_blank" rel="noopener">DI</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC" target="_blank" rel="noopener">IOC</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/08/karma-origin/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/08/karma-origin/" data-id="cjt6lbxz6005ljeu1eok9b8t9" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/08/karma-origin/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/karma/">karma</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/分析/">分析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/框架/">框架</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/测试/">测试</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/11/khorium-bullet/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          D2 论坛淘宝 FED 展台游戏「氪金弹头」制作始末
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/07/find-back-the-lost-es6-features-in-nodejs/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">找回 Node.js 里面那些遗失的 ES6 特性</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

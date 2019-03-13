@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>淘宝首页兜底容灾方案 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="淘宝首页是淘宝的一个大流量入口，平均每天的 PV 量达到一亿。而页面上的数据很多都是通过接口调用，不同的接口对应着不同的系统，每个系统的稳定性是不太一样的。 一、兜底容灾的必要性一个日均承载一亿流量的网页，会经常出现哪些问题呢？  某个接口挂了，前端拿不到数据或者拿到的数据不够，页面展示就会出问题，出现空白或者某个模块直接天窗。 用户因为网络问题或者安装了某些插件，导致页面广告、接口请求挂掉，从">
+<meta name="keywords" content="兜底容灾">
+<meta property="og:type" content="article">
+<meta property="og:title" content="淘宝首页兜底容灾方案">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/10/28/disaster-recovery-at-taobao-home-page/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="淘宝首页是淘宝的一个大流量入口，平均每天的 PV 量达到一亿。而页面上的数据很多都是通过接口调用，不同的接口对应着不同的系统，每个系统的稳定性是不太一样的。 一、兜底容灾的必要性一个日均承载一亿流量的网页，会经常出现哪些问题呢？  某个接口挂了，前端拿不到数据或者拿到的数据不够，页面展示就会出问题，出现空白或者某个模块直接天窗。 用户因为网络问题或者安装了某些插件，导致页面广告、接口请求挂掉，从">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1uf_3KXXXXXcLXVXXlzJZ8pXX-900-500.jpg">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/29f3505c1dc13a36895ee512dd848984f9432615">
+<meta property="og:image" content="http://img4.tbcdn.cn/L1/461/1/f40f3c59aeada60c13e288c7791dfb81faaf7619">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/1c4e211f77fac256961ab864c792d0a94ac5068d">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="淘宝首页兜底容灾方案">
+<meta name="twitter:description" content="淘宝首页是淘宝的一个大流量入口，平均每天的 PV 量达到一亿。而页面上的数据很多都是通过接口调用，不同的接口对应着不同的系统，每个系统的稳定性是不太一样的。 一、兜底容灾的必要性一个日均承载一亿流量的网页，会经常出现哪些问题呢？  某个接口挂了，前端拿不到数据或者拿到的数据不够，页面展示就会出问题，出现空白或者某个模块直接天窗。 用户因为网络问题或者安装了某些插件，导致页面广告、接口请求挂掉，从">
+<meta name="twitter:image" content="http://gtms02.alicdn.com/tps/i2/TB1uf_3KXXXXXcLXVXXlzJZ8pXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-disaster-recovery-at-taobao-home-page" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      淘宝首页兜底容灾方案
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 阎王</span>
+        
+        <span>发表于: <a href="/blog/2015/10/28/disaster-recovery-at-taobao-home-page/" class="article-date">
+  <time datetime="2015-10-28T10:23:53.000Z" itemprop="datePublished">2015-10-28</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms02.alicdn.com/tps/i2/TB1uf_3KXXXXXcLXVXXlzJZ8pXX-900-500.jpg" alt="淘宝首页兜底容灾方案"></p>
+<p>淘宝首页是淘宝的一个大流量入口，平均每天的 PV 量达到一亿。而页面上的数据很多都是通过接口调用，不同的接口对应着不同的系统，每个系统的稳定性是不太一样的。</p>
+<h3 id="一、兜底容灾的必要性"><a href="#一、兜底容灾的必要性" class="headerlink" title="一、兜底容灾的必要性"></a>一、兜底容灾的必要性</h3><p>一个日均承载一亿流量的网页，会经常出现哪些问题呢？</p>
+<ul>
+<li>某个接口挂了，前端拿不到数据或者拿到的数据不够，页面展示就会出问题，出现空白或者某个模块直接天窗。</li>
+<li>用户因为网络问题或者安装了某些插件，导致页面广告、接口请求挂掉，从而页面出现问题</li>
+</ul>
+<p>前者的概率不是很大，因为网页上的请求 QPS 都是预先评估过的，只要前端请求没有成倍激增，并且后端压力都在系统监控范围内，不会出太大的岔子。但是一旦出问题，页面上就有可能空白一大块，如果后端排查和处理问题不及时，很可能从小问题演变成故障，像淘宝首页这样的页面，还可能演变成公关问题，因为访问量实在太大，每分钟影响的人太多。</p>
+<p>第二个问题也是比较严峻的，据统计，不管网站做的多简洁，总是会有千分之一的用户因为网络或者浏览器插件问题导致页面访问失败或者部分接口请求失败，一个 PV 一亿的网站，按照千分之一计算，一个接口每天会有 10w 左右的 PV 请求失败，而请求接口一多，页面上整体的请求失败量就很高了，这个数据会达到几百万。</p>
+<h3 id="二、如何兜底，如何容灾"><a href="#二、如何兜底，如何容灾" class="headerlink" title="二、如何兜底，如何容灾"></a>二、如何兜底，如何容灾</h3><p>兜底容灾的方案有很多，目的就是让请求失败而页面展示依然正常。下面说一说常用的几个方案：</p>
+<p><strong>1. 再请求一次</strong></p>
+<p>照顾到用户体验，同时也考虑到一个请求的正常发送、接受时间，我们把超时时间设置为 5s，超过 5s 或者请求的结果状态为 failed ，则重新请求一次。所以我们可以重新封装下 io 模块，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置请求次数</span></span><br><span class="line"><span class="keyword">var</span> tryTimes = <span class="number">2</span>;</span><br><span class="line">io(&#123;</span><br><span class="line">  url: url,</span><br><span class="line">  timeout: <span class="number">5000</span>,</span><br><span class="line">  dataType: <span class="string">"jsonp"</span>,</span><br><span class="line">  <span class="comment">// try</span></span><br><span class="line">  tryTimes: tryTimes</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种处理方案对于提交订单、选中商品到购物车的页面比较合适，因为操作流是确定的，提交一次不成功，很自然的想到再提交一次，只是用户等待的不同阶段应该用不同的文案来提醒。而对于展示类的数据请求，不太适合多次失败尝试。所以首页未采用这种方案。</p>
+<p><strong>2. 缓存每一次请求到本地</strong></p>
+<p>现在的浏览器都支持本地储存（无论使用 userData 还是 localStorage），当每次请求到达用户浏览器的时候，把请求的数据缓存一份到本地储存，那么下次请求失败就可以使用上次的数据啦~</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">io(&#123;</span><br><span class="line">  url: url,</span><br><span class="line">  dataType: <span class="string">"jsonp"</span>,</span><br><span class="line">  success: <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 缓存数据到本地</span></span><br><span class="line">    cache(DATAKEY, data);</span><br><span class="line">    show(data);</span><br><span class="line">  &#125;,</span><br><span class="line">  error: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 请求失败，获取本地缓存数据</span></span><br><span class="line">    <span class="keyword">var</span> data = cache(DATAKEY);</span><br><span class="line">    show(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种方式是比较常用的，每次请求成功都会缓存最新的数据。不过这里存在两个问题：</p>
+<ul>
+<li>如果用户第一次访问就失败了呢？要知道新用户是比较多的。</li>
+<li>缓存的数据是否具有时效性，如果过期了呢？比如是一个推荐接口，推荐的商品用户已经购买过了，但是访问的时候接口挂掉，依然现实用户购买过的商品，这个逻辑是不太能接受的。</li>
+</ul>
+<p>当然，有总比没有好吧，就算是第一次访问，这个概率是相当低的，就算数据过期，但是依然是正确的链接，所以基本可以接受。</p>
+<p><strong>3. 备用接口（硬兜底）</strong></p>
+<p>会给自己的网页接口准备备用接口的网站，估计不会很多。而淘宝首页基本都用了。我们可以做一个包装：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">io(&#123;</span><br><span class="line">  url: url,</span><br><span class="line">  <span class="comment">// 备份接口</span></span><br><span class="line">  backUrl: backUrl</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>一旦请求失败，进入备用数据接口请求备份数据。同样的，这里也存在一个问题：如果接口是个性化的，则每个用户访问这个接口拿到的数据都不一样，那么这个备份接口该如何推数据？如果备用接口的数据跟正常接口一样，那还不如直接去请求两次。</p>
+<p>所以这里提到的备用接口，主要是数据的硬兜底，硬兜底的来源有两个：</p>
+<ul>
+<li>运营维护一份数据，推送到 CDN，每一份数据都有一个固定的地址</li>
+<li>后端向 CDN push 一份通用数据。我们知道个性化都是使用 cookie 去识别用户的，对于没有浏览器记录的新用户就没有 cookie，此时会推一份通用的数据，这个通用的数据也可以作为接口的备份源。</li>
+</ul>
+<h3 id="三、兜底容错实践"><a href="#三、兜底容错实践" class="headerlink" title="三、兜底容错实践"></a>三、兜底容错实践</h3><p>我们很容易得到如下的操作流程：</p>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/29f3505c1dc13a36895ee512dd848984f9432615" alt="异步容错实践"></p>
+<p>而这里存在的问题是：</p>
+<ul>
+<li>获取缓存数据后，不好对数据格式进行判断，一般来说，只有有效的数据才能存到本地储存中，而判断是否有效往往存在误差</li>
+<li>兜底数据没有及时更新</li>
+<li>程序只会报警，但是不会自动修复</li>
+</ul>
+<p>存在的隐患是：</p>
+<ul>
+<li>前端每次改版，如更换接口、更换人员，兜底数据没有及时更新</li>
+<li>如果兜底数据也存在错误，则页面一定出现空白天窗</li>
+</ul>
+<p>所以对整个流程做了一些改进：</p>
+<p><img src="http://img4.tbcdn.cn/L1/461/1/f40f3c59aeada60c13e288c7791dfb81faaf7619" alt="异步容错改进"></p>
+<p>数据经过统一平台输出，在输出之前，我们将数据推一份到 CDN 作为备份，产生另一个接口，一旦原始接口请求失败，则直接请求备份的接口，这个在规则对应和即时更新上可以做到很赞！那么基本的流程就是这样：</p>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/1c4e211f77fac256961ab864c792d0a94ac5068d" alt="异步容错改进流程"></p>
+<p>实际上淘宝首页在这个基础上还加了一层，那就是每个接口必须对应一个运营手填的数据，这个作为最后的硬兜底，而这个硬兜底也会被缓存到本地，整个流程就形成一个闭环。那么，剩下的工作就只有监控和警报了。</p>
+<p>下面是一串伪代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> url = interfaceURL;</span><br><span class="line"><span class="keyword">var</span> backUrl = interfaceBackURL;</span><br><span class="line"><span class="keyword">var</span> hardBackUrl = hardDataURL;</span><br><span class="line"><span class="keyword">var</span> cacheTime = <span class="number">10</span>day;</span><br><span class="line"></span><br><span class="line">io(&#123;</span><br><span class="line">  url: url,</span><br><span class="line">  backurl: backUrl,</span><br><span class="line">  success: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 缓存数据到本地</span></span><br><span class="line">    cache(DATAKEY, data, cacheTime);</span><br><span class="line">    show(data);</span><br><span class="line">  &#125;,</span><br><span class="line">  error: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 请求失败，获取本地缓存数据</span></span><br><span class="line">    <span class="keyword">var</span> data = cache(DATAKEY);</span><br><span class="line">    <span class="keyword">if</span>(data) &#123;</span><br><span class="line">      Reporter.send(<span class="comment">/*WARN*/</span>);</span><br><span class="line">      show(data); </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      Reporter.send(<span class="comment">/*ERROR*/</span>);</span><br><span class="line">      _failed();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 请求硬兜底</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">_failed</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  io(&#123;</span><br><span class="line">    url: hadrBackUrl,</span><br><span class="line">    success: <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">      <span class="comment">// 缓存数据到本地</span></span><br><span class="line">      cache(DATAKEY, data, cacheTime);</span><br><span class="line">      show(data);</span><br><span class="line">    &#125;,</span><br><span class="line">    error: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      Reporter.send(<span class="comment">/*SUPER_ERROR*/</span>);</span><br><span class="line">      show(data); </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意到，我们在上面使用了缓存失效时间，考虑到数据的及时性，设置为 10 天。backUrl 是 url 的备份地址，hardBackUrl 是运营填写的备份数据，整个流程都在闭环之中，所以出问题的概率就大大降低了，即便是后端接口出错，我们也可以看着监控信息，放心的给后端开发 GG 打个电话，告知下等待修复，而不是急急忙忙，抓耳挠腮，担惊受怕天窗来了。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>本文提供的都是伪代码，而这些伪代码的实现并不复杂，也没必要写成组件，主要是提供思路，如何处理大流量高并发下的异步数据接口的兜底容灾。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/10/28/disaster-recovery-at-taobao-home-page/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/10/28/disaster-recovery-at-taobao-home-page/" data-id="cjt6lbxxx001wjeu12he9gxz7" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/10/28/disaster-recovery-at-taobao-home-page/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/兜底容灾/">兜底容灾</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/10/29/deep-into-node-1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Node.js 探秘：初识单线程的 Node.js
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/10/28/jstracker-how-to-collect-data/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">JSTracker：前端异常数据采集</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

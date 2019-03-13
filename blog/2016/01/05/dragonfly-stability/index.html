@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Node.js 源站应用稳定性保障 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="源站与 CDN源站是 CDN 技术中的一部分，是发布内容的原始站点。CDN 负责承载流量的部分称做缓存服务器，而缓存服务器自身不生产内容，需要从源站获取原始内容。Dragonfly 作为淘宝内容管理系统（CMS）的源站，渲染并为缓存服务器提供了所有的页面内容。 Dragonfly 使用 Node.js 开发，稳定性保障是一边实践探索、一边总结经验。现在来回顾，稳定性保障涉及了 Dragonfly">
+<meta name="keywords" content="nodejs,cms,稳定性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js 源站应用稳定性保障">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/05/dragonfly-stability/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="源站与 CDN源站是 CDN 技术中的一部分，是发布内容的原始站点。CDN 负责承载流量的部分称做缓存服务器，而缓存服务器自身不生产内容，需要从源站获取原始内容。Dragonfly 作为淘宝内容管理系统（CMS）的源站，渲染并为缓存服务器提供了所有的页面内容。 Dragonfly 使用 Node.js 开发，稳定性保障是一边实践探索、一边总结经验。现在来回顾，稳定性保障涉及了 Dragonfly">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1RwqULXXXXXXVXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1TfZyLXXXXXceXpXXXXXXXXXX-635-315.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1z51WLXXXXXcOXFXXXXXXXXXX-546-466.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1a853LXXXXXXDXFXXXXXXXXXX-546-545.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node.js 源站应用稳定性保障">
+<meta name="twitter:description" content="源站与 CDN源站是 CDN 技术中的一部分，是发布内容的原始站点。CDN 负责承载流量的部分称做缓存服务器，而缓存服务器自身不生产内容，需要从源站获取原始内容。Dragonfly 作为淘宝内容管理系统（CMS）的源站，渲染并为缓存服务器提供了所有的页面内容。 Dragonfly 使用 Node.js 开发，稳定性保障是一边实践探索、一边总结经验。现在来回顾，稳定性保障涉及了 Dragonfly">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1RwqULXXXXXXVXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-dragonfly-stability" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Node.js 源站应用稳定性保障
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 基德</span>
+        
+        <span>发表于: <a href="/blog/2016/01/05/dragonfly-stability/" class="article-date">
+  <time datetime="2016-01-05T11:45:44.000Z" itemprop="datePublished">2016-01-05</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1RwqULXXXXXXVXFXXXXXXXXXX-900-500.jpg" alt="Node.js 源站应用稳定性保障"></p>
+<h2 id="源站与-CDN"><a href="#源站与-CDN" class="headerlink" title="源站与 CDN"></a>源站与 CDN</h2><p>源站是 CDN 技术中的一部分，是发布内容的原始站点。CDN 负责承载流量的部分称做缓存服务器，而缓存服务器自身不生产内容，需要从源站获取原始内容。Dragonfly 作为淘宝内容管理系统（CMS）的源站，渲染并为缓存服务器提供了所有的页面内容。</p>
+<p>Dragonfly 使用 Node.js 开发，稳定性保障是一边实践探索、一边总结经验。现在来回顾，稳定性保障涉及了 Dragonfly 完整的开发运维的生命周期。因此本文依次从设计、实现、验收、运维四个环节展开。</p>
+<h2 id="系统设计"><a href="#系统设计" class="headerlink" title="系统设计"></a>系统设计</h2><p>从设计入手，我们分别梳理了 Dragonfly 在淘宝 CMS 生态圈的拓扑图和源站内部流程的草图。</p>
+<p>源站的外部环境比较简单。前面对接 CDN，实现流量承载和核心页面的容灾，稳定性很高。后面主要对接 Redis 缓存，用于获取页面的各种资源。（图中的 配置中心 和 FileSync，分别用于获取配置和共享模板片段，为弱依赖）</p>
+<p><img src="https://img.alicdn.com/tps/TB1TfZyLXXXXXceXpXXXXXXXXXX-635-315.png" alt="Dragonfly 外部环境"></p>
+<p>TMS 支持多终端页面的投放，因此 CDN 需要有识别终端的能力，Dragonfly 为此做了相关的处理。梳理前，源站的内部流程如下（Dragonfly 使用了 Koa.js，其中间件执行流程为回形针型——正序进，逆序出）：</p>
+<p><img src="http://img.alicdn.com/tps/TB1z51WLXXXXXcOXFXXXXXXXXXX-546-466.png" alt="Dragonfly 内部流程 - 旧"></p>
+<p>这里我们注意到：</p>
+<ol>
+<li>没有输入过滤模块，为保证环境一致，用户 Query 需要统一丢掉。</li>
+<li>获取页面入口模块依赖 Redis 这样欠稳定的系统，但是并没有纳入容灾备份的流程。</li>
+<li>没有统一的异常处理模块，容灾模块只作异常检测，并为妥善处理异常。</li>
+</ol>
+<p>为此我们先在设计上进行了如下调整：</p>
+<p><img src="http://img.alicdn.com/tps/TB1a853LXXXXXXDXFXXXXXXXXXX-546-545.png" alt="Dragonfly 内部流程"></p>
+<p>依据新的设计，我们确认了依赖不稳定系统的模块都能容灾模块覆盖。同时根据这张草图，我么确认了需要在实现、运维环节检查的内容：</p>
+<ol>
+<li>确认外部依赖系统都有容错策略。</li>
+<li>确认内部错误抛出都做了正确的日志记录，依据自身场景作恰当的容灾或其它异常处理。</li>
+<li>确认监控脚本被正确的配置。</li>
+</ol>
+<h2 id="系统实现"><a href="#系统实现" class="headerlink" title="系统实现"></a>系统实现</h2><p>依据系统设计环节的评审成果，我们开始评审系统实现部分。</p>
+<h3 id="外部依赖容灾保障"><a href="#外部依赖容灾保障" class="headerlink" title="外部依赖容灾保障"></a>外部依赖容灾保障</h3><p>基本原则：</p>
+<blockquote>
+<ul>
+<li>关键链路依赖的外部系统越少越好，外部依赖一定要有详细的容灾策略和预案。</li>
+<li>依赖也包括第三方模块，应该使用最新稳定版本。过期版本易出现 BUG 无人解决、集成困难、性能差等问题。</li>
+</ul>
+</blockquote>
+<p>Dragonfly 外部依赖的具体保障：</p>
+<p><strong>CDN/源站</strong></p>
+<ul>
+<li>CDN，根据自身特点有大量节点，依赖专业运维团队的维护，部分节点异常不影响可用性。</li>
+<li>源站异常，CDN 使用过期的副本。</li>
+</ul>
+<p><strong>终端探测</strong></p>
+<ul>
+<li>终端探测模块使用 UA 进行判断。遇到未知设备，可能出现判断错误，因此系统提供了强制切换参数。</li>
+</ul>
+<p><strong>配置中心</strong></p>
+<ul>
+<li>配置中心即 Dragonfly 使用的配置推送系统。设计上，配置中心从服务端至客户端有多级容灾。</li>
+<li>另外 Dragonfly 还在源码中做了一份本地容灾。</li>
+</ul>
+<p><strong>FileSync</strong></p>
+<ul>
+<li>文件同步系统 FileSync 维护了 CMS／应用 共用的前端代码片段。</li>
+<li>推送后存在本地，遇异常可本地容灾、手工更新。</li>
+</ul>
+<p><strong>Redis</strong></p>
+<ul>
+<li>Redis 性能不错，但受网络影响，Dragonfly 实际使用时超时较多。我们做了大量测试，发现主要原因为 Redis 传输小数据较多，因此确保 TCP 连接做了 Keep-Alive、关闭 Nagle 算法、关闭 Delay ACK 优化后，性能得到了很大改善。</li>
+<li>Redis 是数据缓存，Dragonfly 读取数据以 Redis 为主，另外使用了 Aliyun OSS 作为备份数据源。在 Redis 异常、超时时使用 Aliyun OSS。</li>
+<li>Redis、Aliyun OSS 皆异常时页面将无法更新，源站启用本地容灾。</li>
+</ul>
+<h3 id="内部容错保障"><a href="#内部容错保障" class="headerlink" title="内部容错保障"></a>内部容错保障</h3><p>基本原则有：</p>
+<blockquote>
+<ul>
+<li>规范异常格式、抛出方式，进行统一处理是容灾保障的基础。</li>
+<li>关键系统资源遇到瓶颈，要有降级策略。</li>
+</ul>
+</blockquote>
+<p>Dragonfly 的具体处理方式：</p>
+<p><strong>上下文异常处理</strong></p>
+<ul>
+<li>发生后需要做日志记录，使用静态副本容灾。</li>
+</ul>
+<p><strong>未捕获的异常</strong></p>
+<ul>
+<li>写日志触发报警，重启 Worker 进程。</li>
+</ul>
+<p><strong>实时备份</strong></p>
+<ul>
+<li>每个页面请求，每 10s 生成一次静态容灾副本写入硬盘。</li>
+</ul>
+<p><strong>内存监控</strong></p>
+<ul>
+<li>渲染过程中会产生大量缓存、临时字符串，给垃圾回收带来了很大压力。</li>
+<li>内存占用过高，无法及时回收时，需要强制重启 Worker 进行回收。</li>
+<li>更多优化方案持续进行。</li>
+</ul>
+<p><strong>过载降级</strong></p>
+<ul>
+<li>压力过高时，Dragonfly 会收到 nginx 提供的 Over-Load 头，此时直接返回静态副本。</li>
+</ul>
+<p><strong>静态开关</strong></p>
+<ul>
+<li>与开发团队交流学到的手动降级方案。用于应付未知 BUG 导致的大批页面异常。</li>
+</ul>
+<h2 id="测试（验收）"><a href="#测试（验收）" class="headerlink" title="测试（验收）"></a>测试（验收）</h2><blockquote>
+<p>系统设计时也要一并思考如何测试。优秀的设计应该是易于测试的。</p>
+</blockquote>
+<h3 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h3><p>充分的单元测试是持续重构的保障。Dragonfly 的单元测试细节本文就不展开了，这里给出笔者的一些总结：</p>
+<ul>
+<li>单元测试不拖累开发效率，反而是持续高效开发的保障。</li>
+<li>测试覆盖可以验证代码和测试质量，帮助我们找到潜在的缺陷。</li>
+<li>单元测试设计要充分，从程序的基本单元入手，需求变更时必须及时更新。</li>
+<li>单元测试应保持独立性，每项测试不依赖其它测试，产生可覆盖、一致的结果。这里 Mock 是项很有用的技术。</li>
+</ul>
+<h3 id="功能测试"><a href="#功能测试" class="headerlink" title="功能测试"></a>功能测试</h3><p>单元测试保障了每个模块的质量。对于整个系统而言，功能测试是确定是否实现用户需求的有效方法。</p>
+<p>功能测试的实现与单元测试大同小异。要特别说明的是，对于容灾模块，除了功能测试，我们还做了线上演练。</p>
+<h3 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h3><p>主要利用压测平台模拟真实用户访问，页面使用线上机器抓取的真实地址。出现明显性能下滑的变更不能发布。</p>
+<h3 id="持续集成"><a href="#持续集成" class="headerlink" title="持续集成"></a>持续集成</h3><p>既然测试是质量的保障，我们应该把测试自动化。选择一个成熟的持续集成方案吧。</p>
+<h2 id="日志与监控（维护）"><a href="#日志与监控（维护）" class="headerlink" title="日志与监控（维护）"></a>日志与监控（维护）</h2><h3 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h3><p>日志是用于监控和排查问题的。应以监控和问题排查者的角度记录。做到统一格式，按模块分类记录，集中管理。笔者理解的日志分类为：</p>
+<p>诊断日志</p>
+<ul>
+<li>例如源站会按 config/redis/xtemplate 具体分类记录。</li>
+</ul>
+<p>统计日志</p>
+<ul>
+<li>例如源站的 QPS/RT 等访问日志统计。</li>
+</ul>
+<p>审计日志</p>
+<ul>
+<li>例如用户操作日志。</li>
+</ul>
+<blockquote>
+<p>日志是需要定时维护的，这里依据 Dragonfly 的日志维护经验给出总结：</p>
+</blockquote>
+<ul>
+<li>无用日志必须清理。</li>
+<li>设计日志时思考如何方便故障排查者。</li>
+<li>排查故障后，应反思日志是否合理，并及时完善日志。</li>
+<li>给一台线上机器实现详细 Debug 日志的开关，用于复杂问题的排查。</li>
+</ul>
+<h3 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h3><p>有日志无监控等于没做，部分监控经验：</p>
+<ul>
+<li>监控信息要便于快速解决问题。</li>
+<li>监控要依据运维经验调整合理，误报过多容易导致麻痹。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>千里之堤，溃于蚁穴。系统稳定性需要持续的点滴积累，疏忽任何一个细微环节都可能给系统带来巨大的风险。但是依赖合理的规划、严格的验收标准、持续完善的监控，稳定性保障并不困难。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/05/dragonfly-stability/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/05/dragonfly-stability/" data-id="cjt6lbxxy0020jeu1op00qz0t" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/05/dragonfly-stability/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cms/">cms</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/稳定性/">稳定性</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/07/find-back-the-lost-es6-features-in-nodejs/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          找回 Node.js 里面那些遗失的 ES6 特性
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/04/font-end-tech-inventory/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">近几年前端技术盘点以及 2016 年技术发展方向</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>无线性能优化：FPS 测试 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="时间回到几周前，这天，女神突然来找我，“我这里有几个页面想测量下页面滚动的顺畅性，你有啥办法不？”。Are you kidding me？这么简单，简直是道送分题啊，于是当着女神面，打开 Chrome 开发者工具，勾选上 Show FPS meter，醒目的 FPS 监控面板就出来了，滑动页面时 FPS 的曲线就基本反映出了页面滚动的顺畅性，坐等女神的夸奖~~ “这个我知道啊，但是我有好多页面，">
+<meta name="keywords" content="监控,性能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无线性能优化：FPS 测试">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/13/measuring-fps/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="时间回到几周前，这天，女神突然来找我，“我这里有几个页面想测量下页面滚动的顺畅性，你有啥办法不？”。Are you kidding me？这么简单，简直是道送分题啊，于是当着女神面，打开 Chrome 开发者工具，勾选上 Show FPS meter，醒目的 FPS 监控面板就出来了，滑动页面时 FPS 的曲线就基本反映出了页面滚动的顺畅性，坐等女神的夸奖~~ “这个我知道啊，但是我有好多页面，">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1vDR6LpXXXXbnXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1o28WLpXXXXc0XXXXXXXXXXXX-610-267.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB19v8YLpXXXXXeXpXXXXXXXXXX-949-446.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1ShtMLpXXXXa7XFXXXXXXXXXX-949-446.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Tr4yLpXXXXbFaXXXXXXXXXXX-949-446.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1fJJ3LpXXXXcaXXXXXXXXXXXX-1296-670.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB10exWLpXXXXXHXpXXXXXXXXXX-1435-555.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="无线性能优化：FPS 测试">
+<meta name="twitter:description" content="时间回到几周前，这天，女神突然来找我，“我这里有几个页面想测量下页面滚动的顺畅性，你有啥办法不？”。Are you kidding me？这么简单，简直是道送分题啊，于是当着女神面，打开 Chrome 开发者工具，勾选上 Show FPS meter，醒目的 FPS 监控面板就出来了，滑动页面时 FPS 的曲线就基本反映出了页面滚动的顺畅性，坐等女神的夸奖~~ “这个我知道啊，但是我有好多页面，">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1vDR6LpXXXXbnXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-measuring-fps" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      无线性能优化：FPS 测试
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 冬萌</span>
+        
+        <span>发表于: <a href="/blog/2016/01/13/measuring-fps/" class="article-date">
+  <time datetime="2016-01-13T14:54:23.000Z" itemprop="datePublished">2016-01-13</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1vDR6LpXXXXbnXpXXXXXXXXXX-900-500.jpg" alt="无线性能优化：FPS 测试"></p>
+<p>时间回到几周前，这天，女神突然来找我，“我这里有几个页面想测量下页面滚动的顺畅性，你有啥办法不？”。Are you kidding me？这么简单，简直是道送分题啊，于是当着女神面，打开 Chrome 开发者工具，勾选上 Show FPS meter，醒目的 FPS 监控面板就出来了，滑动页面时 FPS 的曲线就基本反映出了页面滚动的顺畅性，坐等女神的夸奖~~</p>
+<p>“这个我知道啊，但是我有好多页面，难道要一个一个人工看吗？而且这个也没有一个记录的导出，如果能有个方法帮我自动的测量，有问题再通知我，我再仔细排查就好了”。</p>
+<p>这个需求开始有点技术含量了，不过应该也难不倒我，页面都接入了 UITest，在页面做 UI 测试的时候，跑一下测量 FPS 的测试用例就 ok 了，那如何测量呢？女神等我~~</p>
+<h3 id="mozPaintCount"><a href="#mozPaintCount" class="headerlink" title="mozPaintCount"></a>mozPaintCount</h3><p>mozPaintCount 变量是 Mozilla 提供的方法，其返回的是当前文档 paint 到屏幕上的数量，通过计算单位时间 paint 数量变化，即可计算出页面的 FPS，so easy。</p>
+<p>等等，这个变量目前好像只有 Firefox 支持，Chrome 上并没有一个 webkitPaintCount 或者 paintCount 变量，而我们的 UITest 是跑在 ChromeDriver 或者 PhantomJS 上，并没有 Firefox 环境，好吧，这个可以做备选方案，依赖于 UITest 支持 Firefox 环境。为了完成女神的需求，我们还要考虑其他方案了。</p>
+<h3 id="requestAnimationFrame"><a href="#requestAnimationFrame" class="headerlink" title="requestAnimationFrame"></a>requestAnimationFrame</h3><p>在页面重绘前，浏览器会执行传入 requestAnimationFrame 的入参函数，一般多用来实现连贯的逐帧动画。那我们基于 requestAnimationFrame 不就可以获得页面的绘制频率，计算出 FPS，而且浏览器支持情况也不错，说干就干，示例代码如下（简单示例，没做兼容等处理）：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> lastTime = performance.now();</span><br><span class="line"><span class="keyword">var</span> frame = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">var</span> lastFameTime = performance.now();</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> loop = <span class="function"><span class="keyword">function</span>(<span class="params">time</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">var</span> now =  performance.now();</span><br><span class="line">	<span class="keyword">var</span> fs = (now - lastFameTime);</span><br><span class="line">	lastFameTime = now;</span><br><span class="line">	<span class="keyword">var</span> fps = <span class="built_in">Math</span>.round(<span class="number">1000</span>/fs);</span><br><span class="line">	frame++;</span><br><span class="line">	<span class="keyword">if</span> (now &gt; <span class="number">1000</span> + lastTime) &#123;</span><br><span class="line">		<span class="keyword">var</span> fps = <span class="built_in">Math</span>.round( ( frame * <span class="number">1000</span> ) / ( now - lastTime ) );</span><br><span class="line">		frame = <span class="number">0</span>;    </span><br><span class="line">		lastTime = now;    </span><br><span class="line">	&#125;;           </span><br><span class="line">	<span class="built_in">window</span>.requestAnimFrame(loop);   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用例结果如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1o28WLpXXXXc0XXXXXXXXXXXX-610-267.png" alt="requestAnimationFrame 测试 FPS 结果"></p>
+<p>大功告成，可以去找女神答复了，等等，这样是不是太简单了点，无法让女神刮目相看啊（在女神面前装逼），我们是不是再深入点。</p>
+<p>Chrome 浏览器渲染页面时，涉及了两个线程，Render 主线程和 Compositor 合成线程，且两个线程通过名为 Commit 的消息来保持同步，而每一帧消耗时间应该是包含两部分，Render 主线程消耗的时间和 Compositor 线程消耗的时间。典型的状态如下（以下三张图片来自 <a href="https://github.com/GoogleChrome/frame-timing-polyfill/wiki/Explainer" target="_blank" rel="noopener">frame-timing-polyfill</a>）：</p>
+<p><img src="https://img.alicdn.com/tps/TB19v8YLpXXXXXeXpXXXXXXXXXX-949-446.png" alt="典型状态"></p>
+<p>主线程 Commit 消息提交给合成线程，任务都在 16.66ms 内完成。当然，对于一些输入事件，比如滚动，是先转移给合成线程进行处理，然后通知给主线程，这样可以保证对用户的输入操作做及时的响应，同时，对于一些页面更新，如 CSS 动画和 CSS 滤镜，只需合成线程处理，而无需请求主线程，如下所示：</p>
+<p><img src="https://img.alicdn.com/tps/TB1ShtMLpXXXXa7XFXXXXXXXXXX-949-446.png" alt="只需要 Compositor 线程"></p>
+<p>当然，也有可能，主线程处理耗时较多，导致提交给合成线程的时间推迟到了下一帧，如下所示：</p>
+<p><img src="https://img.alicdn.com/tps/TB1Tr4yLpXXXXbFaXXXXXXXXXXX-949-446.png" alt="主线程超时"></p>
+<p>针对以上三种情况，那流畅性如何定义呢？就需要因地制宜，不同环境分别分析了。</p>
+<ul>
+<li><p>对于滚动和 CSS 动画，由于不涉及主线程的影响，我们会更关心合成线程的绘制频率，而合成线程的绘制频率也反映了滚动和 CSS 动画的流程性。</p>
+</li>
+<li><p>对于 JS 帧动画而言，我们期望主线程和合成线程的消耗加起来到能在 16.66ms 内，且不丢帧。因此我们需要同时关注主线程的 Commit 频率和合成线程的绘制频率，并且我们期望每个主线程的 Commit 都对应唯一一个合成线程的绘制（保证不丢帧）。</p>
+</li>
+</ul>
+<p>那是否有方法可以让我们分别取到 Render 主线程和 Compositor 合成线程的数据呢？答案是 <a href="http://w3c.github.io/frame-timing/" target="_blank" rel="noopener">Frame Timing</a>。</p>
+<h3 id="Frame-Timing"><a href="#Frame-Timing" class="headerlink" title="Frame Timing"></a>Frame Timing</h3><p>Frame Timing API 目前还只是草案，暂时还没发现有浏览器支持，不过我们可以先实现，万一浏览器支持了呢~~，目前的 API 如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> rendererEvents = <span class="built_in">window</span>.performance.getEntriesByType(<span class="string">"renderer"</span>);</span><br><span class="line"><span class="keyword">var</span> compositeEvents = <span class="built_in">window</span>.performance.getEntriesByType(<span class="string">"composite"</span>);</span><br></pre></td></tr></table></figure>
+<p>获取 Render 主线程和合成线程的记录，每条记录包含的信息基本如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	sourceFrameNumber: <span class="number">120</span>,</span><br><span class="line">	startTime: <span class="number">1342.549374253</span>,</span><br><span class="line">	duration: <span class="number">10.654313323</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>每个记录都包括唯一的 Frame Number、Frame 开始时间以及持续时间。根据 duration 就可以知道该帧是否达到 16.66ms 的标准，同时根据单位时间记录数（Frame）的个数就能算出主线程或者合成线程每秒的帧率。</p>
+<p>同时，对于主线程 Commit 给合成线程绘制的情况，可以根据唯一的 sourceFrameNumber 将 renderEvents 的记录和 compositeEvents 的记录做关联，得出每个主线程 Commit 所对应的合成线程绘制的次数，如前所说，这也是判断 JS 动画流程性的一个可检测指标~~（具体实现代码较多且比较简单，就不贴了，小伙伴们动动脑筋，分分钟就写出来了~）</p>
+<p>至此，终于可以向女神交差了，想想女神崇拜的目光，还有点小激动呢~~</p>
+<p>再等等，既然 Chrome 能打开 FPS meter，而且我们的 UI 测试也是跑在 ChromDriver 中的，那是不是可以通过配置打开 Chrome 的 FPS meter 获取到 FPS 呢，女神，再等我下~</p>
+<h3 id="Show-FPS-Counter-or-Performance-Log"><a href="#Show-FPS-Counter-or-Performance-Log" class="headerlink" title="Show FPS Counter or Performance Log"></a>Show FPS Counter or Performance Log</h3><p>果不其然，查询 ChromeDriver 的<a href="http://peter.sh/experiments/chromium-command-line-switches/" target="_blank" rel="noopener">配置设置</a></p>
+<blockquote>
+<p>–show-fps-counter: Draws a heads-up-display showing Frames Per Second as well as GPU memory usage. If you also use –vmodule=”head*=1” then FPS will also be output to the console log.</p>
+</blockquote>
+<p>只要能输出到 console log 里，我们就能方便的取到了，于是果断在 UITest 的 ChromeDriver 配置里加上里这两项：</p>
+<pre><code>chromeOptions[&quot;args&quot;] = [
+    // 其他配置省略
+    &apos;--show-fps-counter&apos;,
+    &apos;--vmodule=&quot;head*=1&quot;&apos;
+];
+</code></pre><p>满心欢喜的一试，FPS meter 是出来的，但是说好的 console log 并没有，具体的讨论可以参见这个 <a href="https://code.google.com/p/chromium/issues/detail?id=430258" target="_blank" rel="noopener">issue</a>。</p>
+<p>难道没有别的办法了吗？既然 Chrome 的 Timeline 那么强大，其中也包含了每一帧的耗时，那是不是可以取到 Timeline 的数据？当然没问题，我们使用 <a href="https://www.npmjs.com/package/selenium-webdriver" target="_blank" rel="noopener">selenium-webdriver</a> 就能方便的获取到页面的 Performance Log，示例如下所示：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> webdriver = <span class="built_in">require</span>(<span class="string">'selenium-webdriver'</span>);</span><br><span class="line"><span class="keyword">var</span> chrome = <span class="built_in">require</span>(<span class="string">'selenium-webdriver/chrome'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 配置需要跟踪记录的数据</span></span><br><span class="line"><span class="keyword">var</span> options = <span class="keyword">new</span> chrome.Options();</span><br><span class="line"><span class="keyword">var</span> traceCategories = [</span><br><span class="line">	<span class="string">'blink.console'</span>,</span><br><span class="line">	<span class="string">'devtools.timeline'</span>,</span><br><span class="line">	<span class="string">'toplevel'</span>,</span><br><span class="line">	<span class="string">'disabled-by-default-devtools.timeline'</span>,</span><br><span class="line">	<span class="string">'disabled-by-default-d.evtools.timeline.frame'</span></span><br><span class="line">];</span><br><span class="line">options.setLoggingPrefs(&#123; <span class="attr">performance</span>: <span class="string">'ALL'</span> &#125;);</span><br><span class="line">	options.setPerfLoggingPrefs(&#123;</span><br><span class="line">	<span class="string">'traceCategories'</span>: traceCategories.join(<span class="string">','</span>)</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 传入 chromedriver 实例</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getTrace</span>(<span class="params">browser</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> (<span class="keyword">new</span> webdriver.WebDriver.Logs(browser))</span><br><span class="line">		.get(<span class="string">'performance'</span>)</span><br><span class="line">		.then(<span class="function"><span class="keyword">function</span>(<span class="params">logs</span>) </span>&#123;</span><br><span class="line">			<span class="comment">// performance log </span></span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，traceCategories 的配置和 <code>chrome://tracing/</code> 的配置一样，打开 Chrome，地址栏输入 <code>chrome://tracing/</code>，点击 <code>record</code> 按钮，会出现如下所示的配置项：</p>
+<p><img src="https://img.alicdn.com/tps/TB1fJJ3LpXXXXcaXXXXXXXXXXXX-1296-670.png" alt="Chrome Tracing"></p>
+<p>其中的配置就是我们可以获取的。获取到 Performance Log 后导出成 JSON 文件，导入到 Chrome 的 Timeline 里，你会惊奇的发现，这和直接用 Timeline 效果是一样一样的，如下所示：</p>
+<p><img src="https://img.alicdn.com/tps/TB10exWLpXXXXXHXpXXXXXXXXXX-1435-555.png" alt="Timeline"></p>
+<p>但是接下来，我发现真正头疼的问题来了，Performance Log 是一堆密密麻麻的数据，而且还没找到相关文档，目前只是可以取出平均的 FPS，计算方法如下，首先解析数据，取出类型为 DrawFrame 的记录个数，然后除以整个统计的持续时间，即可大体得出整体平均的 FPS，如何解析出更具体的数据，还在持续研究中，希望这下可以让女神满意，嘿嘿嘿~</p>
+<h3 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h3><ul>
+<li><a href="http://robert.ocallahan.org/2010/11/measuring-fps_26.html" target="_blank" rel="noopener">Measuring FPS</a></li>
+<li><a href="https://github.com/GoogleChrome/frame-timing-polyfill/wiki/Explainer" target="_blank" rel="noopener">frame-timing-polyfill</a></li>
+<li><a href="http://peter.sh/experiments/chromium-command-line-switches/" target="_blank" rel="noopener">ChromeDriver Config</a></li>
+<li><a href="https://code.google.com/p/chromium/issues/detail?id=430258" target="_blank" rel="noopener">issue: need FPS data in console log</a></li>
+<li><a href="https://www.npmjs.com/package/selenium-webdriver" target="_blank" rel="noopener">selenium-webdriver</a></li>
+<li><a href="http://seleniumhq.github.io/selenium/docs/api/javascript/module_selenium-webdriver.html" target="_blank" rel="noopener">selenium-webdriver api</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/13/measuring-fps/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/13/measuring-fps/" data-id="cjt6lbxzh0068jeu1g60laom6" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/13/measuring-fps/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能/">性能</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/监控/">监控</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/14/nodejs-memory-leak-analyze/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          记一次 Node.js 应用内存暴涨分析
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/13/node-subway-beijing/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">让我们谈谈「生产环境中的 Node.js」- Node 地下铁第 1 次线下沙龙总结</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

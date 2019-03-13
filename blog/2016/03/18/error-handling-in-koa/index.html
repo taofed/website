@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>如何优雅的在 koa 中处理错误 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="软件开发时，有 80% 的代码在处理各种错误。 ——某著名开发者  想让自己的代码健壮，错误处理是必不可少的。这篇文章将主要介绍 koa 框架中错误处理的实现（其实主要是 co 的实现），使用 koa 框架开发 web 应用时进行错误处理的一些方法。 基础在 Node.js 中，错误处理的方法主要有下面几种：  和其他同步语言类似的 throw / try / catch 方法 callbac">
+<meta name="keywords" content="node.js,co,koa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何优雅的在 koa 中处理错误">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/03/18/error-handling-in-koa/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="软件开发时，有 80% 的代码在处理各种错误。 ——某著名开发者  想让自己的代码健壮，错误处理是必不可少的。这篇文章将主要介绍 koa 框架中错误处理的实现（其实主要是 co 的实现），使用 koa 框架开发 web 应用时进行错误处理的一些方法。 基础在 Node.js 中，错误处理的方法主要有下面几种：  和其他同步语言类似的 throw / try / catch 方法 callbac">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1WJcvLVXXXXX5XFXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何优雅的在 koa 中处理错误">
+<meta name="twitter:description" content="软件开发时，有 80% 的代码在处理各种错误。 ——某著名开发者  想让自己的代码健壮，错误处理是必不可少的。这篇文章将主要介绍 koa 框架中错误处理的实现（其实主要是 co 的实现），使用 koa 框架开发 web 应用时进行错误处理的一些方法。 基础在 Node.js 中，错误处理的方法主要有下面几种：  和其他同步语言类似的 throw / try / catch 方法 callbac">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1WJcvLVXXXXX5XFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-error-handling-in-koa" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      如何优雅的在 koa 中处理错误
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 栖邀</span>
+        
+        <span>发表于: <a href="/blog/2016/03/18/error-handling-in-koa/" class="article-date">
+  <time datetime="2016-03-18T11:44:08.000Z" itemprop="datePublished">2016-03-18</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1WJcvLVXXXXX5XFXXXXXXXXXX-900-500.jpg" alt="如何优雅的在 koa 中处理错误"></p>
+<blockquote>
+<p>软件开发时，有 80% 的代码在处理各种错误。<br> </p><p style="text-align:right">——某著名开发者</p><p></p>
+</blockquote>
+<p>想让自己的代码健壮，错误处理是必不可少的。这篇文章将主要介绍 koa 框架中错误处理的实现（其实主要是 co 的实现），使用 koa 框架开发 web 应用时进行错误处理的一些方法。</p>
+<h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><p>在 Node.js 中，错误处理的方法主要有下面几种：</p>
+<ul>
+<li>和其他同步语言类似的 throw / try / catch 方法</li>
+<li>callback(err, data) 回调形式</li>
+<li>通过 EventEmitter 触发一个 error 事件</li>
+</ul>
+<p>第一种使用 catch 来捕获错误，十分易用，其他两种在捕获错误时多多少少都有些别扭。</p>
+<p>但是 koa 通过十分巧妙的”黑魔法“让我们可以使用 catch 来捕获异步代码中的错误。比如下面的例子：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="built_in">Promise</span> = <span class="built_in">require</span>(<span class="string">'bluebird'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> filename = <span class="string">'/nonexists'</span>;</span><br><span class="line"><span class="keyword">let</span> statAsync = <span class="built_in">Promise</span>.promisify(fs.stat);</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">yield</span> statAsync(filename);</span><br><span class="line">&#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">  <span class="comment">// error here</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 koa 中，推荐统一使用 throw / try / catch 的方式来进行错误的触发和捕获，这会让代码更加易读，防止被绕晕。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>上面我们说了 koa 中可以使用 try / catch，我们就来分析下它是如何做到的。koa 基于 co，所以，我们其实主要是分析 co 的实现。（注：这一部分比较偏原理，不关心的可以跳过。）</p>
+<p>首先，我们来看看什么是 generator。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">gen</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> a = <span class="keyword">yield</span> <span class="string">'start'</span>;</span><br><span class="line">  <span class="built_in">console</span>.log(a);</span><br><span class="line">  <span class="keyword">var</span> b = <span class="keyword">yield</span> <span class="string">'end'</span>;</span><br><span class="line">  <span class="built_in">console</span>.log(b);</span><br><span class="line">  <span class="keyword">return</span> <span class="string">'over'</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> it = gen();</span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 'start', done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next(<span class="number">22</span>)); <span class="comment">// 22 &#123;value: 'end', done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next(<span class="number">333</span>)); <span class="comment">// 333 &#123;value: 'over', done: true&#125;</span></span><br></pre></td></tr></table></figure>
+<p>带有 <code>*</code> 的函数声明表示是一个 generator 函数，当执行 <code>gen()</code> 时，函数体内的代码并没有执行，而是返回了一个 generator 对象。</p>
+<p>generator 函数通常和 yield 结合使用，函数执行到每个 yield 时都会暂停并返回 yield 的右值。下次调用 next 时，函数会从 yield 的下一个语句继续执行。等到整个函数执行完，next 方法返回的 done 字段会变成 true，并且将函数返回值作为 value 字段。</p>
+<p>第一次执行 <code>next()</code> 时，走到 <code>yield &#39;start&#39;</code> 后暂停并返回 <code>yield</code> 的右值 <code>&#39;start&#39;</code>。注意，此时<code>var a =</code> 这个赋值语句其实还没有执行。</p>
+<p>第二次执行 <code>next(22)</code> 时，从 <code>yield &#39;start&#39;</code> 下一个语句执行。于是执行 <code>var a =</code> 这个赋值语句，而表达式 <code>yield &#39;start&#39;</code> 的值就等于传递给 <code>next</code> 函数的参数值 <code>22</code>，所以，<code>a</code> 被赋值为 <code>22</code>。然后继续往下执行到 <code>yield &#39;end&#39;</code> 后暂停并返回 <code>yield</code> 的右值 <code>&#39;end&#39;</code>。</p>
+<p>第三次执行 <code>next(333)</code> 时，从 <code>yield &#39;end&#39;</code> 下一个语句执行。此时执行 <code>var b =</code> 这个赋值语句，表达式 <code>yield &#39;end&#39;</code> 的值等于传递给 <code>next</code> 函数的参数 <code>333</code>，<code>b</code> 被赋值为 <code>333</code>。继续往下执行到 <code>return</code> 语句，将 <code>return</code> 语句的返回值作为 <code>value</code> 返回，因为函数已经执行完毕，<code>done</code> 字段标记为 <code>true</code>。</p>
+<p>可以看到 generator 就是一种迭代机制，就像一只很懒的青蛙，戳一下（调用 <code>next</code>）动一下。</p>
+<p>generator 对象还有一个 <code>throw</code> 方法，可以在 generator 函数外面抛出异常，然后在 generator 函数里面捕获异常。有点绕？我们来看一个实例：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">gen</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">yield</span> <span class="string">'a'</span>;</span><br><span class="line">    <span class="keyword">yield</span> <span class="string">'b'</span>;</span><br><span class="line">  &#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'inside：'</span>, e); <span class="comment">// inside： [Error: error from outside]</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> it = gen();</span><br><span class="line">it.next();</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(it.throw(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'error from outside'</span>))); <span class="comment">// &#123; value: undefined, done: true &#125;</span></span><br></pre></td></tr></table></figure>
+<p>我们执行一次 <code>next</code>，会运行到 <code>yield &#39;a&#39;</code> 这里然后暂停，这一句刚好在 try 的返回内，因此 <code>it.throw</code> 抛出的错误我们可以 catch 到。并且看到 <code>throw</code> 返回的 <code>done</code> 字段是 <code>true</code>，说明后面的 <code>yield &#39;b&#39;</code> 已经不会再执行了。</p>
+<p>如果我们不调用 <code>next</code>，或者连续调用三次 <code>next</code>，<code>yield</code> 代码不在 <code>try</code> 返回里面，会导致报错。co 的错误处理其实正是利用了这个 <code>throw</code> 方法。</p>
+<p>下面我们来看看 co 的核心代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">co</span>(<span class="params">gen</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> ctx = <span class="keyword">this</span>;</span><br><span class="line">  <span class="keyword">var</span> args = slice.call(<span class="built_in">arguments</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 统一返回一个整体的 promise</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve, reject</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 如果是函数，调用并取得 generator 对象</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> gen === <span class="string">'function'</span>) gen = gen.apply(ctx, args);</span><br><span class="line">    <span class="comment">// 如果根本不是 generator 对象（没有 next 方法），直接 resolve 掉并返回</span></span><br><span class="line">    <span class="keyword">if</span> (!gen || <span class="keyword">typeof</span> gen.next !== <span class="string">'function'</span>) <span class="keyword">return</span> resolve(gen);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 入口函数</span></span><br><span class="line">    onFulfilled();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">onFulfilled</span>(<span class="params">res</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> ret;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 拿到 yield 的返回值</span></span><br><span class="line">        ret = gen.next(res);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        <span class="comment">// 如果执行发生错误，直接将 promise reject 掉</span></span><br><span class="line">        <span class="keyword">return</span> reject(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 延续调用链</span></span><br><span class="line">      next(ret);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">onRejected</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> ret;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 如果 promise 被 reject 了就直接抛出错误</span></span><br><span class="line">        ret = gen.throw(err);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        <span class="comment">// 如果执行发生错误，直接将 promise reject 掉</span></span><br><span class="line">        <span class="keyword">return</span> reject(e);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// 延续调用链</span></span><br><span class="line">      next(ret);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">next</span>(<span class="params">ret</span>) </span>&#123;</span><br><span class="line">      <span class="comment">// generator 函数执行完毕，resolve 掉 promise</span></span><br><span class="line">      <span class="keyword">if</span> (ret.done) <span class="keyword">return</span> resolve(ret.value);</span><br><span class="line">      <span class="comment">// 将 value 统一转换为 promise</span></span><br><span class="line">      <span class="keyword">var</span> value = toPromise.call(ctx, ret.value);</span><br><span class="line">      <span class="comment">// 将 promise 添加 onFulfilled、onRejected，这样当新的promise 状态变成成功或失败，就会调用对应的回调。整个 next 链路就执行下去了</span></span><br><span class="line">      <span class="keyword">if</span> (value &amp;&amp; isPromise(value)) <span class="keyword">return</span> value.then(onFulfilled, onRejected);</span><br><span class="line">      <span class="comment">// 没法转换为 promise，直接 reject 掉 promise</span></span><br><span class="line">      <span class="keyword">return</span> onRejected(<span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'You may only yield a function, promise, generator, array, or object, '</span></span><br><span class="line">        + <span class="string">'but the following object was passed: "'</span> + <span class="built_in">String</span>(ret.value) + <span class="string">'"'</span>));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>假设有下面的代码，让我们一起推演下执行流程：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">co(<span class="function"><span class="keyword">function</span>* <span class="title">gen</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> a = <span class="keyword">yield</span> <span class="built_in">Promise</span>.resolve(<span class="string">'a 值'</span>);</span><br><span class="line">  <span class="built_in">console</span>.log(a);</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">var</span> b = <span class="keyword">yield</span> <span class="built_in">Promise</span>.reject(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'b 错误'</span>));</span><br><span class="line">    <span class="keyword">var</span> c = <span class="keyword">yield</span> <span class="built_in">Promise</span>.resolve(<span class="string">'c 值'</span>);</span><br><span class="line">    <span class="built_in">console</span>.log(b, c);</span><br><span class="line">  &#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'error'</span>, e);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">'over'</span>;</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params">value</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(value);</span><br><span class="line">&#125;).catch(<span class="function"><span class="keyword">function</span> (<span class="params">err</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.error(err.stack);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>约定：<code>Promise.resolve(&#39;a 值&#39;)</code> 生成的是 promiseA；<code>Promise.reject(new Error(&#39;b 错误&#39;))</code> 生成的是 promiseB。</p>
+<p>首先传入 co 的 gen 函数会被执行，获取到 generator 对象。对应代码：<code>if (typeof gen === &#39;function&#39;) gen = gen.apply(ctx, args);</code>。</p>
+<p>然后调用 <code>onFulfilled</code> 函数。开启整个执行过程。</p>
+<p>第一次执行 <code>ret = gen.next(res)</code>，走到 <code>yield Promise.resolve(&#39;a 值&#39;)</code> 后暂停并返回 <code>yield</code> 的右值，此时 <code>ret</code> 等于 <code>{value: PromiseA, done: false}</code>。</p>
+<p>然后执行 <code>next(ret)</code>，将 <code>ret.value</code> 转换为 Promise，执行 <code>value.then(onFulfilled, onRejected)</code>，也就是 <code>PromiseA.then(onFulfilled, onRejected)</code>。当我们的 PromiseA 被 resolve 后，又再次执行 <code>onFulfilled</code>，并传入 resvole 的值，也就是：<code>onFulfilled(&#39;a 值&#39;)</code>。</p>
+<p>于是第二次执行 <code>ret = gen.next(&#39;a 值&#39;)</code>（此时的 <code>res</code> 就等于 <code>a 值</code>），进入到 gen 函数，执行接下来的 <code>var a =</code> 赋值语句，<code>yield Promise.resolve(&#39;a 值&#39;)</code> 的返回值等于给 <code>next</code> 传递的参数 <code>&#39;a 值&#39;</code>，于是变量 <code>a</code> 被赋值为 <code>&#39;a 值&#39;</code>。继续执行到 <code>yield Promise.reject(new Error(&#39;b 错误&#39;))</code> 后暂停并返回 <code>yield</code> 的右值，此时 <code>ret</code> 等于 <code>{value: PromiseB, done: false}</code>。</p>
+<p>继续执行 <code>next(ret)</code>，延续调用链。执行 <code>value.then(onFulfilled, onRejected)</code>，也就是 <code>PromiseB.then(onFulfilled, onRejected)</code>。这次 PromiseB 被 reject 掉了，于是执行 <code>onRejected</code>，并传人 reject 的错误原因，也就是：<code>onRejected(new Error(&#39;b 错误&#39;))</code>。</p>
+<p>于是执行到 <code>ret = gen.throw(new Error(&#39;b 错误&#39;))</code>，而此时 <code>yield Promise.reject(new Error(&#39;b 错误&#39;))</code> 刚好在 try 的范围内，错误被 catch 住了！接着就执行 catch 里面的打印语句 <code>console.log(&#39;error&#39;, e);</code>，一路执行到函数结束（因为再也没有 <code>yield</code> 了），将返回值赋给 <code>value</code>。最后 <code>ret</code> 等于 <code>{value: &#39;over&#39;, done: true}</code>。</p>
+<p>继续执行 <code>next(ret)</code>，延续调用链。执行到 <code>if (ret.done) return resolve(ret.value);</code>，于是整体的 promise 被 resolve 掉，执行 <code>then</code> 里面的打印语句，打印出 <code>ret.value</code> 的值 <code>&#39;over&#39;</code>。整个流程结束。</p>
+<p>如果我们不 try / catch 会怎样？因为 <code>onRejected</code> 里面有是这样处理的：<code>try { ret = gen.throw(err); } catch (e) { return reject(e); }</code>。我们上面说如果 <code>yield</code> 没有在 <code>try</code>里会导致 <code>gen.throw</code> 报错，于是整体 promise 被 reject，执行其 <code>catch</code> 方法，打印出 <code>Error(&#39;b 错误&#39;)</code> 的堆栈。</p>
+<p>这就是“黑魔法”的神秘面纱！对 TJ 大神真是一个大写的“服”字。</p>
+<h2 id="什么错误该处理和怎么处理"><a href="#什么错误该处理和怎么处理" class="headerlink" title="什么错误该处理和怎么处理"></a>什么错误该处理和怎么处理</h2><p>接下来的问题是什么样的错误我们需要处理？怎么处理？我们可以将错误分个类：</p>
+<ul>
+<li>操作错误：不是程序 bug 导致的运行时错误。比如：连接数据库服务器失败、请求接口超时、系统内存用光等等。</li>
+<li>程序错误：程序 bug 导致的错误，只要修改代码就可以避免。比如：尝试读取未定义对象的属性、语法错误等等。</li>
+</ul>
+<p>很显然，我们真正需要处理的是操作错误，程序错误应该马上进行修复。</p>
+<p>那怎么处理操作错误呢？总结起来大概有下面这些方法：</p>
+<ul>
+<li>直接处理。这个简直是废话。举个例子：尝试向一个文件中写东西，但是这个文件不存在，那这个时候会报错吧？处理这个错误的方法就是先创建好要写入的文件。如果我们知道怎么处理错误，那直接处理就是。</li>
+<li>重试。有时候某些错误可能是偶发的（比如：连接的服务不稳定等），我们可以尝试对当前操作进行重试。但是一定要设置重试的超时时间、次数，避免长时间的等待卡死应用。</li>
+<li>直接将错误抛给调用方。如果我们不知道具体怎么处理错误，那最简单的就是将错误往上抛。比如：检查到用户没有权限访问某个资源，那我们直接 throw 一个 Error（并带上 status 是 403）比较好，上层代码可以 catch 这个错误，然后要么展示一个统一的无权限页面给用户，要么返回一个统一的错误 json 给调用方。</li>
+<li>写日志然后将错误抛出。这种情况一般是发生了比较致命的错误，没法处理，也不能重试，那我们需要记下错误日志（方便以后定位问题），然后将错误往上抛（交给上层代码去进行统一错误展示）。</li>
+</ul>
+<h2 id="使用中间件统一处理错误"><a href="#使用中间件统一处理错误" class="headerlink" title="使用中间件统一处理错误"></a>使用中间件统一处理错误</h2><p>有了上面的说明，那现在我们就来看看在 koa 里面怎么优雅的实现统一错误处理。</p>
+<p>答案就是使用强大的中间件！</p>
+<p>我们可以在业务逻辑中间件（一般就是 MVC 中的 Controller）开始之前定义下面的中间件：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">app.use(<span class="function"><span class="keyword">function</span>* (<span class="params">next</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">yield</span>* next;</span><br><span class="line">  &#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">    <span class="keyword">let</span> status = e.status || <span class="number">500</span>;</span><br><span class="line">    <span class="keyword">let</span> message = e.message || <span class="string">'服务器错误'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (e <span class="keyword">instanceof</span> JsonError) &#123; <span class="comment">// 错误是 json 错误</span></span><br><span class="line">      <span class="keyword">this</span>.body = &#123;</span><br><span class="line">        <span class="string">'status'</span>: status,</span><br><span class="line">        <span class="string">'message'</span>: message</span><br><span class="line">      &#125;;</span><br><span class="line">      <span class="keyword">if</span> (status == <span class="number">500</span>) &#123; </span><br><span class="line">        <span class="comment">// 触发 koa 统一错误事件，可以打印出详细的错误堆栈 log</span></span><br><span class="line">        <span class="keyword">this</span>.app.emit(<span class="string">'error'</span>, e, <span class="keyword">this</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.status = status;</span><br><span class="line">    <span class="comment">// 根据 status 渲染不同的页面</span></span><br><span class="line">    <span class="keyword">if</span> (status == <span class="number">403</span>) &#123;</span><br><span class="line">      <span class="keyword">this</span>.body = <span class="keyword">yield</span> <span class="keyword">this</span>.render(<span class="string">'403.html'</span>, &#123;<span class="string">'err'</span>: e&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (status == <span class="number">404</span>) &#123;</span><br><span class="line">      <span class="keyword">this</span>.body = <span class="keyword">yield</span> <span class="keyword">this</span>.render(<span class="string">'404.html'</span>, &#123;<span class="string">'err'</span>: e&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (status == <span class="number">500</span>) &#123;</span><br><span class="line">      <span class="keyword">this</span>.body = <span class="keyword">yield</span> <span class="keyword">this</span>.render(<span class="string">'500.html'</span>, &#123;<span class="string">'err'</span>: e&#125;);</span><br><span class="line">      <span class="comment">// 触发 koa 统一错误事件，可以打印出详细的错误堆栈 log</span></span><br><span class="line">      <span class="keyword">this</span>.app.emit(<span class="string">'error'</span>, e, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>可以看到，我们直接执行 <code>yield* next</code>，然后 <code>catch</code> 执行过程中任何一个中间件的错误，然后根据错误的“特性”，分别进行不同的处理。</p>
+<p>有了这个中间件，我们的业务逻辑 controller 中的代码就可以这样来触发错误：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> router = <span class="keyword">new</span> (<span class="built_in">require</span>(<span class="string">'koa-router'</span>));</span><br><span class="line"></span><br><span class="line">router.get(<span class="string">'/some_page'</span>, <span class="function"><span class="keyword">function</span>* (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 直接抛出错误，被中间件捕获后当成 500 错误</span></span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> PageError(<span class="string">'发生了一个致命错误'</span>); </span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> JsonError(<span class="string">'发送了一个致命错误'</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 带 status 的错误，被中间件捕获后特殊处理</span></span><br><span class="line">  <span class="keyword">this</span>.throw(<span class="number">403</span>, <span class="keyword">new</span> PageError(<span class="string">'没有权限访问'</span>));</span><br><span class="line">  <span class="keyword">this</span>.throw(<span class="number">403</span>, <span class="keyword">new</span> JsonError(<span class="string">'没有权限访问'</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="对-Error-分类"><a href="#对-Error-分类" class="headerlink" title="对 Error 分类"></a>对 Error 分类</h2><p>上面的代码里面出现的 <code>JsonError</code>、<code>PageError</code>，实际上是继承于 <code>Error</code> 的两个构造器。代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> util = <span class="built_in">require</span>(<span class="string">'util'</span>);</span><br><span class="line"></span><br><span class="line">exports.JsonError = JsonError;</span><br><span class="line">exports.PageError = PageError;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">JsonError</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">Error</span>.call(<span class="keyword">this</span>, message);</span><br><span class="line">&#125;</span><br><span class="line">util.inherits(JsonError, <span class="built_in">Error</span>);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PageError</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">Error</span>.call(<span class="keyword">this</span>, message);</span><br><span class="line">&#125;</span><br><span class="line">util.inherits(PageError, <span class="built_in">Error</span>);</span><br></pre></td></tr></table></figure>
+<p>通过继承 <code>Error</code> 构造器，我们可以将错误进行细分，从而能更精细的对错误进行处理。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://www.joyent.com/developers/node/design/errors" target="_blank" rel="noopener">https://www.joyent.com/developers/node/design/errors</a></li>
+<li><a href="https://github.com/koajs/koa/wiki/Error-Handling" target="_blank" rel="noopener">https://github.com/koajs/koa/wiki/Error-Handling</a></li>
+<li><a href="https://imququ.com/post/generator-function-in-es6.html" target="_blank" rel="noopener">https://imququ.com/post/generator-function-in-es6.html</a></li>
+<li><a href="http://purplebamboo.github.io/2014/05/24/koa-source-analytics-1/" target="_blank" rel="noopener">http://purplebamboo.github.io/2014/05/24/koa-source-analytics-1/</a></li>
+<li><a href="http://purplebamboo.github.io/2015/01/16/koa-source-analytics-4/" target="_blank" rel="noopener">http://purplebamboo.github.io/2015/01/16/koa-source-analytics-4/</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/03/18/error-handling-in-koa/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/03/18/error-handling-in-koa/" data-id="cjt6lbxy10029jeu1qxxnj9hh" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/03/18/error-handling-in-koa/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/co/">co</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/koa/">koa</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/node-js/">node.js</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/03/21/internationalization/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          淘宝前端国际化方案探索
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/17/kissy-version-solution/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">店铺 KISSY 版本大乱斗</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

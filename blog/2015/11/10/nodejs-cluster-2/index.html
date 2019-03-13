@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>当我们谈论 cluster 时我们在谈论什么（下） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="上篇文章讲解了 Node.js 中多进程部署时遇到的各种问题，那么实际的线上项目中到底是如何利用多进程，如何保障各个 worker 进程稳定性的呢，又是如何利用 cluster 模块 fork 子进程，父子进程间又是如何实现通信的呢？本篇就来一一揭晓。 负载均衡回忆一下上篇中提到的最初 Node.js 多进程模型，多个进程绑定同一端口，相互竞争 accpet 新到来的连接。由于无法控制一个新的连">
+<meta name="keywords" content="Node.js,多进程,cluster">
+<meta property="og:type" content="article">
+<meta property="og:title" content="当我们谈论 cluster 时我们在谈论什么（下）">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/10/nodejs-cluster-2/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="上篇文章讲解了 Node.js 中多进程部署时遇到的各种问题，那么实际的线上项目中到底是如何利用多进程，如何保障各个 worker 进程稳定性的呢，又是如何利用 cluster 模块 fork 子进程，父子进程间又是如何实现通信的呢？本篇就来一一揭晓。 负载均衡回忆一下上篇中提到的最初 Node.js 多进程模型，多个进程绑定同一端口，相互竞争 accpet 新到来的连接。由于无法控制一个新的连">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB17WhrKpXXXXXiXpXX2AXZ8pXX-900-500.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1kT6gKpXXXXbyXXXXvNGU0VXX-533-352.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="当我们谈论 cluster 时我们在谈论什么（下）">
+<meta name="twitter:description" content="上篇文章讲解了 Node.js 中多进程部署时遇到的各种问题，那么实际的线上项目中到底是如何利用多进程，如何保障各个 worker 进程稳定性的呢，又是如何利用 cluster 模块 fork 子进程，父子进程间又是如何实现通信的呢？本篇就来一一揭晓。 负载均衡回忆一下上篇中提到的最初 Node.js 多进程模型，多个进程绑定同一端口，相互竞争 accpet 新到来的连接。由于无法控制一个新的连">
+<meta name="twitter:image" content="http://gtms04.alicdn.com/tps/i4/TB17WhrKpXXXXXiXpXX2AXZ8pXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-cluster-2" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      当我们谈论 cluster 时我们在谈论什么（下）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 淘杰</span>
+        
+        <span>发表于: <a href="/blog/2015/11/10/nodejs-cluster-2/" class="article-date">
+  <time datetime="2015-11-10T11:27:12.000Z" itemprop="datePublished">2015-11-10</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms04.alicdn.com/tps/i4/TB17WhrKpXXXXXiXpXX2AXZ8pXX-900-500.png" alt="当我们谈论 cluster 时我们在谈论什么（下）"></p>
+<p><a href="http://taobaofed.org/blog/2015/11/03/nodejs-cluster/">上篇文章</a>讲解了 Node.js 中多进程部署时遇到的各种问题，那么实际的线上项目中到底是如何利用多进程，如何保障各个 worker 进程稳定性的呢，又是如何利用 cluster 模块 fork 子进程，父子进程间又是如何实现通信的呢？本篇就来一一揭晓。</p>
+<h2 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h2><p>回忆一下上篇中提到的最初 Node.js 多进程模型，多个进程绑定同一端口，相互竞争 accpet 新到来的连接。由于无法控制一个新的连接由哪个进程来处理，导致各 worker 进程之间的负载非常不均衡。</p>
+<p>于是后面就出现了基于 round-robin 算法的另一种模型。主要思路是 master 进程创建 socket，绑定地址以及端口后再进行监听。该 socket 的 fd 不传递到各个 worker 进程。当 master 进程获取到新的连接时，再决定将 accept 到的客户端连接分发给指定的 worker 处理。这里使用了<strong>指定</strong>, 所以如何传递以及传递给哪个 worker 完全是可控的。round-robin 只是其中的某种算法而已，当然可以换成其他的。</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1kT6gKpXXXXbyXXXXvNGU0VXX-533-352.png" alt="负载均衡"></p>
+<p>同样基于这种模型也给出一个简单的 demo。</p>
+<p>master 进程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const fork = require(&apos;child_process&apos;).fork;</span><br><span class="line"></span><br><span class="line">var workers = [];</span><br><span class="line">for (var i = 0; i &lt; 4; i++) &#123;</span><br><span class="line">   workers.push(fork(&apos;./worker&apos;));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var handle = net._createServerHandle(&apos;0.0.0.0&apos;, 3000);</span><br><span class="line">handle.listen();</span><br><span class="line">handle.onconnection = function (err,handle) &#123;</span><br><span class="line">    var worker = workers.pop();</span><br><span class="line">    worker.send(&#123;&#125;,handle);</span><br><span class="line">    workers.unshift(worker);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>woker 进程<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">process.on(&apos;message&apos;, function (m, handle) &#123;</span><br><span class="line">  start(handle);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">var buf = &apos;hello Node.js&apos;;</span><br><span class="line">var res = [&apos;HTTP/1.1 200 OK&apos;,&apos;content-length:&apos;+buf.length].join(&apos;\r\n&apos;)+&apos;\r\n\r\n&apos;+buf;</span><br><span class="line"></span><br><span class="line">function start(handle) &#123;</span><br><span class="line">    console.log(&apos;got a connection on worker, pid = %d&apos;, process.pid);</span><br><span class="line">    var socket = new net.Socket(&#123;</span><br><span class="line">        handle: handle</span><br><span class="line">    &#125;);</span><br><span class="line">    socket.readable = socket.writable = true;</span><br><span class="line">    socket.end(res);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于只有 master 进程接收客户端连接，并且能够按照特定的算法进行分发， 很好的解决了上篇中提到的由于竞争导致各 worker 进程负载不均衡的硬伤。</p>
+<h2 id="优雅退出"><a href="#优雅退出" class="headerlink" title="优雅退出"></a>优雅退出</h2><p>上篇文章开头提到 Node.js 被吐槽稳定性差，进程发生未捕获到的异常就会退出。实际项目中由于各种原因，不可避免最后上线时还是存在各种 bug 以及异常，最终进程退出。</p>
+<p>当进程异常退出时，有可能该进程上还有很多未处理完的请求，简单粗暴的使进程直接退出必然导致所有的请求都会丢失，给用户带来非常糟的体验，这就非常需要一个进程优雅退出的方案。</p>
+<p>给 process 对象添加 uncaughtException 事件绑定能够避免发生异常时进程直接退出。在回调函数里调用当前运行 server 对象的 close 方法，停止接收新的连接。同时告知 master 进程该 worker 进程即将退出，可以 fork 新的 worker 了。</p>
+<p>接着在几秒中之后差不多所有请求都已经处理完毕后，该进程主动退出，其中 timeout 可以根据实际业务场景进行设置。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(function () &#123;</span><br><span class="line">  process.exit(1);</span><br><span class="line">&#125;, timeout)</span><br></pre></td></tr></table></figure>
+<p>这里面有一个小的细节处理，在关闭服务器之前，后续新接收的 request 全部关闭 keep-alive 特性，通知客户端不需要与该服务器保持 socket 连接了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server.on(&apos;request&apos;, function (req, res) &#123;</span><br><span class="line">    req.shouldKeepAlive = false;</span><br><span class="line">    res.shouldKeepAlive = false;</span><br><span class="line">    if (!res._header) &#123;</span><br><span class="line">        res.setHeader(&apos;Connection&apos;, &apos;close&apos;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>第三方 <code>graceful</code> 模块专门来处理这种场景的，感兴趣的同学可以阅读下源码。</p>
+<h2 id="进程守护"><a href="#进程守护" class="headerlink" title="进程守护"></a>进程守护</h2><p>master 进程除了负责接收新的连接，分发给各 worker 进程处理之外，还得像天使一样默默地守护着这些 worker 进程，保障整个应用的稳定性。一旦某个 worker 进程异常退出就 fork 一个新的子进程顶替上去。</p>
+<p>这一切 cluster 模块都已经好处理了，当某个 worker 进程发生异常退出或者与 master 进程失去联系（disconnected）时，master 进程都会收到相应的事件通知。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cluster.on(&apos;exit&apos;, function () &#123;</span><br><span class="line">    clsuter.fork();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">cluster.on(&apos;disconnect&apos;, function () &#123;</span><br><span class="line">    clsuter.fork();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>推荐使用第三方模块 recluster 和 cfork，已经处理的很成熟了。</p>
+<p>这样一来整个应用的稳定性重任就落在 master 进程上了，所以一定不要给 master 太多其它的任务，百分百保证它的健壮性，一旦 master 进程挂掉你的应用也就玩完了。</p>
+<h2 id="IPC"><a href="#IPC" class="headerlink" title="IPC"></a>IPC</h2><p>master 进程能够接收连接进行分发，同时守护 worker 进程，这一切都离不开进程间的通信。<br>讲了这么多，终于到最核心的地方了，要用多进程模型就一定会涉及到 IPC（进程间通信）了。Node.js 中 IPC 都是在父子进程之间进行，按有无发送 fd 分为 2 种方式。</p>
+<h3 id="发送-fd"><a href="#发送-fd" class="headerlink" title="发送 fd"></a>发送 fd</h3><p>当进程间需要发生文件描述符 fd 时，libuv 底层采用消息队列来实现 IPC。master 进程接收到客户端连接分发给 worker 进程处理时就用到了进程间 fd 的传递。</p>
+<h3 id="不发送-fd"><a href="#不发送-fd" class="headerlink" title="不发送 fd"></a>不发送 fd</h3><p>这种情况父子进程之间只是发送简单的字符串，并且它们之间的通信是双向的。master 与 worker 间的消息传递便是这种方式。虽然 pipe 能够满足父子进程间的消息传递，但由于 pipe 是半双工的，也就是说必须得创建 2 个 pipe 才可以实现双向的通信，这无疑使得程序逻辑更复杂。</p>
+<p>libuv 底层采用 socketpair 来实现全双工的进程通信，父进程 fork 子进程之前会调用 socketpair 创建 2 个 fd，下面是一个最简单的也最原始的利用 socketpair 来实现父子进程间双向通信的 demo。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;sys/types.h&gt;</span><br><span class="line">#include &lt;errno.h&gt;</span><br><span class="line">#include &lt;sys/socket.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#define BUF_SIZE 100</span><br><span class="line"></span><br><span class="line">int main () &#123;</span><br><span class="line">    int s[2];</span><br><span class="line">    int w,r;</span><br><span class="line">    char * buf = (char*)calloc(1 , BUF_SIZE);</span><br><span class="line">    pid_t pid;</span><br><span class="line">    </span><br><span class="line">    if (socketpair(AF_UNIX,SOCK_STREAM,0,s) == -1 ) &#123;</span><br><span class="line">        printf(&quot;create unnamed socket pair failed:%s\n&quot;, strerror(errno));</span><br><span class="line">        exit(-1);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    if ((pid = fork()) &gt; 0) &#123;</span><br><span class="line">        printf(&quot;Parent process&apos;s pid is %d\n&quot;,getpid());</span><br><span class="line">        close(s[1]);</span><br><span class="line">        char *messageToChild = &quot;a message to child  process!&quot;;</span><br><span class="line">        if ((w = write(s[0] , messageToChild , strlen(messageToChild) ) ) == -1) &#123;</span><br><span class="line">            printf(&quot;Write socket error:%s\n&quot;,strerror(errno));</span><br><span class="line">            exit(-1);</span><br><span class="line">        &#125;</span><br><span class="line">        sleep(1);</span><br><span class="line">        if ( (r = read(s[0], buf , BUF_SIZE )) == -1) &#123;</span><br><span class="line">          printf(&quot;Pid %d read from socket error:%s\n&quot;,getpid() , strerror(errno) );</span><br><span class="line">          exit(-1);</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;Pid %d read string : %s \n&quot;,getpid(),buf);</span><br><span class="line">    &#125; else if (pid == 0) &#123;</span><br><span class="line">         printf(&quot;Fork child process successed\n&quot;);</span><br><span class="line">         printf(&quot;Child process&apos;s pid is :%d\n&quot;,getpid());</span><br><span class="line">         close(s[0]);</span><br><span class="line">         char *messageToParent = &quot;a message to parent process!&quot;;</span><br><span class="line">         if ((w = write(s[1] , messageToParent , strlen(messageToParent))) == -1 ) &#123;</span><br><span class="line">             printf(&quot;Write socket error:%s\n&quot;,strerror(errno));</span><br><span class="line">             exit(-1);</span><br><span class="line">         &#125;</span><br><span class="line">         sleep(1);</span><br><span class="line">         if ((r = read(s[1], buf , BUF_SIZE )) == -1) &#123;</span><br><span class="line">             printf(&quot;Pid %d read from socket error:%s\n&quot;, getpid() , strerror(errno) );</span><br><span class="line">             exit(-1);</span><br><span class="line">         &#125;</span><br><span class="line">         printf(&quot;Pid %d read string : %s \n&quot;,getpid(),buf); </span><br><span class="line">     &#125; else &#123;</span><br><span class="line">        printf(&quot;Fork failed:%s\n&quot;,strerror(errno));</span><br><span class="line">        exit(-1);</span><br><span class="line">    &#125;</span><br><span class="line">    exit(0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>保存为 socketpair.c 后运行 <code>gcc  socketpair.c -o socket &amp;&amp; ./socket</code> 输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Parent process&apos;s pid is 52853</span><br><span class="line">Fork child process successed</span><br><span class="line">Child process&apos;s pid is :52854</span><br><span class="line">Pid 52854 read string : a message to child  process! </span><br><span class="line">Pid 52853 read string : a message to parent process!</span><br></pre></td></tr></table></figure>
+<h3 id="Node-js-中的-IPC"><a href="#Node-js-中的-IPC" class="headerlink" title="Node.js 中的 IPC"></a>Node.js 中的 IPC</h3><p>上面从 libuv 底层方面讲解了父子进程间双向通信的原理，在上层 Node.js 中又是如何实现的呢，让我们来一探究竟。</p>
+<p>Node.js 中父进程调用 fork 产生子进程时，会事先构造一个 pipe 用于进程通信，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">new process.binding(&apos;pipe_wrap&apos;).Pipe(true);</span><br></pre></td></tr></table></figure>
+<p>构造出的 pipe 最初还是关闭的状态，或者说底层还并没有创建一个真实的 pipe，直至调用到 libuv 底层的<code>uv_spawn</code>, 利用 socketpair 创建的全双工通信管道绑定到最初 Node.js 层创建的 pipe 上。</p>
+<p>管道此时已经真实的存在了，父进程保留对一端的操作，通过环境变量将管道的另一端文件描述符 fd 传递到子进程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">options.envPairs.push(&apos;NODE_CHANNEL_FD=&apos; + ipcFd);</span><br></pre></td></tr></table></figure>
+<p>子进程启动后通过环境变量拿到 fd</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var fd = parseInt(process.env.NODE_CHANNEL_FD, 10);</span><br></pre></td></tr></table></figure>
+<p>并将 fd 绑定到一个新构造的 pipe 上</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var p = new Pipe(true);</span><br><span class="line">p.open(fd);</span><br></pre></td></tr></table></figure>
+<p>于是父子进程间用于双向通信的所有基础设施都已经准备好了。说了这么多可能还是不太明白吧？ 没关系，我们还是来写一个简单的 demo 感受下。</p>
+<p>Node.js 构造出的 pipe 被存储在进程的<code>_channel</code>属性上</p>
+<p>master.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">const WriteWrap = process.binding(&apos;stream_wrap&apos;).WriteWrap;</span><br><span class="line">var cp = require(&apos;child_process&apos;);</span><br><span class="line"></span><br><span class="line">var worker = cp.fork(__dirname + &apos;/worker.js&apos;);</span><br><span class="line">var channel = worker._channel;</span><br><span class="line"></span><br><span class="line">channel.onread = function (len, buf, handle) &#123;</span><br><span class="line">    if (buf) &#123;</span><br><span class="line">        console.log(buf.toString())</span><br><span class="line">        channel.close()</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        channel.close()</span><br><span class="line">        console.log(&apos;channel closed&apos;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var message = &#123; hello: &apos;worker&apos;,  pid: process.pid &#125;;</span><br><span class="line">var req = new WriteWrap();</span><br><span class="line">var string = JSON.stringify(message) + &apos;\n&apos;;</span><br><span class="line">channel.writeUtf8String(req, string, null);</span><br></pre></td></tr></table></figure>
+<p>worker.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">const WriteWrap = process.binding(&apos;stream_wrap&apos;).WriteWrap;</span><br><span class="line">const channel = process._channel;</span><br><span class="line"></span><br><span class="line">channel.ref();</span><br><span class="line">channel.onread = function (len, buf, handle) &#123;</span><br><span class="line">    if (buf) &#123;</span><br><span class="line">        console.log(buf.toString())</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        process._channel.close()</span><br><span class="line">        console.log(&apos;channel closed&apos;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var message = &#123; hello: &apos;master&apos;,  pid: process.pid &#125;;</span><br><span class="line">var req = new WriteWrap();</span><br><span class="line">var string = JSON.stringify(message) + &apos;\n&apos;;</span><br><span class="line">channel.writeUtf8String(req, string, null);</span><br></pre></td></tr></table></figure>
+<p>运行<code>node master.js</code> 输出</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;hello&quot;:&quot;worker&quot;,&quot;pid&quot;:58731&#125;</span><br><span class="line">&#123;&quot;hello&quot;:&quot;master&quot;,&quot;pid&quot;:58732&#125;</span><br><span class="line">channel closed</span><br></pre></td></tr></table></figure>
+<h3 id="进程失联"><a href="#进程失联" class="headerlink" title="进程失联"></a>进程失联</h3><p>在多进程服务器中，为了保障整个 web 应用的稳定性，master 进程需要监控 worker 进程的 exit 以及 disconnect 事件，收到相应事件通知后重启 worker 进程。</p>
+<p>exit 事件不用说，disconnect 事件可能很多人就不太明白了。还记得上面讲到的进程优雅退出吗，当捕获到未处理异常时，进程不立即退出，但是会立刻通知 master 进程重新 fork 新的进程，而不是等该进程主动退出后再 fork。具体的做法就是调用 worker进程的 disconnect 方法，从而关闭父子进程用于通信的 channel ，此时父子进程之间失去了联系，此时master 进程会触发 disconnect 事件，fork 一个新的 worker进程。</p>
+<p>下面是一个触发<code>disconnect</code>事件的简单 demo</p>
+<p>master.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">const WriteWrap = process.binding(&apos;stream_wrap&apos;).WriteWrap;</span><br><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const fork = require(&apos;child_process&apos;).fork;</span><br><span class="line"></span><br><span class="line">var workers = [];</span><br><span class="line">for (var i = 0; i &lt; 4; i++) &#123;</span><br><span class="line">     var worker = fork(__dirname + &apos;/worker.js&apos;);</span><br><span class="line">     worker.on(&apos;disconnect&apos;, function () &#123;</span><br><span class="line">         console.log(&apos;[%s] worker %s is disconnected&apos;, process.pid, worker.pid);</span><br><span class="line">     &#125;);</span><br><span class="line">     workers.push(worker);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var handle = net._createServerHandle(&apos;0.0.0.0&apos;, 3000);</span><br><span class="line">handle.listen();</span><br><span class="line">handle.onconnection = function (err,handle) &#123;</span><br><span class="line">    var worker = workers.pop();</span><br><span class="line">    var channel = worker._channel;</span><br><span class="line">    var req = new WriteWrap();</span><br><span class="line">    channel.writeUtf8String(req, &apos;dispatch handle&apos;, handle);</span><br><span class="line">    workers.unshift(worker);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>worker.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const WriteWrap = process.binding(&apos;stream_wrap&apos;).WriteWrap;</span><br><span class="line">const channel = process._channel;</span><br><span class="line">var buf = &apos;hello Node.js&apos;;</span><br><span class="line">var res = [&apos;HTTP/1.1 200 OK&apos;,&apos;content-length:&apos; + buf.length].join(&apos;\r\n&apos;) + &apos;\r\n\r\n&apos; + buf;</span><br><span class="line"></span><br><span class="line">channel.ref(); //防止进程退出</span><br><span class="line">channel.onread = function (len, buf, handle) &#123;</span><br><span class="line">    console.log(&apos;[%s] worker %s got a connection&apos;, process.pid, process.pid);</span><br><span class="line">    var socket = new net.Socket(&#123;</span><br><span class="line">        handle: handle</span><br><span class="line">    &#125;);</span><br><span class="line">    socket.readable = socket.writable = true;</span><br><span class="line">    socket.end(res);</span><br><span class="line">    console.log(&apos;[%s] worker %s is going to disconnect&apos;, process.pid, process.pid);</span><br><span class="line">    channel.close();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行<code>node master.js</code>启动服务器后，在另一个终端执行多次<code>curl http://127.0.0.1:3000</code>，下面是输出的内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[63240] worker 63240 got a connection</span><br><span class="line">[63240] worker 63240 is going to disconnect</span><br><span class="line">[63236] worker 63240 is disconnected</span><br></pre></td></tr></table></figure>
+<h2 id="最简单的负载均衡-server"><a href="#最简单的负载均衡-server" class="headerlink" title="最简单的负载均衡 server"></a>最简单的负载均衡 server</h2><p>回到前面讲的 round-robin 多进程服务器模型，用于通信的 channel 除了可以发送简单的字符串数据外，还可以发送文件描述符，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel.writeUtf8String(req, string, null);</span><br></pre></td></tr></table></figure>
+<p>最后一个参数便是要传递的 fd。round-robin 多进程服务器模型的核心也正式依赖于这个特性。 在上面的 demo 基础上，我们再稍微加工一下，还原在 Node.js 中最原始的处理。</p>
+<p>master.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const WriteWrap = process.binding(&apos;stream_wrap&apos;).WriteWrap;</span><br><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const fork = require(&apos;child_process&apos;).fork;</span><br><span class="line"></span><br><span class="line">var workers = [];</span><br><span class="line">for(var i = 0; i &lt; 4; i++) &#123;</span><br><span class="line">    workers.push(fork(__dirname + &apos;/worker.js&apos;));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">var handle = net._createServerHandle(&apos;0.0.0.0&apos;, 3000);</span><br><span class="line">handle.listen();</span><br><span class="line">handle.onconnection = function (err,handle) &#123;</span><br><span class="line">    var worker = workers.pop();</span><br><span class="line">    var channel = worker._channel;</span><br><span class="line">    var req = new WriteWrap();</span><br><span class="line">    channel.writeUtf8String(req, &apos;dispatch handle&apos;, handle);</span><br><span class="line">    workers.unshift(worker);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>worker.js</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">const net = require(&apos;net&apos;);</span><br><span class="line">const WriteWrap = process.binding(&apos;stream_wrap&apos;).WriteWrap;</span><br><span class="line">const channel = process._channel;</span><br><span class="line">var buf = &apos;hello Node.js&apos;;</span><br><span class="line">var res = [&apos;HTTP/1.1 200 OK&apos;, &apos;content-length:&apos; + buf.length].join(&apos;\r\n&apos;) + &apos;\r\n\r\n&apos; + buf;</span><br><span class="line"></span><br><span class="line">channel.ref();</span><br><span class="line">channel.onread = function (len, buf, handle) &#123;</span><br><span class="line">    var socket = new net.Socket(&#123;</span><br><span class="line">        handle: handle</span><br><span class="line">    &#125;);</span><br><span class="line">    socket.readable = socket.writable = true;</span><br><span class="line">    socket.end(res);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行 <code>node master.js</code>， 一个简单的多进程 Node.js web 服务器便跑起来了。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>到此整个 Node.js 的多进程服务器模型，以及底层进程间通信原理就讲完了，也为大家揭开了 cluster 的神秘面纱， 相信大家对 cluster 有了更深刻的认识。祝大家 Node.js 的开发旅途上玩得更愉快！</p>
+<p>附：上篇文章<a href="http://taobaofed.org/blog/2015/11/03/nodejs-cluster/">当我们谈论 cluster 时我们在谈论什么(上)</a></p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/10/nodejs-cluster-2/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/10/nodejs-cluster-2/" data-id="cjt6lbxzu007ajeu1pciilqxn" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/10/nodejs-cluster-2/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/cluster/">cluster</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/多进程/">多进程</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/11/flexbox-in-mobile-web/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          移动端开发小记 - Flexbox
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/09/web-performance/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">如何评价页面的性能</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

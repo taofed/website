@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>揭秘 HTML5 和 CSS3 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="互联网的发展总是在不断地催生新技术的产生，而 HTML5 和 CSS3 是最近一直被讨论的热门话题，对于每个互联网开发者尤其是前端开发者而言，都充满了好奇与渴望。那么 HTML5 和 CSS3 究竟有哪些让我们眼前一亮的东西呢？ HTML5HTML 5 草案的前身名为 Web Applications 1.0，于 2004 年被 WHATWG 提出，于 2007 年被 W3C 接纳，并成立了新的">
+<meta name="keywords" content="HTML5,CSS3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="揭秘 HTML5 和 CSS3">
+<meta property="og:url" content="http://taobaofed.org/blog/2009/12/18/html5-and-css3-demystification/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="互联网的发展总是在不断地催生新技术的产生，而 HTML5 和 CSS3 是最近一直被讨论的热门话题，对于每个互联网开发者尤其是前端开发者而言，都充满了好奇与渴望。那么 HTML5 和 CSS3 究竟有哪些让我们眼前一亮的东西呢？ HTML5HTML 5 草案的前身名为 Web Applications 1.0，于 2004 年被 WHATWG 提出，于 2007 年被 W3C 接纳，并成立了新的">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1mOSvQpXXXXXbaXXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="揭秘 HTML5 和 CSS3">
+<meta name="twitter:description" content="互联网的发展总是在不断地催生新技术的产生，而 HTML5 和 CSS3 是最近一直被讨论的热门话题，对于每个互联网开发者尤其是前端开发者而言，都充满了好奇与渴望。那么 HTML5 和 CSS3 究竟有哪些让我们眼前一亮的东西呢？ HTML5HTML 5 草案的前身名为 Web Applications 1.0，于 2004 年被 WHATWG 提出，于 2007 年被 W3C 接纳，并成立了新的">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1mOSvQpXXXXXbaXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-html5-and-css3-demystification" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      揭秘 HTML5 和 CSS3
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 空雁</span>
+        
+        <span>发表于: <a href="/blog/2009/12/18/html5-and-css3-demystification/" class="article-date">
+  <time datetime="2009-12-17T17:09:00.000Z" itemprop="datePublished">2009-12-18</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1mOSvQpXXXXXbaXXXXXXXXXXX-900-500.jpg" alt="揭秘 HTML5 和 CSS3"></p>
+<p>互联网的发展总是在不断地催生新技术的产生，而 HTML5 和 CSS3 是最近一直被讨论的热门话题，对于每个互联网开发者尤其是前端开发者而言，都充满了好奇与渴望。那么 HTML5 和 CSS3 究竟有哪些让我们眼前一亮的东西呢？</p>
+<h3 id="HTML5"><a href="#HTML5" class="headerlink" title="HTML5"></a>HTML5</h3><p>HTML 5 草案的前身名为 Web Applications 1.0，于 2004 年被 WHATWG 提出，于 2007 年被 W3C 接纳，并成立了新的 HTML 工作团队。在 2008 年 1 月 22 日，第一份正式草案发布。HTML5 是近十年来 Web 开发标准最巨大的飞跃。和以前的版本不同，HTML5 并非仅仅用来表示 Web 内容，它的新使命是将 Web 带入一个成熟的应用平台，在 HTML5 平台上，视频，音频，图象，动画，以及同电脑的交互都被标准化。那么我们来看一下 HTML5 的技术概览有哪些：</p>
+<h3 id="HTML5-新增和移除的元素"><a href="#HTML5-新增和移除的元素" class="headerlink" title="HTML5 新增和移除的元素"></a>HTML5 新增和移除的元素</h3><p>HTML5 新增了很多多媒体和交互性元素如 video，audio，在 HTML4 当中如果要嵌入一个视频或是音频的话需要引入一大段的代码，还有兼容各个浏览器，而 HTML5 只需要通过引入一个标签就可以，就像 img 标签一样方便。在页面布局和内容实现方面 HTML5 新增了很多结构化标签元素以及块级及语义元素，如果你要用 HTML 表示一个文件的上传进度条，在 HTML5 中你可以用 progress 这个元素来表示，它有一个 value 属性描述了已经完成了多少任务，还有一个属性 max 描述了这个任务一共需要多少，还可以通过 DOM 接口得到这个进度条的 position 属性（只读），也就是任务完成的百分比。Youtube 在 HTML5 技术上已经做了一个尝试，<a href="http://www.youtube.com/html5" target="_blank" rel="noopener">http://www.youtube.com/html5</a> 是用 HTML5 做的一个 DEMO，从整个页面源代码来看，非常简洁。当然 HTML5 也对一些元素新增了一些属性，如 input 和 textarea 的 placeholder 属性，相当于输入框的输入提示，script 有一个 async 属性会影响脚本的加载和执行。对于所有的 HTML 共有的属性我们通常把它称作是“全局属性”，如 class，id，tabindex，title，HTML5 也新增了一些全局属性，如 contenteditable，contextmenu，hidden 等属性。HTML5 还增加了对于微数据的支持，如 HTML5 新增的 item，itempro，subject 等属性。</p>
+<p>当然 HTML5 也移除了一些表示页面展现的元素，如 font，center，strike 等，这些本应该是 CSS 来做的，所以还是很好理解的，也移除了一些影响网站可访问性的元素如 frame，frameset，noframe 以及一些不常用的元素如 acronym，而采用 abbr 来表示缩写。HTML5 还移除了一些影响客户端兼容性的 HTML 熟悉，如 link 的 rev 属性，td 的 scope 属性；HTML5 也移除了一些表示页面展现的属性如一些元素的 align，bgcolor 属性。</p>
+<h3 id="HTML5-对表单的支持"><a href="#HTML5-对表单的支持" class="headerlink" title="HTML5 对表单的支持"></a>HTML5 对表单的支持</h3><p>HTML5 提供了强大的控件类型如 url，email，date，tel 等，强大的约束属性，如 required 表示必填，文件上传的 accept 属性，以及一些表单重复元素模型的支持，HTML5 在提交表单的时候还可以设置提交的方式为 XML 提交方式，这样服务器端接收到的数据将是 XML 格式，HTML5 的表单被定义为“Web Forms 2.0”，目前 Opera 9.5+ 对 Web Forms 2.0 的支持较为完美。</p>
+<h3 id="HTML5-DOM-变化"><a href="#HTML5-DOM-变化" class="headerlink" title="HTML5 DOM 变化"></a>HTML5 DOM 变化</h3><p>HTML5 在 DOM LEVEL 2 HTML 方面很多都是继承自 HTMLDocument 的接口，当然 HTML5 在 DOM 上也有一些值得注意的新成员，如：支持 getElementsByClassName，可以根据 class 类名选择元素，getSelection() 将会返回当前选中的对象，在选择器上面有两个方法 querySelector 和 querySelectorAll 可以根据 CSS 选择符来获取要查询的元素，相当于 YUI 3 中的 Y.one 和 Y.all。</p>
+<h3 id="HTML5-的-Javascript-APIs"><a href="#HTML5-的-Javascript-APIs" class="headerlink" title="HTML5 的 Javascript APIs"></a>HTML5 的 Javascript APIs</h3><p>HTML5 在 Javascript 上面新增了哪些 API 呢？</p>
+<ul>
+<li>Video/Audio：HTML5 为 Video 和 Audio 提供了 API 来让开发者控制他们自己的用户界面，如可以播放或暂停媒体内容。</li>
+<li>Canvas：Canvas 是一个新的 HTML 元素，这个元素可以被 Script 语言（通常是 JavaScript）用来绘制图形。例如可以用它来画图、合成图象、或做简单的（和不那么简单的）动画。Canvas 是一个神奇的东西，它给我的第一感觉就像是在用 Photoshop 一样，它的每一个方法跟 Photoshop 是那么地相似，通过 canvas.getContext(‘2d’) 就可以得到这个 Canvas 的 API，你可以通过 fillStyle 设置其填充颜色或是通过 strokeStyle 设置其描边颜色，甚至它画路径的操作跟 Photoshop 的钢笔操作更是不谋而合。Canvas 在很多网站都已经有应用，甚至还可以用 Canvas 来编写 Web Game。</li>
+<li>Drag&amp;Drop：在指示设备的视觉媒体中，”Drag” 的操作就是鼠标按下（mousedown）并伴随着鼠标移动（mousemove）的事件，而 ”Drop” 则是鼠标释放时触发的事件。在 Drag&amp;Drop 里定义了 DataEvent 和 DataTransfer 接口，同时当拖拽操作发生时会触发如 dragstart，dragenter，dragleave，drop，dragend 等事件。</li>
+<li>Web Workers：让 JavaScript 多线程，可以在后台做很多工作而不会阻断当前的浏览器操作。</li>
+<li>Geolocation：地理位置定位，运行 navigator.geolocation.getCurrentPosition(success, error) 这个方法时浏览器会提示是否要共享你的地理位置，如果选择共享，则会回调 success 函数，success 函数有一个参数是 position 对象，这个 position 对象有一个 coords 对象，coords 对象包含了很多地理位置信息如 latitude（维度）和 longitude（经度），这样就可以知道你的具体位置了，这个功能在一些手机如 iPhone 上已经有广泛的应用了。</li>
+<li>Application Cache：这是 HTML5 对于离线应用的支持，通过在 HTML 元素上加一个属性 manifest，浏览器会提示你是否要将数据缓存到客户端，如果用户选择了允许，则会按照指定的 manifest 文件列表缓存需要的文件，当你的网络不可用时，你还是可以使用这个应用的。对于离线应用，Google 也开发了 Google Gears 浏览器扩展，不过最后 Google 转投 HTML5 可能也是看到了 HTML5 存储和离线应用的这种优势。</li>
+<li>Storage：Webkit 已经实现了 database storage，你可以像后端操作数据库一样查询数据并执行一些操作。还有一种存储是键值对存储，如 sessionStorage 和 localStorage，可以通过 setItem 和 getItem 来存储与取值，相对于 Cookie 的存储来说，存储的容量要大很多。</li>
+<li>X-Document Messaging：浏览器因为安全和隐私的原因，阻止了不同域之间文档的通信，虽然这是一个安全限制，但是对于那些没有危害的不同域的文档通信带来了很多问题，但是 HTML5 可以实现这种跨文档通信，让我们可以不用管源域是来自哪里，同时可以防止脚本攻击。</li>
+</ul>
+<p>HTML5 让你心动了吗？那么 HTML5 什么时候会成为标准呢？据说要等到 2022 年，这有一个很有意思的网站 <a href="http://ishtml5readyyet.com/" target="_blank" rel="noopener">http://ishtml5readyyet.com/</a> 告诉你还有多少天 HTML5 会真正到来。</p>
+<h3 id="CSS3"><a href="#CSS3" class="headerlink" title="CSS3"></a>CSS3</h3><p>CSS3 对于我们 Web 开发者来说不只是新奇的技术，更重要的是这些全新概念的 Web 应用给我们带来更多无限的可能性，也极大地提高了我们的开发效率。我们将不必再依赖图片或者 JavaScript 去完成圆角、多背景、用户自定义字体、3D 动画、渐变、盒阴影、文字阴影、透明度等提高 Web 设计质量的特色应用。</p>
+<h3 id="CSS3-在选择器上面的支持"><a href="#CSS3-在选择器上面的支持" class="headerlink" title="CSS3 在选择器上面的支持"></a>CSS3 在选择器上面的支持</h3><p>利用属性选择器我们可以根据属性值的开头或结尾很容易选择某个元素，利用兄弟选择器可以选择同级兄弟结点或紧邻下一个结点的元素，利用伪类选择器可以选择某一类元素，CSS3 在选择器上的丰富支持让我们可以灵活的控制样式，而不必为了选择某些元素给他们加上如”odd”或”even”这样的类名。</p>
+<h3 id="CSS3-在样式上的支持"><a href="#CSS3-在样式上的支持" class="headerlink" title="CSS3 在样式上的支持"></a>CSS3 在样式上的支持</h3><p>有一个调查说开发者最期待 CSS3 的特性是什么，最后票数最多的是“圆角”，不错，圆角这个功能可以给我们这些前端工程师省去很多时间和精力去切图拼凑一个圆角。CSS3 还支持阴影，盒阴影以及文本阴影，渐变，之前你可能是通过IE的滤镜看到过，其实 CSS3 实现起来更加方便。@font-face 可以自定义字体，如果用传统的方式，VD 把一个带有特殊文字的设计图给你让你来实现的话你可能会把它做成一个图片，而通过 CSS3 用 @font-face 就可以了。CSS3 对于连续文本换行也新增了一个属性 word-wrap，你可以设置其为 normal（不换行）或 break-word（换行），这解决了连续英文字符出现页面错位的问题，也不需要后端去截取这个连续字符。使用 CSS3 你还可以给边框加背景，这在 iPhone 上也有应用的例子。CSS3 在背景上支持背景调整大小，如当你用一张大图要做一个小的元素背景时可以通过 background-size 来调整背景图的大小来适应这个元素。CSS3 支持 opacity，rgba 和 hsl/a，opacity 和 rgba 的区别是 opacity 设置的透明对其内容也会产生影响，而 rgba 只对你应用的元素产生影响。CSS3 在布局上对于盒模型提供了支持，可以设置 box-sizing 为 content-box 或 border-box，应用为 content-box 就是正常的模式，而应用为 border-box 和 IE5.5 的盒模型很相似，即元素的宽度包括 border 和 padding，这个在布局上可能会比较方便，不用去管到底这个元素会占用多大的宽度，而用 content-box 还需要手动计算一下这个元素实际占用的宽度。</p>
+<h3 id="CSS3-对于动画的支持"><a href="#CSS3-对于动画的支持" class="headerlink" title="CSS3 对于动画的支持"></a>CSS3 对于动画的支持</h3><p>CSS3 支持的动画类型有：transform（变换）、transition（过渡）和 animation（动画）。你可以对特定的属性设置 transition，transiton 和 animation 的区别不大，animation 的动画是自己定义的，面向的更多的是脚本开发者，往往更加复杂。</p>
+<p>为了使用大部分 CSS3 特性，我们不得不与原来的属性一起使用生产商专有扩展。原因是直到现在，大部分浏览器只支持部分 CSS3 属性。最常见的私有属性是用于 Webkit 核心浏览器的（比如 Safari），它们以 -webkit- 开始，以及 Gecko 核心的浏览器（比如，Firefox），以 -moz- 开始，还有 Konqueror（-khtml-）、Opera（-o-）以及 Internet Explorer（-ms-）都有它们自己的属性扩展（目前只有 IE 8 支持 -ms- 前缀）。</p>
+<h3 id="那我们在开发中该如何去用-CSS3-呢？"><a href="#那我们在开发中该如何去用-CSS3-呢？" class="headerlink" title="那我们在开发中该如何去用 CSS3 呢？"></a>那我们在开发中该如何去用 CSS3 呢？</h3><p>我觉得首先是遵循一个优雅降级的原则，比如前面谈到的圆角，我们可以针对 Firefox 和 Safari 等这些支持圆角的浏览器中应用 CSS 圆角，而那些不支持 CSS 圆角的浏览器则显示为直角。其次就是对于不支持 CSS3 的浏览器可以使用 JavaScript 来实现，如 CSS3 任何元素支持 :hover 伪类，我们就可以对只支持链接 :hover 的 IE6 用 JS 来实现。最后就是在向用户或老板推广新技术的同时也要关注他们的目标与可行性，不能为了技术而技术。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/lRSChvh1Mhs" target="_blank" rel="noopener">https://unsplash.com/photos/lRSChvh1Mhs</a> By @Jon Flobrant</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2009/12/18/html5-and-css3-demystification/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2009/12/18/html5-and-css3-demystification/" data-id="cjt6lbxyw004jjeu1pz7hgc3f" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2009/12/18/html5-and-css3-demystification/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CSS3/">CSS3</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTML5/">HTML5</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2010/01/01/focus-on-front-end-development-process/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          关注前端开发流程
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2008/10/09/thinking-in-progressive-enhancement/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">【译】理解「渐进增强（Progressive Enhancement）」</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

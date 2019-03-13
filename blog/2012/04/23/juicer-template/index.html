@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Juicer – 一个 JavaScript 模板引擎的实现和优化 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="让我们从一段代码说起，假设有一段这样的 JSON 数据： 1234var json = &amp;#123;	name: &apos;流火&apos;,	blog: &apos;ued.taobao.org&apos;&amp;#125;; 我们需要根据这段 JSON 生成这样的 HTML 代码： 1流火 (blog: ued.taobao.org) 传统的 JavaScript 代码一定是这个样子： 12var html;html = &apos;&apos; + j">
+<meta name="keywords" content="模板引擎">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Juicer – 一个 JavaScript 模板引擎的实现和优化">
+<meta property="og:url" content="http://taobaofed.org/blog/2012/04/23/juicer-template/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="让我们从一段代码说起，假设有一段这样的 JSON 数据： 1234var json = &amp;#123;	name: &apos;流火&apos;,	blog: &apos;ued.taobao.org&apos;&amp;#125;; 我们需要根据这段 JSON 生成这样的 HTML 代码： 1流火 (blog: ued.taobao.org) 传统的 JavaScript 代码一定是这个样子： 12var html;html = &apos;&apos; + j">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1eOK1QpXXXXabXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB11x9ZPVXXXXccXFXXXXXXXXXX-705-584.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1ibyAPVXXXXa1aXXXXXXXXXXX-646-506.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Bsm2PVXXXXaSXFXXXXXXXXXX-931-471.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1iMbdPVXXXXctXXXXXXXXXXXX-420-226.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1UcHlPVXXXXatXXXXXXXXXXXX-905-152.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Juicer – 一个 JavaScript 模板引擎的实现和优化">
+<meta name="twitter:description" content="让我们从一段代码说起，假设有一段这样的 JSON 数据： 1234var json = &amp;#123;	name: &apos;流火&apos;,	blog: &apos;ued.taobao.org&apos;&amp;#125;; 我们需要根据这段 JSON 生成这样的 HTML 代码： 1流火 (blog: ued.taobao.org) 传统的 JavaScript 代码一定是这个样子： 12var html;html = &apos;&apos; + j">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1eOK1QpXXXXabXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-juicer-template" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Juicer – 一个 JavaScript 模板引擎的实现和优化
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: admin</span>
+        
+        <span>发表于: <a href="/blog/2012/04/23/juicer-template/" class="article-date">
+  <time datetime="2012-04-23T10:21:00.000Z" itemprop="datePublished">2012-04-23</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1eOK1QpXXXXabXpXXXXXXXXXX-900-500.jpg" alt="Juicer – 一个 JavaScript 模板引擎的实现和优化"></p>
+<p>让我们从一段代码说起，假设有一段这样的 JSON 数据：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> json = &#123;</span><br><span class="line">	name: <span class="string">'流火'</span>,</span><br><span class="line">	blog: <span class="string">'ued.taobao.org'</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>我们需要根据这段 JSON 生成这样的 HTML 代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">流火 (blog: ued.taobao.org)</span><br></pre></td></tr></table></figure>
+<p>传统的 JavaScript 代码一定是这个样子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> html;</span><br><span class="line">html = <span class="string">''</span> + json.name + <span class="string">' (blog: '</span> + json.blog + <span class="string">')'</span>;</span><br></pre></td></tr></table></figure>
+<p>不言而喻，这样的代码混杂了 HTML 结构和代码逻辑，而且代码不具可读性，不便于后期维护，于是便有了这样一个函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sub</span>(<span class="params">str, data</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> str.replace(<span class="regexp">/&#123;(.*?)&#125;/igm</span>, <span class="function"><span class="keyword">function</span>(<span class="params">$, $<span class="number">1</span></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> data[$<span class="number">1</span>] ? data[$<span class="number">1</span>] : $;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有了这个函数，我们拼接字符串的工作就可以简化为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> tpl = <span class="string">'&#123;name&#125; (blog: &#123;blog&#125;)'</span>;</span><br><span class="line"><span class="keyword">var</span> html = sub(tpl, json);</span><br></pre></td></tr></table></figure>
+<p><img src="https://img.alicdn.com/tps/TB11x9ZPVXXXXccXFXXXXXXXXXX-705-584.png" alt></p>
+<p>看到这里，不用我多说，我想通过这个例子直观的展现出前端模板引擎的好处所在，这么做能够完全剥离 HTML 和代码逻辑，便于多人协作和后期的代码维护。当然，当我们的业务逻辑需要对数据源进行循环遍历，if 判断等的时候，这个简明的函数很显然并不能满足我们的需求，于是便有了如今这市面上众多的模板引擎，诸如 Mustache，jQuery tmpl，Kissy template，ejs，doT，nTenjin 等等。</p>
+<blockquote>
+<p>“如无必要，勿增实体。”</p>
+</blockquote>
+<p>这是著名的奥卡姆剃须刀法则，简单的说就是避免重复造轮子。那么就会有童鞋质疑，既然已然有这么多现成的东西可用，为什么还要重新打造一个呢？</p>
+<p>我个人认为一个完善的模板引擎应该兼顾这几点：</p>
+<ul>
+<li>语法简明</li>
+<li>执行效率高</li>
+<li>安全性</li>
+<li>错误处理机制</li>
+<li>多语言通用性</li>
+</ul>
+<p><img src="https://img.alicdn.com/tps/TB1ibyAPVXXXXa1aXXXXXXXXXXX-646-506.png" alt></p>
+<p>而市面上现有的模板引擎没有做到兼顾以上几点，比如 Mustache 支持多种语言，通用性不错，不过性能稍差，而且语法不支持高级特性，例如遍历的时候无法做 if 判断，也无法获得 index 索引值，jQuery tmpl 依赖 jQuery，缺乏可移植性，Kissy template 虽然依赖 Kissy， 不过性能和语法都值得推荐，doT/nTenjin 性能和灵活性都很不错，但是语法需要用原生的js来写，写好的模板代码可读性稍差。</p>
+<p>鱼和熊掌不可兼得，语法的处理，安全性的输出过滤和错误处理机制的引入在一定程度上都会或多或少降低模板引擎的性能，因此就需要我们权衡。Juicer 在实现上首先将性能看做第一个重要的指标，毕竟性能好坏直接影响用户的感知，同时兼顾了安全性和错误处理机制（即便这样会导致性能的略微下降）。</p>
+<p>首先来看下 jsperf 上同几个主流模板引擎的性能对比。</p>
+<p><img src="https://img.alicdn.com/tps/TB1Bsm2PVXXXXaSXFXXXXXXXXXX-931-471.png" alt></p>
+<p><img src="https://img.alicdn.com/tps/TB1iMbdPVXXXXctXXXXXXXXXXXX-420-226.png" alt></p>
+<p>可以看到，性能上比传统模板引擎均有提升，下边的介绍主要从语法、安全性和错误处理，以及如何使用这几个方面介绍下 Juicer.</p>
+<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><ul>
+<li>循环 {@each}…{@/each}</li>
+<li>判断 {@if}…{@else if}…{@else}…{@/if}</li>
+<li>变量（支持函数）${varname|function}</li>
+<li>注释 {# comment here}</li>
+</ul>
+<p>详细的语法请参考 <a href="http://juicer.name" target="_blank" rel="noopener">Juicer Docs</a>.</p>
+<h3 id="安全性"><a href="#安全性" class="headerlink" title="安全性"></a>安全性</h3><p>安全性，简单地说就是对输出数据在输出前进行一次转义过滤，避免 XSS 这样的脚本注入攻击，简单扫下盲，举个 XSS 的例子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> json = &#123;</span><br><span class="line">	output: <span class="string">'alert("XSS");'</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>如果 JSON 数据是第三方接口返回或者含有用户输入（像 BBS、评价）的内容，我们如果赤裸裸的将 output 写到页面上就会执行恶意的js代码，所以 Juicer 默认是对数据输出做了安全转义的，当然如果不想被转义，可以使用 <code>$${varname}</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">juicer.to_html(<span class="string">'$&#123;output&#125;'</span>,json); </span><br><span class="line"><span class="comment">//输出：&amp;lt;script&amp;gt;alert("XSS");&amp;lt;/script&amp;gt;</span></span><br><span class="line"></span><br><span class="line">juicer.to_html(<span class="string">'$$&#123;output&#125;'</span>,json); </span><br><span class="line"><span class="comment">//输出：&lt;script&gt;alert("XSS");&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h3><p>如果没有错误处理，当模板引擎编译（Compile）或者渲染（Render）出错时候就会引起后续js代码停止执行，可想而知，如果因为一个逗号或者 JSON 数据的偶发错误导致整个页面挂掉，是我们不能接受的。但是 Juicer 在遇到这些错误的时候不会影响后续代码的执行，只会在控制台打出一句警告（Warn）告知开发者模板解析出现错误。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">juicer.to_html(<span class="string">'$&#123;varname,,,,,,,&#125;'</span>, json);</span><br><span class="line">alert(<span class="string">'hello, juicer!'</span>);</span><br></pre></td></tr></table></figure>
+<p>执行上边的代码就会看到控制台打出的 <code>Juicer Compile Exception: Unexpected token ,</code>，但是不会因为错误导致后续的 <code>alert</code>被阻塞掉。</p>
+<p>实现原理</p>
+<p><img src="https://img.alicdn.com/tps/TB1UcHlPVXXXXatXXXXXXXXXXXX-905-152.png" alt></p>
+<p>Juicer 对一个模板的编译和渲染的过程主要有以下几个步骤：</p>
+<ul>
+<li>对模板代码进行语法分析</li>
+<li>分析后生成原生的 JavaScript 代码字符串</li>
+<li>将生成的代码转为可重用的 Function（Compiled Template）</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> json = &#123;</span><br><span class="line">  list: [</span><br><span class="line">    &#123; <span class="attr">name</span>: <span class="string">'benben'</span> &#125;,</span><br><span class="line">    &#123; <span class="attr">name</span>: <span class="string">'liuhuo'</span> &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">juicer.set(<span class="string">'errorhandling'</span>, <span class="literal">false</span>); <span class="comment">// pre-set option</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tpl = <span class="string">'&#123;@each list as value,key&#125;$$&#123;value.name&#125;&#123;@/each&#125;'</span>;</span><br><span class="line"><span class="keyword">var</span> compiled_tpl = juicer(tpl);</span><br></pre></td></tr></table></figure>
+<p>我们通过<code>compiled_tpl.render.toString()</code>看下编译后的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">anonymous</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> data = data || &#123;&#125;;</span><br><span class="line">  <span class="keyword">var</span> out = <span class="string">''</span>;</span><br><span class="line">  out += <span class="string">''</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i0 = <span class="number">0</span>, l = data.list.length; i0 &lt; l; i0++) &#123;</span><br><span class="line">    <span class="keyword">var</span> value = data.list[i0];</span><br><span class="line">    <span class="keyword">var</span> key = i0;</span><br><span class="line">    out += <span class="string">''</span>;</span><br><span class="line">    out += ((value.name));</span><br><span class="line">    out += <span class="string">''</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  out += <span class="string">''</span>;</span><br><span class="line">  <span class="keyword">return</span> out;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>是不是已经明白了 Juicer 的原理？这个编译后的函数就会每次帮我们完成从数据到 HTML 代码的拼装操作。</p>
+<p>这里有几点优化的地方值得分享下：</p>
+<ul>
+<li>using += instead of array.push</li>
+<li>avoid using with {}</li>
+<li>cache the compiled template (function)</li>
+</ul>
+<p>这几点优化在大数据量循环渲染时候性能提升显著，不过正因为放弃了 <code>with{}</code> 语句，所以 Juicer 会在编译函数之前对模板进行词法分析，将用到的变量实现声明，这样就能避免 JSON 数据外层必须指定 <code>data.</code> 前缀，如果你觉得这点性能的提升不重要，也可以在 options 中指定 <code>loose: false</code>（禁用松散模式），这样就可以不省去 <code>data.</code> 前缀，这样做的好处就是性能会更好一些。</p>
+<p>最后介绍下 Options 配置项，左侧为参数默认值。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	cache: <span class="literal">true</span>/<span class="literal">false</span>,</span><br><span class="line">	loose: <span class="literal">true</span>/<span class="literal">false</span>,</span><br><span class="line">	strip: <span class="literal">true</span>/<span class="literal">false</span>,</span><br><span class="line">	errorhandling: <span class="literal">true</span>/<span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>cache 默认为 true，即同一个模板编译后是否被 Juicer 缓存，也就是说如果缓存开启的情况下，同一个模板第一次编译后，为了缩短耗时提升性能，后续不会再次执行编译的操作而是直接从缓存中去取编译好的模板函数。</p>
+<h3 id="Juicer-的-API"><a href="#Juicer-的-API" class="headerlink" title="Juicer 的 API"></a>Juicer 的 API</h3><p>Juicer 有两种使用方法，一种是通过</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">juicer(tpl, data);</span><br><span class="line"><span class="comment">// 或者</span></span><br><span class="line">juicer.to_html(tpl, data);</span><br></pre></td></tr></table></figure>
+<p>直接根据提供的数据将模板转为 HTML 代码，另一种是通过 compile 方法先将模板编译好，在需要的时候再对模板进行数据的 Render 操作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> compiled_tpl=juicer(tpl);</span><br><span class="line"></span><br><span class="line">compiled_tpl.render(data);</span><br><span class="line"><span class="comment">// 或者</span></span><br><span class="line"><span class="keyword">var</span> compiled_tpl=juicer.compile(tpl);</span><br><span class="line">compiled_tpl.render(data);</span><br></pre></td></tr></table></figure>
+<p>最后附上 Juicer 的项目地址，上边有详细的文档和 Demo 代码。<br>地址：<a href="http://juicer.name" target="_blank" rel="noopener">Juicer</a></p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/TilO4-6h3VA" target="_blank" rel="noopener">https://unsplash.com/photos/TilO4-6h3VA</a> By @Sergey Pesterev</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2012/04/23/juicer-template/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2012/04/23/juicer-template/" data-id="cjt6lbxz5005ijeu1r7ex4zzp" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2012/04/23/juicer-template/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/模板引擎/">模板引擎</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2012/10/11/fsm-based-component-design-and-implementation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          基于有限状态机的交互组件设计与实现
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2010/12/24/closure-compiler-advanced-mode/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Closure Compiler 高级模式及更多思考</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

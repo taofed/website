@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>新版卖家中心 Bigpipe 实践（一） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="新版卖家中心已经上线 3 个多月，乔福老师的 Midway 之旅不只是前后端分离，还是工程化的大作坊。我们很清楚前端不再只是地平线上的人类，现在我们可以深入到 View 层和 Controller 层做更多的有趣事。 View 层关于 View 层，有张图可能还活在大家的本地缓存里， UI Layer  已不是单纯在服务端或者在客户端。 Midway  做的就是将 View 层彻底授权给前端。然">
+<meta name="keywords" content="Bigpipe,网页加载优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="新版卖家中心 Bigpipe 实践（一）">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/17/seller-bigpipe/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="新版卖家中心已经上线 3 个多月，乔福老师的 Midway 之旅不只是前后端分离，还是工程化的大作坊。我们很清楚前端不再只是地平线上的人类，现在我们可以深入到 View 层和 Controller 层做更多的有趣事。 View 层关于 View 层，有张图可能还活在大家的本地缓存里， UI Layer  已不是单纯在服务端或者在客户端。 Midway  做的就是将 View 层彻底授权给前端。然">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1EQBQMXXXXXaWXVXXlzJZ8pXX-900-500.jpg">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/T1xW8OFrXkXXXK71TW-590-611.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1pT3AKVXXXXcGXpXX26dPWpXX-1200-3578.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1.39WKVXXXXXYapXXLonyRFXX-1474-1086.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1xFP3KVXXXXa3XXXX0yMD.pXX-768-728.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1FZoNKVXXXXaZXXXX25iM8VXX-1230-702.gif">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1xFP3KVXXXXa3XXXX0yMD.pXX-768-728.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1WR_TKVXXXXbnXpXX7jSJ9FXX-1094-788.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1xFP3KVXXXXa3XXXX0yMD.pXX-768-728.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1h.6rKVXXXXXjapXX7XjsMVXX-788-774.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB16EDdKVXXXXaaXpXXByzwKXXX-572-776.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1D7e1KVXXXXbHXVXXRBfBLFXX-846-1250.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1oy90KVXXXXaHaXXXYWoW9pXX-1478-1076.png">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1khkiKVXXXXXZaXXX25iM8VXX-1230-702.gif">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1FZoNKVXXXXaZXXXX25iM8VXX-1230-702.gif">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="新版卖家中心 Bigpipe 实践（一）">
+<meta name="twitter:description" content="新版卖家中心已经上线 3 个多月，乔福老师的 Midway 之旅不只是前后端分离，还是工程化的大作坊。我们很清楚前端不再只是地平线上的人类，现在我们可以深入到 View 层和 Controller 层做更多的有趣事。 View 层关于 View 层，有张图可能还活在大家的本地缓存里， UI Layer  已不是单纯在服务端或者在客户端。 Midway  做的就是将 View 层彻底授权给前端。然">
+<meta name="twitter:image" content="http://gtms01.alicdn.com/tps/i1/TB1EQBQMXXXXXaWXVXXlzJZ8pXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-seller-bigpipe" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      新版卖家中心 Bigpipe 实践（一）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 子仲</span>
+        
+        <span>发表于: <a href="/blog/2015/12/17/seller-bigpipe/" class="article-date">
+  <time datetime="2015-12-17T14:12:11.000Z" itemprop="datePublished">2015-12-17</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms01.alicdn.com/tps/i1/TB1EQBQMXXXXXaWXVXXlzJZ8pXX-900-500.jpg" alt="新版卖家中心 Bigpipe 实践（一）"></p>
+<p>新版卖家中心已经上线 3 个多月，乔福老师的 Midway 之旅不只是前后端分离，还是工程化的大作坊。我们很清楚前端不再只是地平线上的人类，现在我们可以深入到 View 层和 Controller 层做更多的有趣事。</p>
+<h2 id="View-层"><a href="#View-层" class="headerlink" title="View 层"></a>View 层</h2><p>关于 View 层，有张图可能还活在大家的本地缓存里， UI Layer  已不是单纯在服务端或者在客户端。 Midway  做的就是将 View 层彻底授权给前端。然后我们的岁月里就剩下选择，是选择服务端渲染，还是客户端渲染，还是双管齐下。</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/T1xW8OFrXkXXXK71TW-590-611.png" width="30%"></p>
+<h2 id="页面加载方式"><a href="#页面加载方式" class="headerlink" title="页面加载方式"></a>页面加载方式</h2><p>掌控了 View 层，除了提高效率，还可以考虑针对不同的场景采用不同的页面加载方式。加载方式的演变可以追溯到上个世纪，而当下能做的就是因地制宜，选择合适的方式到合适场景中。</p>
+<h3 id="有哪些加载方式？"><a href="#有哪些加载方式？" class="headerlink" title="有哪些加载方式？"></a>有哪些加载方式？</h3><h4 id="1-直接同步加载"><a href="#1-直接同步加载" class="headerlink" title="1 直接同步加载"></a>1 直接同步加载</h4><p>服务端渲染，一次加载到客户端 </p>
+<p>一般场景：页面首屏内容基本就是页面所有内容</p>
+<h4 id="2-滚动同步加载（lazyload）"><a href="#2-滚动同步加载（lazyload）" class="headerlink" title="2 滚动同步加载（lazyload）"></a>2 滚动同步加载（lazyload）</h4><p>服务端渲染首屏内容，次屏内容放在 textarea 或者注释中，先将内容加载到客户端，滚动时再渲染次屏内容 </p>
+<p>一般场景：页面内容长度高出首屏内容较多</p>
+<h4 id="3-异步加载"><a href="#3-异步加载" class="headerlink" title="3 异步加载"></a>3 异步加载</h4><p>服务端渲染主 layout ，加载到客户端，通过 AJAX 获取其他页面内容，然后在客户端渲染</p>
+<p>一般场景：目前淘宝无线 H5 的方案类似，通过接口获取数据然后在客户端渲染</p>
+<h4 id="4-滚动异步加载（lazyload）"><a href="#4-滚动异步加载（lazyload）" class="headerlink" title="4 滚动异步加载（lazyload）"></a>4 滚动异步加载（lazyload）</h4><p>服务端渲染首屏内容，加载到客户端，滚动时再通过 AJAX 获取次屏内容 </p>
+<p>一般场景：页面内容长度高于首屏内容长度较多</p>
+<h4 id="5-分块加载（Bigpipe）"><a href="#5-分块加载（Bigpipe）" class="headerlink" title="5 分块加载（Bigpipe）"></a>5 分块加载（Bigpipe）</h4><p>服务端支持 chunk 输出，分块将内容传输到客户端，客户端渲染</p>
+<p>一般场景：适合首屏输出</p>
+<h3 id="选择的初衷"><a href="#选择的初衷" class="headerlink" title="选择的初衷"></a>选择的初衷</h3><p>采用什么样的加载方式除了考虑业务逻辑、页面元素、交互形式，第三方内容等诸多因素，最重要的应该还是用户的感受。就像冯小刚说的“电影要观众说好才是好”，就像 XXX 说的“<b>页面要用户说快才是快</b>”。</p>
+<h2 id="卖家中心首页"><a href="#卖家中心首页" class="headerlink" title="卖家中心首页"></a>卖家中心首页</h2><p><img src="http://gtms02.alicdn.com/tps/i2/TB1pT3AKVXXXXcGXpXX26dPWpXX-1200-3578.jpg" width="60%"></p>
+<h4 id="卖家中心首页的特点："><a href="#卖家中心首页的特点：" class="headerlink" title="卖家中心首页的特点："></a><strong><em>卖家中心首页的特点</em></strong>：</h4><ul>
+<li>页面主体内容完全模块化</li>
+<li>首屏有固定的模块</li>
+<li>各个模块有各自的数据</li>
+<li>非官方模块卖家可添加和拖拽</li>
+<li>有些模块是第三方 iframe 进来</li>
+</ul>
+<p>总的来说，首屏模块相对固定，模块较多，页面确实长。</p>
+<h4 id="容我三思"><a href="#容我三思" class="headerlink" title="容我三思"></a><strong><em>容我三思</em></strong></h4><ul>
+<li>选择<b>直接同步加载</b>明天肯定会被叫去谈话</li>
+<li>选择<b>滚动同步加载</b> 虽然好点，但是要取所有模块的数据然后拼装好 再放到 textarea ，这个服务端消耗时间太长</li>
+<li>选择<b>异步加载</b> 已经统治了 View 层，还做这样的事，会不会太小家子气</li>
+<li>选择<b>滚动异步加载</b> 嗯，有朋友圈的人应该都会选择它，首屏先服务端渲染加载，然后滚动的时候再异步加载各个模块</li>
+<li>选择<b>分块加载</b> 首屏内容是不是可以这样做</li>
+</ul>
+<h3 id="第一步：首屏内容同步，滚动异步加载"><a href="#第一步：首屏内容同步，滚动异步加载" class="headerlink" title="第一步：首屏内容同步，滚动异步加载"></a>第一步：首屏内容同步，滚动异步加载</h3><p>我们先选择滚动异步加载的方案实施，我们假设页面中 A/B 为首屏模块 C 为滚动异步加载的模块</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1.39WKVXXXXXYapXXLonyRFXX-1474-1086.png" width="60%"></p>
+<ul>
+<li>客户端请求页面</li>
+<li>服务端获取主 layout 数据</li>
+<li>服务端 A 模块获取数据</li>
+<li>服务端 A 模块模板拼装</li>
+<li>服务端 B 模块获取数据</li>
+<li>服务端 B 模块模板拼装</li>
+<li>拼装成首屏的 HTML</li>
+<li>首屏内容加载到客户端</li>
+<li>客户端滚动到 C 模块位置</li>
+<li>客户端发送请求 C 模块的请求</li>
+<li>服务端获取 C 模块数据</li>
+<li>服务端 C 模块模板拼装</li>
+</ul>
+<h4 id="时间"><a href="#时间" class="headerlink" title="时间"></a><strong><em>时间</em></strong></h4><p><img src="http://gtms02.alicdn.com/tps/i2/TB1xFP3KVXXXXa3XXXX0yMD.pXX-768-728.png" width="40%"></p>
+<ul>
+<li>首屏显示时间依赖 B 模块的处理时间</li>
+<li>白屏时间就是 B 模块处理完的时间</li>
+</ul>
+<h4 id="问题一"><a href="#问题一" class="headerlink" title="问题一"></a><strong><em>问题一</em></strong></h4><ul>
+<li>首屏必须等到最后一个首屏模块完成渲染之后才能输出</li>
+<li>完成首屏 HTML 加载的时间较长，用户从请求到展现之间，页面白屏较长，这个时候“用户感觉慢”</li>
+</ul>
+<h3 id="第二步：减轻首屏内容"><a href="#第二步：减轻首屏内容" class="headerlink" title="第二步：减轻首屏内容"></a>第二步：减轻首屏内容</h3><p>白屏太久，用户感知的内容太晚，这个对于整个网页体验是致命的。那我们就减少首屏内容，让首屏轻一点，这样用户就可以更快地感知到内容的输出。</p>
+<ul>
+<li>A/B 模块都采用异步加载的方式</li>
+<li>首屏只包含主 layout 内容</li>
+<li>由于 A/B 模块在首屏，所以加载完 layout 之后会直接加载这两个模块</li>
+</ul>
+<h4 id="业务场景效果"><a href="#业务场景效果" class="headerlink" title="业务场景效果"></a><strong><em>业务场景效果</em></strong></h4><p><img src="http://gtms01.alicdn.com/tps/i1/TB1FZoNKVXXXXaZXXXX25iM8VXX-1230-702.gif" width="80%"></p>
+<p>用这种方式，进入页面主框架内容很快加载到客户端，首屏模块也在 loading 之后 很快展现，作为用户确实“感觉快”了。</p>
+<h4 id="时间-1"><a href="#时间-1" class="headerlink" title="时间"></a><strong><em>时间</em></strong></h4><p><img src="http://gtms02.alicdn.com/tps/i2/TB1xFP3KVXXXXa3XXXX0yMD.pXX-768-728.png" width="40%"></p>
+<p>同步加载的方式</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1WR_TKVXXXXbnXpXX7jSJ9FXX-1094-788.png" width="60%"></p>
+<p>异步加载首屏模块的方式</p>
+<ul>
+<li>首屏显示时间缩短，依赖 layout 的处理时间</li>
+<li>白屏时间就是 layout 的处理时间</li>
+<li>加载完成的时间变长</li>
+</ul>
+<h4 id="问题二"><a href="#问题二" class="headerlink" title="问题二"></a><strong><em>问题二</em></strong></h4><ul>
+<li>首屏 layout 出来后，首屏模块的 loading 等待比较明显，也会有“模块加载慢”的感觉</li>
+<li>有几个模块，首屏就必须多几个请求</li>
+</ul>
+<h2 id="分块加载（Bigpipe）"><a href="#分块加载（Bigpipe）" class="headerlink" title="分块加载（Bigpipe）"></a>分块加载（Bigpipe）</h2><h4 id="分块传输编码"><a href="#分块传输编码" class="headerlink" title="分块传输编码"></a><strong><em>分块传输编码</em></strong></h4><p>了解分块加载之前，可以先了解下<a href="https://en.wikipedia.org/wiki/Chunked_transfer_encoding" target="_blank" rel="noopener">分块传输编码</a>，分块传输编码允许 HTTP 由应用服务器发送给客户端应用（ 通常是网页浏览器）的数据可以分成多个块传输。</p>
+<p>对于 Node.js 应用来说，可以很轻松实现分块传输编码， Stream 可以很好地在服务端和客户端建立管道，通过对 Response 的 body 分块 push ，达到内容的逐个展现，而这个过程我们<b>只需要一个请求</b>，没错你没听错，现在只要一个请求。</p>
+<h4 id="于是一个构思形成"><a href="#于是一个构思形成" class="headerlink" title="于是一个构思形成"></a><strong><em>于是一个构思形成</em></strong></h4><p><img src="http://gtms02.alicdn.com/tps/i2/TB1xFP3KVXXXXa3XXXX0yMD.pXX-768-728.png" width="40%"></p>
+<p>同步加载首屏的方式</p>
+<p><img src="http://gtms03.alicdn.com/tps/i3/TB1h.6rKVXXXXXjapXX7XjsMVXX-788-774.png" width="40%"></p>
+<p>分块加载首屏的方式</p>
+<ul>
+<li>所有内容加载完成的时间和同步方式一致</li>
+<li>白屏的时间是 layout 的处理时间</li>
+</ul>
+<h4 id="有个-demo"><a href="#有个-demo" class="headerlink" title="有个 demo "></a><strong><em>有个 demo </em></strong></h4><p><img src="http://gtms02.alicdn.com/tps/i2/TB16EDdKVXXXXaaXpXXByzwKXXX-572-776.png" width="40%"></p>
+<ul>
+<li>按顺序一块一块传输到客户端，逐块显示</li>
+<li>因为模块在页面结构的顺序要求，服务端还是得按顺序逐个 push 模块</li>
+<li>这么简单的 demo，是拯救不了世界的</li>
+</ul>
+<h4 id="打破顺序"><a href="#打破顺序" class="headerlink" title="打破顺序"></a><strong><em>打破顺序</em></strong></h4><p><img src="http://gtms01.alicdn.com/tps/i1/TB1D7e1KVXXXXbHXVXXRBfBLFXX-846-1250.png" width="40%"></p>
+<ul>
+<li>第 1 块内容叫做尊重，尊重模块在页面中的顺序</li>
+<li>第 2 块到第 4 块内容叫做无视，无视模块在页面中的顺序</li>
+<li>第 5 块内容完成页面结构的闭合</li>
+<li>第 1 块需要预先定义 doProgress 方法</li>
+<li>doProgress 帮我们将模块内容放到该放的模块位置上</li>
+</ul>
+<h4 id="并行执行"><a href="#并行执行" class="headerlink" title="并行执行"></a><strong><em>并行执行</em></strong></h4><p>现在我们可以不按顺序来输出内容，第 1 块内容我们可以优先输出主体的 layout ，而第 2 块到第 4 块我们可以有 3! 种排列方式，也就是说模块内容什么时候 push 都可以的。</p>
+<ul>
+<li>实际应用中，模块在后端需要取数据拼模板</li>
+<li>模块可以并行执行，谁先完成就输出到客户端，无需等待最后一个模块再进行输出</li>
+</ul>
+<h4 id="思路图"><a href="#思路图" class="headerlink" title="思路图"></a><strong><em>思路图</em></strong></h4><p>我们还是假设页面中  A/B 为首屏模块  C 为滚动异步加载的模块<br><img src="http://gtms02.alicdn.com/tps/i2/TB1oy90KVXXXXaHaXXXYWoW9pXX-1478-1076.png" width="60%"></p>
+<ul>
+<li>客户端请求页面</li>
+<li>服务端获取主 layout 数据</li>
+<li>完成 layout 拼装模板后 Flush 到客户端 Display </li>
+<li>输出的 layout 必须含有 doProgess 方法</li>
+<li>并行执行服务端 A 模块获取数据 A 模块模板拼装</li>
+<li>并行执行服务端 B 模块获取数据 B 模块模板拼装</li>
+<li>A 模块先完成模板拼装，将  doProgess(‘#A’,’A template’) Script Flush 到客户端</li>
+<li>执行方法 doProgess 实现 A 模板的渲染</li>
+<li>B 模块先完成模板拼装，将  doProgess(‘#B’,’B template’)  Script Flush 到客户端</li>
+<li>执行方法 doProgess 实现 B 模板的渲染</li>
+<li>完成并发执行后，Flush 页面结构的闭合标签</li>
+<li>客户端滚动到 C 模块位置</li>
+<li>客户端发送请求 C 模块的请求</li>
+<li>服务端获取 C 模块数据</li>
+<li>服务端 C 模块模板拼装</li>
+</ul>
+<h4 id="业务场景效果-1"><a href="#业务场景效果-1" class="headerlink" title="业务场景效果"></a><strong><em>业务场景效果</em></strong></h4><p><img src="http://gtms04.alicdn.com/tps/i4/TB1khkiKVXXXXXZaXXX25iM8VXX-1230-702.gif" width="80%"></p>
+<p>这次 loading 很快就没了，基本没看到，感觉确实“快了”。</p>
+<p>对比下<b>滚动异步加载</b>的效果：</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1FZoNKVXXXXaZXXXX25iM8VXX-1230-702.gif" width="80%"></p>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a><strong><em>分析</em></strong></h4><ul>
+<li>分块加载和滚动异步加载，首屏的 layout 输出时间应该是差不多的</li>
+<li>唯一的区别是，分块加载在一个请求内完成了首屏模块的同步输出，而滚动异步加载，首屏的模块还需要往返几次请求之后才能到客户端，所以分块加载确实“快了”</li>
+</ul>
+<h2 id="Bigpipe"><a href="#Bigpipe" class="headerlink" title="Bigpipe"></a>Bigpipe</h2><p>其实分块加载的原理，其实就是 Bigpipe 的原理，大伙儿可以看看<a href="http://www.searchtb.com/2011/04/an-introduction-to-bigpipe.html" target="_blank" rel="noopener">这篇文章</a>了解下。因为逐步推导的需要用分块加载可能会通俗一点。</p>
+<p>新版卖家中心是个很好的场景，@乔福 计划做 Bigpipe 优化的决定是个华丽的开始。</p>
+<h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>熟悉了原理，现在通过 Node.js 实现 Bigpipe ，我们可以发现前人已经积累了很多经验。不管是 Koa 还是 express 都有代码可寻。但是如何在现有的 Midway 体系里面，做一个适用于业务快速采用 Bigpipe 加载方式的东西，还需要在业务实践中慢慢提炼出来。下次可以从代码实现上来详细介绍 Bigpipe 的 Node.js 实现以及那些不为人知的坑。</p>
+<h2 id="最终感受"><a href="#最终感受" class="headerlink" title="最终感受"></a>最终感受</h2><ul>
+<li>权利越大，责任越大； View 层在手上，除了前后端分离，也要求前端要像后端。</li>
+<li>换位思考； 以前在浏览器和无线积累的优化经验换到服务端去实施又会怎样，比如压缩和模块加载等等。</li>
+<li>大思路小细节； Bigpipe 是个思路，实践中真正让方案前进的都是小细节的突破。</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/17/seller-bigpipe/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/17/seller-bigpipe/" data-id="cjt6lby1i00b5jeu15ppbj40e" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/17/seller-bigpipe/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bigpipe/">Bigpipe</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网页加载优化/">网页加载优化</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/18/think-to-def/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          DEF 2.0 的想法
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/16/h5-performance-optimization-and-domain-convergence/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">无线性能优化：域名收敛</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

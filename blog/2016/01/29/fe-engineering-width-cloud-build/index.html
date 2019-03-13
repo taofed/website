@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前端工程化：云构建 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="背景通常个人在开发项目的时，都是在本地编写构建脚本对项目进行构建，这个脚本可能是 Gulp，可能是 Grunt， 可能是 webpack，也可能是其他的一些脚本，每次代码发布之前，都要对代码进行构建，代码仓库里面包含构建脚本和构建之后的代码。对于个人开发，这样做是没有问题的，但是涉及到多人开发或者团队开发就会有一定的问题。说是问题也不是问题只不过是会导致开发效率降低，构建错误的情况越来越多。 在">
+<meta name="keywords" content="前端功能,构建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端工程化：云构建">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/29/fe-engineering-width-cloud-build/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="背景通常个人在开发项目的时，都是在本地编写构建脚本对项目进行构建，这个脚本可能是 Gulp，可能是 Grunt， 可能是 webpack，也可能是其他的一些脚本，每次代码发布之前，都要对代码进行构建，代码仓库里面包含构建脚本和构建之后的代码。对于个人开发，这样做是没有问题的，但是涉及到多人开发或者团队开发就会有一定的问题。说是问题也不是问题只不过是会导致开发效率降低，构建错误的情况越来越多。 在">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB15XU_LpXXXXbEXpXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1gF4dLFXXXXcHXXXXXXXXXXXX-925-664.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端工程化：云构建">
+<meta name="twitter:description" content="背景通常个人在开发项目的时，都是在本地编写构建脚本对项目进行构建，这个脚本可能是 Gulp，可能是 Grunt， 可能是 webpack，也可能是其他的一些脚本，每次代码发布之前，都要对代码进行构建，代码仓库里面包含构建脚本和构建之后的代码。对于个人开发，这样做是没有问题的，但是涉及到多人开发或者团队开发就会有一定的问题。说是问题也不是问题只不过是会导致开发效率降低，构建错误的情况越来越多。 在">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB15XU_LpXXXXbEXpXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-fe-engineering-width-cloud-build" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前端工程化：云构建
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 阿大，慎里</span>
+        
+        <span>发表于: <a href="/blog/2016/01/29/fe-engineering-width-cloud-build/" class="article-date">
+  <time datetime="2016-01-28T20:05:30.000Z" itemprop="datePublished">2016-01-29</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB15XU_LpXXXXbEXpXXXXXXXXXX-900-500.png" alt="前端工程化：云构建"></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>通常个人在开发项目的时，都是在本地编写构建脚本对项目进行构建，这个脚本可能是 Gulp，可能是 Grunt， 可能是 webpack，也可能是其他的一些脚本，每次代码发布之前，都要对代码进行构建，代码仓库里面包含构建脚本和构建之后的代码。对于个人开发，这样做是没有问题的，但是涉及到多人开发或者团队开发就会有一定的问题。说是问题也不是问题只不过是会导致开发效率降低，构建错误的情况越来越多。</p>
+<p>在本地对项目进行构建，通过脚手架工具来分发构建脚本对于团队开发来说有很多问题：</p>
+<ul>
+<li>构建脚本的开发维护者很难去持续优化，更新构建脚本</li>
+<li>构建脚本使用者对构建脚本的修改，改良不可复用</li>
+<li>每次发布之前都需要对项目进行构建，如果忘记构建将会导致发布失败</li>
+<li>同一个项目的开发者可能会有不同的构建脚本，极有可能会导致构建出错</li>
+</ul>
+<p>我们把构建脚本从应用里面提炼出来，包装成单独 npm 模块，这样构建脚本（下文统称为构建器）就有了模块的一些特性：</p>
+<ul>
+<li>可分享： 任何人可以很方便发布一个构建脚本模块给任何人使用</li>
+<li>可修改： 如果你有更好的主意，可以 fork，加上自己想要的功能，并发布到 npm 平台上</li>
+<li>易维护： 模块可以由专人维护与更新</li>
+</ul>
+<p>使用云构建后，本地不需要安装任何构建环境，这个对于一些新技术的推广是有好处的， 比如大家都知道，在 Windows 下， 安装 compass 不是一件轻松的事。而且对于构建脚本的更新也是很友好的，只需要更新云构建平台上的构建脚本即可。</p>
+<p>使用云构建后仓库里面就不需要保存构建后的代码，这样有助于保持代码整洁，同时，在多人开发的时候，再也不会出现构建脚本冲突的情况。把云构建接入发布流程，每次提交发布时执行构建，这样就再也不会在发布之前忘了构建。而且服务器的性能更强大，对于比较大的项目能够更快执行构建，节省构建的时间。一线开发人员不需要去关心构建的问题，能够把更多的时间放到业务上，提高工作效率并。</p>
+<h2 id="历史和现状"><a href="#历史和现状" class="headerlink" title="历史和现状"></a>历史和现状</h2><p>Grunt；Gulp 等前端构建的概念是近几年才火起来的，其实淘宝前端团队早在 2011 左右就开始大规模对前端代码进行构建了（Git 也是在这个时候引入到团队内作为版本管理工具）。最初使用的构建引擎是 ant，基于 XML 描述构建规则，后来将 ant 的 build 任务放到了服务器端执行，再后来由于 ant 的扩展性和维护性太低直接改成了 shell 脚本（那个时候压缩代码还是用 YUICompress 和 Google Closure Compiler）。</p>
+<p>再后来 Node.js 开始流行，基于 Node.js 的前端生产力工具开始如雨后春笋般涌现。团队内部开始使用 Grunt 构建前端代码（后续慢慢被 Gulp 和 webpack 替代），但依旧是在本机电脑执行构建，然后将构建后代码提交到仓库进行发布上线。14 年底开始构思并上线了第一版云端构建平台，开始逐步将前端代码的共建工作再次迁移到云端执行。</p>
+<p>经过一年多时间的完善，云构建平台已经完全支撑起了团队内部乃至整个集团的前端代码构建任务，日构建任务量已达 1000+。并且构建服务还集成到了代码发布流程中和本地开发工具中，使前端开发前所未有的高效和轻松。</p>
+<h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>云构建系统由五部分组成：</p>
+<ul>
+<li>客户端（<strong>client</strong>）<ul>
+<li>client 负责向云构建发起一个构建请求并获取构建后内容。</li>
+<li>client 官方提供了一个已经封装好逻辑的 npm 模块，如果是基于 Node.js 的系统，可以直接使用。</li>
+<li>client 支持将需要构建的代码直接上传给构架服务器或者仅提供一个 URL，由构建服务器自己从 URL 下载代码，官方更推荐后者。</li>
+</ul>
+</li>
+<li>构建器（<strong>builder</strong>）<ul>
+<li>builder 是构建任务的最终执行者，包含详细的构建业务逻辑</li>
+<li>builder 是一个标准的 npm 模块</li>
+</ul>
+</li>
+<li>构建服务器（<strong>workers</strong>）<ul>
+<li>workers 是一组高性能服务器，每台服务器可以并发运 32 个构建任务。</li>
+<li>workers 可以动态扩容；上线和下线</li>
+</ul>
+</li>
+<li>构建路由（<strong>router</strong>）<ul>
+<li>router 负责分发构建任务给 worker。</li>
+<li>router 集成了 worker 负载监控功能，可以保证所有 worker 平均负载。</li>
+</ul>
+</li>
+<li>数据展示和管理平台（<strong>web</strong>）<ul>
+<li>web 展示所有构建过程中产生的数据</li>
+<li>web 管理构建器和构建服务器</li>
+</ul>
+</li>
+</ul>
+<h3 id="架构图："><a href="#架构图：" class="headerlink" title="架构图："></a>架构图：</h3><p><img src="https://img.alicdn.com/tps/TB1gF4dLFXXXXcHXXXXXXXXXXXX-925-664.png" alt></p>
+<p>运行一次构建任务的大概过程如下：</p>
+<ol>
+<li>app（需要调用云构建的各种系统）集成 client，并使用 client 提供的接口发起构建请求</li>
+<li>client 从 router 获取一个 worker 地址</li>
+<li>client 与 worker 建立 socket 连接，并向这个 worker 发起构建任务</li>
+<li>worker 实时输出构建日志信息给 client</li>
+<li>worker 完成构建后将构建结果返回给 client</li>
+<li>client 将构建结果返回给 app</li>
+</ol>
+<blockquote>
+<p>为了减轻构建服务器的负载，整个构建过程中涉及到的文件上传下载服务都是通过文件中转服务来完成的。</p>
+</blockquote>
+<h3 id="abc-json"><a href="#abc-json" class="headerlink" title="abc.json"></a>abc.json</h3><p>除了上面的五个部分，还有一个配置文件也是必不可少的：abc.json（a build config）。这个文件一般跟需要构建的内容放在一起发送给 worker。是一个标准的 JSON 文件，指定需要调用的 builder 和一些配置信息。</p>
+<h2 id="构建器（builder）"><a href="#构建器（builder）" class="headerlink" title="构建器（builder）"></a>构建器（builder）</h2><p>abc.json 和 builder 是整个云构建平台唯一可定制部分。</p>
+<p>builder 是一个标准的 npm 模块，入口文件可以是一个 Grunfile.js 或者 gulpfile.js，当然也可以是你自己的 xx.js。如果是 Gulp 或者 Grunt 脚本，worker 会帮你运行这个脚本，如果是普通的 npm 包，wroker 会运行由 package.json 文件中指定的入口文件。</p>
+<h3 id="构建器编写注意事项"><a href="#构建器编写注意事项" class="headerlink" title="构建器编写注意事项"></a>构建器编写注意事项</h3><p>1，项目本身需要依赖一些外部的模块，例如 lodash，需要构建开始前需要自己安装相应的依赖，可以通过一个 Gulp 的 task 去执行，没有依赖则忽略。</p>
+<p>3，针对特定项目的配置信息，可以在项目的配置文件（abc.json）中添加，然后在构建时通过读取配置文件获取。</p>
+<p>4，云构建和本地构建有一定的区别。本地构建时，源码目录和构建好的代码的存放目录构建者都是明确的。而云端构建，构建脚本是由云构建平台来控制的，云构建也需要收集构建好的文件返回给客户端，因此待构建源码的目录（src）和构建好的代码的存放目录（dist）都是需要有云构建平台来指定，worker 在执行 builder 的时候会传递相关参数。</p>
+<p>5，如果构建器本身需要安装依赖，package.json 的依赖需要是 dependencies，不能是 devDependencies。</p>
+<h3 id="构建器测试"><a href="#构建器测试" class="headerlink" title="构建器测试"></a>构建器测试</h3><p>构建器编写本身也需要一定的成本，而且在本地无法测试，如果构建器编写出错，而且已经发布，将会造成很大的问题，因此需要一个构建器的测试平台。</p>
+<p>通过删除构建系统的大部分特性，而只保留最核心的功能，同时去除原系统的一些限制使构建器能够在上面正常运行。同时编写相应的测试命令行工具，形成整个构建器测试平台。</p>
+<p>线上构建系统对构建器做了严格的限制，构建器必须要审核通过才能够发布上线。测试平台没有这些限制，方便构建器开发者更新测试。</p>
+<h2 id="遇到的问题和解决方法"><a href="#遇到的问题和解决方法" class="headerlink" title="遇到的问题和解决方法"></a>遇到的问题和解决方法</h2><h3 id="1，HTTP-连接"><a href="#1，HTTP-连接" class="headerlink" title="1，HTTP 连接"></a>1，HTTP 连接</h3><p>最开始的时候 client 与 worker 都是通过 HTTP 进行通信，这样实现起来的确是很简单，系统也能正常运行。而且对于绝大多数构建任务来说是没有问题的。但是遇到一些比较大的项目，构建时间比较长的项目，问题就暴露出来了。由于构建时间比较长 HTTP 连接经常可能会被重置，既有可能因为 nginx 代理的问题导致，也有可能因为网络问题导致。</p>
+<p>随着云构建系统越来越复杂，服务器的返回值，需要经过多层嵌套才能够返回给客户端，这对于系统的调试和错误处理带来了很多的不变，而且大大降低了代码的可读性。错误处理变得很复杂，可能会存在没有发现的 bug。</p>
+<p>为了彻底解决这个问题，我们使用了 socket 来代替 HTTP，使用了 socket 的特性，构建时间即使再久也不会发生构建过程中通信中断的问题。而且只要构建发生错误，通过 socket 的事件机制立马就能够通知客户端。</p>
+<h3 id="2，文件上传"><a href="#2，文件上传" class="headerlink" title="2，文件上传"></a>2，文件上传</h3><p>在最初的系统中，项目文件的上传是通过 client 直接把项目文件压缩打包上传到 worker，项目文件很大打包压缩上传的时间需要很久，而且文件过大，nginx 会返回 413 错误。当并发任务数量过多的时候，worker 负载过大，经常会因为上传下载占用过多的资源影响构建服务的正常进行。</p>
+<p>通过把文件上传服务独立出来，建立单独文件中转服务，worker 只需要关注构建相关的问题，不再接收处理上传的文件，client 传递给 worker 的只是一个 URL 地址。构建完成后，worker 把构建好的代码打包压缩上传到文件中转服务，然后返回相应的地址给 client，client 通过地址拿到构建好的内容。所有文件处理都通过第三方去处理，文件部分的处理和构建过程完全独立。减少了系统的耦合程度。</p>
+<h3 id="3，负载均衡"><a href="#3，负载均衡" class="headerlink" title="3，负载均衡"></a>3，负载均衡</h3><p>随着云构建系统被使用的越来越多，构建任务经常需要等待，为了避免构建等待，加快构建速度，我们增加了构建服务器的数量。</p>
+<p>多台构建服务器就需要有相应的任务分发机制，对任务进行分发保证构建任务不需要等待。因此增加了云构建路由服务（router）。云构建路由对任务进行分发，构建服务器有多台，在分发的时候要根据构建服务器上面正在运行任务的数量进行分发，确保任务能够以最快的速度运行。</p>
+<p>同时还需要设定心跳机制，定时去检测构建服务器的情况，如果构建服务器出现异常能够及时报警，同时自动下线相应的构建服务器。最大程度的保证构建能够正常的运行，不会因为一台构建服务器出现故障而影响整个构建系统的正常运行。</p>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>1，为了提高测试平台的稳定性和安全性，我们设想为每个构建器提供单独的沙盒运行环境，使用 docker 技术把构建器的运行环境和构建系统本身隔离开来，保证构建器运行过程的问题不会影响构建系统本身，使两者独立起来。这样做对于系统的安全性也会有很大的提高，限制了构建器本身的运行环境，即使构建器中存在一些危害构建系统的行为也不会影响到构建系统，这样极大的提高了安全性和稳定性。</p>
+<p>2，目前云构建还只是拥有对代码进行构建的能力，完全可以把云构建平台进行通用化，成为一个通用 Node.js 任务运行平台，目前我们正在做这方面的尝试。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/29/fe-engineering-width-cloud-build/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/29/fe-engineering-width-cloud-build/" data-id="cjt6lbxy6002kjeu1sn0ki1lb" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/29/fe-engineering-width-cloud-build/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端功能/">前端功能</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/构建/">构建</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/02/22/canvas-performance/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Canvas 最佳实践（性能篇）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/27/nodejs-ipc/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">进程间通信的另类实现</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

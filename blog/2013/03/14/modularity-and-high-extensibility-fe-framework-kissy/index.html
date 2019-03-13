@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>模块化高扩展性的前端框架 KISSY | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="本文为 2013 年 3 月程序员杂志同名文章的完整版。 介绍伴随着淘宝的快速发展，诞生已三年多的 KISSY 也取得了巨大的成长。目前应用于阿里集团的多个业务团队，特别是淘宝，天猫，一淘的绝大多数业务都采用了 KISSY， 满足了从前台的 web page 到后台的 web app 再到移动端应用（起步阶段）的广泛需求。 在阿里集团以外也有不少公司和个人使用 KISSY，交流旺旺群成员已将近千">
+<meta name="keywords" content="KISSY">
+<meta property="og:type" content="article">
+<meta property="og:title" content="模块化高扩展性的前端框架 KISSY">
+<meta property="og:url" content="http://taobaofed.org/blog/2013/03/14/modularity-and-high-extensibility-fe-framework-kissy/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="本文为 2013 年 3 月程序员杂志同名文章的完整版。 介绍伴随着淘宝的快速发展，诞生已三年多的 KISSY 也取得了巨大的成长。目前应用于阿里集团的多个业务团队，特别是淘宝，天猫，一淘的绝大多数业务都采用了 KISSY， 满足了从前台的 web page 到后台的 web app 再到移动端应用（起步阶段）的广泛需求。 在阿里集团以外也有不少公司和个人使用 KISSY，交流旺旺群成员已将近千">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1hbuGQpXXXXc9XVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB180o9QXXXXXbiXpXXXXXXXXXX-865-661.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1Tn0iQpXXXXasXXXXXXXXXXXX-771-513.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1ZYhcQpXXXXcKXXXXXXXXXXXX-643-262.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1vaA5QXXXXXaxXFXXXXXXXXXX-1027-1025.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1ZLU0QXXXXXc2XFXXXXXXXXXX-198-297.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB18Vw.QXXXXXbpXpXXXXXXXXXX-610-234.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1iDNXQpXXXXaCXpXXXXXXXXXX-587-412.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1iDNXQpXXXXaCXpXXXXXXXXXX-587-412.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB168ExQXXXXXb6apXXXXXXXXXX-494-265.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="模块化高扩展性的前端框架 KISSY">
+<meta name="twitter:description" content="本文为 2013 年 3 月程序员杂志同名文章的完整版。 介绍伴随着淘宝的快速发展，诞生已三年多的 KISSY 也取得了巨大的成长。目前应用于阿里集团的多个业务团队，特别是淘宝，天猫，一淘的绝大多数业务都采用了 KISSY， 满足了从前台的 web page 到后台的 web app 再到移动端应用（起步阶段）的广泛需求。 在阿里集团以外也有不少公司和个人使用 KISSY，交流旺旺群成员已将近千">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1hbuGQpXXXXc9XVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-modularity-and-high-extensibility-fe-framework-kissy" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      模块化高扩展性的前端框架 KISSY
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 承玉</span>
+        
+        <span>发表于: <a href="/blog/2013/03/14/modularity-and-high-extensibility-fe-framework-kissy/" class="article-date">
+  <time datetime="2013-03-14T14:44:00.000Z" itemprop="datePublished">2013-03-14</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1hbuGQpXXXXc9XVXXXXXXXXXX-900-500.jpg" alt="模块化高扩展性的前端框架 KISSY"></p>
+<p><em>本文为 2013 年 3 月程序员杂志同名文章的完整版。</em></p>
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>伴随着淘宝的快速发展，诞生已三年多的 KISSY 也取得了巨大的成长。目前应用于阿里集团的多个业务团队，特别是淘宝，天猫，一淘的绝大多数业务都采用了 KISSY， 满足了从前台的 web page 到后台的 web app 再到移动端应用（起步阶段）的广泛需求。</p>
+<p>在阿里集团以外也有不少公司和个人使用 KISSY，交流旺旺群成员已将近千人， 在 GitHub 源码库也时常有外部人员参与提交 issue，发起 pull request，另外在 oschina 等开源社区也受到了一定的关注。</p>
+<p>淘宝在 2012 年 12 月 25 号发布了 KISSY 最新版本 1.3， 在这篇文章中我将对 KISSY 1.3 结合在淘宝的实践做一次全面概述，希望能对想了解淘宝前端技术的朋友有所帮助。</p>
+<h3 id="为什么选择-KISSY"><a href="#为什么选择-KISSY" class="headerlink" title="为什么选择 KISSY"></a>为什么选择 KISSY</h3><p>KISSY 作为国内一个完全自底向上开发起来的框架，诞生三年来历经淘宝的各种业务变化的考验，体现了 KISSY 的可扩展性，高稳定性和可维护性。 它在以下方面具有一定优势：</p>
+<ul>
+<li>拥有大量的中文文档：方便不熟悉英文的国内开发者快速入门学习。</li>
+<li>在国内具备一定的社区规模： 通过旺旺群，Google Groups，微博，官方网站等用户随时可以和开发人员快速交流。</li>
+<li>开发便捷： 在模块化，组件以及工具辅助方面形成了一套完善的机制，可以高效应对日常的需求开发。</li>
+<li>综合借鉴国际先进的框架类库设计：<ul>
+<li>在吸收 jQuery 稳定的 DOM 核心之外提供了模块化，按需加载的基础架构。</li>
+<li>在学习 YUI 坚实的架构之外着重于组件开发，积累了一批贴近淘宝应用的组件集。</li>
+<li>在研究 Ext JS 优秀的组件设计之外探索轻量级，可扩展的组件开发，同时满足 web app 与 web page 的需求。</li>
+</ul>
+</li>
+<li>应用场景广泛： 在各种设备上都有所支持。<ul>
+<li>可以使用 seed 和 core 简单快速地搭建页面</li>
+<li>也可以进一步使用 KISSY 的大量组件构建富客户端应用</li>
+<li>也可以使用统一的 API 开发移动应用</li>
+<li>更可以利用 KISSY 灵活的模块化机制高效进行大规模团队协作</li>
+</ul>
+</li>
+</ul>
+<p>不过由于 KISSY 开发时间还不长，在组件完备性以及可测试性上有待进一步完善，我们坚信这种情况会随着团队的不断努力而逐步解决。</p>
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p>KISSY 的架构由淘宝复杂多变的业务决定，在松耦合、无污染、模块化的核心前提下，也从众多优秀类库和框架的思路得到一些启发。 如图 1 所示：</p>
+<p>图 1： KISSY 整体架构图</p>
+<p><img src="https://gw.alicdn.com/tfs/TB180o9QXXXXXbiXpXXXXXXXXXX-865-661.png" alt="KISSY-architecture"></p>
+<ol>
+<li>最底层的 seed 是类似目前流行的 AMD 模块化机制实现，为了更高效地共享通用组件加入了自动 combo 的支持， 另外 seed 也包含一些像 each（循环数组以及对象），mix（合并对象），param（编码对象为 URL）， ready（等待 DOM ready）等常用的静态工具方法以及 Path，URI，Promise，UA 等模块化需要用到的基础类。</li>
+<li>seed 之上的第二层是处理 DOM 兼容性的核心模块，其中每个模块都是由更小的模块打包合并而来。 特殊之处在于 KISSY 把一些不标准浏览器的兼容代码单独抽取成内部模块，用户可用的外部模块会根据不同的设备分别依赖不同的内部模块。 虽然加载不同的具体实现模块代码，但是最终提供给用户的是一致的模块名，API 以及渐进增强的能力。 例如用户使用 event 模块，在 touch 设备上会加载 event/touch 模块从而可以使用一些手势事件， 而在 ie &lt; 9 下会加载 event/hashchange 模块，以类似 es5-shim 的方式来补全浏览器的能力，提供给用户统一的 API。</li>
+<li>第三层为组件架构层。提供包括模拟 ES5 属性管理，插件和多继承机制的 rich-base 模块， 所有 UI 组件渲染机制的基类 component 模块以及具备一定逻辑的模板引擎 XTemplate。</li>
+<li>第四层为独立可用的 KISSY 组件，用户可自由组合继承搭建最终页面。包括：<br>工具模块，例如拖放，调整大小，操作 swf，操作样式表，mvc（model，router）架构等。<br>UI 组件，例如弹窗，菜单，标签，日历等。</li>
+<li>最外层为 KISSY gallery，KISSY 社区开发的一些通用模块会放入 gallery 中， 从而可以方便得在所有使用 KISSY 的团队间共享模块。 如果该模块确实十分通用则会经过重构放入 KISSY 自身。</li>
+</ol>
+<h3 id="模块化机制"><a href="#模块化机制" class="headerlink" title="模块化机制"></a>模块化机制</h3><h4 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h4><p>由于淘宝业务的复杂，为了提高代码的可维护性和重用性，KISSY 在早期就引入了简单的模块化机制，并且随着前端技术的发展而不断改进。 KISSY 1.3 的模块化机制与目前的 AMD 规范比较类似，并根据淘宝自身业务特点加入了自动 combo 功能。</p>
+<p>注：combo 举例：请求 a.tbcdn.cn/??a.js,b.js 相当于把 a.tbcdn.cn/a.js 与 a.tbcdn.cn/b.js 的文件内容合并后返回。</p>
+<p>KISSY 之外的每个模块必须属于一个包，一个包内可以有很多相关模块，它们具备相同的加载基地址。 包的设计一方面通过约定优先配置的原则可以减少同一个包内多个模块的请求路径配置， 另一方面也方便了部署在不同地址的多个应用间互相调用模块。 所以开发应用前请先配置包地址，例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">KISSY.config(<span class="string">'packages'</span>, &#123;</span><br><span class="line">  myapp: &#123;</span><br><span class="line">    base: <span class="string">'./x'</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>之后在 x 目录下建立 myapp 目录，并在 myapp 目录下新建模块 a 对应的代码文件： a.js</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">KISSY.add(<span class="function"><span class="keyword">function</span>(<span class="params">S, JSON</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">JSON</span>.stringify(&#123;<span class="attr">a</span>: <span class="string">'ok'</span>&#125;);</span><br><span class="line">&#125;, &#123;</span><br><span class="line">  requires: [<span class="string">'json'</span>]</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>以及依赖 a 的入口主模块 main 的代码文件： main.js</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">KISSY.add(<span class="function"><span class="keyword">function</span>(<span class="params">S, DOM, a</span>) </span>&#123;</span><br><span class="line">  S.ready(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    DOM.text(<span class="built_in">document</span>.body, a);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;, &#123;</span><br><span class="line">  requires: [<span class="string">'dom'</span>, <span class="string">'./a'</span>]</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>应用模块可依赖 KISSY 自身模块，例如以上的 dom、json。</p>
+<p>最后新建 index.html 来调用应用模块：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ... 上述包配置</span></span><br><span class="line"></span><br><span class="line">KISSY.use(<span class="string">'myapp/main'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  alert(<span class="string">'page loaded'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="工具支持"><a href="#工具支持" class="headerlink" title="工具支持"></a>工具支持</h3><p>打开上述 index.html 会发现链接数不少，有从淘宝 CDN 的链接也有本地的链接。 因此 KISSY 提供了配套工具 KISSY Module Compiler 进行脚本打包以及抽取依赖后用 CDN combo 来解决这个问题， 对工具有兴趣可查看参考资料中的链接地址，以下仅作简单介绍：</p>
+<h3 id="脚本打包"><a href="#脚本打包" class="headerlink" title="脚本打包"></a>脚本打包</h3><p>如果应用脚本非常多，可以用 module compiler 将入口模块 main 以及其依赖的所有应用模块打包压缩到 main-min.js 中， 同时 module compiler 会生成一份依赖描述文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">KISSY.config(<span class="string">'modules'</span>, &#123;</span><br><span class="line">  <span class="string">'myapp/main'</span>: &#123;</span><br><span class="line">    requires: [<span class="string">'dom'</span>, <span class="string">'json'</span>]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>接着设置 KISSY 启用 combo 模式，并载入上述的依赖描述文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KISSY.config(<span class="string">'combine'</span>, <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+<p>最后修改 index.html 引用 seed-min.js，打开网络面板后会发现现在只产生两个链接请求：</p>
+<p><code>http://a.tbcdn.cn/s/kissy/??dom/base,json/native.js</code><br><code>http://localhost/myapp/main-min.js</code></p>
+<p>注：在 ie &lt; 9 等非标准浏览器下第一个链接地址会加上 dom/ie json/json2 等脚本地址</p>
+<h3 id="抽取依赖"><a href="#抽取依赖" class="headerlink" title="抽取依赖"></a>抽取依赖</h3><p>如果应用脚本不多，并且自身服务器也支持 combo 的话，那么可以采用更加灵活的抽取依赖后全部 combo 的解决方案。 这时 module compiler 会做两件事情：</p>
+<ol>
+<li><p>补全模块名，例如 a.js 变为</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">   KISSY.add(<span class="string">'myapp/a'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">S, JSON</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">JSON</span>.stringify(&#123;<span class="attr">a</span>: <span class="string">'ok'</span>&#125;);</span><br><span class="line">&#125;, &#123;</span><br><span class="line">  requires: [<span class="string">'json'</span>]</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将各个模块的依赖收集为一个单独的文件，例如</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">   KISSY.config(<span class="string">'modules'</span>, &#123;</span><br><span class="line">  <span class="string">'myapp/main'</span>: &#123;</span><br><span class="line">    requires: [<span class="string">'dom,'</span>, <span class="string">'./a'</span>]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">'myapp/a'</span>: &#123;</span><br><span class="line">    requires: [<span class="string">'json'</span>]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>接着设置 KISSY 启用 combo 模式，并载入上述的依赖描述文件：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KISSY.config(<span class="string">'combine'</span>, <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+<p>访问 index.html，打开网络面板会发现同样只产生两个链接请求：</p>
+<p><code>http://a.tbcdn.cn/s/kissy/??dom/base,json/native.js</code><br><code>http://localhost/myapp/??a.js,main.js</code></p>
+<h3 id="KISSY-PIE"><a href="#KISSY-PIE" class="headerlink" title="KISSY-PIE"></a>KISSY-PIE</h3><p>KISSY 还提供了一套基于约定的前端打包解决方案 KISSY-PIE，通过统一的约定，提升应用的可维护性，将大家从重复的打包脚本的编写中解放出来。</p>
+<p>KISSY-PIE 包括了以下功能：</p>
+<ul>
+<li>JS（KISSY 的模块编译，HTML 模板到 KISSY 模块编译，代码压缩）</li>
+<li>CSS（基于 CSS-Combo 的合并，压缩）</li>
+<li>Less</li>
+<li>Sass</li>
+</ul>
+<p>并且在命令行之外还提供了 web 操作界面，如图 2 所示：</p>
+<p>图 2： KISSY-PIE 打包界面</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1Tn0iQpXXXXasXXXXXXXXXXXX-771-513.png" alt="kissy-pie"></p>
+<h3 id="组件机制"><a href="#组件机制" class="headerlink" title="组件机制"></a>组件机制</h3><h4 id="核心"><a href="#核心" class="headerlink" title="核心"></a>核心</h4><p>KISSY 目前包括众多即开即用的组件， 包括工具性质的例如 dd（拖放），resizable（调整大小），swf（插入 Flash），stylesheet（操作样式表）等和 UI 性质的例如 overlay（弹窗），menu（菜单），menubutton（菜单按钮），imagezoom（放大镜），editor（编辑器）， tabs（标签），tree（树）等。 这些组件都基于公共的 rich-base 以及 component 模块： rich-base 和 component 模块充分利用了 JavaScript 语言的 mixin 和原型链继承， 提供了属性绑定，类继承，扩展以及插件等特性。</p>
+<p>其中的重点是 Component，它是所有 UI 组件的基类，提供了两种通用的渲染方式：</p>
+<ol>
+<li><p>组件实例由 JavaScript 完全渲染 DOM 树。其中对于 menu 等组件在 JavaScript 完全渲染的情况亦可以通过 JSON 初始化内部嵌套组件。例如</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">   KISSY.use(<span class="string">'menu'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">S, Menu</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// JavaScript 渲染一个菜单到 body</span></span><br><span class="line">  <span class="keyword">new</span> Menu(&#123;</span><br><span class="line">    children: [&#123;</span><br><span class="line">      content: <span class="string">'item1'</span></span><br><span class="line">    &#125;]</span><br><span class="line">  &#125;).render();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>从已有的 DOM 树节点得到组件实例。</p>
+</li>
+</ol>
+<p>下面以 KISSY 中常用的一个组件 Overlay 为例讲解下，首先看图 3 类结构图：</p>
+<p>图 3： Overlay 类结构图</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1ZYhcQpXXXXcKXXXXXXXXXXXX-643-262.png" alt="overlay"></p>
+<p>Overlay 继承自 Component，然后静态地由一些分散的功能类扩展而来，包括定位功能类，对齐功能类，关闭功能类，遮罩层功能类， 这些功能类底层利用 JavaScript 的 mixin 功能将自己的方法和属性汇入到 Overlay 类中，使得最终的 Overlay 具备了这些能力。</p>
+<p>组件在运行时也可以选择性依赖某些插件模块，将插件的功能注入到组件中去， 既避免了一个组件过于功能繁多导致的文件过大，又大大增强了组件的可扩展性。</p>
+<p>以下为 Overlay 的使用示例代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">KISSY.use(<span class="string">'overlay,component/plugin/resize'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">S, Overlay, ResizePlugin</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 完全由 JavaScript 将组件实例渲染到 body 中</span></span><br><span class="line">  <span class="keyword">new</span> Overlay(&#123;</span><br><span class="line">    content: <span class="string">'test'</span></span><br><span class="line">  &#125;).render();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 从已有的 dom 树节点生成 Overlay 实例</span></span><br><span class="line">  <span class="keyword">var</span> overlay = <span class="keyword">new</span> Overlay(&#123;</span><br><span class="line">    srcNode: <span class="string">'#existing'</span></span><br><span class="line">  &#125;).render();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 运行时加入调整大小的插件能力</span></span><br><span class="line">  overlay.plug(<span class="keyword">new</span> ResizePlugin(&#123;</span><br><span class="line">    handles: [<span class="string">'t'</span>]</span><br><span class="line">  &#125;));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="Brix"><a href="#Brix" class="headerlink" title="Brix"></a>Brix</h3><p>除了 KISSY 自身的组件机制，一淘开发人员根据自己的应用特点在组件开发和使用上找寻了另一条途径。即 Brix 解决方案：</p>
+<p>基于统一的渲染方式：模板（tmpl）和数据（data）产生 HTML 片段后使用 innerHTML 到 DOM 节点中。<br>提取子模板，结合数据的更新，达到局部刷新，开发者不需要再关心页面的表现，而专心于数据的变化。<br>DOM 节点自定义属性设置组件标志，Brix 提供 Pagelet 按照统一的方式实例化组件。</p>
+<p>图 4： Brix 类库结构</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1vaA5QXXXXXaxXFXXXXXXXXXX-1027-1025.png" alt="brix"></p>
+<h3 id="设备普适性"><a href="#设备普适性" class="headerlink" title="设备普适性"></a>设备普适性</h3><p>当前 JavaScript 的使用范围越来越广，平台包括 PC 浏览器与读屏器，Node.js，移动端浏览器以及各种外壳，Windows 8 等。 KISSY 也尽量在各个平台给予支持，保证统一的开发体验。</p>
+<p>在 Node.js 上 KISSY 通过调整模块加载器使得 KISSY 可以直接将自身的模块加载到 Node.js 中使用。例如：</p>
+<ul>
+<li>可以使用 KISSY 的 UA 解析模块来分析日志中的 UA 串</li>
+<li>可以载入 jsdom 模块在 Node.js 环境下做单元测试</li>
+<li>用 XTemplate 在服务器端渲染前端模板</li>
+<li>使用 KISSY 的 htmlparser，color 等工具模块</li>
+</ul>
+<p>经统计约有 1000 万残疾人用户在使用淘宝，其中不少是受影响最大的盲人朋友，他们实际上是通过读屏器来和淘宝交互， KISSY 组件通过遵循 WAI-ARIA 规范来给视力受损的朋友提供无障碍的访问环境，网上人人平等。</p>
+<p>KISSY 也计划对 Windows 8 进行支持，在即将发布的 tmall Windows 8 app 中仅仅通过使用 KISSY 的模块化机制以及一些语法糖 API 就可以达到和平常开发一样的高效。</p>
+<p>随着用户越来越多地在移动设备上购物产生交易，移动应用在流量的比重上也越来越多，KISSY 及时适配移动设备， 目前在两方面进行了支持：</p>
+<ol>
+<li><p>根据设备条件加载。对于移动端由于网络速度等原因对于文件大小比较敏感，KISSY 为了保证一致的 API 又不能随意删减功能， 因而采取了独立兼容模块的方法来保持瘦身。在架构一节也阐述过，KISSY 对基础核心模块中的兼容非标准浏览器的模块进行选择性加载， 同时移动设备上都是标准浏览器，从而可以大大减少实际下载到用户设备上的代码大小。部分组件也实行了拆分，将 PC 的功能交互独立到单独的模块，在移动触摸设备上只加载触摸交互需要用到的模块。</p>
+</li>
+<li><p>渐进增强 API。对于触屏设备，很多交互是建立在手势操作上。而手势操作除了在 Safari 上有 gesture 事件做有限支持外， 在 Android 上则完全没有对应事件。 得益于 KISSY 易于扩展的事件机制，KISSY 在底层多点触摸 touch 事件的基础上模拟出了 tap rotate pinch 等触屏设备上独有的事件，这对于用户则是透明，用户完全可以把这些事件当做原生事件来使用，例如</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">  KISSY.use(<span class="string">'event'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">S, Event</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 监听 div 上的 tap 事件</span></span><br><span class="line">  Event.on(<span class="string">'#div'</span>, <span class="string">'tap'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="ZOOJS"><a href="#ZOOJS" class="headerlink" title="ZOOJS"></a>ZOOJS</h3><p>另外淘宝北京团队还基于 KISSY 核心打造了专门面向 Web 无线设备的一整套工具库 ZOOJS， 包含控件级的事件支持、触屏行为的封装、富控件、皮肤、App 的基础架构等。 这套独特的 Web 无线解决方案力争将 HTML5 和 CSS3 的优势发挥至最佳，做到即调即用。</p>
+<h3 id="测试与持续集成"><a href="#测试与持续集成" class="headerlink" title="测试与持续集成"></a>测试与持续集成</h3><p>KISSY 经过三年的开发代码库已经相当庞大了，模块间还常常有依赖关系，修改代码有牵一发而动千钧的后果。 为了应对此问题，KISSY 也在逐渐完善单元测试，自动化测试与持续集成。</p>
+<h3 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h3><p>KISSY 一个模块的常见目录结构如图 5 所示：</p>
+<p>图 5： 模块目录结构</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1ZLU0QXXXXXc2XFXXXXXXXXXX-198-297.png" alt="KISSY test"></p>
+<p>其中 tests 目录下为测试资源，runner 目录下启动测试的 HTML 文件，specs 下为对应模块的单元测试代码。 KISSY 采用的单元测试框架为 Jasmine ，测试代码举例如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">describe(<span class="string">'S.mix'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  it(<span class="string">'works for simple case'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    expect(S.mix(&#123;<span class="attr">x</span>: <span class="number">1</span>&#125;, &#123;<span class="attr">y</span>: <span class="number">1</span>&#125;)).toEqual(&#123;<span class="attr">x</span>: <span class="number">1</span>, <span class="attr">y</span>: <span class="number">1</span>&#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>然后打开启动测试的 HTML 文件 即可看到图 6 所示的单元测试结果：</p>
+<p>图 6：单元测试结果</p>
+<p><img src="https://gw.alicdn.com/tfs/TB18Vw.QXXXXXbpXpXXXXXXXXXX-610-234.png" alt="run test"></p>
+<h3 id="持续集成"><a href="#持续集成" class="headerlink" title="持续集成"></a>持续集成</h3><p>为了提高测试效率，KISSY 还依赖 Travis CI 平台和 PhantomJS 进行持续集成测试。 每次提交代码都会在 Travis CI 平台上启动 PhantomJS 来运行 KISSY 所有模块的单元测试代码。 如图 7 所示：</p>
+<p>图 7：Travis CI 平台上的 KISSY</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1iDNXQpXXXXaCXpXXXXXXXXXX-587-412.png" alt="travis"></p>
+<h3 id="淘宝应用场景举例"><a href="#淘宝应用场景举例" class="headerlink" title="淘宝应用场景举例"></a>淘宝应用场景举例</h3><p>淘宝目前的绝大多数页面已经采用 KISSY 搭建，这次我选取两个大家使用比较多的应用来介绍下 KISSY 在淘宝的实践：</p>
+<h4 id="店铺页面"><a href="#店铺页面" class="headerlink" title="店铺页面"></a>店铺页面</h4><p>店铺页面是商家店铺的门户，除了淘宝页头之下都可以由商家自定义内容，如图 8 所示：</p>
+<p>图 8：典型的店铺页面</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1iDNXQpXXXXaCXpXXXXXXXXXX-587-412.png" alt="shop"></p>
+<p>可以看出页面本身就是区块化的组织，在程序内部也是分成很多个模块，例如店内搜索模块，宝贝分类模块，销量统计模块等， 每个模块负责页面一块区域的交互实现，这些模块又会调用 KISSY 的模块来实现自身的逻辑。 而每个商家的店铺可能使用到的区块并不相同，这也意味着每个商家店铺所用到的程序模块也不相同。</p>
+<p>店铺模块与 KISSY 模块依赖关系如图 9 所示：</p>
+<p>图 9：店铺模块与 KISSY 模块的关系</p>
+<p><img src="https://gw.alicdn.com/tfs/TB168ExQXXXXXb6apXXXXXXXXXX-494-265.png" alt="shop-mods"></p>
+<p>在实际开发中配置店铺应用为一个包，其内的所有模块都放入这个包内，最后由页面初始化脚本加载当前店铺需要的模块列表。例如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KISSY.use(<span class="string">'shop/search,shop/category,...'</span>);</span><br></pre></td></tr></table></figure>
+<p>在线上会发出两个 combo 请求：一个为店铺页面需要的应用模块集，一个为 KISSY 自己的模块集，例如</p>
+<p><code>http://a.tbcdn.cn/s/kissy/1.3.0/??dom/base.js,event/base.js,overlay.js...</code><br><code>http://a.tbcdn.cn/p/shop/??search.js,category.js...</code></p>
+<h4 id="宝贝详情应用"><a href="#宝贝详情应用" class="headerlink" title="宝贝详情应用"></a>宝贝详情应用</h4><p>宝贝详情页面用来展示商家单个商品的详细信息，评价，成交趋势等信息，并为下一步购买做准备，是目前淘宝访问量最大的页面。</p>
+<p>该应用和店铺应用紧密相关，从页面可以看出，很多区块和店铺页面对应区块相同，实际上在代码层面也是引用同一份模块， 首先宝贝详情应用和店铺应用一样加载当前页面用到的店铺模块，然后再加载这个页面本身的应用模块。 但是宝贝详情业务本身逻辑十分复杂，若像店铺应用一样也是采用模块 combo 的方式则会导致请求 URL 过长， 进而 KISSY 会对过长的 combo URL 拆分成多个短的 URL，反而适得其反。 因此这里会把宝贝详情页自身的模块打包合并，将自己模块的主模块和依赖模块都合并到主模块中去， 最终线上会发出三个请求，其中两个为 combo 请求，一个为非 combo 请求，例如：</p>
+<p><code>http://a.tbcdn.cn/s/kissy/1.3.0/??dom/base.js,event/base.js,overlay.js...</code><br><code>http://a.tbcdn.cn/p/shop/??search.js,category.js...</code><br><code>http://a.tbcdn.cn/p/detail/main.js</code></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>KISSY 才刚刚处于成长初期，相对于国外成熟框架尚有不小差距，不过依然承受住了淘宝复杂多变业务的考验。 下一步 KISSY 会继续完善基础组件例如 date，datasource，selector，graphics 等， 重构已有组件例如 switchable，calendar 等， 增加 package manager 方便基于 KISSY 模块的提交与共享，补全测试用例，实现代码覆盖率检测，不断提高运行稳定性。 将来我们坚信 KISSY 会随着淘宝的发展而继续成长，也会随着国内外前端技术的不断发展而不断进步。 希望有兴趣的你也能加入到 KISSY 开发中，一起学习进步，享受成长的乐趣。</p>
+<h3 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h3><p>KISSY：<a href="http://docs.kissyui.com/" target="_blank" rel="noopener">http://docs.kissyui.com/</a></p>
+<p>KISSY Module Compiler：<a href="https://www.npmjs.com/package/gulp-kmc" target="_blank" rel="noopener">https://www.npmjs.com/package/gulp-kmc</a></p>
+<p>KISSY Module Compiler Node.js 版本：<a href="https://github.com/daxingplay/ModuleCompiler" target="_blank" rel="noopener">https://github.com/daxingplay/ModuleCompiler</a></p>
+<p>OSChina 访谈：<a href="http://www.oschina.net/question/28_71454" target="_blank" rel="noopener">http://www.oschina.net/question/28_71454</a></p>
+<p>nginx combo： <a href="https://github.com/alibaba/nginx-http-concat" target="_blank" rel="noopener">https://github.com/alibaba/nginx-http-concat</a></p>
+<p>BRIX：<a href="http://etaoux.github.com/brix/" target="_blank" rel="noopener">http://etaoux.github.com/brix/</a></p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/S0Ogzvql3Vg" target="_blank" rel="noopener">https://unsplash.com/photos/S0Ogzvql3Vg</a> By @Ben Cliff</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2013/03/14/modularity-and-high-extensibility-fe-framework-kissy/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2013/03/14/modularity-and-high-extensibility-fe-framework-kissy/" data-id="cjt6lbxzk006ijeu10f8dzpg4" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2013/03/14/modularity-and-high-extensibility-fe-framework-kissy/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/KISSY/">KISSY</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2013/05/08/a-css3-selector-implementation-based-on-backtracking-algorithm/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          一种基于匹配回朔的 CSS3 选择器引擎实现
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2013/03/12/jquery-no-conflict/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">谈谈 jQuery 中的防冲突（noConflict）机制</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

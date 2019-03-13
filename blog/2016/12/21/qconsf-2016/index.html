@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>QCon San Francisco 2016 前端参会总结 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="11 月初有幸参加了在美国旧金山举行的 Qcon 会议，会议之余在小伙伴们的各路关系中拜访了一些美国的科技公司。此行受益颇多，这里谈一下自己的所见、所闻以及自己的感受。 会议内容会议内容覆盖了前端、设计、容器、微服务、devops、JAVA 等等，内容非常的丰富，这里选择几个前端相关的场做下分享。  Webpack: The One Build Step To Rule Them Allwebp">
+<meta name="keywords" content="React,框架,QCon,Angular,webpack,RxJS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="QCon San Francisco 2016 前端参会总结">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/12/21/qconsf-2016/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="11 月初有幸参加了在美国旧金山举行的 Qcon 会议，会议之余在小伙伴们的各路关系中拜访了一些美国的科技公司。此行受益颇多，这里谈一下自己的所见、所闻以及自己的感受。 会议内容会议内容覆盖了前端、设计、容器、微服务、devops、JAVA 等等，内容非常的丰富，这里选择几个前端相关的场做下分享。  Webpack: The One Build Step To Rule Them Allwebp">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1pOFzOVXXXXbhaXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1F5cMOFXXXXb3XVXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1rtEIOFXXXXacaXXXXXXXXXXX-892-509.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB15TwzOFXXXXcvaXXXXXXXXXXX-894-513.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1xxwuOFXXXXbnapXXXXXXXXXX-897-518.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1GtU0OFXXXXXIXFXXXXXXXXXX-1072-334.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1XFZGOFXXXXbjXVXXXXXXXXXX-894-517.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1OmIDOFXXXXbBaXXXXXXXXXXX-893-519.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1RSQnOFXXXXcuaFXXXXXXXXXX-896-508.png">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB17wMvOFXXXXc5apXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1ap7sOFXXXXXTaFXXXXXXXXXX-1152-864.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB197gvOFXXXXc1apXXXXXXXXXX-1152-864.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1nzEGOFXXXXavaXXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1CboNOFXXXXakXVXXXXXXXXXX-1152-864.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1p9UvOFXXXXXSapXXXXXXXXXX-1152-864.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1gtJaOVXXXXa4XXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1K2IUOFXXXXbgXFXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1UtQDOFXXXXbfaXXXXXXXXXXX-3456-4608.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1vntbOVXXXXX2XXXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1qX3LOFXXXXbQXVXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1X7gCOFXXXXXmaXXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1py3qOFXXXXb9aFXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1TI7MOFXXXXbxXVXXXXXXXXXX-1440-1920.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1jLQEOFXXXXXIaXXXXXXXXXXX-1152-864.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1cr._OFXXXXbXXXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1ar.BOFXXXXbmaXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1NC.LOFXXXXc2XVXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1WqEWOFXXXXabXFXXXXXXXXXX-3456-4608.jpg_790x10000.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1ZBZyOFXXXXcEaXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="QCon San Francisco 2016 前端参会总结">
+<meta name="twitter:description" content="11 月初有幸参加了在美国旧金山举行的 Qcon 会议，会议之余在小伙伴们的各路关系中拜访了一些美国的科技公司。此行受益颇多，这里谈一下自己的所见、所闻以及自己的感受。 会议内容会议内容覆盖了前端、设计、容器、微服务、devops、JAVA 等等，内容非常的丰富，这里选择几个前端相关的场做下分享。  Webpack: The One Build Step To Rule Them Allwebp">
+<meta name="twitter:image" content="https://gw.alicdn.com/tps/TB1pOFzOVXXXXbhaXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-qconsf-2016" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      QCon San Francisco 2016 前端参会总结
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 释然</span>
+        
+        <span>发表于: <a href="/blog/2016/12/21/qconsf-2016/" class="article-date">
+  <time datetime="2016-12-20T20:10:14.000Z" itemprop="datePublished">2016-12-21</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tps/TB1pOFzOVXXXXbhaXXXXXXXXXXX-900-500.jpg" alt="QCon San Francisco 2016 前端参会总结"></p>
+<p>11 月初有幸参加了在美国旧金山举行的 Qcon 会议，会议之余在小伙伴们的各路关系中拜访了一些美国的科技公司。此行受益颇多，这里谈一下自己的所见、所闻以及自己的感受。</p>
+<h2 id="会议内容"><a href="#会议内容" class="headerlink" title="会议内容"></a>会议内容</h2><p>会议内容覆盖了前端、设计、容器、微服务、devops、JAVA 等等，内容非常的丰富，这里选择几个前端相关的场做下分享。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1F5cMOFXXXXb3XVXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<h3 id="Webpack-The-One-Build-Step-To-Rule-Them-All"><a href="#Webpack-The-One-Build-Step-To-Rule-Them-All" class="headerlink" title="Webpack: The One Build Step To Rule Them All"></a>Webpack: The One Build Step To Rule Them All</h3><p>webpack 自诞生以来席卷全球，为我们的开发带来了无限可能，相信很多童鞋都在使用 webpack，webpack is great!</p>
+<p>来自 webpack 核心团队的 <a href="https://twitter.com/thelarkinn" target="_blank" rel="noopener">@thelarkinn</a> 介绍了 webpack 的基本概念及使用方法，最后介绍了一些 webpack 2.0 的计划和未来的一些方向。</p>
+<ol>
+<li>webpack 的几个核心的概念：entry、output、loader、plugin：<ul>
+<li>Entry 就是我们的源码入口文件，可以是一个，也可以是多个；</li>
+<li>Output 是源码编译后的输出 bundle 文件，它根据你定义的 Entry 文件进行生成；</li>
+<li>Loader 可以说是 webpack 最屌的地方了，它定义了你的文件通过什么样的规则进行转换，它目前已经拥有 N 种 loader，市场上你只要见过的类型它基本都支持。分享者给了一张目前的 Loader 图，当时也是被震惊到了：<br><img src="https://gw.alicdn.com/tps/TB1rtEIOFXXXXacaXXXXXXXXXXX-892-509.png" alt></li>
+<li>Plugins 是 webpack 另一个易用的设计，你可以比较方便的开发使用自己的插件以实现特殊的效果。</li>
+</ul>
+</li>
+<li>webpack 的一些主要功能：<ul>
+<li>本地服务；</li>
+<li>模块热替换；</li>
+<li>模块懒加载；</li>
+<li>Source Maps；</li>
+</ul>
+</li>
+<li>webpack2 的新特性：<br> <img src="https://gw.alicdn.com/tps/TB15TwzOFXXXXcvaXXXXXXXXXXX-894-513.png" alt><ul>
+<li>首先是它将会原生的支持 ES2015，这意味着未来我们无需先将代码转换为 CommonJS 格式了，同时也为 Tree Shaking 的优化提供了基础。</li>
+<li>Tree Shaking 可以帮助我们移除未使用到的代码，以使我们的代码文件更小，这在寸土寸金的无线时代可能更实在。但是，Tree Shaking 能否发挥它的最大作用，还是取决于我们的编码习惯、规范，这也是我们需要去思考和改进的地方。<strong>特别对于公共的组件、模块，我们更需要关注其质量、规范。</strong>开发者关心的不应该只是代码是否能跑起来，同时更需要关心如何跑的更好。</li>
+<li>其它的在编译速度、语法设计、配置校验等方面也做了一些改进。</li>
+</ul>
+</li>
+<li>webpack 的未来：<br> <img src="https://gw.alicdn.com/tps/TB1xxwuOFXXXXbnapXXXXXXXXXX-897-518.png" alt><ul>
+<li>webpack 在未来还会针对 HTTP2 的场景做特殊的优化支持，也会与浏览器厂商合作，在 DevTools 上提供更好的体验。另外还提到了会利用 Chrome 的 timeline 去做一些智能调整配置加载的事情，至于具体是什么，尚未查到资料，目前应该仅仅是 idea 阶段。</li>
+</ul>
+</li>
+</ol>
+<p>整场分享其实比较初级，基本是手把手教你用 webpack，帮你理清了 webpack 的一些思路，最后谈到了 webpack2 以及未来的一些计划，缺乏真正的实战分享。但 webpack 给我们带来的技术革新是巨大的，或许有一天，当所有的语言都可以通过 webpack 编译成 JavaScript，而 JavaScript 又可以运行在任意的平台上，那将会是一个怎样的世界？……</p>
+<h3 id="Building-Robust-Web-Applications-With-RxJS"><a href="#Building-Robust-Web-Applications-With-RxJS" class="headerlink" title="Building Robust Web Applications With RxJS"></a>Building Robust Web Applications With RxJS</h3><blockquote>
+<p>RxJS is an API for asynchronous programming<br>with observable streams。</p>
+</blockquote>
+<p>RxJS 5 的带头大哥、来自 Netflix 的 <a href="https://twitter.com/benlesh" target="_blank" rel="noopener">@BenLesh</a> 通过一个例子分享了 RxJS5 的一些新特性。</p>
+<ul>
+<li>RxJS is “Lodash for events”</li>
+<li>RxJS is Observables</li>
+</ul>
+<p>在 RxJS 的世界里，一切都是流，你可以把任何的东西当成流，通过对这些流的创建、合并、过滤来解耦、分离自己的业务逻辑。</p>
+<p>@BenLesh 通过一个 WebSocket 的例子讲解了 RxJS 的一些基本用法以及新的 RxJS5 带来了哪些新的改变，总体上其实就是在对 RxJS5 做一些宣传工作。</p>
+<p>大家可以从这里下载 @BenLesh 演示的 Demo，自己亲自试一下上：<a href="https://github.com/blesh/robust-websocket-talk" target="_blank" rel="noopener">https://github.com/blesh/robust-websocket-talk</a></p>
+<p>RxJS 巧妙的利用了观察者模式将一些状态、点击、事件抽象为一系列的流，通过对他们的过滤、组合来实现我们的业务逻辑，对于我们未来的一些实时互动产品，搭配这样的事件流，或许能够可以让我们的代码更清晰、相互之间更解耦。</p>
+<h3 id="The-Strengths-of-Ember-Angular-amp-React-Explored"><a href="#The-Strengths-of-Ember-Angular-amp-React-Explored" class="headerlink" title="The Strengths of Ember, Angular &amp; React Explored"></a>The Strengths of Ember, Angular &amp; React Explored</h3><p>来自 Ember 团队的 @larasm、Angular 团队的 @robwormald（Google）、React 团队的 @leeb（Facebook） 分享了各自的库/框架，然后主持人跟三位分享者进行了一些互动。</p>
+<p>先简单介绍一下这三个东东：</p>
+<ol>
+<li>React：<ul>
+<li>React 并不是 MVC，它是基于 Component 的 UI；</li>
+<li>React 不是为了构建 Web App，它是为了构建 UI，你可以把它类比为 DOM；<br>  <img src="https://gw.alicdn.com/tps/TB1GtU0OFXXXXXIXFXXXXXXXXXX-1072-334.jpg_790x10000.jpg" alt></li>
+<li>你可以整个应用都使用 React，也可以像 Facebook 一样在部分模块里使用 React，你可以与其它任何的 framework 一起使用 React。<br><img src="https://gw.alicdn.com/tps/TB1XFZGOFXXXXbjXVXXXXXXXXXX-894-517.png" alt></li>
+</ul>
+</li>
+<li>AngularJS： <ul>
+<li>AngularJS 的组件由三部分组成：HTML、CSS、Class；<br><img src="https://gw.alicdn.com/tps/TB1OmIDOFXXXXbBaXXXXXXXXXXX-893-519.png" alt></li>
+<li>它的模板就是 HTML，通过属性和事件来定义组件的行为；</li>
+<li>它提供了 router 功能；</li>
+<li>AngularJS 可以运行在任何的环境、平台；</li>
+<li>因为 TypeScript 的类型检测、可读性、易用性以及强大的工具支持，AngularJS 使用 TypeScript；</li>
+<li>AngularJS 2 通过预编译提升了不少性能；</li>
+</ul>
+</li>
+<li>ember：<ul>
+<li>ember 是为构建巨型应用而生的，而巨型应用具备几个条件：多人创建，长期维护，升级而不是重写；</li>
+<li>ember 几乎包含了你可能用到的、在其它框架/库里看到的 NB 的特性，例如路由、组件、DOM diffing、单向/双向绑定、模板、服务端渲染等等……</li>
+<li>ember 是一个大型的框架，它在为社区做出巨大的贡献，也在推进着社区技术的发展；</li>
+<li>ember 发展了 5 年，有成熟的、完善的生态圈，Yahoo、LinkedIn 等公司都在为其贡献代码，目前已经有 3000+ 的插件，覆盖各种各样的交互场景；</li>
+<li>ember 拥有最专业、最好用的工具集，可以帮助你更快、更好的入门、编码；</li>
+</ul>
+</li>
+</ol>
+<p>最后，主持人与三位分享者进行了一场小的讨论会。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1RSQnOFXXXXcuaFXXXXXXXXXX-896-508.png" alt></p>
+<p>React 一再说明它不是 framework，而是一个 library，非常的轻量级，入门也比较简单，需要了解一下 babel，最主要的是 <a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">Think in React</a>！React 对于 Virtual DOM 的抽象及使用，使得它可以更好的应用在各个环境、语言层面，为各个平台提供了无限可能。React 有强大的社区支持，虽然 React 自身并无法完全覆盖你的任何需求、功能，但是社区里有大量的 library 可以配合 React 一起来使用，以满足你的任何需求和功能。</p>
+<p>AngularJS 相对来说功能比 React 全，是一个轻量级的 framework，经历了从 1 到 2 的升华，现在逐渐找到了自己的核心并稳定下来。相比 React，它提供了更多的功能以及更完善的体系，你可以在不借助任何外部 library 的情况下基本满足所有的需求和功能，当然，你也同样可以使用外部 library 来弥补 AngularJS 的功能。AngularJS 跟 React 走着完全不同的两个路子，但是理念和思路却在相互的借鉴和学习。使用 AngularJS 2 你需要首先了解 TypeScript，然后根据其文档，理解 Component 等概念，学习成本稍高。</p>
+<p>ember 相对于前两个，基本上就是巨无霸，所有你能想到的功能它都能包含，定位也是大型应用。相较于 AngularJS 被吐槽的升级问题，ember 有严格的升级步骤和规范，配合 ember 强大的 cli 工具及易读好用的文档，你可以轻松的入门、使用 ember。</p>
+<p>总的来说，每一个 framework/library 都在进化，相互的学习、借鉴，都在不断的提升自身的质量和技术，也期望未来我们能够看到更精彩的一些 idea，路走对了就不怕远！没有最好的框架/库，只有更合适的。</p>
+<h2 id="科技公司"><a href="#科技公司" class="headerlink" title="科技公司"></a>科技公司</h2><p>托各位牛逼的小伙们的福，在美期间拜访了一些不错的互联网公司，学到了一些不一样的东西，这里谈一下自己的感受。</p>
+<blockquote>
+<p>由于接待的人的岗位或者资历不同，我们从中了解到的内容跟真实的情况可能存在差异。</p>
+</blockquote>
+<h3 id="Yelp"><a href="#Yelp" class="headerlink" title="Yelp"></a>Yelp</h3><p>Yelp 是一个美国版的大众点评，但用下来你会发现这个大众点评完全不在一个量级，所以拜访之前以为这公司应该比较小，但其实蛮大的，在 downtown 能拥有十多层的办公楼也是够 NB 的。</p>
+<p>Yelp 的办公室跟普通的办公室区别不大，每层会有个小厨房（里边有免费的饮料、小零食等），另外每几排办公桌的墙壁上会有一台电视，据带头大哥说平时无甚鸟用，偶尔会被一些同事连上放一下恶搞的照片、视频之类的。另外呢，员工可申请可升降的桌子用于办公（再也不用自己搞个高架子了……）</p>
+<p>Yelp 的工作比较轻松，施行弹性工作制，公司提倡八小时工作制，我们是大概七点左右去的，基本上比较少的人在“加班”。据带头大哥说，有人竟然会花上两周时间去解决一个 bug！虽然这个问题可能一两个小时就可以通过其他方式修复，但依然坚持要找到问题的原因去修复，想想也是醉了……（刨根问底固然好，但总得先解决问题吧……）</p>
+<p>Yelp 的主要流量入口还是在 PC，手机上可能只占二三十的量，这个让人大跌眼镜。</p>
+<p>Yelp 使用 AWS。</p>
+<h3 id="Airbnb"><a href="#Airbnb" class="headerlink" title="Airbnb"></a>Airbnb</h3><p>Airbnb 的办公室还是蛮有特色的，室内的设计很有艺术感和趣味感，空间很大，感觉工作起来应该很惬意，这里的所有员工桌子均为可升降桌子。</p>
+<p>作为前端，对 Airbnb 最熟悉的莫过于其在 GitHub 上推出的前端规范，我们的规范很多内容也是参考他们来制订的。由于带头大哥并不是前端，问其 Airbnb 各个地方代码规范情况，反馈其实并没有那么的规范…… 少数部门在严格的执行编码规范，大多数部门还是有点散的。</p>
+<p>跟 Yelp 类似，Airbnb 只有百分之三四十的流量在手机端。</p>
+<p>Airbnb 使用 AWS。</p>
+<p><img src="https://gw.alicdn.com/tps/TB17wMvOFXXXXc5apXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1ap7sOFXXXXXTaFXXXXXXXXXX-1152-864.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB197gvOFXXXXc1apXXXXXXXXXX-1152-864.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1nzEGOFXXXXavaXXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1CboNOFXXXXakXVXXXXXXXXXX-1152-864.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1p9UvOFXXXXXSapXXXXXXXXXX-1152-864.jpg_790x10000.jpg" alt></p>
+<p>这是 3D 打印的作品。</p>
+<h3 id="Twitter"><a href="#Twitter" class="headerlink" title="Twitter"></a>Twitter</h3><p>Twitter 同样位于 downtown，拥有十几层的办公楼，员工大约有 2000 多名，楼上还有一个露天的大阳台，能看到有些员工就懒洋洋的躺在阳台的草坪上办公…… 内部还有一个比较大的餐厅，平时还可以用来开 party、一些庆功会、活动之类的。</p>
+<p>Twitter 的工作相对来说比较繁忙，时常也会出现加班的情况。</p>
+<p>由于数据量巨大及自身的业务特殊原因，Twitter 并没有使用 AWS，而是通过自建服务来满足业务需求。同样，Twitter 也并没有使用 docker，而是在很早之前就开发了类似的容器来满足需求。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1gtJaOVXXXXa4XXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<p>大大的阳台。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1K2IUOFXXXXbgXFXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<p>内部餐厅。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1UtQDOFXXXXbfaXXXXXXXXXXX-3456-4608.jpg_790x10000.jpg" alt></p>
+<p>仔细看，这里边有一个 Twitter 的 logo。</p>
+<h3 id="Google"><a href="#Google" class="headerlink" title="Google"></a>Google</h3><p>会议结束后，我们一行来到了硅谷，拜访了这里的 Google 和 Facebook，先来看看 Google。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1vntbOVXXXXX2XXXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<p>最先参观了 Google 的 Android 乐园，里边摆放着每个版本的 Android 代号标志：</p>
+<p><img src="https://gw.alicdn.com/tps/TB1qX3LOFXXXXbQXVXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<p>先是来了 Google Vistor Center，在这里体验了一个还在试验的谷歌地球。这个系统由一圈竖着的屏幕以及一个操控台组成，输入想看的地点，屏幕上就会带你进入相应的地点（当然需要先建模的），画面非常的逼真、细腻，看了纽约曼哈顿、大峡谷、故宫等，感觉比较 NB，以后在家就可以欣赏到世界各地的美景了，还能自己操控来一场峡谷漂流……</p>
+<p><img src="https://gw.alicdn.com/tps/TB1X7gCOFXXXXXmaXXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<p>Vistor Center 里还有一些 ChromeBook 的展览，在世界上第一台 ChromeBook 上访问了下我们的淘宝首页，运行良好……</p>
+<p><img src="https://gw.alicdn.com/tps/TB1py3qOFXXXXb9aFXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<p>由于办公区域不能参观，Google 在这里设置了一个小的办公区供人参观，同样也都是可升降桌子。 另外提供睡觉的壳仓蛮有意思，躺进去后自己关上门，睡起来蛮惬意……</p>
+<p><img src="https://gw.alicdn.com/tps/TB1TI7MOFXXXXbxXVXXXXXXXXXX-1440-1920.jpg_790x10000.jpg" alt></p>
+<p>Vistor Center 里还有一组照片墙，据说这是一个 Google 的基层员工，每次有大人物来园区，这货都会想尽办法与其合照，然后照的多了就成为了“红人”，每个大人物来都会跟他合照，还有奥巴马…… Google 还专门在 Vistor Center 里给他搞了一堵照片墙…… 事实证明，不管是啥事儿，坚持就会有回报……</p>
+<p><img src="https://gw.alicdn.com/tps/TB1jLQEOFXXXXXIaXXXXXXXXXXX-1152-864.jpg_790x10000.jpg" alt></p>
+<p>随后去了 Google 早期的园区，这里是一个开放的区域，不算大，但也不小。有大大的餐厅、各种奇怪的设备、游戏厅、沙滩排球场、小小的静止游泳池、健身房等等，据带头大姐说，员工可以在任意一个喜欢的地方办公，上班时间有的打游戏、有的打球、有的游泳……</p>
+<p><img src="https://gw.alicdn.com/tps/TB1cr._OFXXXXbXXXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<h3 id="Facebook"><a href="#Facebook" class="headerlink" title="Facebook"></a>Facebook</h3><p>进入 FaceBook 的第一感觉就是，这里简直就像一个五彩斑斓的风情小镇，虽然不大，但是足够的温馨，商店、餐厅、电话亭、游戏厅、办公楼静静的立在街道两旁。</p>
+<p>先是去参观了 Instgram，这里的一些员工桌上有气球挂着，据带头大哥说，是员工一年、两年、三年时会挂不同的气球，但由于人员流动性大，挂球的人其实并不多……</p>
+<p>Facebook 的工程师文化比较浓，我们的厕所里贴的是各种广告，人家的厕所里直接贴的是代码、技术，让你尿尿的时候都能够在大脑中执行一次代码……</p>
+<p><img src="https://gw.alicdn.com/tps/TB1ar.BOFXXXXbmaXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1NC.LOFXXXXc2XVXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1WqEWOFXXXXabXFXXXXXXXXXX-3456-4608.jpg_790x10000.jpg" alt></p>
+<p><img src="https://gw.alicdn.com/tps/TB1ZBZyOFXXXXcEaXXXXXXXXXXX-4608-3456.jpg_790x10000.jpg" alt></p>
+<p>Facebook 的大 logo。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>先说 QCon，参会之前，根据主题先看了相关的一些资料，实际听的过程还是稍微有点小失望，前端方面的演讲普遍比较简单，基本是在较少框架、工具的基本使用方式，缺乏真正的实践和应用。如果放在两三年前，或许会是比较有意思的东西，但是今天，这些主题过于基础。相较之前的 QCon 上海，少了无线相关的主题，也少了真正的实践。当然，也并非毫无意义，更多的我们可以听到在被人眼里，这个技术是如何被使用，在这项技术的发展历程中，经历了哪些抉择，变革的思路是怎样的，其实这些对我们的指导意义还是蛮大的。另外，QCon 每天的开场 Keynote 非常的精彩。</p>
+<p>再说下拜访各个公司的收获，从 QCon 到各个创业公司，基本都在使用 AWS，大家都是围绕这 AWS 去做相关的优化、工具来帮助自己的业务运行的更好。我们的阿里云前景广阔啊，如果能够圈住国内的中小创业者，这个市场也是巨大无比的…… 各个公司都各有特色，他们的市场、他们的用户，很多时候真的令你无法想象，跟国内的场景、用户完全是两个不同的景象。员工的工作环境普遍比较惬意，时间也相对比较自由，大多都没有 KPI 的压力。</p>
+<p>再说下美国印象。如果说美国的刷卡业甩中国 100 条街的话，那么中国的移动互联网、移动支付可以甩美国 500 条街。在拜访过程中了解到，在美国，手机的流量套餐基本上是无限量的，但是各个产品的手机端用户并不多，很多人的手机里就装了少数几个 App，他们很少用手机做啥事儿…… 在国内都被用烂了的二维码，在美国几乎看不到，就连 Twitter 也仅仅是在最近才有了二维码功能…… 另外，这些人真是爱跑步啊，无论何时、无论何地，都能看到各种各样的人在跑步…… 很多人周末的活动一般也都是野营、打球、徒步等户外活动，感觉上比较健康。</p>
+<p>美国人在创新上真的是秒杀我们，如高晓松所说，或许是因为美国的强大使美国人感觉到自信、骄傲，更容易创造出不一样的东西，从他们的技术、电影、动画等等我们都能看出美国人的脑洞大开，而我们基本是在其基础上去做增强、改造。在中国逐步的强大、崛起的时候，期望我们也能够更加的自信、骄傲，特别是我们的程序员们能够有自己的创新、自己的不一样的东西，一千个人脑中应该有一千幅不同的 HelloKitty！</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/12/21/qconsf-2016/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/12/21/qconsf-2016/" data-id="cjt6lby15009xjeu1dhunatu8" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/12/21/qconsf-2016/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Angular/">Angular</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/QCon/">QCon</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/React/">React</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/RxJS/">RxJS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/">webpack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/框架/">框架</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/01/05/writing-readable-code/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          编写「可读」代码的实践
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/12/14/node-subway-season-3-guangzhou/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">「八面玲珑的 Node.js」- Node 地下铁第三期广州站线下沙龙总结</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

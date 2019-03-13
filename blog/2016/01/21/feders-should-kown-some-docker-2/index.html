@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前端也应该了解点 docker 知识：docker 架构（上） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="上一篇文章 前端也应该了解点 docker 知识：docker 的理念与场景  介绍了 docker 的一些理念，以及在前端方面可能的应用场景，本篇我们梳理一下 docker 的架构。 话说，我们团队的小明同学看了上篇文章之后，很是激动，迫不及待的想尝试下 docker ，然后按照网上一些教程跑出来了一个 “Hello world” ，激动的差点把鼠标给扔了。如果小明的故事到这里，那就不是我们团">
+<meta name="keywords" content="nodejs,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端也应该了解点 docker 知识：docker 架构（上）">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/21/feders-should-kown-some-docker-2/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="上一篇文章 前端也应该了解点 docker 知识：docker 的理念与场景  介绍了 docker 的一些理念，以及在前端方面可能的应用场景，本篇我们梳理一下 docker 的架构。 话说，我们团队的小明同学看了上篇文章之后，很是激动，迫不及待的想尝试下 docker ，然后按照网上一些教程跑出来了一个 “Hello world” ，激动的差点把鼠标给扔了。如果小明的故事到这里，那就不是我们团">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1KhPQLpXXXXcQXpXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1xd6kLpXXXXboXXXXXXXXXXXX-672-427.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1KX6kLpXXXXXWXXXXXXXXXXXX-700-830.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1rZu6LpXXXXakXFXXXXXXXXXX-889-633.gif">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1RwaULpXXXXXXaXXXXXXXXXXX-393-485.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1UifkLpXXXXXAXXXXXXXXXXXX-756-395.svg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端也应该了解点 docker 知识：docker 架构（上）">
+<meta name="twitter:description" content="上一篇文章 前端也应该了解点 docker 知识：docker 的理念与场景  介绍了 docker 的一些理念，以及在前端方面可能的应用场景，本篇我们梳理一下 docker 的架构。 话说，我们团队的小明同学看了上篇文章之后，很是激动，迫不及待的想尝试下 docker ，然后按照网上一些教程跑出来了一个 “Hello world” ，激动的差点把鼠标给扔了。如果小明的故事到这里，那就不是我们团">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1KhPQLpXXXXcQXpXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-feders-should-kown-some-docker-2" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前端也应该了解点 docker 知识：docker 架构（上）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 正寻</span>
+        
+        <span>发表于: <a href="/blog/2016/01/21/feders-should-kown-some-docker-2/" class="article-date">
+  <time datetime="2016-01-21T11:08:49.000Z" itemprop="datePublished">2016-01-21</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1KhPQLpXXXXcQXpXXXXXXXXXX-900-500.png" alt="前端也应该了解点 docker 知识：docker 架构（上）"></p>
+<p>上一篇文章 <a href="http://taobaofed.org/blog/2016/01/19/feders-should-kown-some-docker-1/">前端也应该了解点 docker 知识：docker 的理念与场景 </a> 介绍了 docker 的一些理念，以及在前端方面可能的应用场景，本篇我们梳理一下 docker 的架构。</p>
+<p>话说，我们团队的小明同学看了上篇文章之后，很是激动，迫不及待的想尝试下 docker ，然后按照网上一些教程跑出来了一个 “Hello world” ，激动的差点把鼠标给扔了。如果小明的故事到这里，那就不是我们团队的小明了，他是位爱动脑筋，对细节刨根问底的同学，他没有沉浸在跑出来 “Hello world”， 而是想了解下什么  image，container，registry，machine 等都是啥玩意。<br>他于是找到了我，问了我些上面的问题。然后我把我和小明的聊天整理了一下，然后以期帮助更多像小明这样的同学。</p>
+<p>Q1：我的笔记本是 mac，为什么我安装的时候还要装 virtualbox ？</p>
+<p>首先我们要知道，docker 提出的容器技术并不是 docker 首创，在之前就有了 LXC 等基于 Linux  内核特性（ cgroups 和 namespace ）的容器技术，而 docker 可以看做是加强版的 LXC ，增加了类似<code>更强的可移植性</code>，<code>版本控制</code>，<code>类库可分享（ docker hub ）</code>  等一些列简化容器操作功能。就是因为这些简化操作，让容器的使用和管理更方便，也是 docker 为什么一下子就火起来的一个很大原因。<br>回到问题上，docker 简单来讲就是一个容器管理工具（同时在此基础上创建了一个生态闭环）。但是 docker 还是在操作系统之上的一个程序，它是需要内核特性支持的。就目前来看 docker 只能原生跑在 Linux 上面，这是它所依赖的底层技术决定的。不管你是在 Windows  还是  mac  上安装 docker 都要安装一个类似  virtualbox  这样跑 Linux 的虚拟机工具。</p>
+<p>总结来讲，docker 因为底层依赖的原因目前只能跑在具有相关特性的 Linux 上面，而要在不支持这些特性的操作系统上安装 docker，就需要额外多装一个 Linux 的环境了。</p>
+<p><img src="https://img.alicdn.com/tps/TB1xd6kLpXXXXboXXXXXXXXXXXX-672-427.png" alt="占位"></p>
+<p>Q2：原来如此，怪不得第一步先让我 docker-machine 创建一个 vm 来跑 docker，那这个 docker-machine 是干什么的。</p>
+<p>我们从上面这个问题知道，docker 原生只能跑在 Linux 上面。你想想如果只能跑在 Linux 上，那和 docker 的理念 <code>run anywhere</code> 是相悖的，也就不会有那么多人去追捧了。</p>
+<p>后来就有了 <code>boot2docker</code>  这个工具。 boot2docker  包含两部分 ：</p>
+<ol>
+<li>一个轻量级的基于 tiny core Linux（一种 Linux  发行版） 的 iso 镜像</li>
+<li>管理和设置 vm 的 boot2docker  工具</li>
+</ol>
+<p>然后有了 boot2docker  之后，mac 和 Windows 上就能跑 docker 了。</p>
+<p>因为 boot2docker 只支持 virtualbox ，很多像  AWS, Microsoft Azure， VMware 等云环境也想方便的跑  docker ，就不能使用这个了。</p>
+<p>然后就有了 docker-machine 。 docker-machine 的出现就是为了解决 docker  可以安装在更多的地方的一个管理工具。你也可以理解是大大的扩展了 boot2docker ，为 docker 的方便安装，官方开发的一个工具。它帮你屏蔽了一些安装的麻烦，让你更好更快的用上 docker。</p>
+<p>另外，在官方的叫法里面，安装的 docker 叫做  <code>docker-engine</code>，在别人说到 docker-engine 的时候，你就知道是泛指 docker 本身就行。<br><img src="https://img.alicdn.com/tps/TB1KX6kLpXXXXXWXXXXXXXXXXXX-700-830.png" alt></p>
+<p>Q 3：你能解释下 <code>docker run hello-world</code>  ， 都发生了什么么 ？</p>
+<p>你这个问题有点大啊，那我就尽量简单来描述。</p>
+<ol>
+<li><p>使用 docker-machine  创建一个 vm   </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-machine create -d virtualbox default</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动  vm  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-machine start default</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置环境变量<br>在 Linux 上是不需要的，但是通过 docker-machine 创建的则需要，see  <a href="http://stackoverflow.com/questions/25234792/what-does-the-docker-host-variable-do" target="_blank" rel="noopener">http://stackoverflow.com/questions/25234792/what-does-the-docker-host-variable-do</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval &quot;$(docker-machine env default)&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>docker run hello-world</p>
+</li>
+</ol>
+<p><img src="https://img.alicdn.com/tps/TB1rZu6LpXXXXakXFXXXXXXXXXX-889-633.gif" alt></p>
+<p>前 3 点算是对前两个问题的一个演示，我们看看第 4 点到底发生了什么。</p>
+<p>首先，我们输入的 <code>docker run hello-world</code>. 字面意思是启动一个使用<code>hello-world</code> 镜像的容器。</p>
+<p>docker 本身的 C/S  架构的。为了验证这一点，我们去我们创建的 vm 里面看一下有没有 docker 的守护进程，运行  <code>docker-machine ssh default</code><br>然后就会进入 vm ，<code>ps -ef |grep &#39;docker -d&#39;</code>  可以看到这个进程。</p>
+<p>docker 命令本身就是充当了 docker  的 client 的角色，用来发送消息给  docker daemon 。 docker daemon  再将收到的命令进行路由，执行对应的操作。我们不仅仅可以使用 docker  命令来操作 docker，另外还有 <code>rest api</code>  等都可以和 docker 通信，进一步来操作 docker。</p>
+<p>接下来，我们从 gif 动画里面可以清楚的看到，第一句：不能在本地找到 <code>hello-world</code> 镜像。</p>
+<p>这里面提到了镜像也就是 <code>image</code> 。 镜像是 docker 当中一个非常重要的技术和概念。<br>镜像是一个只读的模板。里面可能安装了 CentOS 系统，安装了 Node.js 应用。镜像用来创建容器。举个不恰当的例子，镜像就是一个类，容器就是这个类 new  出来的实例。</p>
+<p>docker 首先会在本地查找镜像，如果没有找到，就会去 docker hub 上去搜索，这也是上面  gif  动画的第二句输出的意思。而  docker hub  是官方提供的镜像仓库，我们也可以登陆后可以把我们创建的镜像  push  到  docker hub，然后其他人就可以   pull   到本地来使用。</p>
+<p>关于镜像的更多操作，可以参见官方文档 <a href="https://docs.docker.com/engine/userguide/dockerimages/" target="_blank" rel="noopener">https://docs.docker.com/engine/userguide/dockerimages/</a></p>
+<p>另外镜像还具有分层的概念。<br><img src="https://img.alicdn.com/tps/TB1RwaULpXXXXXXaXXXXXXXXXXX-393-485.png" alt></p>
+<p>关于镜像分层的介绍可以参见 <a href="http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper" target="_blank" rel="noopener">http://www.infoq.com/cn/articles/analysis-of-docker-file-system-aufs-and-devicemapper</a></p>
+<p>我们接着往下看，下载完镜像之后，就会使用该镜像创建一个容器，并输出了 hello world 。docker  也很友好的描述了这个过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">To generate this message, Docker took the following steps:</span><br><span class="line"> 1. The Docker client contacted the Docker daemon.</span><br><span class="line"> 2. The Docker daemon pulled the &quot;hello-world&quot; image from the Docker Hub.</span><br><span class="line"> 3. The Docker daemon created a new container from that image which runs the</span><br><span class="line">    executable that produces the output you are currently reading.</span><br><span class="line"> 4. The Docker daemon streamed that output to the Docker client, which sent it</span><br><span class="line">    to your terminal.</span><br></pre></td></tr></table></figure>
+<p>那么关于镜像的话题还有几个：</p>
+<ol>
+<li>如何使用 DockerFile build  镜像</li>
+<li>如何对镜像进行管理</li>
+<li>如何创建自己的私有 registry</li>
+</ol>
+<p>我们先把这几个话题留在这里，后面还会再说。</p>
+<p>最后总结一下，docker 是 C/S 架构，docker client 把命令发给 docker daemon ，然后 daemon  进行具体的操作。在执行 docker run 的过程中，docker 先会检查本地是否有相关镜像，如果没有就会去 docker hub  进行检索并下载到本地。</p>
+<p><img src="https://img.alicdn.com/tps/TB1UifkLpXXXXXAXXXXXXXXXXXX-756-395.svg" alt></p>
+<p>随着不断梳理和小明的聊天记录，我开始有点烦小明了，问题真多，篇幅有限，剩下的几个问题，我们下次再叙。<br>Q 4: 一个容器终归没什么意思，那么容器之间是怎么通信的？<br>Q 5: 镜像是静态的，那我的代码怎么部署进去？<br>Q 6: 每次启动都要 docker run 一次，有没有更快更方便的方式？<br>Q 7: 据说我们有个 sandbox 项目，能介绍下吗？</p>
+<p>最后感谢小明的友谊客串，小明真是个好同志。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/21/feders-should-kown-some-docker-2/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/21/feders-should-kown-some-docker-2/" data-id="cjt6lbxy9002tjeu1yt1kfvz3" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/21/feders-should-kown-some-docker-2/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/">nodejs</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/25/jsonschema/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          JSON Schema 那些事儿：基本概念
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/20/mobile-wpo-pageshow-async/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">无线性能优化：页面可见时间与异步加载</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

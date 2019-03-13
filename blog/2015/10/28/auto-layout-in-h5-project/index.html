@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Are u ok？---记一次H5项目的安卓适配 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="Are u ok ?当雷布斯难以和台下的印度粉丝语言沟通的时候，他不由自主地向台下的米粉呐喊Are u ok 抒发他不能讲中文却无比激动的情绪。 当我看到那台老款安卓机上的H5页面的时候，我也想对它说 Are u ok?  我不是要卖给印度人手机，而是因为在这些低版本的安卓机面前我也常常词穷技穷。 问题背景无线化风生水起呀，最近做的无线项目里有几个H5的网页，在大部分手机上表现得很正常，但是适配">
+<meta name="keywords" content="H5,适配,安卓,无线">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Are u ok？---记一次H5项目的安卓适配">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/10/28/auto-layout-in-h5-project/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="Are u ok ?当雷布斯难以和台下的印度粉丝语言沟通的时候，他不由自主地向台下的米粉呐喊Are u ok 抒发他不能讲中文却无比激动的情绪。 当我看到那台老款安卓机上的H5页面的时候，我也想对它说 Are u ok?  我不是要卖给印度人手机，而是因为在这些低版本的安卓机面前我也常常词穷技穷。 问题背景无线化风生水起呀，最近做的无线项目里有几个H5的网页，在大部分手机上表现得很正常，但是适配">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB15IMmKXXXXXXzXpXX2AXZ8pXX-900-500.png">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/9f4117125688c27b1a06ecdafe8019f37ac6ceb4">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/7aa911ea32a8256f2bd91b4be7f5f01cc6b9058f">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/5e1aeab961e13b61d4ccf56a09ca46295794bab4">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/f07ed845db192f0f10e69dd1348c2d2fcc507c3f">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/1747b910882969e04c7cb75d818d8433d4b4f67e">
+<meta property="og:image" content="http://img1.tbcdn.cn/L1/461/1/e1eb474fa4ffe0c59f69ab2449c4a33bfc7d8e19">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/6b948eedcc320cdc6751d2cc80d56e35f605e583">
+<meta property="og:image" content="http://img4.tbcdn.cn/L1/461/1/60552e09f2786f09ae51a4382f15904dfbb796e8">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Are u ok？---记一次H5项目的安卓适配">
+<meta name="twitter:description" content="Are u ok ?当雷布斯难以和台下的印度粉丝语言沟通的时候，他不由自主地向台下的米粉呐喊Are u ok 抒发他不能讲中文却无比激动的情绪。 当我看到那台老款安卓机上的H5页面的时候，我也想对它说 Are u ok?  我不是要卖给印度人手机，而是因为在这些低版本的安卓机面前我也常常词穷技穷。 问题背景无线化风生水起呀，最近做的无线项目里有几个H5的网页，在大部分手机上表现得很正常，但是适配">
+<meta name="twitter:image" content="http://gtms02.alicdn.com/tps/i2/TB15IMmKXXXXXXzXpXX2AXZ8pXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-auto-layout-in-h5-project" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Are u ok？---记一次H5项目的安卓适配
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 愈之</span>
+        
+        <span>发表于: <a href="/blog/2015/10/28/auto-layout-in-h5-project/" class="article-date">
+  <time datetime="2015-10-28T06:18:10.000Z" itemprop="datePublished">2015-10-28</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms02.alicdn.com/tps/i2/TB15IMmKXXXXXXzXpXX2AXZ8pXX-900-500.png" alt="Are u ok？---记一次H5项目的安卓适配"></p>
+<h3 id="Are-u-ok"><a href="#Are-u-ok" class="headerlink" title="Are u ok ?"></a>Are u ok ?</h3><p>当雷布斯难以和台下的印度粉丝语言沟通的时候，他不由自主地向台下的米粉呐喊Are u ok 抒发他不能讲中文却无比激动的情绪。</p>
+<p>当我看到那台老款安卓机上的H5页面的时候，我也想对它说 Are u ok? </p>
+<p>我不是要卖给印度人手机，而是因为在这些低版本的安卓机面前我也常常词穷技穷。</p>
+<h3 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h3><p>无线化风生水起呀，最近做的无线项目里有几个H5的网页，在大部分手机上表现得很正常，但是适配测试阶段测试提的一个问题：在中兴U930上，页面整体布局错乱。</p>
+<p>眼看离提交手淘测试时间点越来越近了，PDPM测试问我能不能提交手淘啊，我只能说遗憾地说，”有一款手机上适配有问题，还要看看。”</p>
+<p>因为这个适配问题让我很难办，不能审查DOM，定位只能靠猜和试。我说还要看看，真的是只能看看。</p>
+<p>我问顺堂MDS(淘宝的无线调试平台)能不能调，顺堂居然羞涩地低下了头：安卓4.4以下的确实不行呢。因为devtool….（广告费你懂的）</p>
+<p>PC端有坏孩子IE，到了移动端还有安卓系统碎片化的问题。世界太不和谐了。</p>
+<h3 id="有图有真相"><a href="#有图有真相" class="headerlink" title="有图有真相"></a>有图有真相</h3><p>一般情况下，H5页面显得很好很正常<br><img src="http://img2.tbcdn.cn/L1/461/1/9f4117125688c27b1a06ecdafe8019f37ac6ceb4" alt="图1"></p>
+<p>而在中兴U930上是这样的。</p>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/7aa911ea32a8256f2bd91b4be7f5f01cc6b9058f" alt="图2"></p>
+<p>丑的我都不好意思贴出来</p>
+<h3 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h3><p>问题还是得解决的，没办法，只好从整个无线工程渲染和适配的过程开始想一遍了。</p>
+<p>首先判断是浮动布局造成的影响，毕竟浮动布局容易引起的问题，于是将同行的元素全都改成成inline-block，重新布局后满心期待push，一看，问题依旧，该怎样还是怎样。</p>
+<p>窗外天气不是很好，有点雾霾，要不把你这手机扔出去算了。-。-</p>
+<p>从截图上看，原因可能是某个元素占据了整行，也有可能是文档流节点总宽度超出了容器宽度。</p>
+<p>既然其他机型上宽度都是正常的，为什么唯独这款的宽度不正常呢？这个问题始终绕不过。因为到目前为止，始终还在样式布层面考虑。既然还是无法定位，说明仅仅考虑CSS可能无法找到问题根源或是线索了。</p>
+<p>应该从现在项目依赖的平台和框架整个过一遍页面的适配和渲染过程。</p>
+<h3 id="设备兼容"><a href="#设备兼容" class="headerlink" title="设备兼容"></a>设备兼容</h3><p>我们的移动设备分辨率各式各样，视觉稿却是一个固定的大小。无线应用需要铺满整个屏幕，也就是自适应，和PC的不一样。那么我们的如何做到适应这么多分辨率呢？</p>
+<p>还好有kimi(淘宝前端团队针对移动端H5开发提供的整体解决方案)。</p>
+<p>无线kimi项目依赖于m-base, m-base通过设定根元素的rem，即通过HTML根元素相对长度单位来定义一个相对的基准单位，为什么说是相对的呢？因为这个基准单位的值在不同分辨率下是不同的。所以可能从m-base上能找到线索。</p>
+<p>那么m-base的这个HTML根元素的font-size到底是如何计算出来的呢。</p>
+<p>m-base从1.0.0开始，前端对rem的基准处理统一约定为：viewport/10，也等价于vw单位，后续的rem规范基准都以屏宽十分之一为准，和手淘首页新标准、天猫均保持一致。</p>
+<p>也就是说，我们规定了（篇幅有限，这里只贴出部分规范）<br>1rem = viewport / 10;<br>750的设计稿，1rem = 75px; 1px = 1/75 rem; 200px = 200 / 75 = 2.666666667rem;<br>640的设计稿，1rem = 64px; 1px = 1/64 rem; 200px = 200 / 64 = 3.125rem;</p>
+<h3 id="这个标题叫什么好呢"><a href="#这个标题叫什么好呢" class="headerlink" title="这个标题叫什么好呢"></a>这个标题叫什么好呢</h3><p>分析到这就有点眉目了，可能是rem基准单位值设置大了;也可能是这设备对rem的计算不准确。第二点不在我们控制范围内。所以只考虑第一点：先查一下这个机型现在的1rem值和viewport宽度值，这个设备上只有祭出alert大法了。</p>
+<p><strong> 打印meta 信息，打印viewport, document, device宽度信息</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">var metas = window.parent.document.getElementsByTagName(&quot;meta&quot;)</span><br><span class="line">for (i = 0; i &lt; metas.length; i++) &#123;</span><br><span class="line">    alert(metas[i].getAttribute(&quot;name&quot;))</span><br><span class="line">    alert(metas[i].getAttribute(&quot;content&quot;))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">alert(/ZTE U930_TD/.test(navigator.userAgent));</span><br><span class="line">alert(document.documentElement.clientWidth);</span><br><span class="line">alert(document.body.clientWidth);</span><br><span class="line">alert(window.innerWidth);</span><br><span class="line">alert(window.pageXOffset);</span><br><span class="line">alert(window.outerWidth);</span><br><span class="line">alert(screen.width);</span><br><span class="line">alert(window.rem);</span><br></pre></td></tr></table></figure>
+<p><strong>打印结果</strong></p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>document.documentElement.clientWidth</td>
+<td>360</td>
+</tr>
+<tr>
+<td>document.body.clientWidth</td>
+<td>360</td>
+</tr>
+<tr>
+<td>window.innerWidth</td>
+<td>360</td>
+</tr>
+<tr>
+<td>window.pageXOffset</td>
+<td>360</td>
+</tr>
+<tr>
+<td>window.outerWidth</td>
+<td>540</td>
+</tr>
+<tr>
+<td>screen.width</td>
+<td>540</td>
+</tr>
+<tr>
+<td>window.rem</td>
+<td>40.67</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到viewport宽度是360px，与该机型屏幕分辨率960x540相差了很大，这不科学啊~<br><a href="http://detail.zol.com.cn/326/325040/param.shtml" target="_blank" rel="noopener">该机型的屏幕参数见这里</a></p>
+<p>可以看到1rem=40.67px，这和预计的54px也不一样，而且也不是36px（viewport的1/10）。</p>
+<p>奇怪，难道是该机型有推出过增强版或是乞丐版？而我手上的是乞丐版？于是去工信部网站查该设备。<a href="http://www.tenaa.com.cn/WSFW/LicenceShow.aspx?code=jpokusu3tlOFxUU4Lw2sNhOXuAZbYVdDfASF7DKgVYi6efm5qzmAAbUin3DJS6Mc" target="_blank" rel="noopener">工信部链接在这里</a><br>似乎没有其他版本，但是意外看到了设备证书到期时间—本月10号就要到期了，哦呵呵。</p>
+<h3 id="定位问题"><a href="#定位问题" class="headerlink" title="定位问题"></a>定位问题</h3><p>宽度我们改变不了，那么从基准rem着手。<br>为什么rem=40.67，按照设备信息算应该是54，按照实际的viewport算应该是36。</p>
+<p>想不通，看m-base源码是怎么算的吧。<br>搜索git代码库找到m-base，运气不错，很快就搜到了相关代码</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/5e1aeab961e13b61d4ccf56a09ca46295794bab4" alt="图3"></p>
+<p>可以看到m-base对该机型做了特殊处理<br>40.678/1.13正好就是36，看来确实只有360px。</p>
+<p>既然viewport就是360px，那么把rem设置为36px应该是正确的呀。<br>于是在项目代码里hack一段</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">window.rem = document.documentElement.clientWidth / 10;</span><br><span class="line">var fontEl = document.createElement(&apos;style&apos;);</span><br><span class="line">fontEl.innerHTML = &apos;html: &#123;font-size:&apos; + window.rem + &apos;px !important&#125;&apos;;</span><br><span class="line">document.documentElement.firstElementChild.appendChild(fontEl);</span><br></pre></td></tr></table></figure>
+<p>满心期待push后一看，没啥变化。打印window.rem，还是40.67。<br>应该是因为很多脚本在执行，无法保证在这一段代码在m-base后执行来获得更高的样式优先级，异步之殇啊。</p>
+<p>那就粗暴一点直接设置标签属性<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">window.rem = document.documentElement.clientWidth / 10;</span><br><span class="line">$(&apos;html&apos;).attr(&apos;style&apos;, &apos;font-size: &apos; + window.rem + &apos;px !important&apos;);</span><br></pre></td></tr></table></figure></p>
+<p>刷新页面果然生效了<br><img src="http://img2.tbcdn.cn/L1/461/1/f07ed845db192f0f10e69dd1348c2d2fcc507c3f" alt="图4"></p>
+<p>可以看到右边有一大片空白。<br>看来设备的真实viewport值大于360小于406.7，而rem大于36小于40.67。</p>
+<p>到这里应该就算完全定位问题了。窗外雾霾似乎少了点，这手机也算捡回了条命。</p>
+<h3 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h3><p>接下来就是是体力活了：采用折半搜索确定rem的准确值，算一次改一次刷新一次，尝试38.335太小39.5太小…试到大概40.06看上去差不多了</p>
+<p>效果如图<br><img src="http://img3.tbcdn.cn/L1/461/1/1747b910882969e04c7cb75d818d8433d4b4f67e" alt="screenshot"></p>
+<p>已经很接近屏幕边缘了，问题修复到这其实可以算是fixed了</p>
+<p>屏幕右边还是有一丝丝白边，对处女座不够友好。</p>
+<p>但饭点都过了，手指刷的都不听话了。</p>
+<p>可是我还想算的更精确。</p>
+<blockquote>
+<p>只要是重复的事情，肯定可以被程序取代。<br>                                                                             — 我</p>
+</blockquote>
+<p>所以跑个任务吧</p>
+<p>流程很简单</p>
+<p><img src="http://img1.tbcdn.cn/L1/461/1/e1eb474fa4ffe0c59f69ab2449c4a33bfc7d8e19" alt="流程图"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">var adaptTheDevice = function (startRem) &#123;</span><br><span class="line">    window.rem = startRem || window.rem;</span><br><span class="line">    var _ss = $(&apos;#xiangsi-dianpu .sim-shop&apos;).first().find(&apos;.itemsinshop a&apos;);</span><br><span class="line">    var flag = true;</span><br><span class="line">    var stepping = 0.0001;</span><br><span class="line">    var time_in = new Date().getTime();</span><br><span class="line">    while (flag) &#123;</span><br><span class="line">        for (var i = 1; i &lt; _ss.length; ++i) &#123;</span><br><span class="line">            if (_ss[i].offsetTop &lt; 1) &#123;</span><br><span class="line">                flag = false;</span><br><span class="line">                alert(&apos;error&apos;)</span><br><span class="line">            &#125;</span><br><span class="line">            if (_ss[i - 1].offsetTop != _ss[i].offsetTop) &#123;</span><br><span class="line">                alert(window.rem - stepping);</span><br><span class="line">                flag = false;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        console.log(window.rem);</span><br><span class="line">        window.rem = window.rem + stepping;</span><br><span class="line">        $(&apos;html&apos;).attr(&apos;style&apos;, &apos;font-size: &apos; + window.rem + &apos;px !important&apos;);</span><br><span class="line">    &#125;</span><br><span class="line">    alert(&quot;used time: &quot; + (new Date().getTime() - time_in) + &quot; ms&quot;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>结果</strong></p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/6b948eedcc320cdc6751d2cc80d56e35f605e583" alt="screenshot"></p>
+<p><img src="http://img4.tbcdn.cn/L1/461/1/60552e09f2786f09ae51a4382f15904dfbb796e8" alt="screenshot"></p>
+<p>好吧，只用了20s就跑下来了，适配的值定为40.076，以后再有丧心病狂的安卓4.0来袭就不用重复踩这个坑了，重跑一下这个任务就行了。</p>
+<p>最后给m-base提个issue。</p>
+<h3 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h3><p>解决这个问题一共花了等效时间约2人日，实际时间大约要一周。<br>据统计2014年每天都有约三部智能机上市，如果适配的单位是机器的话，现在市面上近共约四千部智能机每个型号都能测一遍吗？做得到吗？</p>
+<p>更合理的适配单位应当是操作系统版本—-以操作系统版本为适配标准的量尺，同时兼顾个别经典机型。</p>
+<p>毕竟雷布斯有勇气讲英文了，我们为什么不向前走呢？</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/10/28/auto-layout-in-h5-project/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/10/28/auto-layout-in-h5-project/" data-id="cjt6lbxxb000mjeu17rimj7ou" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/10/28/auto-layout-in-h5-project/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/H5/">H5</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安卓/">安卓</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/无线/">无线</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/适配/">适配</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/10/28/try-catch-runing-problem/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          try catch 对代码运行的性能影响
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/10/27/enter-the-door-of-nodejs/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">致想用 Node.js 的你</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

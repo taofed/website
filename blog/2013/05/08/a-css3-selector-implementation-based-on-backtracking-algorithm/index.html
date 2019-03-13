@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>一种基于匹配回朔的 CSS3 选择器引擎实现 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="介绍CSS 选择器是一种应用于 DOM 节点查找场景的特定微型语法，本质上和正则表达式一样都是一种模式匹配语言，灵活使用可以方便得获取指定位置的节点集合。 目前 W3C 推荐标准为 Selectors Level 3，在 IE9 + 以及 Firefox，Chrome，mobile 等浏览器上原生有基本一致的实现，而在 IE 下则需要使用 JavaScript 模拟实现，本文介绍一种基于匹配回朔">
+<meta name="keywords" content="选择器,匹配回溯">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一种基于匹配回朔的 CSS3 选择器引擎实现">
+<meta property="og:url" content="http://taobaofed.org/blog/2013/05/08/a-css3-selector-implementation-based-on-backtracking-algorithm/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="介绍CSS 选择器是一种应用于 DOM 节点查找场景的特定微型语法，本质上和正则表达式一样都是一种模式匹配语言，灵活使用可以方便得获取指定位置的节点集合。 目前 W3C 推荐标准为 Selectors Level 3，在 IE9 + 以及 Firefox，Chrome，mobile 等浏览器上原生有基本一致的实现，而在 IE 下则需要使用 JavaScript 模拟实现，本文介绍一种基于匹配回朔">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1Xq1.QpXXXXaJXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1z8k0QXXXXXX_XVXXXXXXXXXX-468-284.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1LxA8QXXXXXXgXFXXXXXXXXXX-905-306.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1pCkuQXXXXXaTaFXXXXXXXXXX-960-835.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一种基于匹配回朔的 CSS3 选择器引擎实现">
+<meta name="twitter:description" content="介绍CSS 选择器是一种应用于 DOM 节点查找场景的特定微型语法，本质上和正则表达式一样都是一种模式匹配语言，灵活使用可以方便得获取指定位置的节点集合。 目前 W3C 推荐标准为 Selectors Level 3，在 IE9 + 以及 Firefox，Chrome，mobile 等浏览器上原生有基本一致的实现，而在 IE 下则需要使用 JavaScript 模拟实现，本文介绍一种基于匹配回朔">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1Xq1.QpXXXXaJXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-a-css3-selector-implementation-based-on-backtracking-algorithm" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      一种基于匹配回朔的 CSS3 选择器引擎实现
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 承玉</span>
+        
+        <span>发表于: <a href="/blog/2013/05/08/a-css3-selector-implementation-based-on-backtracking-algorithm/" class="article-date">
+  <time datetime="2013-05-07T20:32:00.000Z" itemprop="datePublished">2013-05-08</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1Xq1.QpXXXXaJXXXXXXXXXXXX-900-500.jpg" alt="一种基于匹配回朔的 CSS3 选择器引擎实现"></p>
+<h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>CSS 选择器是一种应用于 DOM 节点查找场景的特定微型语法，<br>本质上和正则表达式一样都是一种模式匹配语言，灵活使用可以方便得获取指定位置的节点集合。</p>
+<p>目前 W3C 推荐标准为 <a href="http://www.w3.org/TR/selectors" target="_blank" rel="noopener">Selectors Level 3</a>，在 IE9 + 以及 Firefox，Chrome，mobile 等浏览器上原生有基本一致的实现，而在 IE 下则需要<br>使用 JavaScript 模拟实现，本文介绍一种基于匹配回朔的 CSS3 选择器引擎实现，特定应用于 IE6、7、8 下。</p>
+<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><p>CSS 选择器是一种紧凑的语法，根据 CSS3 规范一个选择器字符串首先由 ‘,’ 号分割的组组成，例如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s = g1,g2</span><br></pre></td></tr></table></figure>
+<p>表示匹配 g1 与 g2 的元素集合。组内又由以 ‘ ‘，’+’，’&gt;’，’~’ 分割的简单选择器序列组成，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">g1 = simple1 + simple2</span><br><span class="line">g1 = simple1  simple2</span><br><span class="line">g1 = simple1 &gt; simple2</span><br><span class="line">g1 = simple1 ~ simple2</span><br></pre></td></tr></table></figure>
+<p>+ 表示 simple1 匹配的元素与 simple2 的在同一层级，且 simple2 的元素紧跟在 simple1 后面。</p>
+<p>> 表示 simple2 匹配的元素紧跟在 simple1 的下一层级。</p>
+<p>‘ ‘ 表示 simple1 匹配的元素比 simple2 的层级更靠近根节点。</p>
+<p>~ 表示 simple1 匹配的元素与 simple2 的在同一层级，且位置靠前。</p>
+<p>简单选择器序列又可以由类型选择器以及后缀选择器组成，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">simple1 = type_selector suffix_selector</span><br></pre></td></tr></table></figure>
+<p>其中 typeselector 表示标签的名称，例如 ‘h1’，’h2’。不指定时默认为 ‘*’ 表示匹配任何标签。<br>suffixselector 则一般用来进一步过滤，例如类选择器（限定类名），属性选择器（限定属性），伪类、伪元素等。</p>
+<p>例如 h1.x 匹配 &lt;h1 class=’x’\&gt; 而不匹配 &lt;h1&gt; 或 &lt;span class=’x’&gt;。</p>
+<p>完整语法描述可以查看 <a href="file:///web/20160405235659/http://www.w3.org/TR/selectors" target="_blank" rel="noopener">W3C 标准页面</a>。</p>
+<p>以下文章为了简单描述，将这种语法抽象为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a.b + c.d ~ e.f</span><br></pre></td></tr></table></figure>
+<p>其中 a c e 为类型选择器，b d f 为后缀选择器，+ 代表直接位置关系的 &gt; +，~ 代表模糊位置关系的 ~ ‘ ‘。</p>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><h4 id="解析器生成"><a href="#解析器生成" class="headerlink" title="解析器生成"></a>解析器生成</h4><p>首先把 CSS 选择器语法用 LALR 解析程序生成器生成解析程序，从而可以把选择器的字符串格式转换成结构化的数据。<br>这里采用 <a href="https://github.com/kissyteam/kissy/tree/1.4.x/src/kison" target="_blank" rel="noopener">kison</a> 来生成。</p>
+<p>对应 CSS 选择器语法的 kison 格式描述为：</p>
+<p><a href="https://github.com/kissyteam/kissy/blob/1.4.x/src/dom/sub-modules/selector/src/selector/parser-grammar.kison" target="_blank" rel="noopener">selector-grammar</a></p>
+<p>生成的解析器代码如下：</p>
+<p><a href="https://github.com/kissyteam/kissy/blob/1.4.x/src/dom/sub-modules/selector/src/selector/parser.js" target="_blank" rel="noopener">parser.js</a></p>
+<p>流程图如下：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1z8k0QXXXXXX_XVXXXXXXXXXX-468-284.png" alt="解析器生成"></p>
+<p>解析后的结构化数据为双向链表格式，例如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a.b + c.d</span><br></pre></td></tr></table></figure>
+<p>解析后的链表为：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1LxA8QXXXXXXgXFXXXXXXXXXX-905-306.png" alt="linkedlist"></p>
+<h4 id="引擎查找"><a href="#引擎查找" class="headerlink" title="引擎查找"></a>引擎查找</h4><p>接下来的工作就是引擎查找，查找过程比较复杂，下面根据以下流程图结合实例讲解：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1pCkuQXXXXXaTaFXXXXXXXXXX-960-835.png" alt="engine"></p>
+<p>举例选择器字符串为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a.b + c.d ~ a + e.f</span><br></pre></td></tr></table></figure>
+<p>匹配节点串为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e.f a.b c.d e c.d e a e.f</span><br></pre></td></tr></table></figure>
+<h4 id="获取种子集合"><a href="#获取种子集合" class="headerlink" title="获取种子集合"></a>获取种子集合</h4><p>和一般浏览器实现类似，采用自右向左的查找方法，首先要从最右端 的 type selector 获取到种子集合，根据本例为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">  ^           ^     ^   ^</span><br></pre></td></tr></table></figure>
+<h4 id="选择器链表分组"><a href="#选择器链表分组" class="headerlink" title="选择器链表分组"></a>选择器链表分组</h4><p>将选择器根据直接位置进行分组，以直接位置相连的简单的选择器序列为一组，分组后：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a.b + c.d    ~     a + e.f</span><br><span class="line">---------          -------</span><br></pre></td></tr></table></figure>
+<p>分组的意义在于，每次匹配都以直接位置相连的组为单元做匹配，回朔时也应当以组为单元回朔（直接位置处回朔无意义）。</p>
+<h4 id="初步过滤种子"><a href="#初步过滤种子" class="headerlink" title="初步过滤种子"></a>初步过滤种子</h4><p>根据最后的一组的选择器序列：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a + e.f</span><br></pre></td></tr></table></figure>
+<p>进一步过滤种子集合，过滤后为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">  ^                     ^</span><br><span class="line">  1                     2</span><br></pre></td></tr></table></figure>
+<h4 id="进一步过滤种子"><a href="#进一步过滤种子" class="headerlink" title="进一步过滤种子"></a>进一步过滤种子</h4><p>这一步会根据对种子进行进一步过滤，过滤过程中甚至会发生回朔。</p>
+<p>例如对于第一个种子，在初步过滤后，节点串游标和选择器游标分别在：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> a e.f a.b c.d e c.d e a e.f</span><br><span class="line">^</span><br><span class="line"> a.b + c.d    ~     a + e.f</span><br><span class="line">         ^</span><br></pre></td></tr></table></figure>
+<p>由于节点串游标已经越过节点串头，则表明该次匹配失败，该种子节点匹配失败。</p>
+<p>对于第二个种子，在初步过滤后，节点串游标和选择器游标分别在：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">                    ^</span><br><span class="line">a.b + c.d    ~     a + e.f</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure>
+<p>由于匹配失败，但选择器链接为 ‘~’ ，则可不移动选择器游标，而只移动节点串游标：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">                  ^</span><br><span class="line">a.b + c.d    ~     a + e.f</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure>
+<p>可继续匹配到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">              ^</span><br><span class="line">a.b + c.d    ~     a + e.f</span><br><span class="line">  ^</span><br></pre></td></tr></table></figure>
+<p>此时由于选择器链接为 ‘+’ 因而移动节点串游标已经不可能再次匹配，此时应对选择器游标进行回朔到该分组前面：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">              ^</span><br><span class="line">a.b + c.d    ~     a + e.f</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure>
+<p>此时仍然匹配不成功，但可以移动节点串游标为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">            ^</span><br><span class="line">a.b + c.d    ~     a + e.f</span><br><span class="line">        ^</span><br></pre></td></tr></table></figure>
+<p>此时可以匹配选择器游标到头：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> a e.f a.b c.d e c.d e a e.f</span><br><span class="line">   ^</span><br><span class="line"> a.b + c.d    ~     a + e.f</span><br><span class="line">^</span><br></pre></td></tr></table></figure>
+<p>则表明该种子节点符合本次选择器串，最终匹配节点个数为 1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a e.f a.b c.d e c.d e a e.f</span><br><span class="line">                        ^</span><br></pre></td></tr></table></figure>
+<h4 id="引擎代码"><a href="#引擎代码" class="headerlink" title="引擎代码"></a>引擎代码</h4><p>引擎代码可参见：<a href="https://github.com/kissyteam/kissy/blob/1.4.x/src/dom/sub-modules/selector/src/selector.js" target="_blank" rel="noopener">selector.js</a></p>
+<p>单元测试</p>
+<p>单元测试直接拉取 <a href="http://sizzlejs.com/" target="_blank" rel="noopener">Sizzle</a> 对应于 CSS3 的部分，经过少量调整，全部通过：</p>
+<p><a href="https://github.com/kissyteam/kissy/blob/1.4.x/src/dom/sub-modules/selector/tests/runner/sizzle.html" target="_blank" rel="noopener">selector – sizzle 测试</a></p>
+<p>性能测试</p>
+<p><a href="http://jsperf.com/kissy-selector-sizzlejs" target="_blank" rel="noopener">kissy-selector-sizzle</a></p>
+<p>欢迎提交新的例子。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/LMXI9cjVYXk" target="_blank" rel="noopener">https://unsplash.com/photos/LMXI9cjVYXk</a> By @Nathan Shipps</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2013/05/08/a-css3-selector-implementation-based-on-backtracking-algorithm/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2013/05/08/a-css3-selector-implementation-based-on-backtracking-algorithm/" data-id="cjt6lbxwr0005jeu1wv4onka0" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2013/05/08/a-css3-selector-implementation-based-on-backtracking-algorithm/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/匹配回溯/">匹配回溯</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/选择器/">选择器</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2014/04/05/practice-of-separation-of-front-end-from-back-end/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前后端分离的思考与实践（一）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2013/03/14/modularity-and-high-extensibility-fe-framework-kissy/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">模块化高扩展性的前端框架 KISSY</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

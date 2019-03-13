@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前后端分离的思考与实践（三） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="Midway-ModelProxy — 轻量级的接口配置建模框架前言使用 Node.js 做前后端分离的开发模式带来了一些性能及开发流程上的优势（见《前后端分离的思考与实践 一》）, 但同时也面临不少挑战。在淘宝复杂的业务及技术架构下，后端必须依赖Java搭建基础架构，同时提供相关业务接口供前端使用。Node.js 在整个环境中最重要的工作之一就是代理这些业务接口，以方便前端（Node.js 端">
+<meta name="keywords" content="Nodes.js,Midway">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前后端分离的思考与实践（三）">
+<meta property="og:url" content="http://taobaofed.org/blog/2014/04/14/practice-of-separation-of-front-end-from-back-end-3/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="Midway-ModelProxy — 轻量级的接口配置建模框架前言使用 Node.js 做前后端分离的开发模式带来了一些性能及开发流程上的优势（见《前后端分离的思考与实践 一》）, 但同时也面临不少挑战。在淘宝复杂的业务及技术架构下，后端必须依赖Java搭建基础架构，同时提供相关业务接口供前端使用。Node.js 在整个环境中最重要的工作之一就是代理这些业务接口，以方便前端（Node.js 端">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1o0a7QpXXXXb3XXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB16sWDPVXXXXbvapXXXXXXXXXX-580-310.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB171qPPVXXXXbtaXXXXXXXXXXX-642-482.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前后端分离的思考与实践（三）">
+<meta name="twitter:description" content="Midway-ModelProxy — 轻量级的接口配置建模框架前言使用 Node.js 做前后端分离的开发模式带来了一些性能及开发流程上的优势（见《前后端分离的思考与实践 一》）, 但同时也面临不少挑战。在淘宝复杂的业务及技术架构下，后端必须依赖Java搭建基础架构，同时提供相关业务接口供前端使用。Node.js 在整个环境中最重要的工作之一就是代理这些业务接口，以方便前端（Node.js 端">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1o0a7QpXXXXb3XXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-practice-of-separation-of-front-end-from-back-end-3" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前后端分离的思考与实践（三）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 善繁</span>
+        
+        <span>发表于: <a href="/blog/2014/04/14/practice-of-separation-of-front-end-from-back-end-3/" class="article-date">
+  <time datetime="2014-04-13T20:01:00.000Z" itemprop="datePublished">2014-04-14</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1o0a7QpXXXXb3XXXXXXXXXXXX-900-500.jpg" alt="前后端分离的思考与实践（三）"></p>
+<h2 id="Midway-ModelProxy-—-轻量级的接口配置建模框架"><a href="#Midway-ModelProxy-—-轻量级的接口配置建模框架" class="headerlink" title="Midway-ModelProxy — 轻量级的接口配置建模框架"></a>Midway-ModelProxy — 轻量级的接口配置建模框架</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>使用 Node.js 做前后端分离的开发模式带来了一些性能及开发流程上的优势（见《前后端分离的思考与实践 一》）, 但同时也面临不少挑战。在淘宝复杂的业务及技术架构下，后端必须依赖Java搭建基础架构，同时提供相关业务接口供前端使用。Node.js 在整个环境中最重要的工作之一就是代理这些业务接口，以方便前端（Node.js 端和浏览器端）整合数据做页面渲染。如何做好代理工作，使得前后端开发分离之后，仍然可以在流程上无缝衔接，是我们需要考虑的问题。本文将就该问题做相关探讨，并提出解决方案。</p>
+<p><img src="https://img.alicdn.com/tps/TB16sWDPVXXXXbvapXXXXXXXXXX-580-310.jpg" alt></p>
+<p>由于后端提供的接口方式可能多种多样，同时开发人员在编写 Node.js 端代码访问这些接口的方式也有可能多种多样。如果我们在接口访问方式及使用上不做统一架构处理，则会带来以下一些问题：</p>
+<ul>
+<li>每一个开发人员使用各自的代码风格编写接口访问代码，造成工程目录及编码风格混乱，维护相对困难。</li>
+<li>每一个开发人员编写自己的 mock 数据方式，开发完毕之后，需要手工修改代码移除 mock。</li>
+<li>每一个开发人员为了实现接口的不同环境切换（日常，预发，线上），可能各自维护了一些配置文件。</li>
+<li>数据接口调用方式无法被各个业务 Model 非常方便地复用。</li>
+<li>对于数据接口的描述约定散落在代码的各个角落，有可能跟后端人员约定的接口文档不一致。</li>
+<li>整个项目分离开发之后，对于接口的联调或者测试回归成本依然很高，需要涉及到每一个接口提供者和使用者。</li>
+</ul>
+<p>于是我们希望有这样一个框架，通过该框架提供的机制去描述工程项目中依赖的所有外部接口，对他们进行统一管理，同时提供灵活的接口建模及调用方式，并且提供便捷的线上环境和生产环境切换方法，使前后端开发无缝结合。<code>ModelProxy</code> 就是满足这样要求的轻量级框架，它是 Midway Framework 核心构件之一，也可以单独使用。使用 <code>ModelProxy</code> 可以带来如下优点：</p>
+<ul>
+<li>不同的开发者对于接口访问代码编写方式统一，含义清晰，降低维护难度。</li>
+<li>框架内部采用工厂 + 单例模式，实现接口一次配置多次复用。并且开发者可以随意定制组装自己的业务 Model（依赖注入）。</li>
+<li>可以非常方便地实现线上，日常，预发环境的切换。</li>
+<li>内置 river-mock 和 <a href="http://mockjs.com/" target="_blank" rel="noopener">mockjs</a> 等 mock 引擎，提供 mock 数据非常方便。</li>
+<li>使用接口配置文件，对接口的依赖描述做统一的管理，避免散落在各个代码之中。</li>
+<li>支持浏览器端共享 Model，浏览器端可以使用它做前端数据渲染。整个代理过程对浏览器透明。</li>
+<li>接口配置文件本身是结构化的描述文档，可以使用 river 工具集合，自动生成文档。也可使用它做相关自动化接口测试，使整个开发过程形成一个闭环。</li>
+</ul>
+<h2 id="ModelProxy-工作原理图及相关开发过程图览"><a href="#ModelProxy-工作原理图及相关开发过程图览" class="headerlink" title="ModelProxy 工作原理图及相关开发过程图览"></a>ModelProxy 工作原理图及相关开发过程图览</h2><p><img src="https://img.alicdn.com/tps/TB171qPPVXXXXbtaXXXXXXXXXXX-642-482.jpg" alt></p>
+<p>在上图中，开发者首先需要将工程项目中所有依赖的后端接口描述，按照指定的 JSON 格式，写入 <code>interface.json</code> 配置文件。必要时，需要对每个接口编写一个规则文件，也即图中 interface rules 部分。该规则文件用于在开发阶段mock数据或者在联调阶段使用 River 工具集去验证接口。规则文件的内容取决于采用哪一种 mock 引擎（比如 mockjs, river-mock 等等）。配置完成之后，即可在代码中按照自己的需求创建自己的业务 Model。</p>
+<p>下面是一个简单的例子：</p>
+<p>【例一】</p>
+<ul>
+<li>第一步 在工程目录中创建接口配置文件 interface.json, 并在其中添加主搜接口 JSON 定义</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"title"</span>: <span class="string">"pad淘宝项目数据接口集合定义"</span>,</span><br><span class="line">  <span class="attr">"version"</span>: <span class="string">"1.0.0"</span>,</span><br><span class="line">  <span class="attr">"engine"</span>: <span class="string">"mockjs"</span>,</span><br><span class="line">  <span class="attr">"rulebase"</span>: <span class="string">"./interfaceRules/"</span>,</span><br><span class="line">  <span class="attr">"status"</span>: <span class="string">"online"</span>,</span><br><span class="line">  <span class="attr">"interfaces"</span>: [&#123;</span><br><span class="line">    <span class="attr">"name"</span>: <span class="string">"主搜索接口"</span>,</span><br><span class="line">    <span class="attr">"id"</span>: <span class="string">"Search.getItems"</span>,</span><br><span class="line">    <span class="attr">"urls"</span>: &#123;</span><br><span class="line">      <span class="attr">"online"</span>: <span class="string">"http://s.m.taobao.com/client/search.do"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>第二步 在代码中创建并使用 Model</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 引入模块</span></span><br><span class="line"><span class="keyword">var</span> ModelProxy = <span class="built_in">require</span>(<span class="string">'modelproxy'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 全局初始化引入接口配置文件  （注意：初始化工作有且只有一次）</span></span><br><span class="line">ModelProxy.init(<span class="string">'./interface.json'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建model 更多创建模式请参后文</span></span><br><span class="line"><span class="keyword">var</span> searchModel = <span class="keyword">new</span> ModelProxy(&#123;</span><br><span class="line">  searchItems: <span class="string">'Search.getItems'</span> <span class="comment">// 自定义方法名: 配置文件中的定义的接口ID</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用model, 注意: 调用方法所需要的参数即为实际接口所需要的参数。</span></span><br><span class="line">searchModel.searchItems(&#123;<span class="attr">q</span>: <span class="string">'iphone6'</span>&#125;)</span><br><span class="line">  <span class="comment">// !注意 必须调用 done 方法指定回调函数，来取得上面异步调用searchItems获得的数据!</span></span><br><span class="line">  .done(<span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">  &#125;)</span><br><span class="line">  .error(<span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(err);</span><br><span class="line">  &#125;);</span><br><span class="line"><span class="string">``</span><span class="string">`    </span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">ModelProxy 的功能丰富性在于它支持各种形式的 profile 以创建需要业务 Model：</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">* 使用接口 ID 创建 &gt; 生成的对象会取ID最后’.’号后面的单词作为方法名</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">`</span><span class="string">``</span>javascript</span><br><span class="line">ModelProxy.create(<span class="string">'Search.getItem'</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用键值 JSON 对象 &gt; 自定义方法名: 接口 ID</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ModelProxy.create(&#123;</span><br><span class="line">  getName: <span class="string">'Session.getUserName'</span>,</span><br><span class="line">  getMyCarts: <span class="string">'Cart.getCarts'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用数组形式 &gt; 取最后 <code>.</code> 号后面的单词作为方法名<br>下例中生成的方法调用名依次为: Cart_getItem，getItem，suggest，getName</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ModelProxy.create([<span class="string">'Cart.getItem'</span>, <span class="string">'Search.getItem'</span>, <span class="string">'Search.suggest'</span>, <span class="string">'Session.User.getName'</span>]);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>前缀形式 &gt; 所有满足前缀的接口ID会被引入对象，并取其后半部分作为方法名</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ModelProxy.create(<span class="string">'Search.*'</span>);</span><br></pre></td></tr></table></figure>
+<p>同时，使用这些 Model，你可以很轻易地实现合并请求或者依赖请求，并做相关模板渲染</p>
+<p>【例二】 合并请求</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> model = <span class="keyword">new</span> ModelProxy(<span class="string">'Search.*'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 合并请求 (下面调用的 Model 方法除 done 之外，皆为配置接口 Id 时指定)</span></span><br><span class="line">model.suggest(&#123;<span class="attr">q</span>: <span class="string">'女'</span>&#125;)</span><br><span class="line">  .list(&#123;<span class="attr">keyword</span>: <span class="string">'iphone6'</span>&#125;)</span><br><span class="line">  .getNav(&#123;<span class="attr">key</span>: <span class="string">'流行服装'</span>&#125;)</span><br><span class="line">  .done(<span class="function"><span class="keyword">function</span>(<span class="params">data1, data2, data3</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 参数顺序与方法调用顺序一致</span></span><br><span class="line">    <span class="built_in">console</span>.log(data1, data2, data3);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+<p>【例三】 依赖请求</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> model = <span class="keyword">new</span> ModelProxy(&#123;</span><br><span class="line">  getUser: <span class="string">'Session.getUser'</span>,</span><br><span class="line">  getMyOrderList: <span class="string">'Order.getOrder'</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 先获得用户id，然后再根据id号获得订单列表</span></span><br><span class="line">model.getUser(&#123;<span class="attr">sid</span>: <span class="string">'fdkaldjfgsakls0322yf8'</span>&#125;)</span><br><span class="line">  .done(<span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> uid = data.uid;</span><br><span class="line">    <span class="comment">// 二次数据请求依赖第一次取得的id号</span></span><br><span class="line">    <span class="keyword">this</span>.getMyOrderList(&#123;<span class="attr">id</span>: uid&#125;)</span><br><span class="line">      .done(<span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+<p>此外 ModelProxy 不仅在 Node.js 端可以使用，也可以在浏览器端使用。只需要在页面中引入官方包提供的 modelproxy-client.js 即可。</p>
+<p>【例四】浏览器端使用 ModelProxy</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 引入modelproxy模块，该模块本身是由KISSY封装的标准模块--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"modelproxy-client.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">KISSY.use(<span class="string">'modelproxy'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">S, ModelProxy</span>) </span>&#123;</span></span><br><span class="line"><span class="javascript">  <span class="comment">// !配置基础路径，该路径与第二步中配置的拦截路径一致!</span></span></span><br><span class="line"><span class="javascript">  <span class="comment">// 且全局配置有且只有一次！</span></span></span><br><span class="line"><span class="javascript">  ModelProxy.configBase(<span class="string">'/model/'</span>);</span></span><br><span class="line"><span class="undefined"></span></span><br><span class="line"><span class="javascript">  <span class="comment">// 创建model</span></span></span><br><span class="line"><span class="javascript">  <span class="keyword">var</span> searchModel = ModelProxy.create(<span class="string">'Search.*'</span>);</span></span><br><span class="line"><span class="undefined">  searchModel</span></span><br><span class="line"><span class="javascript">    .list(&#123;<span class="attr">q</span>: <span class="string">'ihpone6'</span>&#125;)</span></span><br><span class="line"><span class="javascript">    .list(&#123;<span class="attr">q</span>: <span class="string">'冲锋衣'</span>&#125;)</span></span><br><span class="line"><span class="javascript">    .suggest(&#123;<span class="attr">q</span>: <span class="string">'i'</span>&#125;)</span></span><br><span class="line"><span class="javascript">    .getNav(&#123;<span class="attr">q</span>: <span class="string">'滑板'</span>&#125;)</span></span><br><span class="line"><span class="javascript">    .done(<span class="function"><span class="keyword">function</span>(<span class="params">data1, data2, data3, data4</span>) </span>&#123;</span></span><br><span class="line"><span class="javascript">      <span class="built_in">console</span>.log(&#123;</span></span><br><span class="line"><span class="javascript">        <span class="string">'list_ihpone6'</span>: data1,</span></span><br><span class="line"><span class="javascript">        <span class="string">'list_冲锋衣'</span>: data2,</span></span><br><span class="line"><span class="javascript">        <span class="string">'suggest_i'</span>: data3,</span></span><br><span class="line"><span class="javascript">        <span class="string">'getNav_滑板'</span>: data4</span></span><br><span class="line"><span class="undefined">      &#125;);</span></span><br><span class="line"><span class="undefined">    &#125;);</span></span><br><span class="line"><span class="undefined">&#125;);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>同时，<code>ModelProxy</code> 可以配合 Midway 另一核心组件 <code>Midway-XTPL</code> 一起使用，实现数据和模板以及相关渲染过程在浏览器端和服务器端的全共享。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>ModelProxy 以一种配置化的轻量级框架存在，提供友好的接口 model 组装及使用方式，同时很好的解决前后端开发模式分离中的接口使用规范问题。在整个项目开发过程中，接口始终只需要定义描述一次，前端开发人员即可引用，同时使用 River 工具自动生成文档，形成与后端开发人员的契约，并做相关自动化测试，极大地优化了整个软件工程开发过程。</p>
+<p>【注】River 是阿里集团研发的前后端统一接口规范及相关工具集合的统称</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/k8w64_keVSg" target="_blank" rel="noopener">https://unsplash.com/photos/k8w64_keVSg</a> By @Alfred Quartey</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2014/04/14/practice-of-separation-of-front-end-from-back-end-3/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2014/04/14/practice-of-separation-of-front-end-from-back-end-3/" data-id="cjt6lby0u009cjeu1j2tqzzdd" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2014/04/14/practice-of-separation-of-front-end-from-back-end-3/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Midway/">Midway</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodes-js/">Nodes.js</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前后端分离的思考与实践（四）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2014/04/09/practice-of-separation-of-front-end-from-back-end-2/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前后端分离的思考与实践（二）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

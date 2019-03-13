@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>ES7 Decorator 装饰者模式 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="1、装饰模式设计模式大家都有了解，网上有很多系列教程。 这里只分享 装饰者模式 以及如何使用 ES7 的 decorator 概念。 1.1、装饰模式 v.s. 适配器模式装饰模式和适配器模式都是 包装模式 (Wrapper Pattern)，它们都是通过封装其他对象达到设计的目的的，但是它们的形态有很大区别。  适配器模式我们使用的场景比较多，比如连接不同数据库的情况，你需要包装现有的模块接口">
+<meta name="keywords" content="es7,设计模式,decorator">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES7 Decorator 装饰者模式">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/16/es7-decorator/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="1、装饰模式设计模式大家都有了解，网上有很多系列教程。 这里只分享 装饰者模式 以及如何使用 ES7 的 decorator 概念。 1.1、装饰模式 v.s. 适配器模式装饰模式和适配器模式都是 包装模式 (Wrapper Pattern)，它们都是通过封装其他对象达到设计的目的的，但是它们的形态有很大区别。  适配器模式我们使用的场景比较多，比如连接不同数据库的情况，你需要包装现有的模块接口">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1mO6yKpXXXXXAaXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB151RLKXXXXXcMXFXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB12g8YKXXXXXaKXpXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1ex47KXXXXXbmXXXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1prp9KXXXXXaDXXXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1d2X4KXXXXXcjXXXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1inNZKXXXXXalXpXXXXXXXXXX-1024-768.jpg">
+<meta property="og:image" content="https://lh3.googleusercontent.com/-Nf4nWOn8xq4/VijgN2MO_iI/AAAAAAAACeI/yVN_AMwHhvE/s640/2015-06-11-webstorm-add-scope-1024x630.png">
+<meta property="og:image" content="https://lh3.googleusercontent.com/-Z_9myWbGlaA/VijgOAtk6SI/AAAAAAAACeI/sBk6YYmAlfo/s640/ws-2.png">
+<meta property="og:image" content="https://lh3.googleusercontent.com/-9ELihywPAx0/VijgOERy2dI/AAAAAAAACeI/Y9W6iBIel5Q/s640/ws-3.png">
+<meta property="og:image" content="https://lh3.googleusercontent.com/-wMyJjsatkao/VijgOu5XI-I/AAAAAAAACeI/MQzBDiTwOLE/s640/.png">
+<meta property="og:image" content="https://lh3.googleusercontent.com/-lCMQXwTdCXo/VijgO1lQf3I/AAAAAAAACeI/LDw0AvyeWfQ/s640/ws-5.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES7 Decorator 装饰者模式">
+<meta name="twitter:description" content="1、装饰模式设计模式大家都有了解，网上有很多系列教程。 这里只分享 装饰者模式 以及如何使用 ES7 的 decorator 概念。 1.1、装饰模式 v.s. 适配器模式装饰模式和适配器模式都是 包装模式 (Wrapper Pattern)，它们都是通过封装其他对象达到设计的目的的，但是它们的形态有很大区别。  适配器模式我们使用的场景比较多，比如连接不同数据库的情况，你需要包装现有的模块接口">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1mO6yKpXXXXXAaXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-es7-decorator" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      ES7 Decorator 装饰者模式
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 玄农</span>
+        
+        <span>发表于: <a href="/blog/2015/11/16/es7-decorator/" class="article-date">
+  <time datetime="2015-11-16T10:11:01.000Z" itemprop="datePublished">2015-11-16</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1mO6yKpXXXXXAaXXXXXXXXXXX-900-500.jpg" alt="ES7 Decorator 装饰者模式"></p>
+<h2 id="1、装饰模式"><a href="#1、装饰模式" class="headerlink" title="1、装饰模式"></a>1、装饰模式</h2><p>设计模式大家都有了解，网上有很多系列教程。</p>
+<p>这里只分享 <strong>装饰者模式</strong> 以及如何使用 ES7 的 <code>decorator</code> 概念。</p>
+<h3 id="1-1、装饰模式-v-s-适配器模式"><a href="#1-1、装饰模式-v-s-适配器模式" class="headerlink" title="1.1、装饰模式 v.s. 适配器模式"></a>1.1、装饰模式 v.s. 适配器模式</h3><p>装饰模式和适配器模式都是 <strong>包装模式</strong> (Wrapper Pattern)，它们都是通过封装其他对象达到设计的目的的，但是它们的形态有很大区别。</p>
+<ul>
+<li><p><strong>适配器模式</strong>我们使用的场景比较多，比如连接不同数据库的情况，你需要包装现有的模块接口，从而使之适配数据库 —— 好比你手机使用转接口来适配插座那样；</p>
+</li>
+<li><p><strong>装饰模式</strong>不一样，仅仅包装现有的模块，使之 “更加华丽” ，并不会影响原有接口的功能 —— 好比你给手机添加一个外壳罢了，并不影响手机原有的通话、充电等功能；<br><img src="https://gw.alicdn.com/tps/TB151RLKXXXXXcMXFXXXXXXXXXX-1024-768.jpg" alt="更加华丽"></p>
+</li>
+</ul>
+<p>更多区别参见：<a href="http://blog.csdn.net/zhshulin/article/details/38665187" target="_blank" rel="noopener">设计模式——装饰模式（Decorator）</a></p>
+<h3 id="1-2、装饰模式场景-——-面向-AOP-编程"><a href="#1-2、装饰模式场景-——-面向-AOP-编程" class="headerlink" title="1.2、装饰模式场景 —— 面向 AOP 编程"></a>1.2、装饰模式场景 —— 面向 AOP 编程</h3><p>装饰模式经典的应用是 AOP 编程，比如“日志系统”，日志系统的作用是记录系统的行为操作，它在不影响原有系统的功能的基础上增加记录环节 —— 好比你佩戴了一个智能手环，并不影响你日常的作息起居，但你现在却有了自己每天的行为记录。</p>
+<p>更加抽象的理解，可以理解为给数据流做一层<code>filter</code>，因此 AOP 的典型应用包括 安全检查、缓存、调试、持久化等等。可参考<a href="http://haidaoqi3630.iteye.com/blog/2172845" target="_blank" rel="noopener">Spring aop 原理及各种应用场景 </a>。<br><img src="https://gw.alicdn.com/tps/TB12g8YKXXXXXaKXpXXXXXXXXXX-1024-768.jpg" alt="aop"></p>
+<h2 id="2、使用-ES7-的-decorator"><a href="#2、使用-ES7-的-decorator" class="headerlink" title="2、使用 ES7 的 decorator"></a>2、使用 ES7 的 decorator</h2><p>ES7 中增加了一个 <code>decorator</code> 属性，它借鉴自 Python，请参考文章<a href="http://www.liuhaihua.cn/archives/115548.html" target="_blank" rel="noopener">Decorators in ES7</a>。</p>
+<p>下面我们以 <strong>钢铁侠</strong> 为例讲解如何使用 ES7 的 decorator。</p>
+<p>以钢铁侠为例，钢铁侠本质是一个人，只是“装饰”了很多武器方才变得那么 NB，不过再怎么装饰他还是一个人。<br><img src="https://gw.alicdn.com/tps/TB1ex47KXXXXXbmXXXXXXXXXXXX-1024-768.jpg" alt="钢铁侠"></p>
+<p>我们的示例场景是这样的</p>
+<ul>
+<li>首先创建一个普通的<code>Man</code>类，它的抵御值 2，攻击力为 3，血量为 3；</li>
+<li>然后我们让其带上钢铁侠的盔甲，这样他的抵御力增加 100，变成 102；</li>
+<li>让其带上光束手套，攻击力增加 50，变成 53；</li>
+<li>最后让他增加“飞行”能力</li>
+</ul>
+<p><img src="https://gw.alicdn.com/tps/TB1prp9KXXXXXaDXXXXXXXXXXXX-1024-768.jpg" alt="ironman"></p>
+<h3 id="2-1、【Demo-1】对方法的装饰：装备盔甲"><a href="#2-1、【Demo-1】对方法的装饰：装备盔甲" class="headerlink" title="2.1、【Demo 1】对方法的装饰：装备盔甲"></a>2.1、【Demo 1】对方法的装饰：装备盔甲</h3><p><strong>创建 Man 类</strong>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Man</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(def = 2,atk = 3,hp = 3)&#123;</span><br><span class="line">    <span class="keyword">this</span>.init(def,atk,hp);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  init(def,atk,hp)&#123;</span><br><span class="line">    <span class="keyword">this</span>.def = def; <span class="comment">// 防御值</span></span><br><span class="line">    <span class="keyword">this</span>.atk = atk;  <span class="comment">// 攻击力</span></span><br><span class="line">    <span class="keyword">this</span>.hp = hp;  <span class="comment">// 血量</span></span><br><span class="line">  &#125;</span><br><span class="line">  toString()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`防御力:<span class="subst">$&#123;<span class="keyword">this</span>.def&#125;</span>,攻击力:<span class="subst">$&#123;<span class="keyword">this</span>.atk&#125;</span>,血量:<span class="subst">$&#123;<span class="keyword">this</span>.hp&#125;</span>`</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tony = <span class="keyword">new</span> Man();</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`当前状态 ===&gt; <span class="subst">$&#123;tony&#125;</span>`</span>); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出：当前状态 ===&gt; 防御力:2,攻击力:3,血量:3</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>代码直接放在 <a href="http://babeljs.io/repl/" target="_blank" rel="noopener">http://babeljs.io/repl/</a> 中运行查看结果，记得勾选<code>Experimental</code>选项和<code>Evaluate</code>选项</p>
+</blockquote>
+<p>创建 <strong>decorateArmour</strong> 方法，为钢铁侠装配盔甲——注意 <code>decorateArmour</code> 是装饰在方法<code>init</code>上的。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">decorateArmour</span>(<span class="params">target, key, descriptor</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> method = descriptor.value;</span><br><span class="line">  <span class="keyword">let</span> moreDef = <span class="number">100</span>;</span><br><span class="line">  <span class="keyword">let</span> ret;</span><br><span class="line">  descriptor.value = <span class="function">(<span class="params">...args</span>)=&gt;</span>&#123;</span><br><span class="line">    args[<span class="number">0</span>] += moreDef;</span><br><span class="line">    ret = method.apply(target, args);</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> descriptor;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Man</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(def = 2,atk = 3,hp = 3)&#123;</span><br><span class="line">    <span class="keyword">this</span>.init(def,atk,hp);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @decorateArmour</span><br><span class="line">  init(def,atk,hp)&#123;</span><br><span class="line">    <span class="keyword">this</span>.def = def; <span class="comment">// 防御值</span></span><br><span class="line">    <span class="keyword">this</span>.atk = atk;  <span class="comment">// 攻击力</span></span><br><span class="line">    <span class="keyword">this</span>.hp = hp;  <span class="comment">// 血量</span></span><br><span class="line">  &#125;</span><br><span class="line">  toString()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`防御力:<span class="subst">$&#123;<span class="keyword">this</span>.def&#125;</span>,攻击力:<span class="subst">$&#123;<span class="keyword">this</span>.atk&#125;</span>,血量:<span class="subst">$&#123;<span class="keyword">this</span>.hp&#125;</span>`</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tony = <span class="keyword">new</span> Man();</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`当前状态 ===&gt; <span class="subst">$&#123;tony&#125;</span>`</span>);</span><br><span class="line"><span class="comment">// 输出：当前状态 ===&gt; 防御力:102,攻击力:3,血量:3</span></span><br></pre></td></tr></table></figure></p>
+<p>我们先看输出结果，防御力的确增加了 <strong>100</strong>，看来盔甲起作用了。</p>
+<p>初学者这里会有两个疑问：</p>
+<ul>
+<li><ol>
+<li><code>decorateArmour</code>方法的参数为啥是这三个？可以更换么？</li>
+</ol>
+</li>
+<li><ol start="2">
+<li><code>decorateArmour</code>方法为什么返回的是<code>descriptor</code></li>
+</ol>
+</li>
+</ul>
+<p>这里给出个人的解答作为参考：</p>
+<ol>
+<li><strong>Decorators</strong> 的本质是利用了 ES5 的 <strong>Object.defineProperty</strong> 属性，这三个参数其实是和 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty" target="_blank" rel="noopener">Object.defineProperty</a> 参数一致的，因此不能更改，详细分析请见 <a href="http://greengerong.com/blog/2015/09/24/es7-javascript-decorators/" target="_blank" rel="noopener">细说 ES7 JavaScript Decorators</a></li>
+<li>可以看看 <strong>bable 转换后</strong> 的代码，其中有一句是 <code>descriptor = decorator(target, key, descriptor) || descriptor;</code> ，点到为止，这里不详细展开了，可自行看看这行代码的上下文（参考文献中也涉及到这句代码的解释）。</li>
+</ol>
+<h3 id="2-2、【Demo-2】装饰器叠加：增加光束手套"><a href="#2-2、【Demo-2】装饰器叠加：增加光束手套" class="headerlink" title="2.2、【Demo 2】装饰器叠加：增加光束手套"></a>2.2、【Demo 2】装饰器叠加：增加光束手套</h3><p>在上面的示例中，我们成功为 普通人 增加 “盔甲” 这个装饰；现在我想再给他增加 “光束手套”，希望额外增加 <strong>50</strong> 点防御值。</p>
+<p><strong>Step 1</strong>：拷贝一份<code>decorateArmour</code>方法，改名为<code>decorateLight</code>，同时修改防御值的属性：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">decorateLight</span>(<span class="params">target, key, descriptor</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> method = descriptor.value;</span><br><span class="line">  <span class="keyword">let</span> moreAtk = <span class="number">50</span>;</span><br><span class="line">  <span class="keyword">let</span> ret;</span><br><span class="line">  descriptor.value = <span class="function">(<span class="params">...args</span>)=&gt;</span>&#123;</span><br><span class="line">    args[<span class="number">1</span>] += moreAtk;</span><br><span class="line">    ret = method.apply(target, args);</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> descriptor;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>Step 2</strong>：直接在<code>init</code>方法上添加装饰语法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">....</span><br><span class="line">  @decorateArmour</span><br><span class="line">  @decorateLight</span><br><span class="line">  init(def,atk,hp)&#123;</span><br><span class="line">    <span class="keyword">this</span>.def = def; <span class="comment">// 防御值</span></span><br><span class="line">    <span class="keyword">this</span>.atk = atk;  <span class="comment">// 攻击力</span></span><br><span class="line">    <span class="keyword">this</span>.hp = hp;  <span class="comment">// 血量</span></span><br><span class="line">  &#125;</span><br><span class="line"> ...</span><br></pre></td></tr></table></figure></p>
+<p>最后的代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">decorateLight</span>(<span class="params">target, key, descriptor</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> method = descriptor.value;</span><br><span class="line">  <span class="keyword">let</span> moreAtk = <span class="number">50</span>;</span><br><span class="line">  <span class="keyword">let</span> ret;</span><br><span class="line">  descriptor.value = <span class="function">(<span class="params">...args</span>)=&gt;</span>&#123;</span><br><span class="line">    args[<span class="number">1</span>] += moreAtk;</span><br><span class="line">    ret = method.apply(target, args);</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> descriptor;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Man</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(def = 2,atk = 3,hp = 3)&#123;</span><br><span class="line">    <span class="keyword">this</span>.init(def,atk,hp);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @decorateArmour</span><br><span class="line">  @decorateLight</span><br><span class="line">  init(def,atk,hp)&#123;</span><br><span class="line">    <span class="keyword">this</span>.def = def; <span class="comment">// 防御值</span></span><br><span class="line">    <span class="keyword">this</span>.atk = atk;  <span class="comment">// 攻击力</span></span><br><span class="line">    <span class="keyword">this</span>.hp = hp;  <span class="comment">// 血量</span></span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> tony = <span class="keyword">new</span> Man();</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`当前状态 ===&gt; <span class="subst">$&#123;tony&#125;</span>`</span>);</span><br><span class="line"><span class="comment">//输出：当前状态 ===&gt; 防御力:102,攻击力:53,血量:3</span></span><br></pre></td></tr></table></figure></p>
+<p>在这里你就能看出装饰模式的优势了，它可以对某个方法进行叠加使用，对原类的侵入性非常小，只是增加一行<code>@decorateLight</code>而已，可以方便地增删；（同时还可以复用）</p>
+<h3 id="2-3、【Demo-3】对类的装饰：增加飞行能力"><a href="#2-3、【Demo-3】对类的装饰：增加飞行能力" class="headerlink" title="2.3、【Demo 3】对类的装饰：增加飞行能力"></a>2.3、【Demo 3】对类的装饰：增加飞行能力</h3><p>按文章 <a href="http://blog.csdn.net/zhshulin/article/details/38665187" target="_blank" rel="noopener">装饰模式</a>所言，装饰模式有两种：<strong>纯粹的装饰模式</strong> 和 <strong>半透明的装饰模式</strong>。</p>
+<p>上述的两个 demo 中所使用的应该是 <strong>纯粹的装饰模式</strong>，它并不增加对原有类的接口；下面要讲 demo 是给普通人增加“飞行”能力，相当于给类新增一个方法，属于 <strong>半透明的装饰模式</strong>，有点儿像适配器模式的样子。</p>
+<p><strong>Step 1</strong>：增加一个方法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addFly</span>(<span class="params">canFly</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">target</span>)</span>&#123;</span><br><span class="line">    target.canFly = canFly;</span><br><span class="line">    <span class="keyword">let</span> extra = canFly ? <span class="string">'(技能加成:飞行能力)'</span> : <span class="string">''</span>;</span><br><span class="line">    <span class="keyword">let</span> method = target.prototype.toString;</span><br><span class="line">    target.prototype.toString = <span class="function">(<span class="params">...args</span>)=&gt;</span>&#123;</span><br><span class="line">      <span class="keyword">return</span> method.apply(target.prototype,args) + extra;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> target;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>Step 2</strong>：这个方法将直接去装饰类：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">addFly</span>(<span class="params">canFly</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">target</span>)</span>&#123;</span><br><span class="line">    target.canFly = canFly;</span><br><span class="line">    <span class="keyword">let</span> extra = canFly ? <span class="string">'(技能加成:飞行能力)'</span> : <span class="string">''</span>;</span><br><span class="line">    <span class="keyword">let</span> method = target.prototype.toString;</span><br><span class="line">    target.prototype.toString = <span class="function">(<span class="params">...args</span>)=&gt;</span>&#123;</span><br><span class="line">      <span class="keyword">return</span> method.apply(target.prototype,args) + extra;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> target;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@addFly(<span class="literal">true</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Man</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(def = 2,atk = 3,hp = 3)&#123;</span><br><span class="line">    <span class="keyword">this</span>.init(def,atk,hp);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  @decorateArmour</span><br><span class="line">  @decorateLight</span><br><span class="line">  init(def,atk,hp)&#123;</span><br><span class="line">    <span class="keyword">this</span>.def = def; <span class="comment">// 防御值</span></span><br><span class="line">    <span class="keyword">this</span>.atk = atk;  <span class="comment">// 攻击力</span></span><br><span class="line">    <span class="keyword">this</span>.hp = hp;  <span class="comment">// 血量</span></span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`当前状态 ===&gt; <span class="subst">$&#123;tony&#125;</span>`</span>);</span><br><span class="line"><span class="comment">// 输出：当前状态 ===&gt; 防御力:102,攻击力:53,血量:3(技能加成:飞行能力)</span></span><br></pre></td></tr></table></figure>
+<p>作用在方法上的 <code>decorator</code> 接收的第一个参数（<strong>target</strong> ）是类的 <code>prototype</code>；如果把一个 <code>decorator</code> 作用到类上，则它的第一个参数 target 是 <strong>类本身</strong>。（参考 <a href="http://www.liuhaihua.cn/archives/115548.html" target="_blank" rel="noopener">Decorators in ES7</a> ）</p>
+<h2 id="3、使用原生-JS-实现装饰器模式"><a href="#3、使用原生-JS-实现装饰器模式" class="headerlink" title="3、使用原生 JS 实现装饰器模式"></a>3、使用原生 JS 实现装饰器模式</h2><p>关于如何用现有标准的原生 JS 实现的装饰模式，可参考译文<br> <a href="http://www.codingserf.com/index.php/2015/05/javascript-design-patterns-decorator/" target="_blank" rel="noopener">JavaScript设计模式：装饰者模式</a>，这是一篇值得一读的文章，深入浅出。</p>
+<p>这里用 ES5 重写一下上面的 Demo 1的场景，简略说一下关键点：</p>
+<ol>
+<li>Man 是具体的类，<strong>Decorator</strong> 是针对 <strong>Man</strong>  的装饰器基类</li>
+<li>具体的装饰类 <strong>DecorateArmour</strong> 典型地使用 <strong>prototype 继承方式</strong> 继承自 <strong>Decorator</strong> 基类；</li>
+<li>基于 <strong>IOC（控制反转）思想</strong> ，<strong>Decorator</strong> 是接受 <strong>Man</strong> 类，而不是自己创建  <strong>Man</strong>  类；</li>
+</ol>
+<p>最后代码是：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 首先我们要创建一个基类</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Man</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">this</span>.def = <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">this</span>.atk = <span class="number">3</span>; </span><br><span class="line">  <span class="keyword">this</span>.hp = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 装饰者也需要实现这些方法，遵守 Man 的接口</span></span><br><span class="line">Man.prototype=&#123;</span><br><span class="line">  toString:<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`防御力:<span class="subst">$&#123;<span class="keyword">this</span>.def&#125;</span>,攻击力:<span class="subst">$&#123;<span class="keyword">this</span>.atk&#125;</span>,血量:<span class="subst">$&#123;<span class="keyword">this</span>.hp&#125;</span>`</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建装饰器，接收 Man 对象作为参数。</span></span><br><span class="line"><span class="keyword">var</span> Decorator = <span class="function"><span class="keyword">function</span>(<span class="params">man</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.man = man;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 装饰者要实现这些相同的方法</span></span><br><span class="line">Decorator.prototype.toString = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.man.toString();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 继承自装饰器对象</span></span><br><span class="line"><span class="comment">// 创建具体的装饰器，也是接收 Man 作对参数</span></span><br><span class="line"><span class="keyword">var</span> DecorateArmour = <span class="function"><span class="keyword">function</span>(<span class="params">man</span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> moreDef = <span class="number">100</span>;</span><br><span class="line">  man.def += moreDef;</span><br><span class="line">  Decorator.call(<span class="keyword">this</span>,man);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">DecorateArmour.prototype = <span class="keyword">new</span> Decorator();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接下来我们要为每一个功能创建一个装饰者对象，重写父级方法，添加我们想要的功能。</span></span><br><span class="line">DecorateArmour.prototype.toString = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.man.toString();</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 注意这里的调用方式</span></span><br><span class="line"><span class="comment">// 构造器相当于“过滤器”，面向切面的</span></span><br><span class="line"><span class="keyword">var</span> tony = <span class="keyword">new</span> Man();</span><br><span class="line">tony = <span class="keyword">new</span> DecorateArmour(tony);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">`当前状态 ===&gt; <span class="subst">$&#123;tony&#125;</span>`</span>);</span><br><span class="line"><span class="comment">// 输出：当前状态 ===&gt; 防御力:102,攻击力:3,血量:3</span></span><br></pre></td></tr></table></figure>
+<h2 id="4、经典实现：Logger"><a href="#4、经典实现：Logger" class="headerlink" title="4、经典实现：Logger"></a>4、经典实现：Logger</h2><p>AOP 的经典应用就是 <strong>日志系统</strong> 了，那么我们也用 ES7 的语法给钢铁侠打造一个日志系统吧。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1d2X4KXXXXXcjXXXXXXXXXXXX-1024-768.jpg" alt="logger"></p>
+<p>下面是最终的代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Created by jscon on 15/10/16.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">let</span> log = <span class="function">(<span class="params">type</span>) =&gt;</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="function">(<span class="params">target, name, descriptor</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> method = descriptor.value;</span><br><span class="line">    descriptor.value =  <span class="function">(<span class="params">...args</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="built_in">console</span>.info(<span class="string">`(<span class="subst">$&#123;type&#125;</span>) 正在执行: <span class="subst">$&#123;name&#125;</span>(<span class="subst">$&#123;args&#125;</span>) = ?`</span>);</span><br><span class="line">      <span class="keyword">let</span> ret;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        ret = method.apply(target, args);</span><br><span class="line">        <span class="built_in">console</span>.info(<span class="string">`(<span class="subst">$&#123;type&#125;</span>) 成功 : <span class="subst">$&#123;name&#125;</span>(<span class="subst">$&#123;args&#125;</span>) =&gt; <span class="subst">$&#123;ret&#125;</span>`</span>);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">`(<span class="subst">$&#123;type&#125;</span>) 失败: <span class="subst">$&#123;name&#125;</span>(<span class="subst">$&#123;args&#125;</span>) =&gt; <span class="subst">$&#123;error&#125;</span>`</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IronMan</span> </span>&#123;</span><br><span class="line">  @log(<span class="string">'IronMan 自检阶段'</span>)</span><br><span class="line">  check()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'检查完毕'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  @log(<span class="string">'IronMan 攻击阶段'</span>)</span><br><span class="line">  attack()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'击倒敌人'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  @log(<span class="string">'IronMan 机体报错'</span>)</span><br><span class="line">  error()&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="string">'Something is wrong!'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tony = <span class="keyword">new</span> IronMan();</span><br><span class="line">tony.check();</span><br><span class="line">tony.attack();</span><br><span class="line">tony.error();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出：</span></span><br><span class="line"><span class="comment">// (IronMan 自检阶段) 正在执行: check() = ?</span></span><br><span class="line"><span class="comment">// (IronMan 自检阶段) 成功 : check() =&gt; 检查完毕</span></span><br><span class="line"><span class="comment">// (IronMan 攻击阶段) 正在执行: attack() = ?</span></span><br><span class="line"><span class="comment">// (IronMan 攻击阶段) 成功 : attack() =&gt; 击倒敌人</span></span><br><span class="line"><span class="comment">// (IronMan 机体报错) 正在执行: error() = ?</span></span><br><span class="line"><span class="comment">// (IronMan 机体报错) 失败: error() =&gt; Something is wrong!</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>Logger</strong> 方法的关键在于：</p>
+<ul>
+<li>首先使用 <code>const method = descriptor.value;</code> 将原有方法提取出来，保障原有方法的纯净；</li>
+<li>在 <strong>try..catch</strong> 语句是 调用 <code>ret = method.apply(target, args);</code>在调用之前之后分别进行日志汇报；</li>
+<li>最后返回 <code>return ret;</code> 原始的调用结果</li>
+</ul>
+<p>相信这套思路会给后续我们实现 AOP 模式提供良好的借鉴。</p>
+<h2 id="5、扩展：基于工厂模式"><a href="#5、扩展：基于工厂模式" class="headerlink" title="5、扩展：基于工厂模式"></a>5、扩展：基于工厂模式</h2><p>当你想要一个有 3 种功能的钢铁侠，就得用 <strong>new 操作符</strong> 创建 4 个对象。这么做单调乏味又烦人，所以我们打算只调用一个方法就能创建出一部拥有所有功能的钢铁侠。</p>
+<p>这就需要 <strong>工厂模式</strong> 了，工厂模式的官方定义是：在子类中对一个类的成员对象进行实例化。比如定义 <strong>decorateIronMan（person,feature）</strong> 方法，里面接受一个 <strong>Person</strong> 对象（而不是自己初始化）,相当于流水线生产了。</p>
+<p><img src="https://gw.alicdn.com/tps/TB1inNZKXXXXXalXpXXXXXXXXXX-1024-768.jpg" alt="factory"></p>
+<p>如何 <strong>结合装饰模式和工厂模式</strong> 提高代码效能，这篇优秀的译文 <a href="http://www.codingserf.com/index.php/2015/05/javascript-design-patterns-factory-part-1/" target="_blank" rel="noopener">JavaScript设计模式：工厂模式</a> 给出了详细的方法，这里不再赘述 ，强烈推荐阅读此文。</p>
+<h2 id="6、现在就想用？"><a href="#6、现在就想用？" class="headerlink" title="6、现在就想用？"></a>6、现在就想用？</h2><p><code>decorator</code> 目前还只是一个提议，但是感谢 Babel ，我们现在就可以体验它了。首先，安装 <strong>babel</strong>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install babel -g</span><br></pre></td></tr></table></figure>
+<p>然后，开启 <strong>decorator</strong>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">babel --optional es7.decorators foo.js &gt; foo.es5.js</span><br></pre></td></tr></table></figure>
+<p>babel 也提供了一个<a href="http://babeljs.io/repl/" target="_blank" rel="noopener">在线的 REPL</a> ，勾选  <strong>experimental 选项</strong>，就可以了。</p>
+<h3 id="在-webstorm-中设置-babel"><a href="#在-webstorm-中设置-babel" class="headerlink" title="在 webstorm 中设置 babel"></a>在 webstorm 中设置 babel</h3><p><strong>Step 1</strong> ：首先全局安装<code>babel</code>组件模块</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g babel</span><br></pre></td></tr></table></figure>
+<p><strong>Step 2</strong> ：设置 scope （这一步可以省略）</p>
+<p><img src="https://lh3.googleusercontent.com/-Nf4nWOn8xq4/VijgN2MO_iI/AAAAAAAACeI/yVN_AMwHhvE/s640/2015-06-11-webstorm-add-scope-1024x630.png" alt="设置"></p>
+<p><strong>命名 scope：</strong></p>
+<p><img src="https://lh3.googleusercontent.com/-Z_9myWbGlaA/VijgOAtk6SI/AAAAAAAACeI/sBk6YYmAlfo/s640/ws-2.png" alt="命名 scope"></p>
+<p><strong>将文件添加到当前 scope</strong>：<br><img src="https://lh3.googleusercontent.com/-9ELihywPAx0/VijgOERy2dI/AAAAAAAACeI/Y9W6iBIel5Q/s640/ws-3.png" alt="add"></p>
+<p><strong>Step 3</strong> ：设置 ES 版本</p>
+<p><img src="https://lh3.googleusercontent.com/-wMyJjsatkao/VijgOu5XI-I/AAAAAAAACeI/MQzBDiTwOLE/s640/.png" alt="set"></p>
+<p><strong>Step 4</strong> ：添加 watcher</p>
+<p><img src="https://lh3.googleusercontent.com/-lCMQXwTdCXo/VijgO1lQf3I/AAAAAAAACeI/LDw0AvyeWfQ/s640/ws-5.png" alt="watcher"></p>
+<blockquote>
+<p>arguments 内可以填写：<code>$FilePathRelativeToProjectRoot$ --stage --out-file $FileNameWithoutExtension$-es5.js $FilePath$</code></p>
+</blockquote>
+<p>.</p>
+<blockquote>
+<p>如果需要 source-map，需要添加<code>--source-map</code>选项，同时在<code>Output paths to refresh</code>中填写 <code>$FileNameWithoutExtension$-es5.js:$FileNameWithoutExtension$-es5.js.map</code></p>
+</blockquote>
+<p>更多设置参考<a href="http://babeljs.io/docs/usage/cli/" target="_blank" rel="noopener">babel cli</a></p>
+<h2 id="7、总结"><a href="#7、总结" class="headerlink" title="7、总结"></a>7、总结</h2><p>虽然它是 ES7 的特性，但在 Babel 大势流行的今天，我们可以利用 Babel 来使用它。我们可以利用 Babel 命令行工具，或者 grunt、gulp、webpack 的 babel 插件来使用 Decorators。</p>
+<p>上述的代码都可以直接放在 <a href="http://babeljs.io/repl/" target="_blank" rel="noopener">http://babeljs.io/repl/</a> 中运行查看结果；</p>
+<p>关于 ES7 Decorators 的更有意思的玩法，你可以参见牛人实现的常用的 <a href="https://github.com/jayphelps/core-decorators.js" target="_blank" rel="noopener">Decorators：core-decorators</a>。以及 raganwald 的 <a href="http://raganwald.com/2015/06/26/decorators-in-es7.html" target="_blank" rel="noopener">如何用 Decorators 来实现 Mixin</a>。</p>
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><ul>
+<li><a href="http://www.liuhaihua.cn/archives/115548.html" target="_blank" rel="noopener">Decorators in ES7</a>：装饰者模式让你包装已有的方法，从而扩展已有函数。</li>
+<li><a href="http://www.codingserf.com/index.php/2015/05/javascript-design-patterns-decorator/" target="_blank" rel="noopener">JavaScript设计模式：装饰者模式</a>：严重推荐，这一系列让你比较透彻明白设计模式在 JS 中的应用。</li>
+<li><a href="http://greengerong.com/blog/2015/09/23/es7-zhi-decorators-shi-xian-aopshi-li/" target="_blank" rel="noopener">ES7 之 Decorators 实现 AOP 示例</a>：如何实现一个简单的 AOP。</li>
+<li><a href="http://greengerong.com/blog/2015/09/24/es7-javascript-decorators/" target="_blank" rel="noopener">细说 ES7 JavaScript Decorators</a>：讲解 ES7 Decorator的背后原理，就是使用了 Object.defineProperty 方法；</li>
+<li><a href="http://mcculloughwebservices.com/2015/06/14/webstorm-babel-plugin/" target="_blank" rel="noopener">How To Set Up the Babel Plugin in WebStorm</a>：图文并茂，教你如何设置 babel.</li>
+<li><a href="http://web.jobbole.com/82923/" target="_blank" rel="noopener">Rest 参数和参数默认值</a>：ES6 为我们提供一种新的方式来创建可变参数的函数，Rest 参数和参数默认值</li>
+<li><a href="https://medium.com/google-developers/exploring-es7-decorators-76ecb65fb841" target="_blank" rel="noopener">Exploring ES2016 Decorators</a>：很完整的一个教程，里面涉及比较全面。</li>
+<li><a href="http://cocktailjs.github.io/blog/traits-with-es7-decorators.html" target="_blank" rel="noopener">Traits with ES7 Decorators</a>：相当于是介绍 <code>traits-decorator</code> 模块；</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/16/es7-decorator/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/16/es7-decorator/" data-id="cjt6lbxy5002hjeu1qnaaba0r" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/16/es7-decorator/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/decorator/">decorator</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/es7/">es7</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/设计模式/">设计模式</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/17/nvm-or-n/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          管理 node 版本，选择 nvm 还是 n？
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/13/web-debug-in-ios/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">在 iOS 模拟器中调试 Web 页面</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

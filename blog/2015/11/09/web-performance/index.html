@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>如何评价页面的性能 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="引言前端页面的性能一直都是一个热议的话题，从老早的“军规”开始我们就一直在关注页面的性能问题。 在前面巨人们的身后每个人也有自己的一些页面性能的经验，本文主要是介绍如何评估页面加载完成之后的性能。 浏览器如何渲染一个页面先附上一张图片：  这是在网上找的一张图，虽然是用来描述 performance 的 API 但是也很好的描述了浏览器是怎么处理一个页面渲染的。 这是我们在 PC 时代考虑的浏览">
+<meta name="keywords" content="performance,页面性能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何评价页面的性能">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/09/web-performance/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="引言前端页面的性能一直都是一个热议的话题，从老早的“军规”开始我们就一直在关注页面的性能问题。 在前面巨人们的身后每个人也有自己的一些页面性能的经验，本文主要是介绍如何评估页面加载完成之后的性能。 浏览器如何渲染一个页面先附上一张图片：  这是在网上找的一张图，虽然是用来描述 performance 的 API 但是也很好的描述了浏览器是怎么处理一个页面渲染的。 这是我们在 PC 时代考虑的浏览">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1MByrKpXXXXc.aXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1WlKAKpXXXXctXVXXXXXXXXXX-670-281.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB17K5YKpXXXXafXpXXXXXXXXXX-890-411.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1EM5HKpXXXXX0XVXXXXXXXXXX-891-180.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1kUSTKpXXXXbVXpXXXXXXXXXX-674-368.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1PwyIKpXXXXXsXVXXXXXXXXXX-316-217.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1_GOBKpXXXXb8XVXXXXXXXXXX-408-133.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB10a1vKpXXXXbcaXXXXXXXXXXX-1043-463.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1__q4KpXXXXa4XXXXXXXXXXXX-472-217.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1.hKIKpXXXXXBXVXXXXXXXXXX-253-162.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1a.qLKpXXXXbhXFXXXXXXXXXX-193-300.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何评价页面的性能">
+<meta name="twitter:description" content="引言前端页面的性能一直都是一个热议的话题，从老早的“军规”开始我们就一直在关注页面的性能问题。 在前面巨人们的身后每个人也有自己的一些页面性能的经验，本文主要是介绍如何评估页面加载完成之后的性能。 浏览器如何渲染一个页面先附上一张图片：  这是在网上找的一张图，虽然是用来描述 performance 的 API 但是也很好的描述了浏览器是怎么处理一个页面渲染的。 这是我们在 PC 时代考虑的浏览">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1MByrKpXXXXc.aXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-web-performance" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      如何评价页面的性能
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 溪夏</span>
+        
+        <span>发表于: <a href="/blog/2015/11/09/web-performance/" class="article-date">
+  <time datetime="2015-11-09T11:14:41.000Z" itemprop="datePublished">2015-11-09</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1MByrKpXXXXc.aXXXXXXXXXXX-900-500.jpg" alt="如何评价页面的性能"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>前端页面的性能一直都是一个热议的话题，从老早的“军规”开始我们就一直在关注页面的性能问题。</p>
+<p>在前面巨人们的身后每个人也有自己的一些页面性能的经验，本文主要是介绍如何评估页面加载完成之后的性能。</p>
+<h3 id="浏览器如何渲染一个页面"><a href="#浏览器如何渲染一个页面" class="headerlink" title="浏览器如何渲染一个页面"></a>浏览器如何渲染一个页面</h3><p>先附上一张图片：</p>
+<p><img src="https://img.alicdn.com/tps/TB1WlKAKpXXXXctXVXXXXXXXXXX-670-281.png" alt="image"></p>
+<p>这是在网上找的一张图，虽然是用来描述 performance 的 API 但是也很好的描述了浏览器是怎么处理一个页面渲染的。</p>
+<p>这是我们在 PC 时代考虑的浏览器性能，主要在服务端响应、文档下载、文档渲染三个阶段，性能优化大部分也集中在这三个阶段。针对这部分的监控、分析非常的普遍了，在 <a href="http://taobaofed.org/blog/2015/10/28/jstracker-how-to-collect-data/">JSTracker</a> 上也有这个数据的分析。</p>
+<p>为什么刚才说 PC 时代呢，除了这些指标作为前端还有需要关注的什么性能呢？</p>
+<p>页面加载之后的操作体验！（注：这里的加载之后近似在 onLoad 之后）</p>
+<h3 id="页面操作的流畅度"><a href="#页面操作的流畅度" class="headerlink" title="页面操作的流畅度"></a>页面操作的流畅度</h3><p>在 PC 的 CPU 越来越牛逼、内存越来越大的时候，前端的代码复杂度也在上升。</p>
+<p>以往我们都默认认为只要资源加载好了、只要资源加载快了那么我们的页面性能就是棒棒哒的，现在不再是这样。</p>
+<p>这里涉及到两个问题：</p>
+<ul>
+<li>PC 端的 CPU 性能、内存的性能虽然很高了，但是前端代码也更复杂了；</li>
+<li>除了 PC，还有无线端；</li>
+</ul>
+<p>于是我们的性能指标多了一项：页面流畅度。</p>
+<h3 id="页面流畅度如何感知"><a href="#页面流畅度如何感知" class="headerlink" title="页面流畅度如何感知"></a>页面流畅度如何感知</h3><p>卡顿的感受会在很多地方出现，比如：</p>
+<ul>
+<li>你在逛某个页面的时候愉快的的滚动鼠标滚轮，但是页面会突然的顿一下。</li>
+<li>你在打开手机上直接访问 PC 页面（或者 H5 页面）的时候，发现浏览器就像死掉了一样。</li>
+</ul>
+<p>拿两个 PC 页面来感受一下卡顿：</p>
+<p>页面 1：<a href="http://codepen.io/taobaofed/pen/jbeQbN" target="_blank" rel="noopener">http://codepen.io/taobaofed/pen/jbeQbN</a></p>
+<p>页面 2：<a href="http://codepen.io/taobaofed/pen/JYmeYJ" target="_blank" rel="noopener">http://codepen.io/taobaofed/pen/JYmeYJ</a></p>
+<p>很明显页面 1 比页面 2 卡顿很多。</p>
+<p>卡顿就是这样的感觉，但是怎么来衡量这个卡顿的程度呢？</p>
+<p>总不能让用户直接说吧，就像上面的两个页面：有人开心的时候会说都很流畅，要是不开心的时候他会说两个都有点卡顿。这样的评价太主观了。</p>
+<h3 id="如何客观的度量页面卡顿程度"><a href="#如何客观的度量页面卡顿程度" class="headerlink" title="如何客观的度量页面卡顿程度"></a>如何客观的度量页面卡顿程度</h3><p>首先要知道页面为什么会卡顿呢？</p>
+<p>我们还是以上面两个页面做比较，看看浏览器里面的 Timeline;</p>
+<p>页面 1：</p>
+<p><img src="https://img.alicdn.com/tps/TB17K5YKpXXXXafXpXXXXXXXXXX-890-411.png" alt="image"></p>
+<p>页面 2：</p>
+<p><img src="https://img.alicdn.com/tps/TB1EM5HKpXXXXX0XVXXXXXXXXXX-891-180.png" alt="image"></p>
+<p>这两个页面的渲染 FPS 可以看出来，的确第一个页面很卡。一般我们要求页面要达到 60 FPS（ 60 帧/秒）。上面说到页面 2 其实也是有稍微的卡顿的，只不过比页面 1 好很多。</p>
+<p>如果按照 60 FPS 计算，那么每一帧执行时间为 1/60s，也就是 16.7ms。</p>
+<h3 id="为什么页面会看起来比较卡"><a href="#为什么页面会看起来比较卡" class="headerlink" title="为什么页面会看起来比较卡"></a>为什么页面会看起来比较卡</h3><p>浏览器的渲染是单线程的，在某一个时刻要么在进行 JS 运算，要么在进行 UI 渲染。不会同时进行。</p>
+<p>如果我们的脚本在改变 UI 那么这个脚本的执行时间不要超过了 16.7ms，否则页面在这个周期中无法进行 UI 变化，那么看起来就是跳帧（卡顿）了。</p>
+<p>如果你的页面没有改变 UI ，情况会好很多，浏览器看起来就是失去了响应，Hover 滚动都动不了了。</p>
+<p>准备了一个简单的代码，用来说明如果脚本执行超过 16.7ms 会有什么感觉：</p>
+<p>页面 3：<a href="http://codepen.io/taobaofed/pen/YyJJzW" target="_blank" rel="noopener">http://codepen.io/taobaofed/pen/YyJJzW</a></p>
+<p>在这里例子中两个按钮的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//按钮1</span></span><br><span class="line">$(<span class="string">'#do'</span>).on(<span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">  $(<span class="string">'#status'</span>).text(<span class="string">'calculating....'</span>); </span><br><span class="line">  setTimeout(long,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//按钮2</span></span><br><span class="line">$(<span class="string">'#do2'</span>).on(<span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">  $(<span class="string">'#status'</span>).text(<span class="string">'calculating....'</span>); </span><br><span class="line">  long();</span><br><span class="line"></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>点击第一个按钮，下方文字会立即变为“calculating….”</p>
+<p>点击第二个按钮，下方的文字跳过了变为“calculating….”阶段，直接变为“calclation done”。而且按钮的 Active 状态都不会消失，直到脚本执行完成。</p>
+<p>为什么会出现这样的结果呢？</p>
+<p>这个就是浏览器的单进程模式确定的，setTimeout 把要执行的任务扔到浏览器的单线程的队列尾部，线程能够有机会渲染 UI ！（图片来自参考文章 3）</p>
+<p><img src="https://img.alicdn.com/tps/TB1kUSTKpXXXXbVXpXXXXXXXXXX-674-368.png" alt="image"></p>
+<p>第一个按钮点击之后 UI 渲染能够马上的得到运行时间，第二个按钮点击之后 UI 渲染必须要等到 long 方法执行完毕，所以看起来像是浏览器卡死了。</p>
+<h3 id="如何采集页面卡顿的程度"><a href="#如何采集页面卡顿的程度" class="headerlink" title="如何采集页面卡顿的程度"></a>如何采集页面卡顿的程度</h3><p>目前为止，我们已经知道了什么是卡顿、卡顿的发生原因、如何在 Chrome 中查看卡顿，接下来我们要想办法用 JS 获取页面的卡顿程度。</p>
+<p>利用上述的原理：浏览器是单线程的，如果卡顿发生了那么后面队列堆积的方法就得不到执行。</p>
+<p>假如我们配置一个定时器，每隔一段时间 t 就向浏览器的线程队列中丢一个方法进去：</p>
+<ul>
+<li>如果线程队列是空闲的，那么我们理论上可以检查到我们的方式每次都是准时的间隔 t 被调用一次；</li>
+<li>如果线程队列是繁忙的，那么这个间隔时间将是大于 t 的；</li>
+</ul>
+<p>试验方案有了，接下来进行试验。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> t = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">setInterval(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="keyword">new</span> <span class="built_in">Date</span>() - t);</span><br><span class="line">  t = <span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">&#125;, <span class="number">100</span>);</span><br></pre></td></tr></table></figure>
+<p>还是刚才的页面 3， 请打开控制台看看：<br>当点击按钮的时候控制台的 console 会停止，隔一会儿再输出数据，而且的确如我们预料的间隔时间变长了。</p>
+<p><img src="https://img.alicdn.com/tps/TB1PwyIKpXXXXXsXVXXXXXXXXXX-316-217.png" alt="image"></p>
+<p>有兴趣的同学可以打开页面 1、页面 2 的控制台也可以看到数据。</p>
+<p>接下来的事情是把这些数据收集起来，形成一个指标。这事情就好办多了：</p>
+<ul>
+<li>统计页面一段时间的这些 t 值的和，可以计算出页面的拥堵程度，这个值理论上是和 CPU 的时间消耗成正比的，所以我们定义这个值为 CPU 消耗；</li>
+<li>统计这些 t 值在什么时候开始归于平静，这个值也就是浏览器线程开始闲下来的时间，我们定义这个值为页面可操作时间；</li>
+<li>统计一段时间这些 t 值超过某个阈值的次数，比如设置的间隔是 100ms，t 值过了 200 的次数和总次数的比。我们定义这个值为页面渲染的 CPU 占比；</li>
+</ul>
+<h3 id="数据可视化"><a href="#数据可视化" class="headerlink" title="数据可视化"></a>数据可视化</h3><p>一些浏览器是不能直接看到 console 的，比如手机浏览器。于是我们提供一个小插件（bookmarklet）。</p>
+<p>页面 4：<a href="http://codepen.io/taobaofed/pen/xwyQwd" target="_blank" rel="noopener">http://codepen.io/taobaofed/pen/xwyQwd</a></p>
+<p>然后打开任意页面可以看到这个：</p>
+<p><img src="https://img.alicdn.com/tps/TB1_GOBKpXXXXb8XVXXXXXXXXXX-408-133.png" alt="image"></p>
+<h3 id="数据统计"><a href="#数据统计" class="headerlink" title="数据统计"></a>数据统计</h3><p>这个数据目前已经纳入到到 JSTracker 的性能数据中。</p>
+<p>Taobao 首页的数据：</p>
+<p><img src="https://img.alicdn.com/tps/TB10a1vKpXXXXbcaXXXXXXXXXXX-1043-463.png" alt="image"></p>
+<h3 id="如何优化"><a href="#如何优化" class="headerlink" title="如何优化"></a>如何优化</h3><p>原则是每段连续执行的 JS 都尽量在 16.7ms 内完成，主要可以按以下方案进行：</p>
+<h4 id="减少会引起页面重绘（redraw）的方法的调用"><a href="#减少会引起页面重绘（redraw）的方法的调用" class="headerlink" title="减少会引起页面重绘（redraw）的方法的调用"></a>减少会引起页面重绘（redraw）的方法的调用</h4><p>这些值的列表如下（不完整，如果你不确定可以写个循环测试一下）：</p>
+<p>clientHeight, clientLeft, clientTop, clientWidth, focus(), getBoundingClientRect(), getClientRects(), innerText, offsetHeight, offsetLeft, offsetParent, offsetTop, offsetWidth, outerText, scrollByLines(), scrollByPages(), scrollHeight, scrollIntoView(), scrollIntoViewIfNeeded(), scrollLeft, scrollTop, scrollWidth</p>
+<p>如果要使用尽量吧这些值缓存起来，不要再循环中直接调用。（有兴趣的同学可以对比一下页面 1 和页面 2 的区别，其实只有一行）。<br>除了缓存还可以像页面 2 一样，直接不去获取，因为这些值可能我们是能够预测的，不要要再让浏览器计算。</p>
+<h4 id="将某些耗时的操作放到空闲的时候再去做（requestAnimationFrame、setTimout）"><a href="#将某些耗时的操作放到空闲的时候再去做（requestAnimationFrame、setTimout）" class="headerlink" title="将某些耗时的操作放到空闲的时候再去做（requestAnimationFrame、setTimout）"></a>将某些耗时的操作放到空闲的时候再去做（requestAnimationFrame、setTimout）</h4><p>如页面 3 让 UI 渲染能够有 CPU 时间执行。</p>
+<p>但是如果你的这个耗时计算耗时太长了你可以考虑是否能将一些不是立即需要的任务分拆掉，平均的分配到各个帧。</p>
+<p><img src="https://img.alicdn.com/tps/TB1__q4KpXXXXa4XXXXXXXXXXXX-472-217.png" alt="image"></p>
+<h4 id="涉及到页面的动画元素能用-GPU-最佳"><a href="#涉及到页面的动画元素能用-GPU-最佳" class="headerlink" title="涉及到页面的动画元素能用 GPU 最佳"></a>涉及到页面的动画元素能用 GPU 最佳</h4><p>我们可以给某些元素加上：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">-webkit-transform</span>: <span class="selector-tag">translateZ</span>(0);</span><br></pre></td></tr></table></figure>
+<p>强制让浏览器用 GPU 渲染这个层，不过这样做要适量，多了也容易出问题。（参考： <a href="http://wesleyhales.com/blog/2013/10/26/Jank-Busting-Apples-Home-Page/" target="_blank" rel="noopener">http://wesleyhales.com/blog/2013/10/26/Jank-Busting-Apples-Home-Page/</a> ）</p>
+<h4 id="釜底抽薪：降级"><a href="#釜底抽薪：降级" class="headerlink" title="釜底抽薪：降级"></a>釜底抽薪：降级</h4><p>你可以通过某种方式检测到浏览器太卡了，那么降级之……</p>
+<h3 id="这个监控对页面本身性能的影响"><a href="#这个监控对页面本身性能的影响" class="headerlink" title="这个监控对页面本身性能的影响"></a>这个监控对页面本身性能的影响</h3><p>由于页面被注入了这个一个定时器，可能会对页面造成影响的，虽然这个影响非常低但是还是必须要考虑：</p>
+<p>第一层，强力优化这部分代码的性能：</p>
+<p>在定时器中执行的任务都是纯 JS 运算，我们统计过这个部分的代码的消耗平均不到 0.04ms，占一帧时间的 0.23%。</p>
+<p><img src="https://img.alicdn.com/tps/TB1.hKIKpXXXXXBXVXXXXXXXXXX-253-162.png" alt="image"></p>
+<p><img src="https://img.alicdn.com/tps/TB1a.qLKpXXXXbhXFXXXXXXXXXX-193-300.png" alt="image"></p>
+<p>第二层，抽样少量的数据进行数据采集，目前采样 1% 的。</p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a href="http://www.infoq.com/cn/articles/javascript-high-performance-animation-and-page-rendering" target="_blank" rel="noopener">http://www.infoq.com/cn/articles/javascript-high-performance-animation-and-page-rendering</a></li>
+<li><a href="http://www.oschina.net/translate/performance-optimisation-with-timeline-profiles" target="_blank" rel="noopener">http://www.oschina.net/translate/performance-optimisation-with-timeline-profiles</a></li>
+<li><a href="http://blog.sae.sina.com.cn/archives/2394" target="_blank" rel="noopener">http://blog.sae.sina.com.cn/archives/2394</a></li>
+<li><a href="http://www.cnblogs.com/Mainz/p/3552717.html" target="_blank" rel="noopener">http://www.cnblogs.com/Mainz/p/3552717.html</a></li>
+<li>bookmarklet 插件借鉴 <a href="http://ued.taobao.org/blog/2012/06/7th_d2/" target="_blank" rel="noopener">http://ued.taobao.org/blog/2012/06/7th_d2/</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/09/web-performance/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/09/web-performance/" data-id="cjt6lby2200cljeu1qqn7ha99" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/09/web-performance/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/performance/">performance</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/页面性能/">页面性能</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/10/nodejs-cluster-2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          当我们谈论 cluster 时我们在谈论什么（下）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/07/jstracker-data-processing/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">JSTracker：异常数据处理</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

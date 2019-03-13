@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>在 iOS 模拟器中调试 Web 页面 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="双十一大家“买买买”了吗？我猜你们要么是躺在沙发上，要么是躲在被窝里用手机和 Pad 下的单，因为我就是这么干的。当然我也不是瞎猜，天猫官方微博公布的数据为证：无线端交易额占比一路保持在 70% 以上，最后定格在 68%（据说峰值数据更是丧心病狂，具体数据未公布，大家猜猜吧）。 “Mobile First” 真的已经不是喊喊口号而已！部分业务形态甚至直接 “Mobile Only” 了。当然所谓">
+<meta name="keywords" content="mobile,debug,iOS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 iOS 模拟器中调试 Web 页面">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/11/13/web-debug-in-ios/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="双十一大家“买买买”了吗？我猜你们要么是躺在沙发上，要么是躲在被窝里用手机和 Pad 下的单，因为我就是这么干的。当然我也不是瞎猜，天猫官方微博公布的数据为证：无线端交易额占比一路保持在 70% 以上，最后定格在 68%（据说峰值数据更是丧心病狂，具体数据未公布，大家猜猜吧）。 “Mobile First” 真的已经不是喊喊口号而已！部分业务形态甚至直接 “Mobile Only” 了。当然所谓">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Ml2nKpXXXXX0aXXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB14vfIKpXXXXanXXXXXXXXXXXX-748-321.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1IKzrKpXXXXaqXFXXXXXXXXXX-683-688.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1UwfpKpXXXXcqXFXXXXXXXXXX-1121-616.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1z6noKpXXXXaoXVXXXXXXXXXX-336-608.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Jn_vKpXXXXcUXpXXXXXXXXXX-1108-607.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1hh6iKpXXXXX0aXXXXXXXXXXX-806-299.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1hY2pKpXXXXblXVXXXXXXXXXX-716-450.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="在 iOS 模拟器中调试 Web 页面">
+<meta name="twitter:description" content="双十一大家“买买买”了吗？我猜你们要么是躺在沙发上，要么是躲在被窝里用手机和 Pad 下的单，因为我就是这么干的。当然我也不是瞎猜，天猫官方微博公布的数据为证：无线端交易额占比一路保持在 70% 以上，最后定格在 68%（据说峰值数据更是丧心病狂，具体数据未公布，大家猜猜吧）。 “Mobile First” 真的已经不是喊喊口号而已！部分业务形态甚至直接 “Mobile Only” 了。当然所谓">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1Ml2nKpXXXXX0aXXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-web-debug-in-ios" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      在 iOS 模拟器中调试 Web 页面
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 阿大</span>
+        
+        <span>发表于: <a href="/blog/2015/11/13/web-debug-in-ios/" class="article-date">
+  <time datetime="2015-11-13T11:31:07.000Z" itemprop="datePublished">2015-11-13</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1Ml2nKpXXXXX0aXXXXXXXXXXX-900-500.png" alt="在 iOS 模拟器中调试 Web 页面"></p>
+<p>双十一大家“买买买”了吗？我猜你们要么是躺在沙发上，要么是躲在被窝里用手机和 Pad 下的单，因为我就是这么干的。当然我也不是瞎猜，天猫官方微博公布的数据为证：无线端交易额占比一路保持在 70% 以上，最后定格在 68%（据说峰值数据更是丧心病狂，具体数据未公布，大家猜猜吧）。</p>
+<p>“Mobile First” 真的已经不是喊喊口号而已！部分业务形态甚至直接 “Mobile Only” 了。当然所谓的 “Mobile” 绝不局限于 Native App，Web 页面仍是不可替代存在，我始终坚信不管是手机端还是其他终端 Web 模式依然代表着未来。</p>
+<p>不过开发手机上的 Web 页面调试一直是一个老大难问题。 虽然 Chrome DevTools 可以模拟手机的环境，但与真实环境差别还是比较大的，另外 Chrome 模拟的环境对 App 内 Webview 场景也无能为力（手机淘宝上的无线 Web 页面有非常多的功能需要调用 Webview 提供的 JSBridge 接口实现）。所以真机调试和模拟器调试是无线 Web 开发必备技能。</p>
+<p>真机相对复杂留到下次讲，今天我们先看看怎么在 iOS 模拟器里调试 Web 页面。</p>
+<p>iOS 模拟器（iOS Simulator）是捆绑在 Xcode 里的，所以这篇文章的操作系统环境仅限 Mac OS，且已安装 Xcode。强烈建议大家从 App Store 下载 Xcode，理由你们都懂。</p>
+<h2 id="启动-iOS-Simulator"><a href="#启动-iOS-Simulator" class="headerlink" title="启动 iOS Simulator"></a>启动 iOS Simulator</h2><p>常规的方式就是先启动 Xcode，再从 Xcode 菜单中启动模拟器。对于我们只是用模拟器来调试 Web 页面而言，每次都启动 Xcode 显然效率太低，是否可以跳过 Xcode 直接启动模拟器呢？</p>
+<p>虽然模拟器捆绑在 Xcode 中，但是本身是一个单独的应用程序，安装路径在：</p>
+<p><code>/Applications/Xcode.app/Contents/Developer/Applications/iOS Simulator.app</code></p>
+<p>Tips：上面是 Xcode 6 中的应用名，Xcode 7 已改名为：Simulator.app，路径不变。</p>
+<p>通过常规的方式启动模拟器后，发现 Dock 菜单上多出了一个模拟器的图标，这时即便退出 Xcode，模拟器任然能正常工作。为了方便下次开启模拟器，可以在 Dock 模拟器图标上右键选择：“在 Dock 中保留”，这样下次就可以通过直接点击图标启动了：</p>
+<p><img src="https://img.alicdn.com/tps/TB14vfIKpXXXXanXXXXXXXXXXXX-748-321.png" alt></p>
+<p>模拟器默认加载的是上次退出时使用的设备，需要更换的话到 “Hardware &gt; Device” 菜单下选择即可。</p>
+<p><img src="https://img.alicdn.com/tps/TB1IKzrKpXXXXaqXFXXXXXXXXXX-683-688.png" alt></p>
+<p>接下来就简单了，在模拟器中用 Safari 打开你要调试的页面，再打开 Mac 上的 Safari，在“开发 &gt; iOS Simulator”菜单下选中模拟器中打开的页面就可以调试了。如果没有“开发”菜单，请到“偏好设置 &gt; 高级”中开启。</p>
+<p><img src="https://img.alicdn.com/tps/TB1UwfpKpXXXXcqXFXXXXXXXXXX-1121-616.png" alt></p>
+<h2 id="在模拟器中安装-App"><a href="#在模拟器中安装-App" class="headerlink" title="在模拟器中安装 App"></a>在模拟器中安装 App</h2><p>如果只是在手机上的 Safari 中调试页面，那么跟直接在 Mac 的 Safari 中并没有太大区别，完全没有必要花大力气在模拟器中搞。我们的最终目标是要调试 App Webview 中的 Web 页面，接下来我们看看怎么把 App 装到模拟器里，这里我们以手机淘宝 App 为例。</p>
+<p>模拟器上是没有 App Store 的，也不能下载 ipa 文件安装。只能安装基于源代码打包出来的 App Bundle，为了演示我已经预先从手机淘宝的 App 开发那里获得了名为： taobao.app 的 App Bundle。</p>
+<p>另外 Xcode 提供了一个 simctl 命令，可以对模拟器做各种操作。simctl 命令的路径是：</p>
+<p><code>/Applications/Xcode.app/Contents/Developer/usr/bin/simctl</code></p>
+<p>在终端执行命令：</p>
+<p><code>/Applications/Xcode.app/Contents/Developer/usr/bin/simctl install booted taobao.app</code> </p>
+<p><img src="https://img.alicdn.com/tps/TB1z6noKpXXXXaoXVXXXXXXXXXX-336-608.png" alt></p>
+<p>就可以把手机淘宝安装在前面启动的模拟器中了（参数 booted 指的是当前启动的模拟器）。嫌每次执行 simctl 的路径太长，可以使用 xcrun 命令，它会自动查找并启动已注册的 Xcode 命令行开发工具，比如：<code>xcrun simctl xxx</code>。</p>
+<p>App 安装好了，接下来我们让 App 打开我们要调试的页面，依旧还是使用 simctl 命令：</p>
+<p><code>xcrun simctl openurl booted taobao://h5.m.taobao.com/guang/index.html</code></p>
+<p>Tips：<code>taobao://</code> 是模拟器在安装 taobao.app 时注册的协议（scheme），当出现次协议的 URL 请求时默认会使用手机淘宝打开。不同的 App 在系统注册的协议各不相同，需要根据实际情况填写。如果需要在 Safari 中打开直接用 <code>http://</code> 协议头即可。</p>
+<p>OK，成功在手机淘宝的 Webview 打开页面。后面怎么做就不用教了吧！在 Mac 上打开 Safari， “开发 &gt; iOS Simulator” 菜单下选中模拟器中打开的页面，看图：</p>
+<p><img src="https://img.alicdn.com/tps/TB1Jn_vKpXXXXcUXpXXXXXXXXXX-1108-607.png" alt></p>
+<p>Tips：simctl 更多功能可以执行 <code>xcrun simctl help</code> 命令查看。</p>
+<h2 id="还有么有优化空间"><a href="#还有么有优化空间" class="headerlink" title="还有么有优化空间"></a>还有么有优化空间</h2><p>在模拟器中安装 App，在 App 中打开 Web 页面都是在终端完成的，启动模拟器可不可以也在终端完成呢？答案是肯定的。</p>
+<p>前面已经提到其实模拟器是一个独立的应用程序，所以我们可以通过 Mac 自带的 open 命令来运行，命令如下：<code>open -a &quot;iOS Simulator&quot;</code>。还可以在启动的时候指定模拟哪个设备：<code>open -a &quot;iOS Simulator&quot; --args -CurrentDeviceUDID &lt;udid&gt;</code>。udid 可以通过命令：<code>xcrun simctl list</code> 获得，执行后会列出当前已下载的设备列表，如图：</p>
+<p><img src="https://img.alicdn.com/tps/TB1hh6iKpXXXXX0aXXXXXXXXXXX-806-299.png" alt></p>
+<p>中间那串数字就是 udid，启动设备为 “iPhone 4S” 的 iOS 模拟器，命令应该是这样的：</p>
+<p><code>open -a &quot;iOS Simulator.app&quot; --args -CurrentDeviceUDID &quot;FCE2CFE8-64C3-4DBE-906B-B9BF4180DE49&quot;</code></p>
+<p>如果已升级到 Xcode 7 命令为：</p>
+<p><code>open -a &quot;Simulator.app&quot; --args -CurrentDeviceUDID &quot;FCE2CFE8-64C3-4DBE-906B-B9BF4180DE49&quot;</code></p>
+<p>至此，“启动模拟器”、“安装 App”、“打开 Web 页面” 我们都可以通过终端命令执行了。不过每次调试都要执行一遍这一点都不符合前端爱装 “X” 的个性。也许你想到了把这些命令封装到一个 shell 脚本中，如果这是这样的话也太小看我们装 “X” 的功力了。</p>
+<p>现在不是“云”很火吗！我们也上个“云”。试想一下：所有的前端只要打开一个固定的网站，网站就会显示您当前系统支持启动哪些设备的 iOS 模拟器，只要在网站上轻轻一点本地的模拟器就启动起来了。不仅如此，网站还可以控制模拟器安装指定的 App，用指定的 App 打开的网页。像这样：</p>
+<p><img src="https://img.alicdn.com/tps/TB1hY2pKpXXXXblXVXXXXXXXXXX-716-450.png" alt></p>
+<p>这是淘宝前端团队内部系统：MDS（Mobile pages Develop &amp; Debug Solution）的一个局部界面（不知道大家有么有发现，文章写到这里，我的 Xcode 版本已经从 6 升级到了 7 ^ ^！吐槽下 App Store，真的很慢~~~）。</p>
+<p>光有个网站就能启动本地的模拟器那是气功大师才干的出来的事儿，配合网站还需要一个安装在本地电脑的 SDK（npm）。为了启动个模拟器搞个网站又搞个 SDK？如果你是这么认为的，那是真的认为我们只是在装 “X” 了。MDS 要处理的事情远远比想象地要多，比如本地怎么才能获取最新的手机淘宝 App Bundle。 另外，MDS 还集成了一个云端的 DevTools 工具，这块内容下次有机会再细讲。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/11/13/web-debug-in-ios/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/11/13/web-debug-in-ios/" data-id="cjt6lby1y00cgjeu1kgwsl7e8" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/11/13/web-debug-in-ios/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/debug/">debug</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iOS/">iOS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mobile/">mobile</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/16/es7-decorator/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          ES7 Decorator 装饰者模式
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/11/12/html-minify-service/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">HTML 压缩服务治理</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

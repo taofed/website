@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>深入理解 GraphQL | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="0.引子通过上一篇文章我们对 GraphQL 有了基础的了解。我们知道 GraphQL 使用 Schema 来描述数据，并通过制定和实现 GraphQL 规范定义了支持 Schema 查询的 DSQL （Domain Specific Query Language，领域特定查询语言）。Schema 帮助将复杂的业务模型数据抽象拆分成细粒度的基础数据结构，而 DSQL 的实现则赋予了前端开发者自由">
+<meta name="keywords" content="GraphQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解 GraphQL">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/03/10/graphql-in-depth/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="0.引子通过上一篇文章我们对 GraphQL 有了基础的了解。我们知道 GraphQL 使用 Schema 来描述数据，并通过制定和实现 GraphQL 规范定义了支持 Schema 查询的 DSQL （Domain Specific Query Language，领域特定查询语言）。Schema 帮助将复杂的业务模型数据抽象拆分成细粒度的基础数据结构，而 DSQL 的实现则赋予了前端开发者自由">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/i2/TB11UwELpXXXXahXFXX2AXZ8pXX-900-500.png">
+<meta property="og:image" content="https://gtms01.alicdn.com/tps/i1/TB1MXPNLpXXXXaqXVXX1m7LTXXX-2040-1532.png">
+<meta property="og:image" content="https://camo.githubusercontent.com/467de36145472e6a36452b8d2087f5a1beb7b31e/687474703a2f2f6f6c6567696c79656e6b6f2e6769746875622e696f2f72656163746976652d65636f6d6d657263652d6170692d64657369676e2f6173736574732f696d672f6772617068712d737562736372697074696f6e2d312e737667">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解 GraphQL">
+<meta name="twitter:description" content="0.引子通过上一篇文章我们对 GraphQL 有了基础的了解。我们知道 GraphQL 使用 Schema 来描述数据，并通过制定和实现 GraphQL 规范定义了支持 Schema 查询的 DSQL （Domain Specific Query Language，领域特定查询语言）。Schema 帮助将复杂的业务模型数据抽象拆分成细粒度的基础数据结构，而 DSQL 的实现则赋予了前端开发者自由">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/i2/TB11UwELpXXXXahXFXX2AXZ8pXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-graphql-in-depth" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      深入理解 GraphQL
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 云翮</span>
+        
+        <span>发表于: <a href="/blog/2016/03/10/graphql-in-depth/" class="article-date">
+  <time datetime="2016-03-10T10:29:42.000Z" itemprop="datePublished">2016-03-10</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/i2/TB11UwELpXXXXahXFXX2AXZ8pXX-900-500.png" alt="深入理解 GraphQL"></p>
+<h1 id="0-引子"><a href="#0-引子" class="headerlink" title="0.引子"></a>0.引子</h1><p>通过<a href="http://taobaofed.org/blog/2015/11/26/graphql-basics-server-implementation/">上一篇文章</a>我们对 GraphQL 有了基础的了解。我们知道 GraphQL 使用 Schema 来描述数据，并通过制定和实现 <a href="https://facebook.github.io/graphql/" target="_blank" rel="noopener">GraphQL 规范</a>定义了支持 Schema 查询的 DSQL （Domain Specific Query Language，领域特定查询语言）。Schema 帮助将复杂的业务模型数据抽象拆分成细粒度的基础数据结构，而 DSQL 的实现则赋予了前端开发者自由组织和定制请求数据的能力。如果以一张图来表示的话，可以将 GraphQL 看做一条以<strong>通用基础业务数据模型</strong>为基础、将传统后端服务和前端页面紧密且自由地联系在一起的纽带。</p>
+<p><img src="https://gtms01.alicdn.com/tps/i1/TB1MXPNLpXXXXaqXVXX1m7LTXXX-2040-1532.png" alt></p>
+<p>为什么 GraphQL 的 Schema 能够表示出服务器所支持的复杂业务模型数据，GraphQL 的 Query 又是怎样赋予前端开发者对数据的定制能力，本文将通过分析和理解 GraphQL 的设计来和大家一起探讨解答这些问题。</p>
+<h1 id="1-GraphQL-的设计"><a href="#1-GraphQL-的设计" class="headerlink" title="1.GraphQL 的设计"></a>1.GraphQL 的设计</h1><p>GraphQL 由以下组件构成：</p>
+<ul>
+<li>类型系统（Type System）</li>
+<li>查询语言（Query Language）</li>
+<li>执行语义（Execution Semantics）</li>
+<li>静态验证（Static Validation）</li>
+<li>类型检查（Type Introspection）</li>
+</ul>
+<p>作为将数据模型和具体接口实现解耦的 DSL，GraphQL 的基础组件，也是它最重要的组件之一就是类型系统。</p>
+<h2 id="1-1-类型系统"><a href="#1-1-类型系统" class="headerlink" title="1.1 类型系统"></a>1.1 <a href="https://facebook.github.io/graphql/#sec-Type-System" target="_blank" rel="noopener">类型系统</a></h2><p>可以将 GraphQL 的类型系统分为标量类型（Scalar Types，标量类型）和其他高级数据类型，标量类型即可以表示最细粒度数据结构的数据类型，可以和 JavaScript 的原始类型对应。GraphQL 规范目前规定支持的标量类型有：</p>
+<ul>
+<li><code>Int</code>：整数，对应 JavaScript 的 <a href="https://developer.mozilla.org/en-US/docs/Glossary/Number" target="_blank" rel="noopener">Number</a></li>
+<li><code>Float</code>：浮点数，对应 JavaScript 的 <a href="https://developer.mozilla.org/en-US/docs/Glossary/Number" target="_blank" rel="noopener">Number</a></li>
+<li><code>String</code>：字符串，对应 JavaScript 的 <a href="https://developer.mozilla.org/en-US/docs/Glossary/String" target="_blank" rel="noopener">String</a></li>
+<li><code>Boolean</code>：布尔值，对应 JavaScript 的 <a href="https://developer.mozilla.org/en-US/docs/Glossary/Boolean" target="_blank" rel="noopener">Boolean</a></li>
+<li><code>ID</code>：ID 值，是一个序列化后值唯一的字符串，可以视作对应 ES 2015 新增的 <a href="https://developer.mozilla.org/en-US/docs/Glossary/Symbol" target="_blank" rel="noopener">Symbol</a></li>
+</ul>
+<p><code>Scalar Types</code> 的 JavaScript 参考实现代码可以查看<a href="https://github.com/graphql/graphql-js/blob/master/src/type/scalars.js" target="_blank" rel="noopener">这里</a>。</p>
+<p>其他高级数据类型包括：</p>
+<ul>
+<li><p><code>Object</code>：对象</p>
+<p>用于描述层级或者树形数据结构。对于树形数据结构来说，叶子字段的类型都是标量数据类型。几乎所有 GraphQL 类型都是对象类型。Object 类型有一个 name 字段，以及一个很重要的 fields 字段。fields 字段可以描述出一个完整的数据结构。例如一个表示地址数据结构的 GraphQL 对象为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">const AddressType = new GraphQLObjectType(&#123;</span><br><span class="line">  name: &apos;Address&apos;,</span><br><span class="line">  fields: &#123;</span><br><span class="line">    street: &#123; type: GraphQLString &#125;,</span><br><span class="line">    number: &#123; type: GraphQLInt &#125;,</span><br><span class="line">    formatted: &#123;</span><br><span class="line">      type: GraphQLString,</span><br><span class="line">      resolve(obj) &#123;</span><br><span class="line">        return obj.number + &apos; &apos; + obj.street</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Interface</code>：接口</p>
+<p>接口用于描述多个类型的通用字段，例如一个表示实体数据结构的 GraphQL 接口为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">const EntityType = new GraphQLInterfaceType(&#123;</span><br><span class="line">  name: &apos;Entity&apos;,</span><br><span class="line">  fields: &#123;</span><br><span class="line">    name: &#123; type: GraphQLString &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Union</code>：联合</p>
+<p>联合类型用于描述某个字段能够支持的所有返回类型以及具体请求真正的返回类型，例如一个表示宠物（可以是猫或者狗）的 GraphQL 联合类型为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">const PetType = new GraphQLUnionType(&#123;</span><br><span class="line">  name: &apos;Pet&apos;,</span><br><span class="line">  types: [DogType, CatType],</span><br><span class="line">  resolveType(value) &#123;</span><br><span class="line">    if (value instanceof Dog) &#123;</span><br><span class="line">      return DogType;</span><br><span class="line">    &#125;</span><br><span class="line">    if (value instanceof Cat) &#123;</span><br><span class="line">      return CatType;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Enum</code>：枚举</p>
+<p>用于表示可枚举数据结构的类型，例如表示 RGB 色值的 GraphQL 枚举类型为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const RGBType = new GraphQLEnumType(&#123;</span><br><span class="line">  name: &apos;RGB&apos;,</span><br><span class="line">  values: &#123;</span><br><span class="line">    RED: &#123; value: 0 &#125;,</span><br><span class="line">    GREEN: &#123; value: 1 &#125;,</span><br><span class="line">    BLUE: &#123; value: 2 &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Input Object</code>：输入对象</p>
+<p>是为了查询（query）而定义的数据类型，不直接重用 Object 类型是因为 Object 的字段可能存在循环引用，或者字段引用了不能作为查询输入对象的接口和联合类型。参考实现中 <code>Input Object</code> 的定义代码为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">export type GraphQLInputType =</span><br><span class="line">  GraphQLScalarType |</span><br><span class="line">  GraphQLEnumType |</span><br><span class="line">  GraphQLInputObjectType |</span><br><span class="line">  GraphQLList&lt;GraphQLInputType&gt; |</span><br><span class="line">  GraphQLNonNull&lt;</span><br><span class="line">    GraphQLScalarType |</span><br><span class="line">    GraphQLEnumType |</span><br><span class="line">    GraphQLInputObjectType |</span><br><span class="line">    GraphQLList&lt;GraphQLInputType&gt;</span><br><span class="line">  &gt;;</span><br><span class="line"></span><br><span class="line">export function isInputType(type: ?GraphQLType): boolean &#123;</span><br><span class="line">  const namedType = getNamedType(type);</span><br><span class="line">  return (</span><br><span class="line">    namedType instanceof GraphQLScalarType ||</span><br><span class="line">    namedType instanceof GraphQLEnumType ||</span><br><span class="line">    namedType instanceof GraphQLInputObjectType</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，Object、Interface 和 Union 三种类型是不能作为输入对象类型的。</p>
+</li>
+<li><p><code>List</code>：列表</p>
+<p>列表是其他类型的封装，通常用于对象字段的描述。例如下面 PersonType 类型数据的 parents 和 children 字段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">const PersonType = new GraphQLObjectType(&#123;</span><br><span class="line">  name: &apos;Person&apos;,</span><br><span class="line">  fields: () =&gt; (&#123;</span><br><span class="line">    parents: &#123; type: new GraphQLList(Person) &#125;,</span><br><span class="line">    children: &#123; type: new GraphQLList(Person) &#125;,</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Non-Null</code>：不能为 Null</p>
+<p>Non-Null 强制类型的值不能为 null，并且在请求出错时一定会报错。可以用于必须保证值不能为 null 的字段。例如数据库的行的 id 字段不能为 null：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">const RowType = new GraphQLObjectType(&#123;</span><br><span class="line">  name: &apos;Row&apos;,</span><br><span class="line">  fields: () =&gt; (&#123;</span><br><span class="line">    id: &#123; type: new GraphQLNonNull(GraphQLString) &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>还有一种重要的数据类型，即 schema 类型，它描述了后端服务器能够提供的数据支持。这里先暂时不介绍，因为它涉及 GraphQL 的其他组件，等全部介绍完我们再来看 GraphQL 中 schema 的<a href="https://github.com/graphql/graphql-js/blob/master/src/type/schema.js" target="_blank" rel="noopener">具体实现</a>。</p>
+<h2 id="1-2-查询语言"><a href="#1-2-查询语言" class="headerlink" title="1.2 查询语言"></a>1.2 <a href="https://facebook.github.io/graphql/#sec-Language.Query-Document" target="_blank" rel="noopener">查询语言</a></h2><p>类型系统对应我们开头提到的 Schema，是对服务器端数据的描述，而查询语言则解耦了前端开发者与后端接口的依赖。前端开发者利用查询语言可以自由地组织和定制系统能够提供的业务数据。</p>
+<p>GraphQL 的一个查询请求被称为一份 query 文档（query document），即 GraphQL 服务能够解析验证并执行的一串请求字符串。query 由操作（Operation）和片段（Fragments）组成。一个 query 可以包含多个操作和片段。只有包含操作的 query 才会被 GraphQL 服务执行。但是不包含操作，只有片段的 query 也会被 GraphQL 服务解析验证，这样一份片段就可以在多个 query 文档内使用。</p>
+<p>只包含一个操作的 query 可以不带操作名称或者使用简写形式（即 query 关键字加操作名）。query 包含多个操作时，所有操作都必须带上名称。</p>
+<p><strong>操作（Operations）</strong></p>
+<p>GraphQL 规范支持两种操作：</p>
+<ul>
+<li>query：仅获取数据（fetch）的只读请求</li>
+<li>mutation：获取数据后还有写操作的请求</li>
+</ul>
+<p>在官方提供的参考实现中我们会发现还支持一种操作 <a href="https://github.com/graphql/graphql-js/blob/master/src/execution/execute.js#L250" target="_blank" rel="noopener">subscription</a>，这是为了处理订阅更新这种比较复杂的实时数据更新场景而设计的操作，不过目前这种操作还处于试验阶段，不建议在生产环境中使用。</p>
+<p>查询请求的模型可以用下面的图来表示：</p>
+<p><img src="https://camo.githubusercontent.com/467de36145472e6a36452b8d2087f5a1beb7b31e/687474703a2f2f6f6c6567696c79656e6b6f2e6769746875622e696f2f72656163746976652d65636f6d6d657263652d6170692d64657369676e2f6173736574732f696d672f6772617068712d737562736372697074696f6e2d312e737667" alt></p>
+<blockquote>
+<p>注：<a href="https://gist.github.com/OlegIlyenko/a5a9ab1b000ba0b5b1ad" target="_blank" rel="noopener">图片来源</a></p>
+</blockquote>
+<p><strong>选择集合（Selection Sets）</strong></p>
+<p>选择集合表示当前选中的数据内容，格式为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  Field           // 字段名</span><br><span class="line">  FragmentSpread  // 片段展开</span><br><span class="line">  InlineFragment  // 内联片段</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于选择集合的使用，可以参考 <a href="https://github.com/graphql/graphql-js/blob/master/src/execution/execute.js#L355" target="_blank" rel="noopener">graphql-js 的代码</a>。参考实现代码在<a href="https://github.com/graphql/graphql-js/blob/master/src/language/ast.js#L107" target="_blank" rel="noopener">这里</a>。</p>
+<p><strong>字段（Field）</strong></p>
+<p>字段格式为：</p>
+<p><code>alias:name(argument:value)</code></p>
+<p>其中 <code>alias</code> 是字段的别名，即结果中显示的字段名称。</p>
+<p><code>name</code> 为字段名称，对应 schema 中定义的 fields 字段名。</p>
+<p><code>argument</code> 为参数名称，对应 schema 中定义的 fields 字段的参数名称。</p>
+<p><code>value</code> 为参数值，值的类型对应标量类型的值。</p>
+<p>例如这样的请求：<code>http://yunhe.taobao.com/?query={banner{backgroundURL:bg,biaoti:slogan}}</code><br>backgroundURL 就是 bg 字段的别名。</p>
+<p><strong><a href="https://facebook.github.io/graphql/#sec-Language.Query-Document.Fragments" target="_blank" rel="noopener">片段（Fragment）</a></strong></p>
+<p>片段是 GraphQL 的主要组合数据结构，通过片段可以重用重复的字段选择，减少 query 中的重复内容。片段又分为 FragmentSpread 和 InlineFragment。例如没有片段时需要这样编写 query：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">query noFragments &#123;</span><br><span class="line">  user(id: 4) &#123;</span><br><span class="line">    friends(first: 10) &#123;</span><br><span class="line">      id</span><br><span class="line">      name</span><br><span class="line">      profilePic(size: 50)</span><br><span class="line">    &#125;</span><br><span class="line">    mutualFriends(first: 10) &#123;</span><br><span class="line">      id</span><br><span class="line">      name</span><br><span class="line">      profilePic(size: 50)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>query 中存在下列重复的选择集合：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  id</span><br><span class="line">  name</span><br><span class="line">  profilePic(size: 50)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以用片段简化为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">query withFragments &#123;</span><br><span class="line">  user(id: 4) &#123;</span><br><span class="line">    friends(first: 10) &#123;</span><br><span class="line">      ...friendFields</span><br><span class="line">    &#125;</span><br><span class="line">    mutualFriends(first: 10) &#123;</span><br><span class="line">      ...friendFields</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fragment friendFields on User &#123;</span><br><span class="line">  id</span><br><span class="line">  name</span><br><span class="line">  profilePic(size: 50)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用片段时需要加上 <code>...</code> 操作符表示展开片段内容。</p>
+<p>内联片段示例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">query inlineFragmentTyping &#123;</span><br><span class="line">  profiles(handles: [&quot;zuck&quot;, &quot;cocacola&quot;]) &#123;</span><br><span class="line">    handle</span><br><span class="line">    ... on User &#123;</span><br><span class="line">      friends &#123;</span><br><span class="line">        count</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ... on Page &#123;</span><br><span class="line">      likers &#123;</span><br><span class="line">        count</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>指令（Directives）</strong></p>
+<p>指令要解决的是 query 执行时字段参数无法覆盖的情况，例如引入或者忽略某个字段。指令为 GraphQL 执行添加了更多的信息。</p>
+<p>指令实例如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">query hasConditionalFragment($condition: Boolean) &#123;</span><br><span class="line">  ...maybeFragment @include(if: $condition)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fragment maybeFragment on Query &#123;</span><br><span class="line">  me &#123;</span><br><span class="line">    name</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://github.com/graphql/graphql-js/blob/042e1620bb3a83e07e15586bb5b69b211c91e8de/src/type/directives.js#L50" target="_blank" rel="noopener">include</a> 指令表示只有在 if 参数为 true 时才引入片段表示的字段。</p>
+<p><a href="https://github.com/graphql/graphql-js/blob/042e1620bb3a83e07e15586bb5b69b211c91e8de/src/type/directives.js#L68" target="_blank" rel="noopener">skip</a> 指令表示在 if 参数为 true 时忽略片段中的字段。</p>
+<p>熟悉了<strong>类型系统</strong>和<strong>查询语言</strong>我们就可以用 GraphQL 来实现应用层的数据请求了。其他三个 GraphQL 组件更偏向于 DSL 的实现和原理，因此本文不再做详细介绍，感兴趣的同学可以对照<a href="https://facebook.github.io/graphql/" target="_blank" rel="noopener">规范</a>和<a href="https://github.com/graphql/graphql-js" target="_blank" rel="noopener">参考实现</a>自己研究。</p>
+<h1 id="2-总结"><a href="#2-总结" class="headerlink" title="2.总结"></a>2.总结</h1><p>GraphQL 是在应用层对业务数据模型的抽象，是对数据请求定制的 DSQL，它解除了接口和数据之间的绑定，对业务数据结构做了抽象和整理，业务逻辑中的数据依赖于底层数据库结构，并且可以由具体业务场景来定制，不同的业务场景只要基于同样一套基础业务数据模型就可以得到复用，在我看来，这才是 GraphQL 带来的最大改变和收益。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://kadira.io/blog/graphql/subscriptions-in-graphql" target="_blank" rel="noopener">State of Subscriptions in GraphQL</a></li>
+<li><a href="https://github.com/graphql/graphql-js/pull/189" target="_blank" rel="noopener">Initial pass at adding <code>subscription</code> to executor</a></li>
+<li><a href="https://github.com/facebook/relay/issues/411" target="_blank" rel="noopener">Implement subscriptions for real-time updates</a></li>
+<li><a href="https://gist.github.com/OlegIlyenko/a5a9ab1b000ba0b5b1ad" target="_blank" rel="noopener">Event-stream based GraphQL subscriptions</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/03/10/graphql-in-depth/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/03/10/graphql-in-depth/" data-id="cjt6lbxyj003mjeu1fii78w3v" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/03/10/graphql-in-depth/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GraphQL/">GraphQL</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/03/11/react-web-intro/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          三步将 React Native 项目运行在 Web 浏览器上面
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/09/server-in-front-end/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">当前端也拥有 server 的能力</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>论版本号的正确打开方式 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="版本号广泛运用于开发的各种场景：NPM 包的版本定义、对 NPM 包的特定版本的依赖指定、git 的 daily 版本号分支…… 面对如此多的场景，版本号的命名却存在很大问题。举些例子：  开始写一个新项目 / 模块时，不管三七二十一，都从 0.0.1 起版本，直到项目不再维护时，版本还停留在 0.0.48，前两位永远都是 0。 API 变化巨大，而版本号雷打不动一步一个脚印。一个二方包从 0.">
+<meta name="keywords" content="版本号,SemVer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论版本号的正确打开方式">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/08/05/instructions-of-semver/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="版本号广泛运用于开发的各种场景：NPM 包的版本定义、对 NPM 包的特定版本的依赖指定、git 的 daily 版本号分支…… 面对如此多的场景，版本号的命名却存在很大问题。举些例子：  开始写一个新项目 / 模块时，不管三七二十一，都从 0.0.1 起版本，直到项目不再维护时，版本还停留在 0.0.48，前两位永远都是 0。 API 变化巨大，而版本号雷打不动一步一个脚印。一个二方包从 0.">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB18IDkLXXXXXbeXpXXXXXXXXXX-900-500.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="论版本号的正确打开方式">
+<meta name="twitter:description" content="版本号广泛运用于开发的各种场景：NPM 包的版本定义、对 NPM 包的特定版本的依赖指定、git 的 daily 版本号分支…… 面对如此多的场景，版本号的命名却存在很大问题。举些例子：  开始写一个新项目 / 模块时，不管三七二十一，都从 0.0.1 起版本，直到项目不再维护时，版本还停留在 0.0.48，前两位永远都是 0。 API 变化巨大，而版本号雷打不动一步一个脚印。一个二方包从 0.">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB18IDkLXXXXXbeXpXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-instructions-of-semver" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      论版本号的正确打开方式
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 法海</span>
+        
+        <span>发表于: <a href="/blog/2016/08/05/instructions-of-semver/" class="article-date">
+  <time datetime="2016-08-04T17:48:27.000Z" itemprop="datePublished">2016-08-05</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB18IDkLXXXXXbeXpXXXXXXXXXX-900-500.png" alt="论版本号的正确打开方式"></p>
+<p>版本号广泛运用于开发的各种场景：NPM 包的版本定义、对 NPM 包的特定版本的依赖指定、git 的 daily 版本号分支……</p>
+<p>面对如此多的场景，版本号的命名却存在很大问题。举些例子：</p>
+<ul>
+<li>开始写一个新项目 / 模块时，不管三七二十一，都从 <code>0.0.1</code> 起版本，直到项目不再维护时，版本还停留在 <code>0.0.48</code>，前两位永远都是 0。</li>
+<li>API 变化巨大，而版本号雷打不动一步一个脚印。一个二方包从 <code>0.0.8</code> 升级到 <code>0.0.9</code> 就引起了整个项目的崩溃。</li>
+<li>依赖二方 / 三方包时，不知道该依赖哪个版本，有时随便指定了一个，有时则直接依赖了 <code>*</code>。</li>
+</ul>
+<hr>
+<h2 id="版本号的命名"><a href="#版本号的命名" class="headerlink" title="版本号的命名"></a>版本号的命名</h2><h3 id="SemVer"><a href="#SemVer" class="headerlink" title="SemVer"></a>SemVer</h3><p>根据国际主流的惯例，我们使用「语义化版本（<a href="http://semver.org/" target="_blank" rel="noopener">Semantic Versioning</a>）」的命名方式，有时简称 SemVer。</p>
+<p>语义化版本号（以下简称「版本号」）的格式是：<code>&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;</code>。即使用三位非负整数，以点号 <code>.</code> 连接。</p>
+<p>如：<code>1.4.15</code>、<code>6.2.0</code>。</p>
+<h3 id="每一位版本号的含义"><a href="#每一位版本号的含义" class="headerlink" title="每一位版本号的含义"></a>每一位版本号的含义</h3><ol>
+<li><code>&lt;major&gt;</code> 即主版本号，俗称大版本升级。改动到主版本号时，标志着 API 发生了巨大变化，包括但不限于新增特性、修改机制、删除功能， <strong>一般不兼容上一个主版本号</strong>。</li>
+<li><code>&lt;minor&gt;</code> 即次版本号，俗称小版本升级。当我们进行常规的新增或修改功能时，改动次版本号，但是 <strong>必须是向前兼容的</strong>。这也意味着我们 <strong>不能直接删除某个功能</strong>。如若必要，我们可以在 <a href="http://guide.taobao.net/6.changelog.php" target="_blank" rel="noopener">changelog</a> 中标记某项功能为「即将删除（Deprecated）」，然后在下一个大版本中将其彻底删除。</li>
+<li><code>&lt;patch&gt;</code> 即修订号，俗称 bug 修复。顾名思义，如果仅仅为了修复或调整一些小问题，我们就只改动修订号。</li>
+</ol>
+<p>所以，当我们明确了每一位的含义和作用后，就不会陷入「每次只改最末位」的尴尬中了。</p>
+<p>那如何判断一个修改应该是改动修订号还是次版本号呢？视情况而定。比如对于「修改了 app 图标」这件事来说，如果只是调整了图标的间距位置，那么可以认作问题修复；如果把整个图标换了，配上了不同的标语，那么这应该是一次功能改动。</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>版本号前不要加 <code>v</code>。</li>
+<li>不要在数字前补 <code>0</code>。错误示例：<code>01.12.03</code>。</li>
+<li>每一位版本号按照 +1 的速度递增，不要在版本号之间跳跃。</li>
+<li>主版本号停留在 <code>0</code> 的版本号，即 <code>0.x.x</code> 应当视作还在内部开发阶段的代码。如果代码有公共 API，此时不宜对外公开。</li>
+<li><code>1.0.0</code> 的版本号用于界定公共 API 的形成。</li>
+<li>当次版本号递增时，修订号归零；当主版本号递增时，次版本号、修订号归零。</li>
+<li>进行新的开发时，版本号从 <code>0.1.0</code> 开始。</li>
+<li>如果不小心把一个不兼容的改版当成了次版本号发行，应当发行一个新的次版本号来更正这个问题并且恢复向下兼容。注意 <strong>不能去修改已发行的版本</strong>。</li>
+</ul>
+<h3 id="一个典型的版本号发展示例"><a href="#一个典型的版本号发展示例" class="headerlink" title="一个典型的版本号发展示例"></a>一个典型的版本号发展示例</h3><ol>
+<li><code>0.1.0</code></li>
+<li><code>0.1.1</code></li>
+<li><code>0.1.2</code></li>
+<li><code>0.2.0</code></li>
+<li><code>1.0.0</code></li>
+<li><code>1.1.0</code></li>
+<li><code>1.1.1</code></li>
+<li>……</li>
+</ol>
+<h3 id="快速修改版本号"><a href="#快速修改版本号" class="headerlink" title="快速修改版本号"></a>快速修改版本号</h3><p>如果一个包发布在 NPM / TNPM 中，可以快速修改其版本号。会自动触发一个 git 提交。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 递增一个修订号</span></span><br><span class="line">npm version patch</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 递增一个次版本号</span></span><br><span class="line">npm version minor</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 递增一个主版本号</span></span><br><span class="line">npm version major</span><br></pre></td></tr></table></figure>
+<h2 id="预发版本号"><a href="#预发版本号" class="headerlink" title="预发版本号"></a>预发版本号</h2><p>在常规的版本号命名之上还有一个特殊类别，叫做预发版本号（prerelease version）。它表示当前版本是一个不稳定的版本，使用它时需要注意风险。</p>
+<p>预发版本号的格式是 <code>&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;-&lt;tag&gt;</code>，即前半部分和常规版本号相同，然后跟上连接符 <code>-</code>，后面再跟上字母数字点号连接符（[0-9A-Za-z-.]）。</p>
+<p>一个典型的预发版本号形如 <code>1.0.0-beta.1</code>。建议使用这种 <code>&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;-&lt;stage&gt;.&lt;num&gt;</code> 的形式。其中 <code>&lt;stage&gt;</code> 一般选用：<code>alpha</code>、<code>beta</code>、<code>rc</code>。</p>
+<p>预发版本号是常规版本号的附属，因此在版本的大小比较上，仍然先比较常规版本号部分；对于预发标记部分的比较，则是根据 ASCII 字母表中的顺序来进行。</p>
+<h3 id="一个典型的预发版本号发展示例"><a href="#一个典型的预发版本号发展示例" class="headerlink" title="一个典型的预发版本号发展示例"></a>一个典型的预发版本号发展示例</h3><ol>
+<li><code>0.9.0</code></li>
+<li><code>1.0.0-alpha.1</code></li>
+<li><code>1.0.0-alpha.2</code></li>
+<li><code>1.0.0-beta.1</code></li>
+<li><code>1.0.0-rc.1</code></li>
+<li><code>1.0.0</code></li>
+<li><code>1.0.1</code></li>
+<li>……</li>
+</ol>
+<h2 id="依赖的版本号标记法"><a href="#依赖的版本号标记法" class="headerlink" title="依赖的版本号标记法"></a>依赖的版本号标记法</h2><p>我们广泛使用的 NPM 本身也遵从 SemVer 版本号命名，除了包版本本身的定义之外，最重要的是对三方包依赖的版本号的定义，不当的写法将导致一系列潜在的问题。</p>
+<h3 id="指定可用的版本号范围"><a href="#指定可用的版本号范围" class="headerlink" title="指定可用的版本号范围"></a>指定可用的版本号范围</h3><p>在 NPM 包的 deps 系列字段中，经常出现形如 <code>~1.0.4</code>、<code>^2.1.1</code> 这样的标记法，这种标记法标记的是「版本号范围（version range）」，它表示依赖的三方包其版本号只要落在定义版本号范围内，即算合法。另外，当运行 <code>npm update</code> 时，依赖的包将升级到版本号范围支持的最高版本。</p>
+<p>版本号范围的标记符号有很多种，诸如比较符号 <code>&gt;=</code>、<code>&lt;</code> 等；连接符 <code>-</code>；通配符 <code>x</code>、<code>*</code>；模糊符 <code>^</code>、<code>~</code>。具体的用法可参考 <a href="https://docs.npmjs.com/misc/semver" target="_blank" rel="noopener">NPM 官方文档</a>，这里仅给出常用的标记方式。</p>
+<table>
+<thead>
+<tr>
+<th>含义</th>
+<th>最简写法</th>
+<th>使用通配符的写法</th>
+<th>使用模糊符的写法</th>
+<th>表达的版本号范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>仅跟进修复版本</td>
+<td><code>1.0</code></td>
+<td><code>1.0.x</code></td>
+<td><code>~1.0.4</code></td>
+<td><code>&gt;=1.0.4 &lt;1.1.0</code></td>
+</tr>
+<tr>
+<td>跟进每个小版本更新</td>
+<td><code>1</code></td>
+<td><code>1.x</code>、<code>1.x.x</code></td>
+<td><code>^1.0.4</code></td>
+<td><code>&gt;=1.0.4 &lt;2.0.0</code></td>
+</tr>
+<tr>
+<td>始终升级到最新版</td>
+<td><code>*</code></td>
+<td><code>*</code></td>
+<td><code>*</code></td>
+<td><code>&gt;=0.0.0</code></td>
+</tr>
+</tbody>
+</table>
+<p>我们建议在写法上采用 <strong>「使用通配符的写法」</strong>，并且一般情况下 <strong>「跟进每个小版本更新」</strong>，但 <strong>不「始终升级到最新版」</strong>，即书写为 <code>1.x</code>。由于 <code>&lt;major&gt;</code> 位版本是不向下兼容的，所以在大版本的控制上，仍然采用人为干预以保证安全。</p>
+<h3 id="不同的-deps-字段"><a href="#不同的-deps-字段" class="headerlink" title="不同的 deps 字段"></a>不同的 deps 字段</h3><p>NPM 包中的依赖有几种形式的字段：<code>dependencies</code>、<code>devDependencies</code>、<code>peerDependencies</code>。以下简要介绍下各字段的不同含义，以及使用场景。</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+<th>依赖被安装的时机</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dependencies</code></td>
+<td>运行时依赖，包的调用者需要使用到的依赖</td>
+<td>执行 <code>npm install</code> 后会把当前包的 <code>dependencies</code> 字段中的所有依赖项安装到 <code>./node_modules</code> 目录。<br> 执行 <code>npm install xxx</code> 后会把 xxx 安装到 <code>./node_modules</code> 下，同时会安装 xxx 的 <code>dependencies</code> 字段依赖项到 <code>./node_modules/xxx/node_modules</code> 目录。  <br> 执行 <code>npm install xxx --save</code> 后会额外把 xxx 作为依赖存到当前包的 <code>dependencies</code> 字段中。</td>
+<td>所有程序运行需要用到的依赖代码，如 lodash 等。</td>
+</tr>
+<tr>
+<td><code>devDependencies</code></td>
+<td>开发时依赖，包的开发维护者需要使用到的依赖</td>
+<td>执行 <code>npm install</code> 后也会把当前包的 <code>devDependencies</code> 字段中的所有依赖项安装到 <code>./node_modules</code> 目录。<br> 执行 <code>npm install xxx</code> 后会把 xxx 安装到 <code>./node_modules</code> 下，但不会安装 xxx 的 <code>devDependencies</code> 字段依赖项。 <br> 执行 <code>npm install xxx --save-dev</code> 后会额外把 xxx 作为开发时依赖存到当前包的 <code>devDependencies</code> 字段中。</td>
+<td>一般是一些开发调试的辅助工具，如测试工具 mocha、构建工具 gulp 等。</td>
+</tr>
+<tr>
+<td><code>peerDependencies</code></td>
+<td>略</td>
+<td>略</td>
+<td>仅在 <a href="https://nodejs.org/en/blog/npm/peer-dependencies/" target="_blank" rel="noopener">特定场景</a> 下有用，默认不使用此字段。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><ol>
+<li><a href="http://semver.org/" target="_blank" rel="noopener">Semantic Versioning</a></li>
+<li><a href="https://docs.npmjs.com/misc/semver" target="_blank" rel="noopener">NPM SemVer</a></li>
+</ol>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/08/05/instructions-of-semver/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/08/05/instructions-of-semver/" data-id="cjt6lbxyy004sjeu1lcbg59px" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/08/05/instructions-of-semver/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SemVer/">SemVer</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/版本号/">版本号</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/08/12/optimized-react-components/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          高性能 React 组件
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/07/29/puzzled-by-link/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">纠结的链接：ln、ln -s、fs.symlink、require</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

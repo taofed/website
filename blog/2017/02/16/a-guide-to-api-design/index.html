@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>从达标到卓越 —— API 设计之道 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="新技术层出不穷，长江后浪推前浪，而浪潮褪去后能留下来的，是一些经典的设计思想。 在前端界，以前有远近闻名的 jQuery，近来有声名鹊起的 Vue.js。这两者叫好又叫座的原因固然有很多，但是其中有一个共同特质不可忽视，那便是它们的 API 设计 非常优雅。 因此这次我想来谈个大课题 —— API 设计之道。  讨论内容的定义域本文并不是《jQuery API 赏析》，当我们谈论 API 的设计">
+<meta name="keywords" content="API 设计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从达标到卓越 —— API 设计之道">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/02/16/a-guide-to-api-design/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="新技术层出不穷，长江后浪推前浪，而浪潮褪去后能留下来的，是一些经典的设计思想。 在前端界，以前有远近闻名的 jQuery，近来有声名鹊起的 Vue.js。这两者叫好又叫座的原因固然有很多，但是其中有一个共同特质不可忽视，那便是它们的 API 设计 非常优雅。 因此这次我想来谈个大课题 —— API 设计之道。  讨论内容的定义域本文并不是《jQuery API 赏析》，当我们谈论 API 的设计">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1qujpLXXXXXaLXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从达标到卓越 —— API 设计之道">
+<meta name="twitter:description" content="新技术层出不穷，长江后浪推前浪，而浪潮褪去后能留下来的，是一些经典的设计思想。 在前端界，以前有远近闻名的 jQuery，近来有声名鹊起的 Vue.js。这两者叫好又叫座的原因固然有很多，但是其中有一个共同特质不可忽视，那便是它们的 API 设计 非常优雅。 因此这次我想来谈个大课题 —— API 设计之道。  讨论内容的定义域本文并不是《jQuery API 赏析》，当我们谈论 API 的设计">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1qujpLXXXXXaLXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-a-guide-to-api-design" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      从达标到卓越 —— API 设计之道
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 法海</span>
+        
+        <span>发表于: <a href="/blog/2017/02/16/a-guide-to-api-design/" class="article-date">
+  <time datetime="2017-02-16T13:33:13.000Z" itemprop="datePublished">2017-02-16</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1qujpLXXXXXaLXFXXXXXXXXXX-900-500.jpg" alt="从达标到卓越 —— API 设计之道"></p>
+<p>新技术层出不穷，长江后浪推前浪，而浪潮褪去后能留下来的，是一些经典的设计思想。</p>
+<p>在前端界，以前有远近闻名的 jQuery，近来有声名鹊起的 Vue.js。这两者叫好又叫座的原因固然有很多，但是其中有一个共同特质不可忽视，那便是它们的 <strong>API 设计</strong> 非常优雅。</p>
+<p>因此这次我想来谈个大课题 —— API 设计之道。</p>
+<hr>
+<h2 id="讨论内容的定义域"><a href="#讨论内容的定义域" class="headerlink" title="讨论内容的定义域"></a>讨论内容的定义域</h2><p>本文并不是《jQuery API 赏析》，当我们谈论 API 的设计时，不只局限于讨论「某个框架应该如何设计暴露出来的方法」。作为程序世界分治复杂逻辑的基本协作手段，广义的 API 设计涉及到我们日常开发中的方方面面。</p>
+<p>最常见的 API 暴露途径是函数声明（Function Signiture），以及属性字段（Attributes）；而当我们涉及到前后端 IO 时，则需要关注通信接口的数据结构（JSON Schema）；如果还有异步的通信，那么事件（Events）或消息（Message）如何设计也是个问题；甚至，依赖一个包（Package）的时候，包名本身就是接口，你是否也曾碰到过一个奇葩的包名而吐槽半天？</p>
+<p>总之，「API 设计」不只关乎到框架或库的设计者，它和每个开发者息息相关。</p>
+<h2 id="提纲挈领"><a href="#提纲挈领" class="headerlink" title="提纲挈领"></a>提纲挈领</h2><p>有一个核心问题是，我们如何评判一个 API 的设计算「好」？在我看来，一言以蔽之，易用。</p>
+<p>那「易用」又是什么呢？我的理解是，只要能够足够接近人类的日常语言和思维，并且不需要引发额外的大脑思考，那就是易用。</p>
+<blockquote>
+<p>Don’t make me think.</p>
+</blockquote>
+<p>具体地，我根据这些年来碰到的大量（反面和正面）案例，归纳出以下这些要点。按照要求从低到高的顺序如下：</p>
+<ul>
+<li>达标：词法和语法<ul>
+<li>正确拼写</li>
+<li>准确用词</li>
+<li>注意单复数</li>
+<li>不要搞错词性</li>
+<li>处理缩写</li>
+<li>用对时态和语态</li>
+</ul>
+</li>
+<li>进阶：语义和可用性<ul>
+<li>单一职责</li>
+<li>避免副作用</li>
+<li>合理设计函数参数</li>
+<li>合理运用函数重载</li>
+<li>使返回值可预期</li>
+<li>固化术语表</li>
+<li>遵循一致的 API 风格</li>
+</ul>
+</li>
+<li>卓越：系统性和大局观<ul>
+<li>版本控制</li>
+<li>确保向下兼容</li>
+<li>设计扩展机制</li>
+<li>控制 API 的抽象级别</li>
+<li>收敛 API 集</li>
+<li>发散 API 集</li>
+<li>制定 API 的支持策略</li>
+</ul>
+</li>
+</ul>
+<p>（本文主要以 JavaScript 作为语言示例。）</p>
+<h2 id="达标：词法和语法"><a href="#达标：词法和语法" class="headerlink" title="达标：词法和语法"></a>达标：词法和语法</h2><p>高级语言和自然语言（英语）其实相差无几，因此正确地使用（英语的）词法和语法是程序员最基本的素养。而涉及到 API 这种供用户调用的代码时，则尤其重要。</p>
+<p>但事实上，由于亚洲地区对英语的掌握能力普遍一般……所以现实状况并不乐观 —— 如果以正确使用词法和语法作为达标的门槛，很多 API 都没能达标。</p>
+<h3 id="正确拼写"><a href="#正确拼写" class="headerlink" title="正确拼写"></a>正确拼写</h3><p>正确地拼写一个单词是底线，这一点无需赘述。然而 API 中的各种错别字现象仍屡见不鲜，即使是在我们阿里这样的大公司内。</p>
+<p>曾经有某个 JSON 接口（mtop）返回这样一组店铺数据，以在前端模板中渲染：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// json</span></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">"shopBottom"</span>: &#123;</span><br><span class="line">      <span class="string">"isTmall"</span>: <span class="string">"false"</span>,</span><br><span class="line">      <span class="string">"shopLevel"</span>: <span class="string">"916"</span>,</span><br><span class="line">      <span class="string">"shopLeveImg"</span>: <span class="string">"//xxx.jpg"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>乍一看平淡无奇，结果我调试了小半天都没能渲染出店铺的「店铺等级标识图片」，即 <code>shopLevelImg</code> 字段。问题到底出在了哪里？</p>
+<p>眼细的朋友可能已经发现，接口给的字段名是 <code>shopLeveImg</code>，少了一个 <code>l</code>，而在其后字母 <code>I</code> 的光辉照耀下，肉眼很难分辨出这个细节问题。</p>
+<p>拼错单词的问题真的是太普遍了，再比如：</p>
+<ul>
+<li>某个叫做 <code>toast</code> 的库，package.json 中的 name 写成了 <code>taost</code>。导致在 npm 中没能找到这个包。</li>
+<li>某个跑马灯组件，工厂方法中的一个属性错将 <code>panel</code> 写成了 <code>pannel</code>。导致以正确的属性名初始化时代码跑不起来。</li>
+<li>某个 URL（<a href="http://www.ruanyifeng.com/blog/2017/01/entainment.html）中错将" target="_blank" rel="noopener">www.ruanyifeng.com/blog/2017/01/entainment.html）中错将</a> <code>entertainment</code> 写成了 <code>entainment</code>……这倒没什么大影响，只是 URL 发布后就改不了了，留下了错别字不好看。</li>
+<li>……</li>
+</ul>
+<p>注意到，这些拼写错误经常出现在 <strong>字符串</strong> 的场景中。不同于变量名，IDE 无法检查字符串中的单词是否科学、是否和一些变量名一致，因此，我们在对待一些需要公开出去的 API 时，需要尤其注意这方面的问题；另一方面，更认真地注意 IDE 的 typo 提示（单词拼写错误提示），也会对我们产生很大帮助。</p>
+<h3 id="准确用词"><a href="#准确用词" class="headerlink" title="准确用词"></a>准确用词</h3><p>我们知道，中英文单词的含义并非一一对应，有时一个中文意思可以用不同的英文单词来解释，这时我们需要选择使用恰当的准确的词来描述。</p>
+<p>比如中文的「消息」可以翻译为 message、notification、news 等。虽然这几个不同的单词都可以有「消息」的意思，但它们在用法和语境场景上存在着细微差异：</p>
+<ul>
+<li>message：一般指双方通信的消息，是内容载体。而且经常有来有往、成对出现。比如 <code>postMessage()</code> 和 <code>receiveMessage()</code>。</li>
+<li>notification：经常用于那种比较短小的通知，现在甚至专指 iOS / Android 那样的通知消息。比如 <code>new NotificationManager()</code>。</li>
+<li>news：内容较长的新闻消息，比 notification 更重量级。比如 <code>getTopNews()</code>。</li>
+<li>feed：自从 RSS 订阅时代出现的一个单词，现在 RSS 已经日薄西山，但是 feed 这个词被用在了更多的地方。其含义只可意会不可言传。比如 <code>fetchWeitaoFeeds()</code>。</li>
+</ul>
+<p>所以，即使中文意思大体相近，也要准确地用词，从而让读者更易理解 API 的作用和 <strong>上下文场景</strong>。</p>
+<p>有一个正面案例，是关于 React 的。（在未使用 ES2015 的）React 中，有两个方法叫做：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">React.createClass(&#123;</span><br><span class="line">  getDefaultProps: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// return a dictionary</span></span><br><span class="line">  &#125;,</span><br><span class="line">  getInitialState: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// return a dictionary either</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>它们的作用都是用来定义初始化的组件信息，返回值的类型也都一样，但是在方法名上却分别用了 <code>default</code> 和 <code>initial</code> 来修饰，为什么不统一为一个呢？</p>
+<p>原因和 React 的机制有关：</p>
+<ul>
+<li><code>props</code> 是指 Element 的属性，要么是不存在某个属性值后来为它赋值，要么是存在属性的默认值后来将其覆盖。所以这种行为，<code>default</code> 是合理的修饰词。</li>
+<li><code>state</code> 是整个 Component 状态机中的某一个特定状态，既然描述为了状态机，那么状态和状态之间是互相切换的关系。所以对于初始状态，用 <code>initial</code> 来修饰。</li>
+</ul>
+<p>就这么个小小的细节，就可一瞥 React 本身的机制，足以体现 API 设计者的智慧。</p>
+<p>另外，最近我还碰到了这样一组事件 API：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// event name 1</span></span><br><span class="line">page.emit(<span class="string">'pageShowModal'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// event name 2</span></span><br><span class="line">page.emit(<span class="string">'pageCloseModal'</span>);</span><br></pre></td></tr></table></figure>
+<p>这两个事件显然是一对正反义的动作，在上述案例中，表示「显示窗口」时使用了 <code>show</code>，表示「关闭窗口」时使用了 <code>close</code>，这都是非常直觉化的直译。而事实上，成对出现的词应该是：<code>show &amp; hide</code>、<code>open &amp; close</code>。</p>
+<p>因此这里必须强调：<strong>成对出现的正反义词不可混用</strong>。在程序世界经常成对出现的词还有：</p>
+<ul>
+<li>in &amp; out</li>
+<li>on &amp; off</li>
+<li>previous &amp; next</li>
+<li>forward &amp; backward</li>
+<li>success &amp; failure</li>
+<li>…</li>
+</ul>
+<p>总之，我们可以试着扩充英语的词汇量，使用合适的词，这对我们准确描述 API 有很大的帮助。</p>
+<h3 id="注意单复数"><a href="#注意单复数" class="headerlink" title="注意单复数"></a>注意单复数</h3><p>所有涉及到诸如数组（Array）、集合（Collection）、列表（List）这样的数据结构，在命名时都要使用复数形式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> shopItems = [</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getShopItems</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// return an array</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// fail</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getShopItem</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// unless you really return a non-array</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现实往往出人意表地糟糕，前不久刚改一个项目，我就碰到了这样的写法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MarketFloor</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  state = &#123;</span><br><span class="line">    item: [</span><br><span class="line">      &#123;&#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的 <code>item</code> 实为一个数组，即使它内部只有一个成员。因此应该命名为 <code>items</code> 或 <code>itemList</code>，无论如何，不应该是表示单数的 <code>item</code>。</p>
+<p>同时要注意，在复数的风格上保持一致，要么所有都是 <code>-s</code>，要么所有都是 <code>-list</code>。</p>
+<p>反过来，我们在涉及到诸如字典（Dictionary）、表（Map）的时候，不要使用复数！</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fail</span></span><br><span class="line"><span class="keyword">var</span> EVENT_MAPS = &#123;</span><br><span class="line">  MODAL_WILL_SHOW: <span class="string">'modalWillShow'</span>,</span><br><span class="line">  MODAL_WILL_HIDE: <span class="string">'modalWillHide'</span>,</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>虽然这个数据结构看上去由很多 key-value 对组成，是个类似于集合的存在，但是「map」本身已经包含了这层意思，不需要再用复数去修饰它。</p>
+<h3 id="不要搞错词性"><a href="#不要搞错词性" class="headerlink" title="不要搞错词性"></a>不要搞错词性</h3><p>另外一个容易犯的低级错误是搞错词性，即命名时拎不清名词、动词、形容词……</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">asyncFunc(&#123;</span><br><span class="line">  success: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;,</span><br><span class="line">  fail: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><code>success</code> 算是一个在程序界出镜率很高的词了，但是有些同学会搞混，把它当做动词来用。在上述案例中，成对出现的单词其词性应该保持一致，这里应该写作 <code>succeed</code> 和 <code>fail</code>；当然，在这个语境中，最好遵从惯例，使用名词组合 <code>success</code> 和 <code>failure</code>。</p>
+<p>这一对词全部的词性如下：</p>
+<ul>
+<li>n. 名词：success, failure</li>
+<li>v. 动词：succeed, fail</li>
+<li>adj. 形容词：successful, failed（无形容词，以过去分词充当）</li>
+<li>adv. 副词：successfully, fail to do sth.（无副词，以不定式充当）</li>
+</ul>
+<p>注意到，如果有些词没有对应的词性，则考虑变通地采用其他形式来达到同样的意思。</p>
+<p>所以，即使我们大部分人都知道：方法命名用动词、属性命名用名词、布尔值类型用形容词（或等价的表语），但由于对某些单词的词性不熟悉，也会导致最终的 API 命名有问题，这样的话就很尴尬了。</p>
+<h3 id="处理缩写"><a href="#处理缩写" class="headerlink" title="处理缩写"></a>处理缩写</h3><p>关于词法最后一个要注意的点是缩写。有时我们经常会纠结，首字母缩写词（acronym）如 <code>DOM</code>、<code>SQL</code> 是用大写还是小写，还是仅首字母大写，在驼峰格式中又该怎么办……</p>
+<p>对于这个问题，简单不易混淆的做法是，首字母缩写词的所有字母均大写。（如果某个语言环境有明确的业界惯例，则遵循惯例。）</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// before</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getDomNode</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// after</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getDOMNode</span>(<span class="params"></span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>在经典前端库 KISSY 的早期版本中，<code>DOM</code> 在 API 中都命名为 <code>dom</code>，驼峰下变为 <code>Dom</code>；而在后面的版本内统一写定为全大写的 <code>DOM</code>。</p>
+<p>另外一种缩写的情况是对长单词简写（shortened word），如 <code>btn (button)</code>、<code>chk (checkbox)</code>、<code>tpl (template)</code>。这要视具体的语言规范 / 开发框架规范而定。如果什么都没定，也没业界惯例，那么把单词写全了总是不会错的。</p>
+<h3 id="用对时态和语态"><a href="#用对时态和语态" class="headerlink" title="用对时态和语态"></a>用对时态和语态</h3><p>由于我们在调用 API 时一般类似于「调用一条指令」，所以在语法上，一个函数命名是祈使句式，时态使用一般现在时。</p>
+<p>但在某些情况下，我们需要使用其他时态（进行时、过去时、将来时）。比如，当我们涉及到 <strong>生命周期</strong>、<strong>事件节点</strong>。</p>
+<p>在一些组件系统中，必然涉及到生命周期，我们来看一下 React 的 API 是怎么设计的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">componentWillMount</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">componentDidMount</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">componentWillUpdate</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">componentDidUpdate</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">componentWillUnmount</span>(<span class="params"></span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>React 划分了几个关键的生命周期节点（mount, update, unmount, …），以将来时和过去时描述这些节点片段，暴露 API。注意到一个小细节，React 采用了 <code>componentDidMount</code> 这种过去时风格，而没有使用 <code>componentMounted</code>，从而跟 <code>componentWillMount</code> 形成对照组，方便记忆。</p>
+<p>同样地，当我们设计事件 API 时，也要考虑使用合适的时态，特别是希望提供精细的事件切面时。或者，引入 <code>before</code>、<code>after</code> 这样的介词来简化：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// will render</span></span><br><span class="line">Component.on(<span class="string">'beforeRender'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// now rendering</span></span><br><span class="line">Component.on(<span class="string">'rendering'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// has rendered</span></span><br><span class="line">Component.on(<span class="string">'afterRender'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br></pre></td></tr></table></figure>
+<p>另一方面是关于语态，即选用主动语态和被动语态的问题。其实最好的原则就是 <strong>尽量避免使用被动语态</strong>。因为被动语态看起来会比较绕，不够直观，因此我们要将被动语态的 API 转换为主动语态。</p>
+<p>写成代码即形如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// passive voice, make me confused</span></span><br><span class="line">object.beDoneSomethingBy(subject);</span><br><span class="line"></span><br><span class="line"><span class="comment">// active voice, much more clear now</span></span><br><span class="line">subject.doSomething(object);</span><br></pre></td></tr></table></figure>
+<h2 id="进阶：语义和可用性"><a href="#进阶：语义和可用性" class="headerlink" title="进阶：语义和可用性"></a>进阶：语义和可用性</h2><p>说了那么多词法和语法的注意点，不过才是达标级别而已。确保 API 的可用性和语义才使 API 真正「可用」。</p>
+<p>无论是友好的参数设置，还是让人甜蜜蜜的语法糖，都体现了程序员的人文关怀。</p>
+<h3 id="单一职责"><a href="#单一职责" class="headerlink" title="单一职责"></a>单一职责</h3><p>单一职责是软件工程中一条著名的原则，然而知易行难，一是我们对于具体业务逻辑中「职责」的划分可能存在难度，二是部分同学仍没有养成贯彻此原则的习惯。</p>
+<p>小到函数级别的 API，大到整个包，保持单一核心的职责都是很重要的一件事。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fail</span></span><br><span class="line">component.fetchDataAndRender(url, template);</span><br><span class="line"></span><br><span class="line"><span class="comment">// good</span></span><br><span class="line"><span class="keyword">var</span> data = component.fetchData(url);</span><br><span class="line">component.render(data, template);</span><br></pre></td></tr></table></figure>
+<p>如上，将混杂在一个大坨函数中的两件独立事情拆分出去，保证函数（function）级别的职责单一。</p>
+<p>更进一步地，（假设）<code>fetchData</code> 本身更适合用另一个类（class）来封装，则对原来的组件类 <code>Component</code> 再进行拆分，将不属于它的取数据职责也分离出去：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DataManager</span> </span>&#123;</span><br><span class="line">  fetchData(url) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">this</span>.dataManager = <span class="keyword">new</span> DataManager();</span><br><span class="line">  &#125;</span><br><span class="line">  render(data, template) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// more code, less responsibility</span></span><br><span class="line"><span class="keyword">var</span> data = component.dataManager.fetchData(url);</span><br><span class="line">component.render(data, template);</span><br></pre></td></tr></table></figure>
+<p>在文件（file）层面同样如此，一个文件只编写一个类，保证文件的职责单一（当然这对很多语言来说是天然的规则）。</p>
+<p>最后，视具体的业务关联度而决定，是否将一簇文件做成一个包（package），或是拆成多个。</p>
+<h3 id="避免副作用"><a href="#避免副作用" class="headerlink" title="避免副作用"></a>避免副作用</h3><p>严格「无 <a href="https://en.wikipedia.org/wiki/Side_effect_(computer_science)" target="_blank" rel="noopener">副作用</a> 的编程」几乎只出现在纯函数式程序中，现实中的 OOP 编程场景难免触及副作用。因此在这里所说的「避免副作用」主要指的是：</p>
+<ol>
+<li>函数本身的运行稳定可预期。</li>
+<li>函数的运行不对外部环境造成意料外的污染。</li>
+</ol>
+<p>对于无副作用的纯函数而言，输入同样的参数，执行后总能得到同样的结果，这种幂等性使得一个函数无论在什么上下文中运行、运行多少次，最后的结果总是可预期的 —— 这让用户非常放心，不用关心函数逻辑的细节、考虑是否应该在某个特定的时机调用、记录调用的次数等等。希望我们以后设计的 API 不会出现这个案例中的情况：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// return x.x.x.1 while call it once</span></span><br><span class="line"><span class="keyword">this</span>.context.getSPM();</span><br><span class="line"></span><br><span class="line"><span class="comment">// return x.x.x.2 while call it twice</span></span><br><span class="line"><span class="keyword">this</span>.context.getSPM();</span><br></pre></td></tr></table></figure>
+<p>在这里，<code>getSPM()</code> 用来获取每个链接唯一的 SPM 码（SPM 是阿里通用的埋点统计方案）。但是用法却显得诡异：每调用一次，就会返回一个不同的 SPM 串，于是当我们需要获得几个 SPM 时，就会这样写：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> spm1 = <span class="keyword">this</span>.context.getSPM();</span><br><span class="line"><span class="keyword">var</span> spm2 = <span class="keyword">this</span>.context.getSPM();</span><br><span class="line"><span class="keyword">var</span> spm3 = <span class="keyword">this</span>.context.getSPM();</span><br></pre></td></tr></table></figure>
+<p>虽然在实现上可以理解 —— 此函数内部维护了一个计数器，每次返回一个自增的 SPM D 位，但是 <strong>这样的实现方式与这个命名看似是幂等的 getter 型函数完全不匹配</strong>，换句话说，这使得这个 API 不可预期。</p>
+<p>如何修改之？一种做法是，不改变此函数内部的实现，而是将 API 改为 Generator 式的风格，通过形如 <code>SPMGenerator.next()</code> 接口来获取自增的 SPM 码。</p>
+<p>另一种做法是，如果要保留原名称，可以将函数签名改为 <code>getSPM(spmD)</code>，接受一个自定义的 SPM D 位，然后返回整个 SPM 码。这样在调用时也会更明确。</p>
+<p>除了函数内部的运行需可预期外，它对外部一旦造成不可预期的污染，那么影响将更大，而且更隐蔽。</p>
+<p>对外部造成污染一般是两种途径：一是在函数体内部直接修改外部作用域的变量，甚至全局变量；二是通过修改实参间接影响到外部环境，如果实参是引用类型的数据结构。</p>
+<p>曾经也有发生因为对全局变量操作而导致整个容器垮掉的情况，这里就不再展开。</p>
+<p>如何防止此类副作用发生？本质上说，需要控制读写权限。比如：</p>
+<ol>
+<li>模块沙箱机制，严格限定模块对外部作用域的修改；</li>
+<li>对关键成员作访问控制（access control），冻结写权限等等。</li>
+</ol>
+<h3 id="合理设计函数参数"><a href="#合理设计函数参数" class="headerlink" title="合理设计函数参数"></a>合理设计函数参数</h3><p>对一个函数来说，「函数签名」（Function Signature）比函数体本身更重要。函数名、参数设置、返回值类型，这三要素构成了完整的函数签名。而其中，参数设置对用户来说是接触最频繁，也最为关心的部分。</p>
+<p>那如何优雅地设计函数的入口参数呢？我的理解是这样几个要点：</p>
+<p>优化参数顺序。<strong>相关性越高的参数越要前置</strong>。</p>
+<p>这很好理解，相关性越高的参数越重要，越要在前面出现。其实这还有两个隐含的意思，即 <strong>可省略的参数后置</strong>，以及 <strong>为可省略的参数设定缺省值</strong>。对某些语言来说（如 C++），调用的时候如果想省略实参，那么一定要为它定义缺省值，而带缺省值的参数必须后置，这是在编译层面就规定死的。而对另一部分灵活的语言来说（如 JS），将可省参数后置同样是最佳实践。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// bad</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderPage</span>(<span class="params">pageIndex, pageData</span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">renderPage(<span class="number">0</span>, &#123;&#125;);</span><br><span class="line">renderPage(<span class="number">1</span>, &#123;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// good</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderPage</span>(<span class="params">pageData, pageIndex = <span class="number">0</span></span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">renderPage(&#123;&#125;);</span><br><span class="line">renderPage(&#123;&#125;, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>第二个要点是控制参数个数。用户记不住过多的入口参数，因此，参数能省略则省略，或更进一步，<strong>合并同类型的参数</strong>。</p>
+<p>由于可以方便地创建 Object 这种复合数据结构，合并参数的这种做法在 JS 中尤为普遍。常见的情况是将很多配置项都包成一个配置对象：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// traditional</span></span><br><span class="line">$.ajax(url, params, success);</span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line">$.ajax(&#123;</span><br><span class="line">  url,</span><br><span class="line">  params,</span><br><span class="line">  success,</span><br><span class="line">  failure</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这样做的好处是：</p>
+<ul>
+<li>用户虽然仍需记住参数名，但不用再关心参数顺序。</li>
+<li>不必担心参数列表过长。将参数合并为字典这种结构后，想增加多少参数都可以，也不用关心需要将哪些可省略的参数后置的问题。</li>
+</ul>
+<p>当然，凡事有利有弊，由于缺乏顺序，就无法突出哪些是最核心的参数信息；另外，在设定参数的默认值上，会比参数列表的形式更繁琐。因此，需要兼顾地使用最优的办法来设计函数参数，为了同一个目的：易用。</p>
+<h3 id="合理运用函数重载"><a href="#合理运用函数重载" class="headerlink" title="合理运用函数重载"></a>合理运用函数重载</h3><p>谈到 API 的设计，尤其是函数的设计，总离不开一个机制：重载（overload）。</p>
+<p>对于强类型语言来说，重载是个很 cool 的功能，能够大幅减少函数名的数量，避免命名空间的污染。然而对于弱类型语言而言，由于不需要在编译时做 type-binding，函数在调用阶段想怎么传实参都行……所以重载在这里变得非常微妙。以下着重谈一下，什么时候该选择重载，什么时候又不该。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Element <span class="title">getElementById</span><span class="params">(String: id)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">HTMLCollection <span class="title">getElementsByClassName</span><span class="params">(String: names)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">HTMLCollection <span class="title">getElementsByTagName</span><span class="params">(String: name)</span></span></span><br></pre></td></tr></table></figure>
+<p>以上三个函数是再经典不过的 DOM API，而在当初学习它们的时候（从 Java 思维转到 JS 思维）我就在想这两个问题：</p>
+<ol>
+<li>为什么要设计成 <code>getSomethingBySomething</code> 这么复杂结构的名字，而不是使用 <code>getSomething</code> 做重载？</li>
+<li>这三个函数只有 <code>getElementById</code> 是单数形式，为何不设计为返回 HTMLCollection（即使只返回一个成员也可以包一个 Collection 嘛），以做成复数形式的函数名从而保持一致性？</li>
+</ol>
+<p>两个问题中，如果第二个问题能解决，那么这三个函数的结构将完全一致，从而可以考虑解决第一个问题。</p>
+<p>先来看问题二。稍微深入下 DOM 知识后就知道，id 对于整个 DOM 来说必须是唯一的，因此在理论上 <code>getElementsById</code>（注意有复数）将永远返回仅有 0 或 1 个成员的 Collection，这样一来用户的调用方式将始终是 <code>var element = getElementsById(id)[0]</code>，而这是非常荒谬的。所以 DOM API 设计得没问题。</p>
+<p>既然问题二无解，那么自然这三个函数没法做成一个重载。退一步说，即使问题二能解决，还存在另外一个麻烦：它们的入口参数都是一样的，都是 String！对于强类型语言来说，参数类型和顺序、返回值统统一样的情况下，压根无法重载。因为编译器无法通过任何一个有效的特征，来执行不同的逻辑！</p>
+<p>所以，<strong>如果入口参数无法进行有效区分，不要选择重载</strong>。</p>
+<p>当然，有一种奇怪的做法可以绕过去：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fail</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getElementsBy</span>(<span class="params">byWhat, name</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">switch</span>(byWhat) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">'className'</span>:</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">case</span> <span class="string">'tagName'</span>:</span><br><span class="line">      <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">getElementsBy(<span class="string">'tagName'</span>, name);</span><br><span class="line">getElementsBy(<span class="string">'className'</span>, name);</span><br></pre></td></tr></table></figure>
+<p>一种在风格上类似重载的，但实际是在运行时走分支逻辑的做法……可以看到，API 的信息总量并没降低。不过话不能说死，这种风格在某些特定场景也有用武之地，只是多数情况下并不推荐。</p>
+<p>与上述风格类似的，是这样一种做法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// get elements by tag-name by default</span></span><br><span class="line"><span class="function">HTMLCollection <span class="title">getElements</span><span class="params">(String: name)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">// if you add a flag, it goes by class-name</span></span></span><br><span class="line"><span class="function">HTMLCollection <span class="title">getElements</span><span class="params">(String: name, Boolean: byClassName)</span></span></span><br></pre></td></tr></table></figure>
+<p>「将 flag 标记位作为了重载手段」—— 在早期微软的一些 API 中经常能见到这样的写法，可以说一旦离开了文档就无法编码，根本不明白某个 Boolean 标记位是用来干嘛的，这大大降低了用户的开发体验，以及代码可读性。</p>
+<p>这样看起来，可重载的场景真是太少了！也不尽然，在我看来有一种场景很适合用重载：批量处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Module <span class="title">handleModules</span><span class="params">(Module: <span class="keyword">module</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">Collection&lt;Module&gt; <span class="title">handleModules</span><span class="params">(Collection&lt;Module&gt;: modules)</span></span></span><br></pre></td></tr></table></figure>
+<p>当用户经常面临处理一个或多个不确定数量的对象时，他可能需要思考和判断，什么时候用单数 <code>handleModule</code>、什么时候用复数 <code>handleModules</code>。将这种类型的操作重载为一个（大抵见于 setter 型操作），同时支持单个和批量的处理，可以降低用户的认知负担。</p>
+<p>所以，在合适的时机重载，否则宁愿选择「函数名结构相同的多个函数」。原则是一样的，保证逻辑正确的前提下，尽可能降低用户负担。</p>
+<p>对了，关于 <code>getElements</code> 那三个 API，它们最终的进化版本回到了同一个函数：<code>querySelector(selectors)</code>。</p>
+<h3 id="使返回值可预期"><a href="#使返回值可预期" class="headerlink" title="使返回值可预期"></a>使返回值可预期</h3><p>函数的易用性体现在两方面：入口和出口。上面已经讲述了足够多关于入口的设计事项，这一节讲出口：函数返回值。</p>
+<p>对于 getter 型的函数来说，调用的直接目的就是为了获得返回值。因此我们要让返回值的类型和函数名的期望保持一致。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// expect 'a.b.c.d'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getSPMInString</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// fail</span></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    a, b, c, d</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从这一点上来讲，要慎用 ES2015 中的新特性「解构赋值」。</p>
+<p>而对于 setter 型的函数，调用的期望是它能执行一系列的指令，然后去达到一些副作用，比如存文件、改写变量值等等。因此绝大多数情况我们都选择了返回 undefined / void —— 这并不总是最好的选择。</p>
+<p>回想一下，我们在调用操作系统的命令时，系统总会返回「exit code」，这让我们能够获知系统命令的执行结果如何，而不必通过其他手段去验证「这个操作到底生效了没」。因此，创建这样一种返回值风格，或可一定程度增加健壮性。</p>
+<p>另外一个选项，是让 setter 型 API 始终返回 <code>this</code>。这是 jQuery 为我们带来的经典启示 —— 通过返回 <code>this</code>，来产生一种「链式调用（chaining）」的风格，简化代码并且增加可读性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">'div'</span>)</span><br><span class="line">  .attr(<span class="string">'foo'</span>, <span class="string">'bar'</span>)</span><br><span class="line">  .data(<span class="string">'hello'</span>, <span class="string">'world'</span>)</span><br><span class="line">  .on(<span class="string">'click'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;);</span><br></pre></td></tr></table></figure>
+<p>最后还有一个异类，就是异步执行的函数。由于异步的特性，对于这种需要一定延时才能得到的返回值，只能使用 callback 来继续操作。使用 Promise 来包装它们尤为必要。对异步操作都返回一个 Promise，使整体的 API 风格更可预期。</p>
+<h3 id="固化术语表"><a href="#固化术语表" class="headerlink" title="固化术语表"></a>固化术语表</h3><p>在前面的词法部分中曾经提到「准确用词」，但即使我们已经尽量去用恰当的词，在有些情况下仍然不免碰到一些难以抉择的尴尬场景。</p>
+<p>比如，我们经常会看到 pic 和 image、path 和 url 混用的情况，这两组词的意思非常接近（当然严格来说 path 和 url 的意义是明确不同的，在此暂且忽略），稍不留神就会产生 4 种组合……</p>
+<ul>
+<li>picUrl</li>
+<li>picPath</li>
+<li>imageUrl</li>
+<li>imagePath</li>
+<li>更糟糕的情况是 imgUrl、picUri、picURL……</li>
+</ul>
+<p>所以，在一开始就要 <strong>产出术语表</strong>，包括对缩写词的大小写如何处理、是否有自定义的缩写词等等。一个术语表可以形如：</p>
+<table>
+<thead>
+<tr>
+<th>标准术语</th>
+<th>含义</th>
+<th>禁用的非标准词</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pic</td>
+<td>图片</td>
+<td>image, picture</td>
+</tr>
+<tr>
+<td>path</td>
+<td>路径</td>
+<td>URL, url, uri</td>
+</tr>
+<tr>
+<td>on</td>
+<td>绑定事件</td>
+<td>bind, addEventListener</td>
+</tr>
+<tr>
+<td>off</td>
+<td>解绑事件</td>
+<td>unbind, removeEventListener</td>
+</tr>
+<tr>
+<td>emit</td>
+<td>触发事件</td>
+<td>fire, trigger</td>
+</tr>
+<tr>
+<td>module</td>
+<td>模块</td>
+<td>mod</td>
+</tr>
+</tbody>
+</table>
+<p>不仅在公开的 API 中要遵守术语表规范，在局部变量甚至字符串中都最好按照术语表来。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">page.emit(<span class="string">'pageRenderRow'</span>, &#123;</span><br><span class="line">  index: <span class="keyword">this</span>.props.index,</span><br><span class="line">  modList: moduleList</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>比如这个我最近碰到的案例，同时写作了 <code>modList</code> 和 <code>moduleList</code>，这就有点怪怪的。</p>
+<p>另外，对于一些创造出来的、业务特色的词汇，如果不能用英语简明地翻译，就直接用拼音：</p>
+<ul>
+<li>淘宝 <code>Taobao</code></li>
+<li>微淘 <code>Weitao</code></li>
+<li>极有家 <code>Jiyoujia</code></li>
+<li>……</li>
+</ul>
+<p>在这里，千万不要把「微淘」翻译为 <code>MicroTaobao</code>……当然，专有词已经有英文名的除外，如 <code>Tmall</code>。</p>
+<h3 id="遵循一致的-API-风格"><a href="#遵循一致的-API-风格" class="headerlink" title="遵循一致的 API 风格"></a>遵循一致的 API 风格</h3><p>这一节算得上是一个复习章节。词法、语法、语义中的很多节都指向同一个要点：一致性。</p>
+<blockquote>
+<p>一致性可以最大程度降低信息熵。</p>
+</blockquote>
+<p>好吧，这句话不是什么名人名言，就是我现编的。总而言之，一致性能大大降低用户的学习成本，并对 API 产生准确的预期。</p>
+<ol>
+<li>在词法上，提炼术语表，全局保持一致的用词，避免出现不同的但是含义相近的词。</li>
+<li>在语法上，遵循统一的语法结构（主谓宾顺序、主被动语态），避免天马行空的造句。</li>
+<li>在语义上，合理运用函数的重载，提供可预期的甚至一致类型的函数入口和出口。</li>
+</ol>
+<p>甚至还可以一致得更细节些，只是举些例子：</p>
+<ol>
+<li>打 log 要么都用中文，要么都用英文。</li>
+<li>异步接口要么都用回调，要么都改成 Promise。</li>
+<li>事件机制只能选择其一：<code>object.onDoSomething = func</code> 或 <code>object.on(&#39;doSomething&#39;, func)</code>。</li>
+<li>所有的 setter 操作必须返回 <code>this</code>。</li>
+<li>……</li>
+</ol>
+<blockquote>
+<p>一份代码写得再怎么烂，把某个单词都拼成一样的错误，也好过这个单词只出现一次错误。</p>
+</blockquote>
+<p>是的，一致性，再怎么强调都不为过。</p>
+<h2 id="卓越：系统性和大局观"><a href="#卓越：系统性和大局观" class="headerlink" title="卓越：系统性和大局观"></a>卓越：系统性和大局观</h2><p>不管是大到发布至业界，或小到在公司内跨部门使用，一组 API 一旦公开，整体上就是一个产品，而调用方就是用户。所谓牵一发而动全身，一个小细节可能影响整个产品的面貌，一个小改动也可能引发整个产品崩坏。因此，我们一定要站在全局的层面，甚至考虑整个技术环境，系统性地把握整个体系内 API 的设计，体现大局观。</p>
+<h3 id="版本控制"><a href="#版本控制" class="headerlink" title="版本控制"></a>版本控制</h3><p>80% 的项目开发在版本控制方面做得都很糟糕：随心所欲的版本命名、空洞诡异的提交信息、毫无规划的功能更新……人们显然需要一段时间来培养规范化开发的风度，但是至少得先保证一件事情：</p>
+<blockquote>
+<p>在大版本号不变的情况下，API 保证向前兼容。</p>
+</blockquote>
+<p>这里说的「大版本号」即「语义化版本命名」<code>&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;</code> 中的第一位 <code>&lt;major&gt;</code> 位。</p>
+<p>这一位的改动表明 API 整体有大的改动，很可能不兼容，因此用户对大版本的依赖改动会慎之又慎；反之，如果 API 有不兼容的改动，意味着必须修改大版本号，否则用户很容易出现在例行更新依赖后整个系统跑不起来的情况，更糟糕的情况则是引发线上故障。</p>
+<p>如果这种情况得不到改善，用户们就会选择 <strong>永远不升级依赖</strong>，导致更多的潜在问题。久而久之，最终他们便会弃用这些产品（库、中间件、whatever）。</p>
+<p>所以，希望 API 的提供者们以后不会再将大版本锁定为 <code>0</code>。更多关于「语义化版本」的内容，请参考我的另一篇文章《<a href="http://taobaofed.org/blog/2016/08/04/instructions-of-semver/">论版本号的正确打开方式</a>》。</p>
+<h3 id="确保向下兼容"><a href="#确保向下兼容" class="headerlink" title="确保向下兼容"></a>确保向下兼容</h3><p>如果不希望对客户造成更新升级方面的困扰，我们首先要做好的就是确保 API 向下兼容。</p>
+<p>API 发生改动，要么是需要提供新的功能，要么是为之前的糟糕设计买单……具体来说，改动无外乎：增加、删除、修改 三方面。</p>
+<p>首先是删除。<strong>不要轻易删除公开发布的 API</strong>，无论之前写得多么糟糕。如果一定要删除，那么确保正确使用了「<code>Deprecated</code>」：</p>
+<p>对于某个不想保留的可怜 API，先不要直接删除，将其标记为 <code>@deprecated</code> 后置入下一个小版本升级（比如从 <code>1.0.2</code> 到 <code>1.1.0</code>）。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* @deprecated</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">youWantToRemove</span>(<span class="params">foo, bar</span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* This is the replacement.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">youWantToKeep</span>(<span class="params">foo</span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>并且，在 changelog 中明确指出这些 API 即将移除（不推荐使用，但是目前仍然能用）。</p>
+<p>之后，在下一个 <strong>大版本</strong> 中（比如 <code>1.1.0</code> 到 <code>2.0.0</code>）删除标记为 <code>@deprecated</code> 的部分，同时在 changelog 中指明它们已删除。</p>
+<p>其次是 API 的修改。如果我们仅仅是修复 bug、重构实现、或者添加一些小特性，那自然没什么可说的；但是如果想彻底修改一个 API……比如重做入口参数、改写业务逻辑等等，建议的做法是：</p>
+<ol>
+<li>确保原来的 API 符合「单一职责」原则，如果不是则修改之。</li>
+<li>增加一个全新的 API 去实现新的需求！由于我们的 API 都遵循「单一职责」，因此一旦需要彻底修改 API，意味着新需求和原来的职责已经完全无法匹配，不如干脆新增一个 API。</li>
+<li>视具体情况选择保留或移除旧 API，进入前面所述「删除 API」的流程。</li>
+</ol>
+<p>最后是新增 API。事实上，即使是只加代码不删代码，整体也不一定是向下兼容的。有一个经典的正面案例是：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// modern browsers</span></span><br><span class="line"><span class="built_in">document</span>.hidden == <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// out-of-date browsers</span></span><br><span class="line"><span class="built_in">document</span>.hidden == <span class="literal">undefined</span>;</span><br></pre></td></tr></table></figure>
+<p>浏览器新增的一个 API，用以标记「当前文档是否可见」。直观的设计应该是新增 <code>document.visible</code> 这样的属性名……问题是，在逻辑上，文档默认是可见的，即 <code>document.visible</code> 默认为 <code>true</code>，而不支持此新属性的旧浏览器返回 <code>document.visible == undefined</code>，是个 falsy 值。因此，如果用户在代码中简单地以：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="built_in">document</span>.visible) &#123;</span><br><span class="line">  <span class="comment">// do some stuff</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>做特征检测的话，在旧浏览器中就会进入错误的条件分支……而反之，以 <code>document.hidden</code> API 来判断，则是向下兼容的。</p>
+<h3 id="设计扩展机制"><a href="#设计扩展机制" class="headerlink" title="设计扩展机制"></a>设计扩展机制</h3><p>毫无疑问，在保证向下兼容的同时，API 需要有一个对应的扩展机制以可持续发展 —— 一方面便于开发者自身增加功能，另一方面用户也能参与进来共建生态。</p>
+<p>技术上来说，接口的扩展方式有很多，比如：继承（extend）、组合（mixin）、装饰（decorate）……选择没有对错，因为不同的扩展方式适用于不同的场景：在逻辑上确实存在派生关系，并且需要沿用基类行为同时自定义行为的，采用重量级的继承；仅仅是扩充一些行为功能，但是逻辑上压根不存在父子关系的，使用组合；而装饰手法更多应用于给定一个接口，将其包装成多种适用于不同场景新接口的情况……</p>
+<p>另一方面，对于不同的编程语言来说，由于不同的语言特性……静态、动态等，各自更适合用某几种扩展方式。所以，到底采用什么扩展办法，还是得视情况而定。</p>
+<p>在 JS 界，有一些经典的技术产品，它们的扩展甚至已经形成生态，如：</p>
+<ul>
+<li>jQuery。耳熟能详的 <code>$.fn.customMethod = function() {};</code>。这种简单的 mixin 做法已经为 jQuery 提供了成千上万的插件，而 jQuery 自己的大部分 API 本身也是基于这个写法构建起来的。</li>
+<li>React。React 自身已经处理了所有有关组件实例化、生命周期、渲染和更新等繁琐的事项，只要开发者基于 <code>React.Component</code> 来继承出一个组件类。对于一个 component system 来说，这是一个经典的做法。</li>
+<li>Gulp。相比于近两年的大热 Webpack，个人认为 Gulp 更能体现一个 building system 的逻辑 —— 定义各种各样的「任务」，然后用「管道」将它们串起来。一个 Gulp 插件也是那么的纯粹，接受文件流，返回文件流，如是而已。</li>
+<li>Koa。对于主流的 HTTP Server 来说，中间件的设计大同小异：接受上一个 request，返回一个新的 response。而对天生 Promise 化的 Koa 来说，它的中间件风格更接近于 Gulp 了，区别仅在于一个是 file stream，一个是 HTTP stream。</li>
+</ul>
+<p>不只是庞大的框架需要考虑扩展性，设计可扩展的 API 应该变成一种基本的思维方式。比如这个活生生的业务例子：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// json</span></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">"type"</span>: <span class="string">"item"</span>,</span><br><span class="line">    <span class="string">"otherAttrs"</span>: <span class="string">"foo"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">"type"</span>: <span class="string">"shop"</span>,</span><br><span class="line">    <span class="string">"otherAttrs"</span>: <span class="string">"bar"</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment">// render logic</span></span><br><span class="line"><span class="keyword">switch</span>(feed.type) &#123;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'item'</span>:</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'render in item-style.'</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'shop'</span>:</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'render in shop-style.'</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="string">'other'</span>:</span><br><span class="line">  <span class="keyword">default</span>:</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'render in other styles, maybe banner or sth.'</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据不同的类型渲染一组 feeds 信息：商品模块、店铺模块，或是其他。某天新增了需求说要支持渲染天猫的店铺模块（多显示个天猫标等等），于是 JSON 接口直接新增一个 <code>type = &#39;tmallShop&#39;</code> —— 这种接口改法很简单直观，但是并不好。在不改前端代码的情况下，<code>tmallShop</code> 类型默认进入 <code>default</code> 分支，导致奇奇怪怪的渲染结果。</p>
+<p>考虑到 <code>tmallShop</code> 和 <code>shop</code> 之间是一个继承的关系，<code>tmallShop</code> 完全可以当一个普通的 <code>shop</code> 来用，执行后者的所有逻辑。用 Java 的表达方式来说就是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a tmallShop is a shop</span></span><br><span class="line">Shop tmallShop = <span class="keyword">new</span> TmallShop();</span><br><span class="line">tmallShop.doSomeShopStuff();</span><br></pre></td></tr></table></figure>
+<p>将这个逻辑关系反映到 JSON 接口中，合理的做法是新增一个 <code>subType</code> 字段，用来标记 <code>tmallShop</code>，而它的 <code>type</code> 仍然保持为 <code>shop</code>。这样一来，即使原来的前端代码完全不修改，仍然可以正常运行，除了无法渲染出一些天猫店铺的特征。</p>
+<p>这里还有一个非常类似的正面案例，是 ABS 搭建系统（淘宝 FED 出品的站点搭建系统）设计的模块 JSON Schema：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// json</span></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">"type"</span>: <span class="string">"string"</span>,</span><br><span class="line">    <span class="string">"format"</span>: <span class="string">"enum"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="string">"type"</span>: <span class="string">"string"</span>,</span><br><span class="line">    <span class="string">"format"</span>: <span class="string">"URL"</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>同样采用了 <code>type</code> 为主类型，而扩展字段在这里变成了 <code>format</code>，用来容纳一些扩展特性。在实际开发中，的确也很方便新增各种新的数据结构逻辑。</p>
+<h3 id="控制-API-的抽象级别"><a href="#控制-API-的抽象级别" class="headerlink" title="控制 API 的抽象级别"></a>控制 API 的抽象级别</h3><p>API 能扩展的前提是什么？是接口足够抽象。这样才能够加上各种具体的定语、装饰更多功能。用日常语言举个例子：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// abstract</span></span><br><span class="line">I want to go to a place.</span><br><span class="line"><span class="comment">// when</span></span><br><span class="line">&#123;Today, Tomorrow, Jan. <span class="number">1</span>st&#125; I want to go to a place.</span><br><span class="line"><span class="comment">// where</span></span><br><span class="line">I want to go to &#123;mall, cafe, bed&#125;.</span><br><span class="line"></span><br><span class="line"><span class="comment">// concrete, no extends any more</span></span><br><span class="line">Today I want to go to a cafe <span class="keyword">for</span> my business.</span><br></pre></td></tr></table></figure>
+<p>所以，在设计 API 时要高抽象，不要陷入具体的实现，不要陷入具体的需求，要高屋建瓴。</p>
+<p>看个实际的案例：一个类 React Native 的页面框架想暴露出一个事件「滚动到第二屏」，以便页面开发者能监听这个事件，从而更好地控制页面资源的加载策略（比如首屏默认加载渲染、到第二屏之后再去加载剩下的资源）。</p>
+<p>但是因为一些实现上的原因，页面框架还不能通过页面位移（offset）来精确地通知「滚动到了第二屏」，而只能判断「第二屏的第一个模块出现了」。于是这个事件没有被设计为 <code>secondScreenReached</code>，而变成了 <code>secondScreenFirstModuleAppear</code>……虽然 <code>secondScreenFirstModuleAppear</code> 不能精确定义 <code>secondScreenReached</code>，但是直接暴露这个具体的 API 实在太糟糕了，问题在于：</p>
+<ul>
+<li>用户在依赖一个非常非常具体的 API，给用户造成了额外的信息负担。「第二屏的第一个模块出现了！」这很怪异，用户根本不关心模块的事情，用户关心的只是他是否到达了第二屏。</li>
+<li>一旦页面框架能够真正通过页面位移来实现「滚动到第二屏」，如果我们暴露的是高抽象的 <code>secondScreenReached</code>，那么只需要更改一下这个接口的具体实现即可；反之，我们暴露的是很具体的 <code>secondScreenFirstModuleAppear</code>，就只能挨个通知用户：「你现在可以不用依赖这个事件了，改成我们新出的 <code>secondScreenReached</code> 吧！」</li>
+</ul>
+<p>是的，抽象级别一般来说越高越好，将 API 设计成业务无关的，更通用，而且方便扩展。但是物极必反，对于像我这样的抽象控来说，最好能学会控制接口的抽象级别，将其保持在一个恰到好处的层次上，不要做无休止的抽象。</p>
+<p>还是刚才的例子 <code>secondScreenReached</code>，我们还可以将其抽象成 <code>targetScreenReached</code>，可以支持到达首屏、到达第二屏、第三屏……的事件，这样是不是更灵活、更优雅呢？并没有 ——</p>
+<ul>
+<li>抽象时一定要考虑到具体的业务需求场景，有些实现路径如果永远不可能走到，就没必要抽出来。比如这个例子中，没有人会去关心第三屏、第四屏的事件。</li>
+<li>太高的抽象容易造成太多的层次，带来额外的耦合、通信等不同层次之间的沟通成本，这将会成为新的麻烦。对用户而言，也是额外的信息负担。</li>
+</ul>
+<p>对于特定的业务来说，接口越抽象越通用，而越具体则越能解决特定问题。所以，思考清楚，API 面向的场景范围，避免懒惰设计，避免过度设计。</p>
+<h3 id="收敛-API-集"><a href="#收敛-API-集" class="headerlink" title="收敛 API 集"></a>收敛 API 集</h3><p>对于一整个体系的 API 来说，用户面对的是这个整体集合，而不是其中某几个单一的 API。我们要保证集合内的 API 都在一致的抽象维度上，并且适当地合并 API，减小整个集合的信息量，酌情做减法。</p>
+<blockquote>
+<p>产品开始做减法，便是对用户的温柔。</p>
+</blockquote>
+<p><strong>收敛近似意义的参数和局部变量</strong>。下面这样的一组 API 好像没什么不对，但是对强迫症来说一定产生了不祥的直觉：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">selectTab</span>(<span class="params">index</span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">highlightTab</span>(<span class="params">tabIndex</span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">gotoPage</span>(<span class="params">index</span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>又是 <code>index</code> 又是 <code>tabIndex</code> 的，或许还会有 <code>pageIndex</code>？诚然，函数形参和局部变量的命名对最终用户来说没有直接影响，但是这些不一致的写法仍然能反映到 API 文档中，并且，对开发者自身也会产生混淆。所以，选一个固定的命名风格，然后从一而终！如果忘了的话，回头看一下前文「固化术语表」这一节吧！</p>
+<p><strong>收敛近似职责的函数</strong>。对用户暴露出太多的接口不是好事，但是一旦要合并不同的函数，是否就会破坏「单一职责」原则呢？</p>
+<p>不，因为「单一职责」本身也要看具体的抽象层次。以下这个例子和前文「合理运用函数重载」中的例子有相似之处，但具体又有所不同。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a complex rendering process</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderPage</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// too many APIs here</span></span><br><span class="line">  renderHeader();</span><br><span class="line">  renderBody();</span><br><span class="line">  renderSidebar();</span><br><span class="line">  renderFooter();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// now merged</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderPage</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  renderSections([</span><br><span class="line">    <span class="string">'header'</span>, <span class="string">'body'</span>, <span class="string">'sidebar'</span>, <span class="string">'footer'</span></span><br><span class="line">  ]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// call renderSection</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderSections</span>(<span class="params">sections</span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// and the real labor</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderSection</span>(<span class="params">section</span>) </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>类似于这样，避免暴露过多近似的 API，合理利用抽象将其合并，减小对用户的压力。</p>
+<p>对于一个有清晰继承树的场景来说，收敛 API 显得更加自然且意义重大 —— 利用多态性（Polymorphism）构建 Consistent APIs。（以下例子来源于 <a href="https://github.com/ryanmcdermott/clean-code-javascript" target="_blank" rel="noopener">Clean Code JS</a>。）</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// bad: type-checking here</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">travelToTexas</span>(<span class="params">vehicle</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (vehicle <span class="keyword">instanceof</span> Bicycle) &#123;</span><br><span class="line">    vehicle.pedal(<span class="keyword">this</span>.currentLocation, <span class="keyword">new</span> Location(<span class="string">'texas'</span>));</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (vehicle <span class="keyword">instanceof</span> Car) &#123;</span><br><span class="line">    vehicle.drive(<span class="keyword">this</span>.currentLocation, <span class="keyword">new</span> Location(<span class="string">'texas'</span>));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// cool</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">travelToTexas</span>(<span class="params">vehicle</span>) </span>&#123;</span><br><span class="line">  vehicle.move(<span class="keyword">this</span>.currentLocation, <span class="keyword">new</span> Location(<span class="string">'texas'</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有一个将 API 收敛到极致的家伙恐怕大家都不会陌生：jQuery 的 <code>$()</code>。这个风格不正是 jQuery 当年的杀手级特性之一吗？</p>
+<blockquote>
+<p>如果 <code>$()</code> 能让我搞定这件事，就不要再给我 <code>foo()</code> 和 <code>bar()</code>。</p>
+</blockquote>
+<p><strong>收敛近似功能的包</strong>。再往上一级，我们甚至可以合并相近的 package。</p>
+<p>淘宝 FED 的 Rax 体系（类 RN 框架）中，有基础的组件标签，如 <code>&lt;Image&gt; (in @ali/rax-components)</code>、<code>&lt;Link&gt; (in @ali/rax-components)</code>，也有一些增强功能的 package，如 <code>&lt;Picture&gt; (in @ali/rax-picture)</code>、<code>&lt;Link&gt; (in @ali/rax-spmlink)</code>。</p>
+<p>在这里，后者包之于前者相当于装饰了更多功能，是前者的增强版。而在实际应用中，也是推荐使用诸如 <code>&lt;Picture&gt;</code> 而禁止使用 <code>&lt;Image&gt;</code>。那么在这种大环境下，<code>&lt;Image&gt;</code> 等基础 API 的暴露就反而变得很扰民。可以考虑将增强包的功能完全合并入基础组件，即将 <code>&lt;Picture&gt;</code> 并入 <code>&lt;Image&gt;</code>，用户只需面对单一的、标准的组件 API。</p>
+<h3 id="发散-API-集"><a href="#发散-API-集" class="headerlink" title="发散 API 集"></a>发散 API 集</h3><p>这听上去很荒谬，为什么一个 API 集合又要收敛又要发散？仅仅是为了大纲上的对称性吗？</p>
+<p>当然不是。存在这个小节是因为我有一个不得不提的案例，不适合放在其他段落，只能放在这里……不，言归正传，我们有时的确需要发散 API 集，提供几个看似接近的 API，以引导用户。因为 —— 虽然这听起来很荒谬 —— 某些情况下，API 其实不够用，但是用户 <strong>没有意识到 API 不够用</strong>，而是选择了混用、滥用。看下面这个例子：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// the func is used here</span></span><br><span class="line">requestAnimationFrame(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// what? trigger an event?</span></span><br><span class="line">  emitter.emit(<span class="string">'moduleDidRenderRow'</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...and there</span></span><br><span class="line">requestAnimationFrame(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// another one here, I guess rendering?</span></span><br><span class="line">  <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在重构一组代码时，我看到代码里充斥着 <code>requestAnimationFrame()</code>，这是一个比较新的全局 API，它会以接近 60 FPS 的速率延时执行一个传入的函数，类似于一个针对特定场景优化过的 <code>setTimeout()</code>，但它的初衷是用来绘制动画帧的，而不应该用在奇奇怪怪的场景中。</p>
+<p>在深入地了解了代码逻辑之后，我认识到这里如此调用是为了「延时一丢丢执行一些操作」，避免阻塞主渲染线程。然而这种情况下，还不如直接调用 <code>setTimeout()</code> 来做延时操作。虽然没有太明确的语义，但是至少好过把自己伪装成一次动画的绘制。更可怕的是，据我所知 <code>requestAnimationFrame()</code> 的滥用不仅出现在这次重构的代码中，我至少在三个不同的库见过它的身影 —— 无一例外地，这些库和动画并没有什么关系。</p>
+<p>（一个可能的推断是，调用 <code>requestAnimationFrame(callback)</code> 时不用指定 <code>timeout</code> 毫秒数，而 <code>setTimeout(callback, timeout)</code> 是需要的。似乎对很多用户来说，前者的调用方式更 cool？）</p>
+<p>所以，在市面上有一些 API 好像是「偏方」一般的存在：虽然不知道为什么要这么用，但是……用它就对了！</p>
+<p>事实上，对于上面这个场景，最恰当的解法是使用一个更加新的 API，叫做 <code>requestIdleCallback(callback)</code>。这个 API 从名字上看起来就很有语义：在线程空闲的时候再执行操作。这完全契合上述场景的需求，而且还自带底层的优化。</p>
+<p>当然，由于 API 比较新，还不是所有的平台都能支持。即便如此，我们也可以先面向接口编程，自己做一个 polyfill：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// simple polyfill</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">requestIdleCallback</span>(<span class="params">callback</span>) =&gt; </span>&#123;</span><br><span class="line">  callback &amp;&amp; setTimeout(callback, <span class="number">1e3</span> / <span class="number">60</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>另一个经典的滥用例子是 ES2015 中的「Generator / yield」。</p>
+<p>原本使用场景非常有限的生成器 Generator 机制被大神匠心独运地加以改造，包装成用来异步代码同步化的解决方案。这种做法自然很有创意，但是从语义用法上来说实在不足称道，让代码变得非常难读，并且带来维护隐患。与其如此，还不如仅仅使用 Promise。</p>
+<p>令人欣慰的是，随后新版的 ES 即提出了新的异步代码关键字「async / await」，真正在语法层面解决了异步代码同步化的问题，并且，新版的 Node.js 也已经支持这种语法。</p>
+<p>因此，我们作为 API 的开发者，一定要提供足够场景适用的 API，来引导我们的用户，不要让他们做出一些出人意料的「妙用」之举。</p>
+<h3 id="制定-API-的支持策略"><a href="#制定-API-的支持策略" class="headerlink" title="制定 API 的支持策略"></a>制定 API 的支持策略</h3><p>我们说，一组公开的 API 是产品。而产品，一定有特定的用户群，或是全球的开发者，或仅仅是跨部门的同事；产品同时有保质期，或者说，生命周期。</p>
+<p>面向目标用户群体，我们要制定 API 的支持策略：</p>
+<ul>
+<li>每一个大版本的支持周期是多久。</li>
+<li>是否有长期稳定的 API 支持版本。（Long-term Support）</li>
+<li>如何从旧版本升级。</li>
+</ul>
+<p>老旧版本很可能还在运行，但维护者已经没时间精力再去管这些历史遗物，这时明确地指出某些版本不再维护，对开发者和用户都好。当然，同时别忘了给出升级文档，指导老用户如何迁移到新版本。还有一个更好的做法是，在我们开启一个新版本之际，就确定好上一个版本的寿命终点，提前知会到用户。</p>
+<p>还有一个技术上的注意事项，那就是：<strong>大版本间最好有明确的隔离</strong>。对于一个复杂的技术产品来说，API 只是最终直接面向用户的接口，背后还有特定的环境、工具组、依赖包等各种支撑，互相之间并不能混用。</p>
+<p>比如，曾经的经典前端库 KISSY。在业界技术方案日新月异的大潮下，KISSY 6 版本已经强依赖了 TNPM（阿里内网的 NPM）、DEF 套件组（淘宝 FED 的前端工具套件），虽然和之前的 1.4 版本相比 API 的变化并不大，但是仍然不能在老环境下直接使用 6 版本的代码库……这一定程度上降低了自由组合的灵活度，但事实上随着业务问题场景的复杂度提升，解决方案本身会需要更定制化，因此，将环境、工具等上下游关联物随代码一起打包，做成一整个技术方案，这正是业界的现状。</p>
+<p>所以，隔离大版本，制定好 API 支持策略，让我们的产品更专业，让用户免去后顾之忧。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上，便是我从业以来感悟到的一些「道」，三个进阶层次、几十个细分要点，不知有没有给读者您带来一丁点启发。</p>
+<p>但实际上，<strong>大道至简</strong>。我一直认为，程序开发和平时的说话写字其实没有太大区别，无非三者 ——</p>
+<ol>
+<li>逻辑和抽象。</li>
+<li>领域知识。</li>
+<li>语感。</li>
+</ol>
+<p>写代码，就像写作，而设计 API 好比列提纲。勤写、勤思，了解前人的模式、套路，学习一些流行库的设计方法，掌握英语、提高语感……相信大家都能设计出卓越的 API。</p>
+<p>最后，附上 API 设计的经典原则：</p>
+<blockquote>
+<p>Think about future, design with flexibility, but only implement for production.</p>
+</blockquote>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><ol>
+<li><a href="https://msdn.microsoft.com/en-us/library/ms229042(v=vs.110).aspx" target="_blank" rel="noopener">Framework Design Guidelines</a></li>
+<li><a href="https://github.com/lifesinger/blog/issues/164" target="_blank" rel="noopener">Page Visibility 的 API 设计</a></li>
+<li><a href="https://github.com/lifesinger/blog/issues/119" target="_blank" rel="noopener">我心目中的优秀 API</a></li>
+<li><a href="https://github.com/ryanmcdermott/clean-code-javascript" target="_blank" rel="noopener">Clean Code JavaScript</a></li>
+</ol>
+<hr>
+<p>题图：<a href="https://www.flickr.com/photos/132889348@N07/20013034943" target="_blank" rel="noopener">只是一张符合上下文的图片，并没有更深的含义</a>。</p>
+<p>花絮：由于文章很长，在编写过程中我也不由得发生了「同一个意思却使用多种表达方式」的情况。某些时候这是必要的 —— 可以丰富文字的多样性；而有些时候，则显得全文缺乏一致性。在发表本文之前，我搜索了这些词语：「调用者」、「调用方」、「引用者」、「使用者」，然后将它们统一修改为我们熟悉的名字：「用户」。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/02/16/a-guide-to-api-design/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/02/16/a-guide-to-api-design/" data-id="cjt6lbxwx0009jeu13izu9sin" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/02/16/a-guide-to-api-design/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/API-设计/">API 设计</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/03/02/thinking-in-request-animation-frame/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          浅析 requestAnimationFrame
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/02/11/why-rax/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Why Rax?</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

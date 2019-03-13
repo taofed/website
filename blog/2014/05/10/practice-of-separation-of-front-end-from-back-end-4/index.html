@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前后端分离的思考与实践（四） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="前后端分离模式下的安全解决方案前言 在前后端分离的开发模式中，从开发的角色和职能上来讲，一个最明显的变化就是：以往传统中，只负责浏览器环境中开发的前端同学，需要涉猎到服务端层面，编写服务端代码。而摆在面前的一个基础性问题就是如何保障 Web 安全？  本文就在前后端分离模式的架构下，针对前端在 Web 开发中，所遇到的安全问题以及应对措施和注意事项，并提出解决方案。 跨站脚本攻击（XSS）的防御">
+<meta name="keywords" content="Nodes.js,Midway">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前后端分离的思考与实践（四）">
+<meta property="og:url" content="http://taobaofed.org/blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="前后端分离模式下的安全解决方案前言 在前后端分离的开发模式中，从开发的角色和职能上来讲，一个最明显的变化就是：以往传统中，只负责浏览器环境中开发的前端同学，需要涉猎到服务端层面，编写服务端代码。而摆在面前的一个基础性问题就是如何保障 Web 安全？  本文就在前后端分离模式的架构下，针对前端在 Web 开发中，所遇到的安全问题以及应对措施和注意事项，并提出解决方案。 跨站脚本攻击（XSS）的防御">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1XVylQpXXXXcsapXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1dw6nPVXXXXb4XXXXXXXXXXXX-1432-994.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前后端分离的思考与实践（四）">
+<meta name="twitter:description" content="前后端分离模式下的安全解决方案前言 在前后端分离的开发模式中，从开发的角色和职能上来讲，一个最明显的变化就是：以往传统中，只负责浏览器环境中开发的前端同学，需要涉猎到服务端层面，编写服务端代码。而摆在面前的一个基础性问题就是如何保障 Web 安全？  本文就在前后端分离模式的架构下，针对前端在 Web 开发中，所遇到的安全问题以及应对措施和注意事项，并提出解决方案。 跨站脚本攻击（XSS）的防御">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1XVylQpXXXXcsapXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-practice-of-separation-of-front-end-from-back-end-4" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前后端分离的思考与实践（四）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: admin</span>
+        
+        <span>发表于: <a href="/blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/" class="article-date">
+  <time datetime="2014-05-09T17:42:00.000Z" itemprop="datePublished">2014-05-10</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1XVylQpXXXXcsapXXXXXXXXXX-900-500.jpg" alt="前后端分离的思考与实践（四）"></p>
+<h2 id="前后端分离模式下的安全解决方案"><a href="#前后端分离模式下的安全解决方案" class="headerlink" title="前后端分离模式下的安全解决方案"></a>前后端分离模式下的安全解决方案</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote>
+<p>在前后端分离的开发模式中，从开发的角色和职能上来讲，一个最明显的变化就是：以往传统中，只负责浏览器环境中开发的前端同学，需要涉猎到服务端层面，编写服务端代码。而摆在面前的一个基础性问题就是如何保障 Web 安全？</p>
+</blockquote>
+<p>本文就在前后端分离模式的架构下，针对前端在 Web 开发中，所遇到的安全问题以及应对措施和注意事项，并提出解决方案。</p>
+<h2 id="跨站脚本攻击（XSS）的防御"><a href="#跨站脚本攻击（XSS）的防御" class="headerlink" title="跨站脚本攻击（XSS）的防御"></a>跨站脚本攻击（XSS）的防御</h2><h4 id="问题及解决思路"><a href="#问题及解决思路" class="headerlink" title="问题及解决思路"></a>问题及解决思路</h4><p>跨站脚本攻击（XSS，Cross-site scripting）是最常见和基本的攻击 Web 网站的方法。攻击者可以在网页上发布包含攻击性代码的数据，当浏览者看到此网页时，特定的脚本就会以浏览者用户的身份和权限来执行。通过 XSS 可以比较容易地修改用户数据、窃取用户信息以及造成其它类型的攻击，例如：CSRF 攻击。</p>
+<p>预防 XSS 攻击的基本方法是：确保任何被输出到 HTML 页面中的数据以 HTML 的方式进行转义（HTML escape）。例如下面的模板代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">textarea</span> <span class="attr">name</span>=<span class="string">"description"</span>&gt;</span>$description<span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这段代码中的 <code>$description</code> 为模板的变量（不同模板中定义的变量语法不同，这里只是示意一下），由用户提交的数据，那么攻击者可以输入一段包含 JavaScript 的代码，使得上述模板语句的结果变成如下的结果：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">textarea</span> <span class="attr">name</span>=<span class="string">"description"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">textarea</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="string">'hello'</span>)<span class="string">'</span></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>上述代码，在浏览器中渲染，将会执行 JavaScript 代码并在屏幕上 alert hello。当然这个代码是无害的，但攻击者完全可以创建一个 JavaScript 来修改用户资料或者窃取 cookie 数据。</p>
+<p>解决方法很简单，就是将 <code>$description</code> 的值进行 HTML escape，转义后的输出代码如下</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">textarea</span> <span class="attr">name</span>=<span class="string">"description"</span>&gt;</span></span><br><span class="line">&amp;lt;/textarea&amp;gt;&amp;lt;script&amp;gt;alert(&amp;quot;hello!&amp;quot;)&amp;lt;/script&amp;gt;</span><br><span class="line"><span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>以上经过转义后的 HTML 代码是没有任何危害的。</p>
+<h2 id="Midway-的解决方案"><a href="#Midway-的解决方案" class="headerlink" title="Midway 的解决方案"></a>Midway 的解决方案</h2><h3 id="转义页面中所有用户输出的数据"><a href="#转义页面中所有用户输出的数据" class="headerlink" title="转义页面中所有用户输出的数据"></a>转义页面中所有用户输出的数据</h3><p>对数据进行转义有以下几种情况和方法：</p>
+<h4 id="1-使用模板内部提供的机制进行转义"><a href="#1-使用模板内部提供的机制进行转义" class="headerlink" title="1. 使用模板内部提供的机制进行转义"></a>1. 使用模板内部提供的机制进行转义</h4><p>中途岛内部使用 KISSY XTemplate 作为模板语言。</p>
+<p>在 XTemplate 实现中，语法上使用两个中括号（<code>{{val}}</code>）解析模板数据，默认既是对数据进行 HTML 转义的，所以开发者可以这样写模板：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">textarea</span> <span class="attr">name</span>=<span class="string">"description"</span>&gt;</span>&#123;&#123;description&#125;&#125;<span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在 XTemplate 中，如果不希望输出的数据被转义，需要使用三个中括号（<code>{{{val}}}</code>）。</p>
+<h4 id="2-在Midway中明确的调用转义函数"><a href="#2-在Midway中明确的调用转义函数" class="headerlink" title="2. 在Midway中明确的调用转义函数"></a>2. 在Midway中明确的调用转义函数</h4><p>开发者可以在 Node.js 程序或者模板中，直接调用 Midway 提供的 HTML 转义方法，显示的对数据进行转义，如下：</p>
+<p>方法1：在 Node.js 程序中对数据进行 HTML 转义</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Security= <span class="built_in">require</span>(<span class="string">'midway-security'</span>);</span><br><span class="line"><span class="comment">//data from server，eg &#123;html:'&lt;/textarea&gt;'，other:""&#125;</span></span><br><span class="line">data.html =Security.escapeHtml(data.html);</span><br><span class="line">xtpl = xtpl.render(data);</span><br></pre></td></tr></table></figure>
+<p>方法2：在模板中对 HTML 数据进行 HTML 转义</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">textarea</span> <span class="attr">name</span>=<span class="string">"description"</span>&gt;</span>Security.escapeHtml(&#123;&#123;&#123;description&#125;&#125;&#125;)<span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>注意：只有当模板内部没有对数据进行转义的时候才使用 <code>Security.escapeHtml</code> 进行转义。 否则，模板内部和程序会两次转义叠加，导致不符合预期的输出。</p>
+<p>推荐：如果使用 XTemplate，建议直接使用模板内置的 <code>{{}}</code> 进行转义； 如果使用其他模板，建议使用 <code>Security.escapeHtml</code> 进行转义。</p>
+<h3 id="过滤页面中用户输出的富文本"><a href="#过滤页面中用户输出的富文本" class="headerlink" title="过滤页面中用户输出的富文本"></a>过滤页面中用户输出的富文本</h3><p>你可能会想到：“其实我就是想输出富文本，比如一些留言板、论坛给用户提供一些简单的字体大小、颜色、背景等功能，那么我该如何处理这样的富文本来防止 XSS 呢？”</p>
+<h4 id="1-使用-Midway-中-Security-提供的-richText-函数"><a href="#1-使用-Midway-中-Security-提供的-richText-函数" class="headerlink" title="1. 使用 Midway 中 Security 提供的 richText 函数"></a>1. 使用 Midway 中 Security 提供的 richText 函数</h4><p>Midway 中提供了 richText 方法，专门用来过滤富文本，防止 XSS、钓鱼、cookie 窃取等漏洞。</p>
+<p>有一个留言板，模板代码可能如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"message-board"</span>&gt;</span></span><br><span class="line">&#123;&#123;&#123;message&#125;&#125;&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>因为 message 是用户的输入数据，其留言板的内容，包含了富文本信息，所以这里 XTemplate 中，使用了三个大括号，默认不进行 HTML 转义；那么用户输入的数据假如如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"http://eval.com/eval.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">"color:red;font-size:20px;position:fixed;"</span>&gt;</span>我在留言中<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>上述的富文本数据如果直接输出到页面中，必然会导致 <code>eval.com</code> 站点的 JS 注入到当前页面中，造成了 XSS 攻击。为了防止这个漏洞，我们只要在模板或者程序中，调用 <code>Security.richText</code> 方法，处理用户输入的富文本。</p>
+<p>调用方法与 <code>escapeHtml</code> 类似，有如下两种方式</p>
+<p>方法1: 直接在 Node.js 程序中调用</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">message = Security.richText(message);</span><br><span class="line"><span class="keyword">var</span> html = xtpl.render(message);</span><br></pre></td></tr></table></figure>
+<p>方法2： 在模板中调用</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"message-board"</span>&gt;</span></span><br><span class="line">Security.richText(&#123;&#123;&#123;message&#125;&#125;&#125;)</span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>通过调用 Security 的 richText 方法后，最终的输出如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"message-board"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">span</span> <span class="attr">style</span>=<span class="string">"color:red;font-size:20px;"</span>&gt;</span>我在留言中<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以看出，首先：会造成 XSS 攻击的 script 标签被直接过滤掉；同时 style 标签中 CSS 属性 <code>position:fixed;</code> 样式也被过滤了。最终输出了无害的 <code>HTML</code> 富文本。</p>
+<h3 id="了解其他可能导致-XSS-攻击的途径"><a href="#了解其他可能导致-XSS-攻击的途径" class="headerlink" title="了解其他可能导致 XSS 攻击的途径"></a>了解其他可能导致 XSS 攻击的途径</h3><p>除了在页面的模板中可能存在 XSS 攻击之外，在 Web 应用中还有其他几个途径也可能会有风险。</p>
+<h4 id="1-出错页面的漏洞"><a href="#1-出错页面的漏洞" class="headerlink" title="1. 出错页面的漏洞"></a>1. 出错页面的漏洞</h4><p>一个页面如果找不到，系统可能会报一个 <code>404 Not Found</code> 的错误，例如：<a href="http://localhost/page/not/found" target="_blank" rel="noopener">http://localhost/page/not/found</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">404 NotFound</span><br><span class="line">Page /page/not/found does not exsit</span><br></pre></td></tr></table></figure>
+<p>很显然：攻击者可以利用这个页面，构造一个类似这样的连接，<code>http://localhost/%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E</code>，并引诱受害者点击 ；假如出错页面未对输出变量进行转义的话，那么连接中隐藏的 <code>&lt;script&gt;alert(&#39;hello&#39;)&lt;/script&gt;</code> 将会被执行。</p>
+<p>在 Express 中，发送一个 404 页面的方法如下</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">res.send(<span class="number">404</span>，<span class="string">'Sorry，we don\'t find that!'</span>)</span><br></pre></td></tr></table></figure>
+<p>这里就需要开发者注意错误页面（404 或者其他错误状态）的处理方式。如果错误信息的返回内容带有路径信息（其实更准确的讲，是用户输入信息），就一定要进行 <code>escapeHtml</code> 了。</p>
+<p>后续，错误处理的安全机制，会在 <code>Midway</code> 框架层面中完成。</p>
+<h2 id="Midway-解决方案的补充说明"><a href="#Midway-解决方案的补充说明" class="headerlink" title="Midway 解决方案的补充说明"></a>Midway 解决方案的补充说明</h2><h3 id="其他模板引擎"><a href="#其他模板引擎" class="headerlink" title="其他模板引擎"></a>其他模板引擎</h3><p>Midway 默认支持 XTemplate 模板，但将来也有可能支持其他模板：如 jade、mustache、ejs 等。目前在主流模板中，都提供了默认转义和不转义的输出变量写法，需要开发者特别留意其安全性。</p>
+<h3 id="关于-escape-的其他支持"><a href="#关于-escape-的其他支持" class="headerlink" title="关于 escape 的其他支持"></a>关于 escape 的其他支持</h3><p>除了对页面中输出的普通数据和富文本数据，一些场景中也还包含其他可能需要转义的情况，Midway 提供了如下几个常用的转义方法，供开发者使用：</p>
+<ul>
+<li>escapeHtml 过滤指定的 HTML 中的字符，防 XSS 漏洞</li>
+<li>jsEncode 对输入的 String 进行 JavaScript 转义 对中文进行 unicode 转义，单引号，双引号转义</li>
+<li>escapeJson 不破坏 JSON 结构的 escape 函数，只对 json 结构中 name 和 vaule 做 escapeHtml 处理</li>
+<li>escapeJsonForJsVar 可以理解就是 jsEncode + escapeJson</li>
+</ul>
+<p>例子如下</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> jsonText = <span class="string">'&#123;"&lt;script&gt;":"&lt;script&gt;"&#125;'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(SecurityUtil.escapeJson(jsonText)); <span class="comment">// &#123;"&amp;lt;script&amp;gt;":"&amp;lt;script&amp;gt;"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> jsonText =<span class="string">'&#123;"你好":"&lt;script&gt;"&#125;'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(SecurityUtil.escapeJsonForJsVar(jsonText)); <span class="comment">//&#123;\"\u4f60\u597d\":\"&amp;lt;script&amp;gt;\"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> str =<span class="string">"alert(\"你好\")"</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(SecurityUtil.jsEncode(str)); <span class="comment">// alert(\"\u4f60\u597d\")</span></span><br></pre></td></tr></table></figure>
+<h2 id="跨站请求伪造攻击（CSRF）的预防"><a href="#跨站请求伪造攻击（CSRF）的预防" class="headerlink" title="跨站请求伪造攻击（CSRF）的预防"></a>跨站请求伪造攻击（CSRF）的预防</h2><h3 id="问题及解决思路-1"><a href="#问题及解决思路-1" class="headerlink" title="问题及解决思路"></a>问题及解决思路</h3><p><em>名词解释</em>： 表单：泛指浏览器端用于客户端提交数据的形式；包括 a 标签、AJAX 提交数据、form 表单提交数据等，而非对等于 HTML 中的 form 标签。</p>
+<p>跨站请求伪造（CSRF，Cross-site request forgery）是另一种常见的攻击。攻击者通过各种方法伪造一个请求，模仿用户提交表单的行为，从而达到修改用户的数据或执行特定任务的目的。</p>
+<p>为了假冒用户的身份，CSRF 攻击常常和 XSS 攻击配合起来做，但也可以通过其它手段：例如诱使用户点击一个包含攻击的链接。</p>
+<p>解决 CSRF 攻击的思路分如下两个步骤</p>
+<ul>
+<li>增加攻击的难度。GET 请求是很容易创建的，用户点击一个链接就可以发起 GET 类型的请求，而 POST 请求相对比较难，攻击者往往需要借助 JavaScript 才能实现；因此，确保 form 表单或者服务端接口只接受 POST 类型的提交请求，可以增加系统的安全性。</li>
+<li>对请求进行认证，确保该请求确实是用户本人填写表单或者发起请求并提交的，而不是第三者伪造的。</li>
+</ul>
+<p>一个正常用户修改网站信息的过程如下</p>
+<ul>
+<li>用户请求修改信息(1) -&gt; 网站显示用户修改信息的表单(2) -&gt; 用户修改信息并提交(3) -&gt; 网站接受用户修改的数据并保存(4)</li>
+</ul>
+<p>而一个 CSRF 攻击则不会走这条路线，而是直接伪造第 2 步用户提交信息</p>
+<ul>
+<li>直接跳到第 2 步(1) -&gt; 伪造要修改的信息并提交(2) -&gt; 网站接受攻击者修改参数数据并保存(3)</li>
+</ul>
+<p>只要能够区分这两种情况，就能够预防 CSRF 攻击。那么如何区分呢？ 就是对第2步所提交的信息进行验证，确保数据源自第一步的表单。具体的验证过程如下：</p>
+<ul>
+<li>用户请求修改信息(1) -&gt; 网站显示用于修改信息的空白表单，表单中包含特殊的 token 同时把 token 保存在 session 中(2) -&gt; 用户修改信息并提交，同时发回 token 信息到服务端(3) -&gt; 网站比对用户发回的 token 和 session 中的 token，应该一致，则接受用户修改的数据，并保存</li>
+</ul>
+<p>这样，如果攻击者伪造要修改的信息并提交，是没办法直接访问到 session 的，所以也没办法拿到实际的 token 值；请求发送到服务端，服务端进行 token 校验的时候，发现不一致，则直接拒绝此次请求。</p>
+<h2 id="Midway-解决方案"><a href="#Midway-解决方案" class="headerlink" title="Midway 解决方案"></a>Midway 解决方案</h2><h3 id="禁用-GET-提交表单"><a href="#禁用-GET-提交表单" class="headerlink" title="禁用 GET 提交表单"></a>禁用 GET 提交表单</h3><p>如果服务端不接受 GET 方式提交的表单数据，那么将会给攻击者带来非常大的难度；因为在页面上构造一个 a 标签 href 属性或者 img 标签 src 属性来构造一个请求是非常容易的，但是如果要 POST 提交，就必须要通过脚本才可以实现。</p>
+<h3 id="用CSRF-token验证请求"><a href="#用CSRF-token验证请求" class="headerlink" title="用CSRF token验证请求"></a>用CSRF token验证请求</h3><p>因为 Midway 不涉及到淘宝分布式 session 及 token 校验这一层面逻辑，所以在 Midway 框架中，只将 token 在 server 和客户端之间进行转发，本身不做实际的校验工作。流程如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1dw6nPVXXXXb4XXXXXXXXXXXX-1432-994.jpg" alt></p>
+<p>后续：在 Midway 中，Node.js 和淘宝的分布式 session 对接后，可以考虑在 Midway 这一层自动进行 token 校验；毕竟安全校验越早进行，成本也会更低。</p>
+<p>建议：在 Midway 中，可以判断是否 request 中有 token 的值，如果一个修改操作，没有 token，可以直接在 Midway 层认为是不安全的，将请求丢弃掉。</p>
+<h2 id="其他安全问题"><a href="#其他安全问题" class="headerlink" title="其他安全问题"></a>其他安全问题</h2><p>关于常见的 Web 安全问题，还有如下几种，这里只做一些简介，后续会持续继承到 Midway framework 中。</p>
+<ul>
+<li>HTTP Headers安全<ul>
+<li>CRLF Injection 攻击者想办法在响应头中注入两个 CRLF 特殊字符，导致响应数据格式异常，从而注入 script 等</li>
+<li>拒绝访问攻击 每个请求因为都会默认带上 cookie，而服务器一般都会限制 cookie 的大小，这就导致了，如果用户客户端 cookie 被设置成了超过某个阀值，那么用户就再也无法访问网站了</li>
+<li>cookie 防窃取 一般 cookie 窃取都是通过 JavaScript（XSS 漏洞） 获取到的，所以尽量将 cookie 设置成 <code>http only</code>，并且加上 cookie 过期时间</li>
+</ul>
+</li>
+</ul>
+<p>关于 cookie 的安全问题，之前 Webx 已经有较好的解决方案；此次 Midway 不负责 cookie 的设置和校验等工作，只负责转发到 Webx 层面进行 check</p>
+<h2 id="关于Node-js"><a href="#关于Node-js" class="headerlink" title="关于Node.js"></a>关于Node.js</h2><p>XSS 等注入性漏洞是所有漏洞中最容易被忽略，占互联网总攻击的70%以上；开发者编写 Node.js 代码时，要时刻提醒自己，永远不要相信用户的输入。</p>
+<p>比如如下几个例子。</p>
+<ul>
+<li><code>var mod = fs.readFileSync(&#39;path&#39;);</code> 如果 path 来源于用户输入，那么假设用户输入 <code>/etc/password</code>，则会读取到不应该读取的内容，造成密码泄漏风险</li>
+<li><code>var result = eval(jsonVal);</code> 一定要确保 jsonVal 是 JSON，而不是用户的输入</li>
+<li>…… 其他可能包含用户输入的地方，一定要确认用户的输入是我们期望的值</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>前后端分离模式下，可以让传统的前端开发人员开始编写后端代码，虽然从架构上讲，只负责模板这一层，但也会接触大量的后端代码；所以安全对于前端来说，这是一个不小的挑战。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/DUNrQdEuYws" target="_blank" rel="noopener">https://unsplash.com/photos/DUNrQdEuYws</a> By @Lucien Huang</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/" data-id="cjt6lby0t0099jeu1rn2r9sax" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Midway/">Midway</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodes-js/">Nodes.js</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2014/05/17/practice-of-separation-of-front-end-from-back-end-5/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前后端分离的思考与实践（五）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2014/04/14/practice-of-separation-of-front-end-from-back-end-3/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前后端分离的思考与实践（三）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

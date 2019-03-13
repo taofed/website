@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>无线性能优化：域名收敛 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="这两天相信有不少同学被一个 93 的数字搞得“要死要活”的，93 是无线页面在做发布时强制要求的性能检测达标分数，而检测规则中第一条就是要将图片域名收敛到 gw.alicdn.com 。 为什么要将域名收敛呢？ PC 时代不是为了突破浏览器的域名并发限制，像图片这种还专门做了多个域名吗？好吧，你的回答可能是域名解析慢。那为什么慢？ 你的回答可能是：“这，这，这，就是慢呗”。 好，成功的挖下了一个">
+<meta name="keywords" content="无线,性能优化,DNS,域名收敛">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无线性能优化：域名收敛">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/16/h5-performance-optimization-and-domain-convergence/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="这两天相信有不少同学被一个 93 的数字搞得“要死要活”的，93 是无线页面在做发布时强制要求的性能检测达标分数，而检测规则中第一条就是要将图片域名收敛到 gw.alicdn.com 。 为什么要将域名收敛呢？ PC 时代不是为了突破浏览器的域名并发限制，像图片这种还专门做了多个域名吗？好吧，你的回答可能是域名解析慢。那为什么慢？ 你的回答可能是：“这，这，这，就是慢呗”。 好，成功的挖下了一个">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB10DZbKVXXXXbCXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="无线性能优化：域名收敛">
+<meta name="twitter:description" content="这两天相信有不少同学被一个 93 的数字搞得“要死要活”的，93 是无线页面在做发布时强制要求的性能检测达标分数，而检测规则中第一条就是要将图片域名收敛到 gw.alicdn.com 。 为什么要将域名收敛呢？ PC 时代不是为了突破浏览器的域名并发限制，像图片这种还专门做了多个域名吗？好吧，你的回答可能是域名解析慢。那为什么慢？ 你的回答可能是：“这，这，这，就是慢呗”。 好，成功的挖下了一个">
+<meta name="twitter:image" content="https://gw.alicdn.com/tps/TB10DZbKVXXXXbCXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-h5-performance-optimization-and-domain-convergence" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      无线性能优化：域名收敛
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 正寻</span>
+        
+        <span>发表于: <a href="/blog/2015/12/16/h5-performance-optimization-and-domain-convergence/" class="article-date">
+  <time datetime="2015-12-16T11:04:53.000Z" itemprop="datePublished">2015-12-16</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tps/TB10DZbKVXXXXbCXpXXXXXXXXXX-900-500.jpg" alt="无线性能优化：域名收敛"></p>
+<p>这两天相信有不少同学被一个 93 的数字搞得“要死要活”的，93 是无线页面在做发布时强制要求的性能检测达标分数，而检测规则中第一条就是要将图片域名收敛到 <code>gw.alicdn.com</code> 。</p>
+<p>为什么要将域名收敛呢？ PC 时代不是为了突破浏览器的域名并发限制，像图片这种还专门做了多个域名吗？好吧，你的回答可能是域名解析慢。那为什么慢？ 你的回答可能是：“这，这，这，就是慢呗”。</p>
+<p>好，成功的挖下了一个坑，我们尝试把挖的坑填一填。</p>
+<p>说到域名，就要从 DNS 讲起，这是一个老生常谈的问题，但还是有一批新生呢^_^.</p>
+<p>DNS 是一个诞生于 1983  年的老协议了，算了算，比我年纪都大好多，是一个应用非常广泛的基础协议。我们从以下几点简单了解下 DNS 的一些基础知识，进而看一下为什么要做域名收敛。</p>
+<ol>
+<li>域名结构</li>
+<li>DNS 查询方式</li>
+<li>HttpDNS 是什么鬼</li>
+</ol>
+<h2 id="1-域名结构"><a href="#1-域名结构" class="headerlink" title="1. 域名结构"></a>1. 域名结构</h2><p>你也许已经知道域名的结构（或者叫命名空间）是一个树状结构，有树就得有根，这个根是一个‘.’（dot）<br>说到树状结构其实和我们经常打交道的 *nix 下的目录结构是一个道理。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p root/&#123;com,net,org&#125;/&#123;taobao,tmall&#125;/&#123;www,detail&#125;</span><br><span class="line"></span><br><span class="line">[22:53:23]    ~ » tree root</span><br><span class="line">root</span><br><span class="line">├── com</span><br><span class="line">│   ├── taobao</span><br><span class="line">│   │   ├── detail</span><br><span class="line">│   │   └── www</span><br><span class="line">│   └── tmall</span><br><span class="line">│       ├── detail</span><br><span class="line">│       └── www</span><br><span class="line">├── net</span><br><span class="line">│   ├── taobao</span><br><span class="line">│   │   ├── detail</span><br><span class="line">│   │   └── www</span><br><span class="line">│   └── tmall</span><br><span class="line">│       ├── detail</span><br><span class="line">│       └── www</span><br><span class="line">└── org</span><br><span class="line">    ├── taobao</span><br><span class="line">    │   ├── detail</span><br><span class="line">    │   └── www</span><br><span class="line">    └── tmall</span><br><span class="line">        ├── detail</span><br><span class="line">        └── www</span><br></pre></td></tr></table></figure>
+<p>如上面所示，域名的层级和上面的目录结构是一致的，我们平常对 root 用到的不多，但并不代表它不存在，比如 <code>www.taobao.com</code> 完整的书写形式其实是 <code>www.taobao.com.</code>，对，最后那个点就是根，只不过是浏览器或者系统的解析器自动帮你补全了。我们要想获取根域都有那些，可以在终端下直接使用 <code>dig</code> 命令，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">dig</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;.				IN	NS</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">.			388538	IN	NS	l.root-servers.net.</span><br><span class="line">.			388538	IN	NS	b.root-servers.net.</span><br><span class="line">.			388538	IN	NS	e.root-servers.net.</span><br><span class="line">.			388538	IN	NS	i.root-servers.net.</span><br><span class="line">.			388538	IN	NS	h.root-servers.net.</span><br><span class="line">.			388538	IN	NS	j.root-servers.net.</span><br><span class="line">.			388538	IN	NS	g.root-servers.net.</span><br><span class="line">.			388538	IN	NS	d.root-servers.net.</span><br><span class="line">.			388538	IN	NS	c.root-servers.net.</span><br><span class="line">.			388538	IN	NS	k.root-servers.net.</span><br><span class="line">.			388538	IN	NS	a.root-servers.net.</span><br><span class="line">.			388538	IN	NS	m.root-servers.net.</span><br><span class="line">.			388538	IN	NS	f.root-servers.net.</span><br></pre></td></tr></table></figure>
+<p>可以看到有 13 个，大部分都是在国外的（也有镜像），可以参见 <a href="https://zh.wikipedia.org/wiki/%E6%A0%B9%E7%B6%B2%E5%9F%9F%E5%90%8D%E7%A8%B1%E4%BC%BA%E6%9C%8D%E5%99%A8" target="_blank" rel="noopener">维基百科</a> 。</p>
+<p>根据上面的目录结构，说完根，就该说顶级域了。按照功能划分，顶级域划分为通用顶级域 （com、org、net 等）和国家与地区顶级域（cn、hk、us、tw 等）。</p>
+<p>上面的顶级域是不开放给普通人和一般组织去申请的，但最近放开了， 比如咱们阿里云就申请了一个 <code>.xin</code> 的顶级域。我们看一下顶级域的解析路径，同样使用 dig 命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">[23:00:58]    ~ » dig com +trace</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; com +trace</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.			388325	IN	NS	g.root-servers.net.</span><br><span class="line">.			388325	IN	NS	j.root-servers.net.</span><br><span class="line">.			388325	IN	NS	l.root-servers.net.</span><br><span class="line">.			388325	IN	NS	a.root-servers.net.</span><br><span class="line">.			388325	IN	NS	e.root-servers.net.</span><br><span class="line">.			388325	IN	NS	h.root-servers.net.</span><br><span class="line">.			388325	IN	NS	d.root-servers.net.</span><br><span class="line">.			388325	IN	NS	c.root-servers.net.</span><br><span class="line">.			388325	IN	NS	b.root-servers.net.</span><br><span class="line">.			388325	IN	NS	m.root-servers.net.</span><br><span class="line">.			388325	IN	NS	i.root-servers.net.</span><br><span class="line">.			388325	IN	NS	k.root-servers.net.</span><br><span class="line">.			388325	IN	NS	f.root-servers.net.</span><br><span class="line">;; Received 496 bytes from 192.168.1.1#53(192.168.1.1) in 161 ms</span><br><span class="line"></span><br><span class="line">com.			172800	IN	NS	a.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	b.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	c.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	d.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	e.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	f.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	g.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	h.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	i.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	j.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	k.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	l.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	m.gtld-servers.net.</span><br></pre></td></tr></table></figure>
+<p>我们加了一个 trace 的参数，就是跟踪解析过程。可以看到，先去了根，然后根告诉说你找的 com 在 这里，就是 <code>com.            172800    IN    NS [a-m].gtld-servers.net.</code>。</p>
+<p>这里有必要提及一个概念，就是上面出现的 NS,既 NameServer，大部分情况下又叫权威名称服务器简称权威。<br>什么是权威呢，通俗点讲其实是某些域的权威，也就是权威上面有这些域的最新，最全的数据，所有这些域的数据都应该以此为准（只有权威可以增删改这些域的数据），就像上面 <code>dig com +trace</code>  的结果可以看到，com 的权威是上面的 13 个根域。同理，所有的顶级域（cn、org、net 等等）的权威都是根域。</p>
+<p>言归正传，说完 com，下面才是 taobao，tmall ，这些才是我们熟悉的一级域（如果不算根，也可以叫二级域），看上面的目录结构，他是在 com 等顶级域目录的下面的，我们看一下解析过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">[23:15:00]    ~ » dig taobao.com. +trace</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.8.3-P1 &lt;&lt;&gt;&gt; taobao.com. +trace</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.			387246	IN	NS	l.root-servers.net.</span><br><span class="line">.			387246	IN	NS	d.root-servers.net.</span><br><span class="line">.			387246	IN	NS	h.root-servers.net.</span><br><span class="line">.			387246	IN	NS	e.root-servers.net.</span><br><span class="line">.			387246	IN	NS	b.root-servers.net.</span><br><span class="line">.			387246	IN	NS	m.root-servers.net.</span><br><span class="line">.			387246	IN	NS	a.root-servers.net.</span><br><span class="line">.			387246	IN	NS	f.root-servers.net.</span><br><span class="line">.			387246	IN	NS	g.root-servers.net.</span><br><span class="line">.			387246	IN	NS	c.root-servers.net.</span><br><span class="line">.			387246	IN	NS	k.root-servers.net.</span><br><span class="line">.			387246	IN	NS	i.root-servers.net.</span><br><span class="line">.			387246	IN	NS	j.root-servers.net.</span><br><span class="line">;; Received 496 bytes from 124.207.160.106#53(124.207.160.106) in 26 ms</span><br><span class="line"></span><br><span class="line">com.			172800	IN	NS	a.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	b.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	c.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	d.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	e.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	f.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	g.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	h.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	i.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	j.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	k.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	l.gtld-servers.net.</span><br><span class="line">com.			172800	IN	NS	m.gtld-servers.net.</span><br><span class="line">;; Received 488 bytes from 192.58.128.30#53(192.58.128.30) in 501 ms</span><br><span class="line"></span><br><span class="line">taobao.com.		172800	IN	NS	ns4.taobao.com.</span><br><span class="line">taobao.com.		172800	IN	NS	ns5.taobao.com.</span><br><span class="line">taobao.com.		172800	IN	NS	ns6.taobao.com.</span><br><span class="line">taobao.com.		172800	IN	NS	ns7.taobao.com.</span><br></pre></td></tr></table></figure>
+<p>可以看到，比 查询 com 的时候 多了 <code>taobao.com. 172800    IN    NS    ns[4-7].taobao.com.</code> 这些， 到现在， taobao.com 解析过程可以描述为：</p>
+<ol>
+<li>我想知道 taobao.com 的信息，好嘞，先去根上看看。</li>
+<li>来到了根这儿，根一看，哦，taobao.com 是 com 的小弟，我只有 com 的信息，你去问问 com 吧。</li>
+<li>好嘞，屁颠屁颠的根据根给的信息，去找 com。</li>
+<li>com 哥，taobao.com 在你这里吧，稍等，我看下，恩，在的，不过我只记录了他们家权威的家庭住址，至于家里有几个娃几条狗我就不清楚了，你根据这个信息去找吧。</li>
+<li>好嘞，然后辗转来到了杭州，感叹了一句，原来你在这里啊。</li>
+</ol>
+<p>上面的描述，其实就是 DNS 的迭代解析的一个概念。</p>
+<p>同理，我们看下 <code>www.taobao.com.</code> 的解析过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">taobao.com.		172800	IN	NS	ns4.taobao.com.</span><br><span class="line">taobao.com.		172800	IN	NS	ns5.taobao.com.</span><br><span class="line">taobao.com.		172800	IN	NS	ns6.taobao.com.</span><br><span class="line">taobao.com.		172800	IN	NS	ns7.taobao.com.</span><br><span class="line">;; Received 184 bytes from 192.43.172.30#53(192.43.172.30) in 181 ms</span><br><span class="line"></span><br><span class="line">www.taobao.com.		600	IN	CNAME www.taobao.com.danuoyi.tbcache.com.</span><br><span class="line">danuoyi.tbcache.com.	10800	IN NS danuoyins8.tbcache.com.</span><br><span class="line">danuoyi.tbcache.com.	10800	IN NS danuoyins4.tbcache.com.</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>上面省略了部分信息，可以看到，到了 taobao.com 之后，才能知道 www 的信息。</p>
+<p>同理也可以知道 taobao.com 的权威是 com  所在的 NS,  <a href="http://www.taobao.com" target="_blank" rel="noopener">www.taobao.com</a> 的权威是 taobao.com 所在的 NS。 </p>
+<h2 id="2-DNS-的解析方式"><a href="#2-DNS-的解析方式" class="headerlink" title="2. DNS 的解析方式"></a>2. DNS 的解析方式</h2><p>上面无形中就说了迭代解析，还有另外一种递归解析方式：只要发出递归查询，服务器必需回答目标 IP 与域名的映射关系。而迭代查询是，服务器收到一次迭代查询回复一次结果，这个结果不一定是目标 IP 与域名的映射关系，也可以是其它 DNS 服务器的地址。</p>
+<p>举个栗子，从客户端到本地 DNS 服务器（又称 Local DNS ，就是你电脑里面配置的或者 DHCP 分配的）是属于递归查询，而  DNS 服务器之间就是的交互查询就是迭代查询。</p>
+<p>简单讲，我想知道 <a href="http://www.taobao.com" target="_blank" rel="noopener">www.taobao.com</a> 的 IP 地址，你发的请求是给本地的 LocalDNS 的，这一段是递归，而 LocalDNS 要会先查看本地缓存（缓存多长时间根据域名的 TTL ），如果没有就会发生上面的迭代请求，直到拿到结果给你。</p>
+<p>可以看到，如果 LocalDNS 本地没有缓存，是费了老鼻子劲了，几乎绕了地球一大圈（稍微夸张）。<br>下面附上在 2G，3G，4G， WIFI  情况下 DNS 递归解析的时间 （ms）：</p>
+<table>
+<thead>
+<tr>
+<th>网络\域</th>
+<th style="text-align:center">com</th>
+<th style="text-align:right">taobao.com</th>
+<th style="text-align:right"><a href="http://www.taobao.com" target="_blank" rel="noopener">www.taobao.com</a></th>
+<th style="text-align:right">总耗时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2G</td>
+<td style="text-align:center">1421</td>
+<td style="text-align:right">2732</td>
+<td style="text-align:right">8166</td>
+<td style="text-align:right">7997</td>
+<td style="text-align:right">20316</td>
+</tr>
+<tr>
+<td>3G</td>
+<td style="text-align:center">748</td>
+<td style="text-align:right">680</td>
+<td style="text-align:right">549</td>
+<td style="text-align:right">58</td>
+<td style="text-align:right">2035</td>
+</tr>
+<tr>
+<td>4G</td>
+<td style="text-align:center">649</td>
+<td style="text-align:right">575</td>
+<td style="text-align:right">454</td>
+<td style="text-align:right">55</td>
+<td style="text-align:right">1733</td>
+</tr>
+<tr>
+<td>WIFI</td>
+<td style="text-align:center">91</td>
+<td style="text-align:right">65</td>
+<td style="text-align:right">201</td>
+<td style="text-align:right">48</td>
+<td style="text-align:right">405</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-HttpDNS-是什么鬼"><a href="#3-HttpDNS-是什么鬼" class="headerlink" title="3. HttpDNS 是什么鬼"></a>3. HttpDNS 是什么鬼</h2><p>上面可以看到，一次域名解析，是挺费时间的，尤其是在 2G， 3G 这种弱网环境，最最关键的是 DNS 请求是走 UDP 的，虽然没有 TCP 三次握手的开销，但是 UDP 是没有保证的，尤其是在弱网环境，说丢就丢了，然后会根据你配置的第二个本地 DNS（一般都会有俩主用和备用，最多看系统限制）去重试，这期间起码 1s 就过去了（重试间隔也因各系统所异）。</p>
+<p>如果顺利，本地 DNS 有缓存，也就是几十 ms 到几百 ms 的事情，不顺利，几秒到十几秒都有可能。</p>
+<p>严格来讲，DNS 才是我们发出去的第一个请求，我们谈 1s 加载，DNS 这一块歇菜了，后面也无从谈起。</p>
+<p><em>所以减少开销就两条路，第一个就是减少 DNS 的请求，第二个就是缩短 DNS 解析路径。</em></p>
+<p>第一个就是做域名收敛的主要原因，相比于 PC 是对于域名的并发限制，无线上来说对并发的要求会弱很多（一般尽量是第一屏，后面使用懒加载）。</p>
+<p>第二个就是缩短解析路径，这里所说的缩短解析路径其实就说各级的缓存：本机的缓存，LocalDNS 的缓存，不过他们或多或少也不靠谱，尤其是运营商的 LocalDNS 给你劫持一下，篡改一下都是常有的事情，于是这个情况下，就有了 HttpDNS。</p>
+<p>HttpDNS 是为了解决移动端 DNS 解析请求而生的，顺便解决 DNS 劫持，合并请求和缓存结果进而提高解析质量。</p>
+<p>HttpDNS 是内置在手淘里面的。这样手淘自己就会做一次缓存，同时也绕过了乱起八糟的递归和迭代查询（因为就像一般的 API  一样直接请求的），大大提高效率。</p>
+<h2 id="4-结论"><a href="#4-结论" class="headerlink" title="4. 结论"></a>4. 结论</h2><ol>
+<li>在移动网络环境下，减少非必要 DNS 请求，将相关域名收敛成一个，可以尝到缓存的红利，进而可以减少打开页面时间</li>
+<li>移动端减少 DNS 解析时间有两种方式：<ul>
+<li>减少 DNS 请求</li>
+<li>缩短 DNS 解析路径</li>
+</ul>
+</li>
+</ol>
+<p>从上面的各种网络环境下 DNS 解析时间对比，减少 DNS 请求是我们做域名收敛的主要原因。HttpDNS 的诞生不仅可以合并请求，缩短 DNS 解析路径，还有防止运营商劫持等功效。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/16/h5-performance-optimization-and-domain-convergence/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/16/h5-performance-optimization-and-domain-convergence/" data-id="cjt6lbxym003rjeu1pnxtto8f" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/16/h5-performance-optimization-and-domain-convergence/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/DNS/">DNS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/域名收敛/">域名收敛</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能优化/">性能优化</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/无线/">无线</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/17/seller-bigpipe/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          新版卖家中心 Bigpipe 实践（一）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/15/nodejs-cluster-cov/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">多进程下的测试覆盖率</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

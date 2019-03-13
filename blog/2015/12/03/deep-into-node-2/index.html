@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Node.js 探秘：求异存同 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="前言在 Node.js 探秘：初识单线程的 Node.js 中，我们了解到，Node.js 基于 libuv 实现了 I/O 的异步操作。所以，我们经常写类似下面的代码： 1234567fs.readFile(&apos;test.txt&apos;, function(err, data) &amp;#123;  if (err) &amp;#123;    //error handle/  &amp;#125;  //do somet">
+<meta name="keywords" content="Node">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node.js 探秘：求异存同">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/03/deep-into-node-2/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="前言在 Node.js 探秘：初识单线程的 Node.js 中，我们了解到，Node.js 基于 libuv 实现了 I/O 的异步操作。所以，我们经常写类似下面的代码： 1234567fs.readFile(&apos;test.txt&apos;, function(err, data) &amp;#123;  if (err) &amp;#123;    //error handle/  &amp;#125;  //do somet">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB11pxrKVXXXXaQXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img4.tbcdn.cn/L1/461/1/c50fa4d59c49e257bd062d296696f4f265ec26ce.jpeg">
+<meta property="og:image" content="http://img1.tbcdn.cn/L1/461/1/0c9d2e9be642d1363fab7fe0582160dfd508374a.jpeg">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/d2b0d7efab8c04636e1f682b425801940faf4eb5.jpeg">
+<meta property="og:image" content="http://img4.tbcdn.cn/L1/461/1/54aae3d9a025398ccfceca0fbe447f393718ad5f.jpeg">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/7e4420f3af9105e533b8d48f44fdaacf0b8a04cf.jpeg">
+<meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/10184bff4df96074c9e17f7a62efcb86357d8a9e.jpeg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node.js 探秘：求异存同">
+<meta name="twitter:description" content="前言在 Node.js 探秘：初识单线程的 Node.js 中，我们了解到，Node.js 基于 libuv 实现了 I/O 的异步操作。所以，我们经常写类似下面的代码： 1234567fs.readFile(&apos;test.txt&apos;, function(err, data) &amp;#123;  if (err) &amp;#123;    //error handle/  &amp;#125;  //do somet">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB11pxrKVXXXXaQXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-deep-into-node-2" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Node.js 探秘：求异存同
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 凌恒</span>
+        
+        <span>发表于: <a href="/blog/2015/12/03/deep-into-node-2/" class="article-date">
+  <time datetime="2015-12-03T11:21:00.000Z" itemprop="datePublished">2015-12-03</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tps/TB11pxrKVXXXXaQXXXXXXXXXXXX-900-500.jpg" alt="Node.js 探秘：求异存同"></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 <a href="http://taobaofed.org/blog/2015/10/29/deep-into-node-1/">Node.js 探秘：初识单线程的 Node.js</a> 中，我们了解到，Node.js 基于 libuv 实现了 I/O 的异步操作。所以，我们经常写类似下面的代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">fs.readFile(<span class="string">'test.txt'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (err) &#123;</span><br><span class="line">    <span class="comment">//error handle/</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//do something with data.</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>通过回调函数来获得想要的结果。</p>
+<p>在我们实际解决问题的时候，往往需要一组操作是有序的，比如：读取配置文件、编写命令行工具等。如果使用回调的方式，会使用很多的回调嵌套，使代码变得很难看。为了解决这个问题，我们引入 Promise、yield 等概念，但今天我们不讨论这些，我们讨论下最简单的解决办法， <strong>同步执行</strong> 以及 Node.js 如何在异步的架构上实现同步的方法。</p>
+<h2 id="使用同步方法"><a href="#使用同步方法" class="headerlink" title="使用同步方法"></a>使用同步方法</h2><p>翻看下 Node.js 的文档，你会看到类似 <code>**Sync</code> 的方法，这些就是 <code>**</code> 对应的同步版本。我们先简单看下如何使用这些方法。</p>
+<p>一般读取文件内容，我们会像文章开头那样异步的处理。如果使用同步方法，则类似于下面这样：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> data = fs.readFileSync(<span class="string">'test.txt'</span>);</span><br><span class="line">  <span class="comment">//do something with data.</span></span><br><span class="line">&#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">  <span class="comment">//error handle.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到使用同步方法后，我们需要的数据会在文件操作后直接返回，而不存在 callback 的异步处理。需要注意的是，像上面那样使用同步方法时，异常内容不会在返回值中返回，它会被抛到环境中，需要使用 <code>try...catch</code> 来捕获处理。如果想在返回值中获取异常，可以传入一个 <code>Buffer</code> 实例来储存 raw data，这样返回值就变成了一个数组，第一个元素是字符串形式的结果，第二个元素是 Error 信息。</p>
+<p>另外，Node.js 在 v0.12 版本之后，实现了同步进程创建的一系列方法，例如：<code>spawnSync</code>，<code>execSync</code> 等，示例如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//异步版本</span></span><br><span class="line">child_process.exec(<span class="string">'ls'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">err, data</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (err) &#123;</span><br><span class="line">    <span class="comment">//error handle</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//do something with data</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//同步版本</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> data = child_process.execSync(<span class="string">'ls'</span>);</span><br><span class="line">  <span class="comment">//do something with data</span></span><br><span class="line">&#125; <span class="keyword">catch</span>(e) &#123;</span><br><span class="line">  <span class="comment">//error handle</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="如何调试-Node-js-源码"><a href="#如何调试-Node-js-源码" class="headerlink" title="如何调试 Node.js 源码"></a>如何调试 Node.js 源码</h2><p>在分析具体内容之前，我们先来做些准备工作。debug 是我们在开发时常用的手段，如果我们在看源码的时候，也能边看，边运行，然后在自己想要的地方停下来，或者按照自己的理解稍作修改，再运行，那一定会大大提高效率，下面笔者介绍下自己的方案（以  <strong>MacOS</strong> 为例）：</p>
+<ol>
+<li>首先需要有一份 Node.js 的源码，使用 <code>git clone</code> <a href="https://github.com/nodejs/node" target="_blank" rel="noopener">Github 的仓库</a> 或者去 <a href="https://nodejs.org/download/release/" target="_blank" rel="noopener">这里</a> 下载压缩包，都可以。</li>
+<li><p>（解压之后）进入源码目录，运行</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./configure</span><br><span class="line">make -j</span><br></pre></td></tr></table></figure>
+ <blockquote style="font-size:16px;"> <code>-j [N]，–jobs[=N]</code> 参数用来提高编译效率，充分利用多核处理器的性能，并行编译，N 为并行的任务数。但它并不是万能的，如果有编译依赖，最好还是用单核编译。</blockquote>
+</li>
+<li><p>使用你习惯的 IDE 来进行 debug，笔者使用的是 CLion。Debug 配置如下图所示：<br><img src="http://img4.tbcdn.cn/L1/461/1/c50fa4d59c49e257bd062d296696f4f265ec26ce.jpeg" alt="Debug 配置"></p>
+<p> 将执行文件指定到 <code>源码目录/out/Release/</code> 目录下的  <strong>node</strong> 执行文件，参数为你需要运行的脚本和相应的参数（比如这里我配置了可以手动调用 <code>gc</code>），之后去掉 Before Launch 中的 build。</p>
+</li>
+<li>然后运行 Debug 模式，就可以通过断点和 LLDB 来调试 Node.js 源码了，如图。<br> <img src="http://img1.tbcdn.cn/L1/461/1/0c9d2e9be642d1363fab7fe0582160dfd508374a.jpeg" alt="Debugging"></li>
+<li>如果需要更改源码，在更改后再次运行 <code>make</code> 即可。</li>
+</ol>
+<h2 id="进入正题"><a href="#进入正题" class="headerlink" title="进入正题"></a>进入正题</h2><p>从 <a href="https://nodejs.org/api/" target="_blank" rel="noopener">Node.js API</a> 文档中，可以看到，只有 <a href="https://nodejs.org/api/fs.html" target="_blank" rel="noopener">File System</a> 和 <a href="https://nodejs.org/api/child_process.html" target="_blank" rel="noopener">Child Process</a> 中有同步的方法，但是两个模块的同步方法实现是不一样的，我们分开来说。</p>
+<h3 id="File-System"><a href="#File-System" class="headerlink" title="File System"></a>File System</h3><p>File System 相关的方法实现都在 <a href="https://github.com/nodejs/node/blob/master/lib/fs.js" target="_blank" rel="noopener">lib/fs.js</a> 和 <a href="https://github.com/nodejs/node/blob/master/src/node_file.cc" target="_blank" rel="noopener">src/node_file.cc</a> 中可以找到。每一个对应的文件操作方法，比如 read、write、link 等等，都有对应的封装。下面以 <code>read</code> 为例进行讲解：</p>
+<p>在 <a href="https://github.com/nodejs/node/blob/master/lib/fs.js" target="_blank" rel="noopener">lib/fs.js</a> 中我们可以看到，<code>fs.read</code>(<a href="https://github.com/nodejs/node/blob/master/lib/fs.js#L587" target="_blank" rel="noopener">#L587</a>) 和 <code>fs.readSync</code>(<a href="https://github.com/nodejs/node/blob/master/lib/fs.js#L633" target="_blank" rel="noopener">#L633</a>) 两个方法实际是很相似的，只不过在调用 C/C++ 层面的 <code>read</code> 方法时，传入的参数不同。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//异步方法</span></span><br><span class="line">fs.read = <span class="function"><span class="keyword">function</span>(<span class="params">fd, buffer, offset, length, position, callback</span>) </span>&#123;</span><br><span class="line">  <span class="comment">//参数处理</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">var</span> req = <span class="keyword">new</span> FSReqWrap();</span><br><span class="line">  req.oncomplete = wrapper;</span><br><span class="line"></span><br><span class="line">  binding.read(fd, buffer, offset, length, position, req);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//同步方法</span></span><br><span class="line">fs.readSync = <span class="function"><span class="keyword">function</span>(<span class="params">fd, buffer, offset, length, position, callback</span>) </span>&#123;</span><br><span class="line">  <span class="comment">//参数处理</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">var</span> r = binding.read(fd, buffer, offset, length, position);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，异步的方法创建了一个  <strong>FSReqWrap</strong> 对象，同时把回调包裹后赋值在它的 <code>oncomplete</code> 属性上。这个对象就是我们之前说到的请求对象，在 Node.js 中几乎所有异步操作都会传入这样一个对象，下文我们还会看到 <code>ProcessWrap</code>，除此之外还有很多其他类型的请求对象。它们的作用就是在和 libuv 相互调用时传递需要的数据。</p>
+<p>在 <a href="https://github.com/nodejs/node/blob/master/src/node_file.cc#L1052" target="_blank" rel="noopener">src/node_file.cc #L1052</a> 的 <code>Read</code> 方法中，会根据传入的第六个参数的类型来判断是同步调用还是异步调用。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">Read</span><span class="params">(<span class="keyword">const</span> FunctionCallbackInfo&lt;Value&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//参数处理</span></span><br><span class="line">  ...</span><br><span class="line">  req = args[<span class="number">5</span>];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (req-&gt;IsObject()) &#123;</span><br><span class="line">    ASYNC_CALL(read, req, fd, &amp;uvbuf, <span class="number">1</span>, pos);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    SYNC_CALL(read, <span class="number">0</span>, fd, &amp;uvbuf, <span class="number">1</span>, pos)</span><br><span class="line">    args.GetReturnValue().Set(SYNC_RESULT); <span class="comment">//调用返回值为错误码，没有则为 0</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，这里面使用了两个宏定义 <code>ASYNC_CALL</code> 和 <code>SYNC_CALL</code>，它们的具体内容在这里：<a href="https://github.com/nodejs/node/blob/master/src/node_file.cc#L281" target="_blank" rel="noopener">#L281</a> 和 <a href="https://github.com/nodejs/node/blob/master/src/node_file.cc#L295" target="_blank" rel="noopener">#L295</a>。对于宏定义，可以理解为代码替换，它会在编译时根据传入的参数生成代码到相应的位置。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ASYNC_CALL</span></span><br><span class="line">FSReqWrap* req_wrap = FSReqWrap::New(env, req.As&lt;Object&gt;(), #func, dest);</span><br><span class="line"><span class="keyword">int</span> err = uv_fs_ ## func(env-&gt;event_loop(),</span><br><span class="line">                         &amp;req_wrap-&gt;req_,</span><br><span class="line">                         __VA_ARGS__,</span><br><span class="line">                         After);					  </span><br><span class="line"><span class="comment">//SYNC_CALL</span></span><br><span class="line">fs_req_wrap req_wrap;</span><br><span class="line"><span class="keyword">int</span> err = uv_fs_ ## func(env-&gt;event_loop(),</span><br><span class="line">                         &amp;req_wrap.req,</span><br><span class="line">                         __VA_ARGS__,</span><br><span class="line">                         <span class="literal">nullptr</span>);</span><br></pre></td></tr></table></figure>
+<p>这两个宏定义的区别在于，异步操作时传入的是一个封装好的请求对象（ <strong>FSReqWrap</strong>），而同步操作时传入的是一个自定义的结构体（ <strong>fs_req_wrap</strong>），而且后者在调用 libuv 方法时也没有传入回调函数 <code>After</code>。这里面的缘由，就涉及到 libuv 的具体细节了。</p>
+<p>libuv 中的 File System 不同于 <a href="http://nikhilm.github.io/uvbook/networking.html" target="_blank" rel="noopener">socket operations</a>，它内部使用了阻塞函数，然后通过线程池来调用这些函数，并在应用程序需要交互时通知在事件循环中注册的 watcher，所以 File System 本身是支持同步调用和异步调用两种形式的，它们的区别就在于 <strong>是否传入了回调函数</strong>。</p>
+<p>从 <a href="https://github.com/nodejs/node/blob/master/deps/uv/src/unix/fs.c#L109" target="_blank" rel="noopener">libuv/fs.c</a> 的 <code>POST</code> 宏中可以看到，当传入回调时，libuv 会通过 <code>uv__work_submit</code> 方法把操作提交到队列中等待执行，而没有回调时，它通过 <code>uv__fs_work</code> 方法直接执行对应操作。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> POST</span></span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (cb != <span class="literal">NULL</span>) &#123;</span><br><span class="line">    uv__work_submit(loop, &amp;req-&gt;work_req, uv__fs_work, uv__fs_done);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    uv__fs_work(&amp;req-&gt;work_req);</span><br><span class="line">    <span class="keyword">return</span> req-&gt;result;</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>另外，这两种方式都是有返回值的，遵循 <a href="http://nikhilm.github.io/uvbook/basics.html#libuv-error-handling" target="_blank" rel="noopener">libuv error code</a>，但一般在同步调用的形式下不会用到。Node.js 在异步调用时通过判断这个返回值是否小于 0，来传递错误。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (err &lt; <span class="number">0</span>) &#123;</span><br><span class="line">  ...</span><br><span class="line">  uv_req-&gt;result = err;</span><br><span class="line">  ...</span><br><span class="line">  After(uv_req);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再来说说为什么传入的请求对象不同。同步调用时，把需要的参数传入就可以了。但在运行异步回调的时候，是需要给出一个上下文信息的（比如读取到的数据和回调函数），所以通过一个包装的  <strong>FSReqWrap</strong> 来把信息放在  <strong>uv_fs_t</strong> 这类对象上，供 libuv 和程序本身使用。</p>
+<p>同步方法和异步方法流程区别主要如下图：</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/d2b0d7efab8c04636e1f682b425801940faf4eb5.jpeg" alt="同步文件操作"><br><em>同步文件操作</em></p>
+<p><img src="http://img4.tbcdn.cn/L1/461/1/54aae3d9a025398ccfceca0fbe447f393718ad5f.jpeg" alt="异步文件操作"><br><em>异步文件操作</em></p>
+<h3 id="Child-Process"><a href="#Child-Process" class="headerlink" title="Child Process"></a>Child Process</h3><p>虽然有 libuv 这样强大的底层库，但是由于它本身的不完善，所以在 v0.12 之后才增加了  <strong>sync</strong> 相关方法。</p>
+<p>因为 <code>exec</code>、<code>execFile</code> 都是基于 <code>spawn</code> 这个方法，所以我们以 <code>spawn</code> 方法为例，来看下异步进程创建是如何实现的。</p>
+<p>跟异步实现相关的文件有 <a href="https://github.com/nodejs/node/blob/master/lib/internal/child_process.js" target="_blank" rel="noopener">internal/child_process.js</a> 和 <a href="https://github.com/nodejs/node/blob/master/src/process_wrap.cc" target="_blank" rel="noopener">process_wrap.cc</a>，我们一点点来看。</p>
+<p>在我们调用的 <code>spawn</code> 实际上最终调用的是 <a href="https://github.com/nodejs/node/blob/master/lib/internal/child_process.js#L252" target="_blank" rel="noopener">internal/child_process.js</a> 中的 <code>ChildProcess.spawn</code> 方法。<code>ChildProcess</code> 的实例会被绑定 <code>onexit</code> 方法，在进程使用完毕后被调用，并且具有 <code>EventEmitter</code> 的 <code>on</code>、<code>emit</code> 等方法，来让使用者获取相应的数据。它的内部存在一个 <code>_handle</code> 对象，它是 <code>ProcessWrap</code> 所对应的 Javascript 对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ChildProcess</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">this</span>._handle = <span class="keyword">new</span> Process(); <span class="comment">//Process Req Wraper</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">this</span>._handle.onexit = <span class="function"><span class="keyword">function</span>(<span class="params">exitCode, signalCode</span>) </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line">util.inherits(ChildProcess, EventEmitter);</span><br></pre></td></tr></table></figure>
+<p>在 <code>ProcessWrap</code> 对象中，会处理我们传入的参数以及回调，最终变成一个 <code>options</code> 引用，传入到 <code>uv_spawn</code> 中，最终它来真正完成 <code>spawn</code> 操作。和上面文件操作的异步方法类似（因为都是继承的  <strong>AsyncWrap</strong>），在执行完成后，会通过 <code>MakeCallback</code> 来执行 <code>onexit</code> 回调，在这个回调里面，会根据结果，触发 <code>error</code> 或 <code>exit</code> 事件。而在运行过程中的输出，会通过 <code>pipe</code>（默认）等方式传回来，因为是 stream，所以可以通过监听 <code>data</code> 事件来获取。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">Spawn</span><span class="params">(<span class="keyword">const</span> FunctionCallbackInfo&lt;Value&gt;&amp; args)</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  options.exit_cb = OnExit;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// options.stdio</span></span><br><span class="line">  ParseStdioOptions(env, js_options, &amp;options);</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">int</span> err = uv_spawn(env-&gt;event_loop(), &amp;wrap-&gt;process_, &amp;options);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/7e4420f3af9105e533b8d48f44fdaacf0b8a04cf.jpeg" alt="async_process"></p>
+<p>当你明白了上面 File System 的异步调用后，Child Porcess 异步的实现会比较容易理解。下面我们来看同步的实现。</p>
+<p>我们知道，Node.js 因为有 <code>uv_run</code> 的存在，它会一直循环，处理各种事件。当全部处理完成后，<code>uv_run</code> 结束，Node.js 也随之结束。那么，可以理解为 <code>uv_run</code> 是一个阻塞的方法，会阻塞当前进程的运行。实际上，<code>uv_run</code> 也确实是一个有 while 循环的方法，满足条件（uv__loop_alive &amp;&amp; loop -&gt; stop_flag == 0）就会一直执行。Child Porcess 同步方法的实现，也正是基于了这个特性。</p>
+<p>在它的底层实现 <a href="https://github.com/nodejs/node/blob/master/src/spawn_sync.cc" target="_blank" rel="noopener">spawn_sync.cc</a> 中，可以看到，它创建了一个新的 <code>uv_loop_t</code> 结构对象 <code>uv_loop_</code>，并且通过它来运行 <code>uv_spawn</code> 和 <code>uv_run</code>。这个 <code>uv_run</code> 会阻塞当前的运行进程，直到执行完毕或者超时。因为主进程使用的是 <code>default_uv_loop</code>，所以不会干扰主进程事件的处理。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> SyncProcessRunner::TryInitializeAndRunLoop(Local&lt;Value&gt; options) &#123;</span><br><span class="line">  ...</span><br><span class="line">  uv_loop_ = <span class="keyword">new</span> <span class="keyword">uv_loop_t</span>;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (timeout_ &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">    r = uv_timer_init(uv_loop_, &amp;uv_timer_);</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  uv_process_options_.exit_cb = ExitCallback;</span><br><span class="line">  r = uv_spawn(uv_loop_, &amp;uv_process_, &amp;uv_process_options_);</span><br><span class="line">  ...</span><br><span class="line">  r = uv_run(uv_loop_, UV_RUN_DEFAULT);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这其中还有一个特殊处理，在 <code>uv_run</code> 执行完毕后，会给即将关闭的 watchers 时间来关闭。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> SyncProcessRunner::CloseHandlesAndDeleteLoop() &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (uv_loop_ != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    CloseStdioPipes();</span><br><span class="line">    CloseKillTimer();</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">//让正在关闭的 watcher 完成关闭，这样它们会调用 close 回调。</span></span><br><span class="line">    <span class="keyword">int</span> r = uv_run(uv_loop_, UV_RUN_DEFAULT);</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">delete</span> uv_loop_;</span><br><span class="line">    uv_loop_ = <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="http://img3.tbcdn.cn/L1/461/1/10184bff4df96074c9e17f7a62efcb86357d8a9e.jpeg" alt="sync_process"></p>
+<p>之后根据执行过程中的输出和执行结果，确定返回给 Javascript 层的结果，经过一系列处理后，返回给调用者，这不是本文重点，就不赘述了。</p>
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>在 Node.js 的 API 中，异步方法的实现都大同小异，使用  <strong>AsyncWrap</strong> 的子类来和 libuv 交换数据，然后在调用 libuv 中相应的方法来。但相应的同步方法的实现，确各有不同，用到了很多特性，下了很大的功夫。反观需要这些同步方法的场景，读取配置文件、编写命令行工具等，能否在异步框架下完成呢？改变下我们的思维，或许会有更好的解决办法。</p>
+<p> <strong>注：以上内容基于 Node.js 5.0 源码。</strong></p>
+<p>参考资料：</p>
+<ul>
+<li><a href="https://github.com/nodejs/node/" target="_blank" rel="noopener">Node.js Sourcecode</a></li>
+<li><a href="http://nikhilm.github.io/uvbook/index.html" target="_blank" rel="noopener">uvbook</a></li>
+<li><a href="http://docs.libuv.org/en/v1.x/index.html" target="_blank" rel="noopener">libuv docs</a></li>
+<li><a href="http://www.infoq.com/cn/articles/nodejsv0.12-execsync-a-synchronous-api-for-child-processes" target="_blank" rel="noopener">Node.js V0.12新特性之给子进程的同步API</a></li>
+<li><a href="https://www.google.com" target="_blank" rel="noopener">Google</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/03/deep-into-node-2/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/03/deep-into-node-2/" data-id="cjt6lbxxt001mjeu1gx2qxdfa" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/03/deep-into-node-2/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node/">Node</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/04/cpu-allocation-profiler/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          如何检测移动端 CPU 以及内存占用率
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/02/waterfall-analyze/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">页面白屏与瀑布流分析方法</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

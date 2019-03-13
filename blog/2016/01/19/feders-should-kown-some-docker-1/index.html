@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前端也应该了解点 docker 知识：docker 的理念与场景 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="我觉着你是看了题目点进来的。前端和 docker 这俩八竿子打不着的有毛关系？那接下来我们就扯一扯，看看能不能把它俩扯一块。 首先得达成共识，现在的前端已经不是以前的狭义的前端，如果指狭义的前端，那真是半毛钱关系都没有。但你我不可否认的是，现在是大前端的时代。什么是大前端，详细的应该大老板来给解释下，但是这里还是简单的去说一下：  前端有了 Node.js，扩展到了服务端的边界，未来有更多的可能">
+<meta name="keywords" content="nodejs,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端也应该了解点 docker 知识：docker 的理念与场景">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/19/feders-should-kown-some-docker-1/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="我觉着你是看了题目点进来的。前端和 docker 这俩八竿子打不着的有毛关系？那接下来我们就扯一扯，看看能不能把它俩扯一块。 首先得达成共识，现在的前端已经不是以前的狭义的前端，如果指狭义的前端，那真是半毛钱关系都没有。但你我不可否认的是，现在是大前端的时代。什么是大前端，详细的应该大老板来给解释下，但是这里还是简单的去说一下：  前端有了 Node.js，扩展到了服务端的边界，未来有更多的可能">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1wTyZLpXXXXacaXXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB12pXiLpXXXXbTXFXXXXXXXXXX-1008-433.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端也应该了解点 docker 知识：docker 的理念与场景">
+<meta name="twitter:description" content="我觉着你是看了题目点进来的。前端和 docker 这俩八竿子打不着的有毛关系？那接下来我们就扯一扯，看看能不能把它俩扯一块。 首先得达成共识，现在的前端已经不是以前的狭义的前端，如果指狭义的前端，那真是半毛钱关系都没有。但你我不可否认的是，现在是大前端的时代。什么是大前端，详细的应该大老板来给解释下，但是这里还是简单的去说一下：  前端有了 Node.js，扩展到了服务端的边界，未来有更多的可能">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1wTyZLpXXXXacaXXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-feders-should-kown-some-docker-1" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前端也应该了解点 docker 知识：docker 的理念与场景
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 正寻</span>
+        
+        <span>发表于: <a href="/blog/2016/01/19/feders-should-kown-some-docker-1/" class="article-date">
+  <time datetime="2016-01-19T14:08:48.000Z" itemprop="datePublished">2016-01-19</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1wTyZLpXXXXacaXXXXXXXXXXX-900-500.png" alt="前端也应该了解点 docker 知识：docker 的理念与场景"></p>
+<p>我觉着你是看了题目点进来的。前端和 docker 这俩八竿子打不着的有毛关系？那接下来我们就扯一扯，看看能不能把它俩扯一块。</p>
+<p>首先得达成共识，现在的前端已经不是以前的狭义的前端，如果指狭义的前端，那真是半毛钱关系都没有。但你我不可否认的是，现在是大前端的时代。什么是大前端，详细的应该大老板来给解释下，但是这里还是简单的去说一下：</p>
+<ol>
+<li>前端有了 Node.js，扩展到了服务端的边界，未来有更多的可能。</li>
+<li>前端现在也逐渐的正规化，工程化，编译，测试，发布逐渐完善。</li>
+<li>我们是工程师，技术工种，抛开限定，多了解点技术岂不是更好。</li>
+</ol>
+<p>看到这里，你可能心想，要是这么说，那确实可能是有那么一点关系。如果意识到这一点，我们已经成功拉近了 1/3 距离 。</p>
+<p>其次，这篇（系列）文章还是定位 docker 的入门文章，即使不是前端的同学来看，也能对 docker 的架构，应用场景有个一定的了解，当你听其它基友讨论 docker 的时候，也能插上一嘴。</p>
+<p>按照惯例，先来列个提纲或者叫先挖个坑：</p>
+<ol>
+<li>docker 的历史和发展（系列一）</li>
+<li>docker 的理念与场景 （系列一）</li>
+<li>mac 上安装 docker （系列二）</li>
+<li>docker 架构 （系列二）</li>
+<li>docker 重要命令简介 （系列三）</li>
+<li>docker 实战 （系列四）<ul>
+<li>DokerFile 及最佳实践</li>
+<li>docker-compose 等编排工具     </li>
+<li>网络</li>
+<li>存储</li>
+<li>集群</li>
+<li>其它</li>
+</ul>
+</li>
+</ol>
+<h2 id="1-docker-的历史和发展"><a href="#1-docker-的历史和发展" class="headerlink" title="1. docker 的历史和发展"></a>1. docker 的历史和发展</h2><p>回顾下历史及发展历程也算是国际惯例了，docker 的发展也充满着传奇色彩。</p>
+<p>当时，这个公司的名称还是叫 <code>dotCloud</code>,  提供 Pass 服务，docker 是他们公司的一个内部项目。</p>
+<p>2013 年 3 月 docker 正式发布开源版本。</p>
+<p><img src="https://img.alicdn.com/tps/TB12pXiLpXXXXbTXFXXXXXXXXXX-1008-433.png" alt></p>
+<p>上图是 docker 的 GitHub commit 图，看看是多么的活跃。还有那 27000+ 的星星。</p>
+<p>后来  <code>dotCloud</code>  一看 docker 这么火，于是把公司名也改成了 docker 了。</p>
+<p>一家公司玩终究玩不出大花样来，而是一堆的国际巨头型的公司的介入，大批的开发者提交代码。</p>
+<p>2013 年 11 月 RHEL 6.5 发布，集成了对 docker 的支持， 拉开了各大厂商竞相支持 docker 的大幕。</p>
+<p>2014 年 4 月开始，亚马逊，谷歌，微软在他们的云产品中已经开始支持 docker。</p>
+<p>2014 年 6 月，DockerCon 2014  召开，谷歌， IBM , 微软， Facebook， twitter 等公司参与。于此同时 docker  1.0 正式发布。</p>
+<p>…</p>
+<p>2015 年 4 月， docker 完成了 D 轮 $9500w 融资。 </p>
+<p>而在国内，也是火的一塌糊涂，各个云厂商，各种大会，都能看到 docker 的身影。</p>
+<h2 id="2-docker-的理念"><a href="#2-docker-的理念" class="headerlink" title="2. docker 的理念"></a>2. docker 的理念</h2><p>理念，往往是为解决痛点而生，就像 KISS（Keep it sample and stupid）为复杂程序而生一样，docker 的理念是 build，ship， run。</p>
+<h3 id="2-1-build"><a href="#2-1-build" class="headerlink" title="2.1 build"></a>2.1 build</h3><p>好吧，作为前端这个单词不陌生吧，你的项目目录下面在几天之前可能还有一个 build 目录，现在接入 <code>ff</code> 进行云端 build，只是把 build 换了个地方。</p>
+<p>按照前端的理解，build 就是编译，打包的意思，和其它静态语言如 c/c++ 之流一样，在保证应用能跑起来之前所做的一些列动作。</p>
+<p>常规的 build 有什么问题呢？它不能打包环境。<br>如果你有打包 rpm 的经历，你可能清楚，你要区分系统的版本，cpu 的架构，从而打出特定平台和系统下的软件包。换句话讲，你 build 一次只能跑在一个特定地方。<br>如果做过 Java 的同学可能清楚当年为啥 Java 会火起来，编写一次，到处运行，就是因为 Java 有 JVM ，其实 docker 从某种角度看就属于 JVM 的角色。<br>前端能不能做到 build 一次，各端运行呢？就要出现一个运行时的东西，屏蔽各端差异，从这种角度考虑，react 可能勉强算一个。</p>
+<p>回到正题，docker 的 build 做了什么工作呢？<br>我们来看一下 docker build 的描述文件<code>DockerFile</code> ：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">FROM centos:centos6</span><br><span class="line">MAINTAINER yourname@example.com</span><br><span class="line"></span><br><span class="line">RUN yum -y update; yum clean all</span><br><span class="line">RUN yum -y install epel-release; yum clean all</span><br><span class="line">RUN yum -y install nodejs npm; yum clean all</span><br><span class="line"></span><br><span class="line"># copy 程序代码到容器的/src 下</span><br><span class="line">ADD . /src</span><br><span class="line"></span><br><span class="line">RUN cd /src; npm install</span><br><span class="line"></span><br><span class="line">EXPOSE 8080</span><br><span class="line"></span><br><span class="line">CMD [&quot;node&quot;, &quot;/src/index.js&quot;]</span><br></pre></td></tr></table></figure>
+<p>上面就是一个简单的 Node.js 应用的 build 描述文件，docker 根据这个描述文件来 build 出来一个镜像，一个可以到处运行的镜像。</p>
+<p>我们看一下第一个关键字 <code>FROM</code> , 它的意思是要从哪里作为基础镜像来制作你现有的镜像。拿我们淘宝来讲，我们假设有一个  Midway 的 docker 镜像，这里面已经做好了运行 Midway 应用的所有环境准备，那么，你在开发，测试，线上，都可以使用同一个 <code>Midway</code>  的镜像，如果你基于 Midway 的 4.0 版本，那你就 <code>FROM Midway: 4.0</code>, 如果想用 5.0 就  <code>FROM Midway: 5.0</code>。</p>
+<p>那从上面 Midway 的例子来看，Midway  的镜像就是包含了 Midway 的环境，不管你是 windows，mac，linux，只要是能用  docker，都能保证你的开发，测试，部署的环境的一致。<br>这要是搁到以前呢？卧槽，Node.js 版本不对啊，环境变量不对啊，程序放的目录不对啊，诸如此类环境不一致带来的问题将一去不复返。</p>
+<p>总结来讲，docker  具有的这种能够打包环境能力，是它能到处运行的关键。</p>
+<h3 id="2-2-ship"><a href="#2-2-ship" class="headerlink" title="2.2 ship"></a>2.2 ship</h3><p>字面意思就是货船，搬运，发布的意思。<br>看看我们目前的发布机制，基本上是原理是，本机 git push 到 GitLab, 服务器上 git pull 。</p>
+<p>从这点上来看和 docker 的异曲同工的。<br>把制作好的镜像  docker push  到   dockerhub  ( 致敬  GitHub ？) 或者私有 registry（你可以理解为  git  对应的 GitLab  ），用户通过 docker pull  到本地，同样一会 pull  差异性的部分。这也是 docker 进行版本控制的一种方式<br>。</p>
+<p>docker 拥有 dockerhub ，相较于程序员拥有 GitHub 一样，是个大宝库，这也是 docker 生态中很重要的一环。</p>
+<p>但差异点在哪里呢？</p>
+<p>传统的发布只是把代码或者程序发布到线上，如果不涉及类似 Node.js 版本升级，npm 模块升级，环境变量更迭及其它代码之外的的变更，其实是凸显不出 docker 的优势的。</p>
+<p>docker 不仅分发镜像，也可以分发镜像的描述文件 <code>DockerFile</code> , 比如你想让测试在你的环境里面去测试和复现 bug，不用提供个头稍微大一些的镜像，给他一个文本文件就好了。</p>
+<p>所以 docker 的官网上也明确的说明了受益人是需要做应用分发的开发者和运维同学。</p>
+<h3 id="2-3-run"><a href="#2-3-run" class="headerlink" title="2.3 run"></a>2.3 run</h3><p>很好理解，就是运行的意思。</p>
+<p>先来看看当前的程序运行模式。 对于传统前端来讲，把静态文件放到 web 服务器的对应目录就可以了，不涉及其它动作。对于  Node.js 类应用来讲可能会复杂一点，不仅仅是把应用代码发布上去就能生效，可能涉及到应用关停等影响服务可用性的动作。</p>
+<p>那么 docker 的优势体现在哪里？</p>
+<ul>
+<li>run anywhere ， 也就是可以运行在任何可以运行 docker 容器的机器上。如果你的应用就是固定的两台设备，这体现不出  docker 的优势，但如果你的应用分布在不同的地方，甚至不同的云服务上，都可以保证正常的秒级启动。那这也给我们在突发流量的时候可以迅速实现扩容。</li>
+<li>非常轻量，和传统的进程没太大差别，这也是相对于传统的  vm 非常大的一个优势。</li>
+<li>资源隔离， 保证各个应用之间不相互影响，同时充分利用机器资源。</li>
+<li>其它（各位可以自行补充）</li>
+</ul>
+<h3 id="2-4-总结"><a href="#2-4-总结" class="headerlink" title="2.4 总结"></a>2.4 总结</h3><p>如果这么拆开了来分析其实对 docker 是不公平的，因为人家是 build， ship， run 提供的是一整套解决方案。</p>
+<p>我们了解了 docker 的理念，反观我们当前的开发，应用部署模式，docker 的应用场景有哪些？</p>
+<ul>
+<li>需要重复配置统一的环境<ul>
+<li>一个团队开发同一个程序，需要一致的开发环境，在之前你可能每个成员在自己电脑上配置一遍，但使用 docker 基本是配置一遍，其他同学共享就可以了</li>
+<li>减少持续集成和测试的难度，我们清楚集成和测试的一大难点就是环境一致性问题</li>
+<li>减少开发，测试，线上因为环境不一致而出现的问题的几率</li>
+<li>世界上有很多知名和成熟的镜像，我们可以拿来用就可以了，提高效率</li>
+</ul>
+</li>
+<li><p>快速，高效利用当前资源</p>
+<ul>
+<li>勤俭节约是中华民族的传统美德，有时候一个容器就能完成的事情，我们申请一台 vm，资源有些浪费。</li>
+<li>生产一台 vm 是分钟级别的，而一台容器却是秒级的，这种优势在大规模需要迅速实现扩容才会凸显出来。</li>
+</ul>
+</li>
+<li><p>需要资源隔离的场景</p>
+<ul>
+<li>比如一些多租户的环境里面，一个用户的失控比如程序把内存吃光，把带宽打满都是常有的事情，而 docker 就可以很好的在这些方面做好控制</li>
+</ul>
+</li>
+<li><p>需要快速动态的伸缩容量的场景</p>
+<ul>
+<li>比如说大促，开始之前迅速扩容，结束之后迅速销毁</li>
+</ul>
+</li>
+<li><p>微服务</p>
+<ul>
+<li>这也是当前一个很火的话题</li>
+</ul>
+</li>
+</ul>
+<p>docker 的场景不仅仅是这些，以上仅仅是结合淘宝前端的现状，YY 出来的一些可能的场景。<br>docker 不是银弹， 个人觉着就像我们对待 Node.js 一样，在合适的场景合理的利用。</p>
+<h3 id="下期预告"><a href="#下期预告" class="headerlink" title="下期预告"></a>下期预告</h3><p>在下一期里面我们的小明将会出场，通过一些问答的方式来描述下 docker 的架构相关的概念和理解，如下：</p>
+<ul>
+<li>Q 1: 我的笔记本是 mac ，为什么我安装的时候还要装 virtualbox ?</li>
+<li>Q 2: 原来如此，怪不得第一步先让我 docker-machine 创建一个 vm 来跑 docker，那这个 docker-machine 是干什么的 ？</li>
+<li>Q 3: 你能解释下 docker run hello-world , 都发生了什么？</li>
+</ul>
+<h3 id="下下期预告"><a href="#下下期预告" class="headerlink" title="下下期预告"></a>下下期预告</h3><ul>
+<li>Q 4: 一个容器终归没什么意思，那么容器之间是怎么通信的？</li>
+<li>Q 5: 镜像是静态的，那我的代码怎么部署进去？</li>
+<li>Q 6: 每次启动都要 docker run 一次，有没有更快更方便的方式？</li>
+<li>Q 7: 据说我们有个  sandbox  （淘宝内部的  Node.js  容器平台）项目，能介绍下吗 ？</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/19/feders-should-kown-some-docker-1/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/19/feders-should-kown-some-docker-1/" data-id="cjt6lbxy8002rjeu174yrz0bs" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/19/feders-should-kown-some-docker-1/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/">nodejs</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/20/mobile-wpo-pageshow-async/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          无线性能优化：页面可见时间与异步加载
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/18/how-does-the-ball-falling-into-the-appointed-hole/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">小球是怎么落入指定球洞的？</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

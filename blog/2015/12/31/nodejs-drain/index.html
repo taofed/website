@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>探究 Node.js 中的 drain 事件 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="起因最近在用 Node.js 写一些网络请求相关的代码时，频繁在一些开源代码中看到 drain 事件的使用，于是我也依葫芦画瓢写到了自己的代码里面： 12345socket.on(&amp;apos;drain&amp;apos;, function()&amp;#123;	console.log(&amp;apos;drain event fired.&amp;apos;);&amp;#125;);socket.write(&amp;apos;so">
+<meta name="keywords" content="Node.js,drain,pipe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="探究 Node.js 中的 drain 事件">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/31/nodejs-drain/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="起因最近在用 Node.js 写一些网络请求相关的代码时，频繁在一些开源代码中看到 drain 事件的使用，于是我也依葫芦画瓢写到了自己的代码里面： 12345socket.on(&amp;apos;drain&amp;apos;, function()&amp;#123;	console.log(&amp;apos;drain event fired.&amp;apos;);&amp;#125;);socket.write(&amp;apos;so">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1vXPdLXXXXXXBXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img1.tbcdn.cn/L1/461/1/bc2589358317b14b49aa2116e99446771e611710.png">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/88bd2e048926e49b9363bfc219d162fc1171c505.png">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/970bd9066ae3c7fead5ebba7d92c3d4a38974c1b.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="探究 Node.js 中的 drain 事件">
+<meta name="twitter:description" content="起因最近在用 Node.js 写一些网络请求相关的代码时，频繁在一些开源代码中看到 drain 事件的使用，于是我也依葫芦画瓢写到了自己的代码里面： 12345socket.on(&amp;apos;drain&amp;apos;, function()&amp;#123;	console.log(&amp;apos;drain event fired.&amp;apos;);&amp;#125;);socket.write(&amp;apos;so">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1vXPdLXXXXXXBXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-nodejs-drain" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      探究 Node.js 中的 drain 事件
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 紫英</span>
+        
+        <span>发表于: <a href="/blog/2015/12/31/nodejs-drain/" class="article-date">
+  <time datetime="2015-12-31T10:05:22.000Z" itemprop="datePublished">2015-12-31</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1vXPdLXXXXXXBXVXXXXXXXXXX-900-500.jpg" alt="探究 Node.js 中的 drain 事件"></p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>最近在用 Node.js 写一些网络请求相关的代码时，频繁在一些开源代码中看到 drain 事件的使用，于是我也依葫芦画瓢写到了自己的代码里面：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">socket.on(&apos;drain&apos;, function()&#123;</span><br><span class="line">	console.log(&apos;drain event fired.&apos;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">socket.write(&apos;some data.&apos;);</span><br></pre></td></tr></table></figure>
+<p>实际放到线上测试的时候发现，在一些情况下，drain 事件真的会被触发，那到底什么时候会触发 drain 事件呢？drain 事件能用来做什么呢？本着打破砂锅问到底的精神，我决定探究一番。</p>
+<h2 id="TLDR"><a href="#TLDR" class="headerlink" title="TLDR"></a>TLDR</h2><p>请直接跳到<code>小结</code>部分。</p>
+<h2 id="探究"><a href="#探究" class="headerlink" title="探究"></a>探究</h2><p>最简单的办法就是查文档。因为我写的是网络请求相关的代码，那么我就先翻越了 net 和 socket 相关的部分。在 Node.js 官方文档中，对于 socket.write 有这么一部分描述：</p>
+<blockquote>
+<p>Returns true if the entire data was flushed successfully to the kernel buffer. Returns false if all or part of the data was queued in user memory. ‘drain’ will be emitted when the buffer is again free.</p>
+</blockquote>
+<p>也就是说，drain 事件是和 socket.write 的返回值强关联的，那么我们可以做一个简单的实验（只写关键部分）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">socket.on(&apos;drain&apos;, function()&#123;</span><br><span class="line">	console.log(&apos;drain event fired.&apos;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">var ret = socket.write(&apos;some data.&apos;);</span><br><span class="line"></span><br><span class="line">console.log(&apos;write data returned %s.&apos;, ret);</span><br></pre></td></tr></table></figure>
+<p>可是无论我怎么运行这部分代码，返回值总是 true，drain 事件没有被触发。那为啥线上就能触发呢？按照文档所说，只有全部或者部分数据被缓冲在了内存里面才会返回 false。那问题又来了，什么时候数据才会被缓冲呢？</p>
+<p>既然是被缓冲了，那最先猜测到就是数据流量太大。就像每天上下班高峰期的文一西路那样，一旦车流量太大，前面的路口塞满了，交警就会让后面的车停下来。</p>
+<p>好，那我们加大“车”流量（为节省篇幅，部分代码省略）：</p>
+<p>服务端代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">var net = require(&apos;net&apos;);</span><br><span class="line">net.createServer(function(socket)&#123;</span><br><span class="line">	// do something</span><br><span class="line">&#125;).listen(6666, &apos;127.0.0.1&apos;);</span><br></pre></td></tr></table></figure></p>
+<p>客户端代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">var net = require(&apos;net&apos;);</span><br><span class="line"></span><br><span class="line">function writeToRemote()&#123;</span><br><span class="line">	var client = new net.Socket();</span><br><span class="line">	client.connect(6666, &apos;127.0.0.1&apos;, function()&#123;</span><br><span class="line">		if(!client.write(&apos;some data by ziying.&apos;))&#123;</span><br><span class="line">			console.log(&apos;write returned false.&apos;);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;);</span><br><span class="line">	client.on(&apos;drain&apos;, function()&#123;</span><br><span class="line">		console.log(&apos;drain event fired.&apos;);</span><br><span class="line">	&#125;);</span><br><span class="line">	client.on(&apos;data&apos;, function()&#123;</span><br><span class="line">		client.destroy();</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 加大流量</span><br><span class="line">for(var i = 0; i &lt; 1000; i++)&#123;</span><br><span class="line">	writeToRemote();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但运行多次之后发现仍旧没有看到任何 drain 事件的迹象。难道次数不够？随着我继续增大 i 的最大值，直到遇到<code>(libuv) kqueue(): Too many open files in system</code>的错误时候，我仍旧没看到 drain 事件。</p>
+<p>逼我用绝招。看 Node.js 源代码！</p>
+<p>因为 socket.write 实际上是调用的 Stream.write（<a href="https://github.com/nodejs/node/blob/cc0342a517279c9c52543e3a37e11da3fc6cdb36/lib/net.js#L615" target="_blank" rel="noopener">参考此处源代码</a>），最后我们在 Stream.write 的<a href="https://github.com/nodejs/node/blob/cc0342a517279c9c52543e3a37e11da3fc6cdb36/lib/_stream_writable.js#L255" target="_blank" rel="noopener">代码</a>中找到了一丝端倪：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">var ret = state.length &lt; state.highWaterMark;</span><br><span class="line">// we must ensure that previous needDrain will not be reset to false.</span><br><span class="line">if (!ret)</span><br><span class="line">  state.needDrain = true;</span><br><span class="line">    </span><br><span class="line">// something else</span><br><span class="line">  </span><br><span class="line">return ret;</span><br></pre></td></tr></table></figure>
+<p>可以看到当要写的数据的长度大于 highWaterMark （字面理解：高水位线）的时候，那么 Stream.write 就会返回 false，也就会触发 drain 事件了。</p>
+<p>那这个高水位线具体是多少呢？可以继续看<a href="https://github.com/nodejs/node/blob/cc0342a517279c9c52543e3a37e11da3fc6cdb36/lib/_stream_writable.js#L40" target="_blank" rel="noopener">代码</a>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">var hwm = options.highWaterMark;</span><br><span class="line">var defaultHwm = this.objectMode ? 16 : 16 * 1024;</span><br><span class="line">this.highWaterMark = (hwm || hwm === 0) ? hwm : defaultHwm;</span><br></pre></td></tr></table></figure>
+<p>默认值是 16KB，看来还是挺大的啊。所以回想一下刚才我们的实验程序，一个是写的数据比较小，另外一个是实验代码中的服务器端没有复杂逻辑，数据处理的也比较快，我们仍旧拿刚才的车流量的例子，虽然车很多很多，但是如果每辆车都开得飞快，那路也不会堵。只有当一些车比较慢，影响到了后面车的速度的时候，整体速度就会下来，就变堵了。</p>
+<p>根据这个思路，我们换成下面这个实验：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">var http = require(&apos;http&apos;);</span><br><span class="line">var fs = require(&apos;fs&apos;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http.createServer(function(req, res) &#123;</span><br><span class="line">	// 哈哈，这个代码写于圣诞，于是就用了圣诞的歌曲，大家圣诞快乐哦！</span><br><span class="line">    var filePath = &apos;./Christmas.mp3&apos;; </span><br><span class="line">    var stat = fs.statSync(filePath);</span><br><span class="line"></span><br><span class="line">    response.writeHead(200, &#123;</span><br><span class="line">        &apos;Content-Type&apos;: &apos;audio/mpeg&apos;,</span><br><span class="line">        &apos;Content-Length&apos;: stat.size</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    var readStream = fs.createReadStream(filePath);</span><br><span class="line">    readStream.on(&apos;data&apos;, function(data) &#123;</span><br><span class="line">        res.write(data);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    res.on(&apos;drain&apos;, function() &#123;</span><br><span class="line">      console.log(&apos;drain event fired.&apos;); </span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    readStream.on(&apos;end&apos;, function() &#123;</span><br><span class="line">        res.end();</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;).listen(6969);</span><br></pre></td></tr></table></figure>
+<p>这里我们启动了一个简单的 HTTP server，任何 requset 过来，都会返回一个 5M 大小的 圣诞歌曲的内容。然后我们对这个 HTTP server 发起 1000 次 GET 请求。果然不出所料，还没等所有请求发完，一堆的 drain event fired 日志出现了：</p>
+<p><img src="http://img1.tbcdn.cn/L1/461/1/bc2589358317b14b49aa2116e99446771e611710.png" alt></p>
+<p>如果对 res.write 的返回值做下日志，也会发现返回了很多 false。</p>
+<p>原因也很容易想到，硬盘读取这个 MP3 文件的速度（测试环境为 RMBP 的 SSD 硬盘）一般都会快于将数据通过 HTTP Response 返回给用户（即便是 localhost 的访问，更不用说外网复杂错综的网络环境了），所以，当 MP3 很快就被读取过来，但又没有很快的将数据写回，那么这个 Stream 中的 data 就被缓存了。于是，我很自然而然的设想，在我这个小应用中，也许这么做并没有什么，但当应用的访问量逐渐增大的时候，这个问题就可能会爆发，比如造成个内存泄露啊之类的。</p>
+<h2 id="怎么用"><a href="#怎么用" class="headerlink" title="怎么用"></a>怎么用</h2><p>那上面的代码该怎么改进呢？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">var readStream = fs.createReadStream(filePath);</span><br><span class="line">readStream.on(&apos;data&apos;, function(data) &#123;</span><br><span class="line">    if(!res.write(data))&#123;</span><br><span class="line">        readStream.pause();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">res.on(&apos;drain&apos;, function() &#123;</span><br><span class="line">	readStream.resume(); </span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>也就是说，当 write 返回 false 的时候，我们暂停读取流，当缓存的数据清空之后，我们再继续读取流，相当于我们根据输出流来对读取流做限流。反过来，如果写入流快于读取流，我们也可以对写入流限流。</p>
+<h2 id="真的是这样吗？"><a href="#真的是这样吗？" class="headerlink" title="真的是这样吗？"></a>真的是这样吗？</h2><p>刚才提到了，我想如果我们没做这部分处理的话，应该很容易造成内存泄露，那我们不妨做个实验验证下。使用上面两段代码分别进行不带限流和带限流的实验，每隔 1s 使用 <code>process.memoryUsage()</code> 打印出来内存使用（我们在启动 server 之后就开始打印内存数据）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">xxx.listen(PORT, function()&#123;</span><br><span class="line"></span><br><span class="line">  setInterval(function()&#123;</span><br><span class="line">    var memoryUsage = process.memoryUsage();</span><br><span class="line">    // 用这个格式是为了方便我使用 Markdown 生成表格导入到 Numbers</span><br><span class="line">    console.log(&apos;| %s | %s | %s |&apos;, memoryUsage.rss, memoryUsage.heapTotal, memoryUsage.heapUsed);</span><br><span class="line">  &#125;, 1000);</span><br><span class="line"></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>最终我得出了如下数据：</p>
+<h5 id="限流"><a href="#限流" class="headerlink" title="限流"></a>限流</h5><p><img src="http://img2.tbcdn.cn/L1/461/1/88bd2e048926e49b9363bfc219d162fc1171c505.png" alt></p>
+<h5 id="没有限流"><a href="#没有限流" class="headerlink" title="没有限流"></a>没有限流</h5><p><img src="http://img2.tbcdn.cn/L1/461/1/970bd9066ae3c7fead5ebba7d92c3d4a38974c1b.png" alt></p>
+<p>可以看到，内存使用其实差不多……</p>
+<p>难道我猜想错了么？最简单的办法，继续看源代码。</p>
+<p>看下 <code>fs.createReadStream</code> 的代码，就可以知道它的工作方式是先在内存中准备一段 Buffer，然后在 fs.read() 读取文件到这个 Buffer 中，完成一次读取时，则从 Buffer 中通过 slice 方法取出那个数据作为一个小 Buffer 对象，再通过 data 事件传给调用方<sup>[1]</sup>。</p>
+<p>再看下 pause 具体是怎么<a href="https://github.com/nodejs/node/blob/cc0342a517279c9c52543e3a37e11da3fc6cdb36/lib/_stream_readable.js#L729" target="_blank" rel="noopener">实现</a>的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Readable.prototype.pause = function() &#123;</span><br><span class="line">  if (false !== this._readableState.flowing) &#123;</span><br><span class="line">    this._readableState.flowing = false;</span><br><span class="line">    this.emit(&apos;pause&apos;);</span><br><span class="line">  &#125;</span><br><span class="line">  return this;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>pause 方法设置了一个状态位。在 <code>flow</code> 方法中，如果是 paused 的状态，那么就不再从 文件流中读取数据了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">function flow(stream) &#123;</span><br><span class="line">  var state = stream._readableState;</span><br><span class="line">  debug(&apos;flow&apos;, state.flowing);</span><br><span class="line">  if (state.flowing) &#123;</span><br><span class="line">    do &#123;</span><br><span class="line">      var chunk = stream.read();</span><br><span class="line">    &#125; while (null !== chunk &amp;&amp; state.flowing);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>所以在 pause 的时候，文件的数据流依旧在 Buffer 中。</p>
+<p>回头看下我们这个例子，其实是写比较慢，如果我们没有对写入的返回值做判断的话，Writable Stream 本身也会把多余的数据缓存起来。具体可以看 <code>WriteOrBuffer</code> 这个方法的<a href="https://github.com/nodejs/node/blob/cc0342a517279c9c52543e3a37e11da3fc6cdb36/lib/_stream_writable.js#L255" target="_blank" rel="noopener">实现</a>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if (state.writing || state.corked) &#123;</span><br><span class="line">	// buffer data</span><br><span class="line">&#125; else &#123;</span><br><span class="line">	doWrite();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出这里如果之前的写入没有完成，那么会把需要写入的数据缓存起来。</p>
+<p>这样就不难理解了，如果我们采用限制读取流的方案，那么数据缓存在读取流的 Buffer 里，如果我们采取不限制读取流的方案，那么数据缓存在写入流的 Buffer 里，总之这部分数据都是要被缓存，只是缓存到不同的流的 Buffer 而已，所以这也能解释了为啥我们的测试结果，内存占用基本没有差别了。</p>
+<h2 id="更好的解决方案"><a href="#更好的解决方案" class="headerlink" title="更好的解决方案"></a>更好的解决方案</h2><p>其实，Node.js 里面提供了更好的解决方案，也就是 pipe。</p>
+<p>我们将上面的代码继续改造下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var readStream = fileSystem.createReadStream(filePath);</span><br><span class="line">readStream.pipe(res);</span><br></pre></td></tr></table></figure>
+<p>是不是更简单了呢？</p>
+<p>我们看下<a href="https://github.com/nodejs/node/blob/cc0342a517279c9c52543e3a37e11da3fc6cdb36/lib/_stream_readable.js#L452" target="_blank" rel="noopener">官方代码</a>是怎么实现的（缩减版）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">var ondrain = pipeOnDrain(src);</span><br><span class="line">dest.on(&apos;drain&apos;, ondrain);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">src.on(&apos;data&apos;, ondata);</span><br><span class="line">function ondata(chunk) &#123;</span><br><span class="line">  var ret = dest.write(chunk);</span><br><span class="line">  if (false === ret) &#123;</span><br><span class="line">    src.pause();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>是不是和我们自己的实现差不多呢？当然官方代码处理的更加细致，对很多情况做了判断，感兴趣的同学不妨阅读看看:)</p>
+<h2 id="该怎么用？"><a href="#该怎么用？" class="headerlink" title="该怎么用？"></a>该怎么用？</h2><p>看到这里，大家可能会问，那按照你这么说，drain 就完全没用了是么？非也非也。虽然我一开始也是这么想的，但经过我在 github 上一阵狂搜，终于有了一些端倪。</p>
+<p>再回想我们刚才的案例，我们的写入流是以 HTTP Response 的形式返回给用户，但如果写入流是我们的一个服务呢？比如我们需要往一台 Redis Server 里面插入大量数据，而这台 Redis 又承担对外提供服务的艰巨任务，那么，为了保证我们写入的同时这台 Server 依旧能较好的对外服务，很自然的就可以想到我们可以对写入流做限流。比如 <code>node_redis</code> 这个模块里面的一个 <a href="https://github.com/NodeRedis/node_redis/blob/afc4989495245e683ce70a234c55046a51e73c08/examples/backpressure_drain.js" target="_blank" rel="noopener">example</a>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line"></span><br><span class="line">var redis = require(&apos;../index&apos;),</span><br><span class="line">    client = redis.createClient(),</span><br><span class="line">    remaining_ops = 100000, paused = false;</span><br><span class="line"></span><br><span class="line">function op() &#123;</span><br><span class="line">    if (remaining_ops &lt;= 0) &#123;</span><br><span class="line">        console.error(&apos;Finished.&apos;);</span><br><span class="line">        process.exit(0);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    remaining_ops--;</span><br><span class="line">    client.hset(&apos;test hash&apos;, &apos;val &apos; + remaining_ops, remaining_ops);</span><br><span class="line">    if (client.should_buffer === true) &#123;</span><br><span class="line">        console.log(&apos;Pausing at &apos; + remaining_ops);</span><br><span class="line">        paused = true;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        setTimeout(op, 1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">client.on(&apos;drain&apos;, function () &#123;</span><br><span class="line">    if (paused) &#123;</span><br><span class="line">        console.log(&apos;Resuming at &apos; + remaining_ops);</span><br><span class="line">        paused = false;</span><br><span class="line">        process.nextTick(op);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        console.log(&apos;Got drain while not paused at &apos; + remaining_ops);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">op();</span><br></pre></td></tr></table></figure>
+<p>在这个例子中，当写入流开始缓存的时候，我们就停止写入了，等 buffer flush 完，我们再继续写入。通过这种形式，我们可以控制发送命令的速率。</p>
+<p>如果你有更好的案例，欢迎与我一起探讨。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>其实在我们平时写代码的过程中，并不需要刻意用到 drain 事件。Node.js 本身已经帮我们处理了很多细节。对于流的处理，推荐大家直接用简单方便的 pipe 方法。而drain 事件比较适合用在一些需要自己手工处理限流的场景。另外，在看 Node.js 源码的时候很多细节还是很赞的，推荐大家可以阅读下。</p>
+<h2 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h2><ol>
+<li>朴大师的《深入浅出 Node.js》6.4节</li>
+</ol>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/31/nodejs-drain/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/31/nodejs-drain/" data-id="cjt6lbxzz007kjeu17ci227ji" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/31/nodejs-drain/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/drain/">drain</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pipe/">pipe</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/04/font-end-tech-inventory/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          近几年前端技术盘点以及 2016 年技术发展方向
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/30/the-communication-scheme-of-react-native-in-ios/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">使用 JS 构建跨平台的原生应用：React Native iOS 通信机制初探</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

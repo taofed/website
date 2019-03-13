@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>imgcook 体验版发布 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="imgcook 体验版发布经过淘宝前端团队内部近一年半的打磨，imgcook 迎来了社区体验版发布，欢迎试用～。 imgcook 是什么？imgcook 是专注以各种图像（Sketch/PSD/静态图片）为原材料烹饪的匠心大厨，通过智能化手段将各种图像一键生成可维护的 UI 视图代码，期望此 imgcook (图像大厨) 未来能够成为一位 P5 级别的重构工程师，能切实提高开发的开发效率，并助力">
+<meta name="keywords" content="AI,imgcook,智能还原">
+<meta property="og:type" content="article">
+<meta property="og:title" content="imgcook 体验版发布">
+<meta property="og:url" content="http://taobaofed.org/blog/2019/01/07/imgcook/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="imgcook 体验版发布经过淘宝前端团队内部近一年半的打磨，imgcook 迎来了社区体验版发布，欢迎试用～。 imgcook 是什么？imgcook 是专注以各种图像（Sketch/PSD/静态图片）为原材料烹饪的匠心大厨，通过智能化手段将各种图像一键生成可维护的 UI 视图代码，期望此 imgcook (图像大厨) 未来能够成为一位 P5 级别的重构工程师，能切实提高开发的开发效率，并助力">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1ZGmCAXzqK1RjSZSgXXcpAVXa-1440-900.gif#align=left&display=inline&height=466&linkTarget=_blank&originHeight=900&originWidth=1440&width=746#align=left&display=inline&height=466&linkTarget=_blank&originHeight=900&originWidth=1440&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1EpqnAXYqK1RjSZLeXXbXppXa-2050-1214.png#align=left&display=inline&height=442&linkTarget=_blank&originHeight=1214&originWidth=2050&width=746#align=left&display=inline&height=442&linkTarget=_blank&originHeight=1214&originWidth=2050&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1A0N9AhTpK1RjSZR0XXbEwXXa-1482-740.png#align=left&display=inline&height=372&linkTarget=_blank&originHeight=740&originWidth=1482&width=746#align=left&display=inline&height=372&linkTarget=_blank&originHeight=740&originWidth=1482&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1AnKhAmzqK1RjSZFpXXakSXXa-1842-960.png#align=left&display=inline&height=389&linkTarget=_blank&originHeight=960&originWidth=1842&width=746#align=left&display=inline&height=389&linkTarget=_blank&originHeight=960&originWidth=1842&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB120WjAbrpK1RjSZTEXXcWAVXa-1612-1078.png#align=left&display=inline&height=499&linkTarget=_blank&originHeight=1078&originWidth=1612&width=746#align=left&display=inline&height=499&linkTarget=_blank&originHeight=1078&originWidth=1612&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB16pblAXzqK1RjSZFCXXbbxVXa-1790-1166.png#align=left&display=inline&height=473&linkTarget=_blank&originHeight=1166&originWidth=1790&width=726#align=left&display=inline&height=486&linkTarget=_blank&originHeight=1166&originWidth=1790&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1qazWApzqK1RjSZFCXXbbxVXa-1526-1000.png#align=left&display=inline&height=489&linkTarget=_blank&originHeight=1000&originWidth=1526&width=746">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB11YVgAbrpK1RjSZTEXXcWAVXa-842-1114.png#align=left&display=inline&height=314&linkTarget=_blank&originHeight=1114&originWidth=842&width=237#align=left&display=inline&height=987&linkTarget=_blank&originHeight=1114&originWidth=842&width=746">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="imgcook 体验版发布">
+<meta name="twitter:description" content="imgcook 体验版发布经过淘宝前端团队内部近一年半的打磨，imgcook 迎来了社区体验版发布，欢迎试用～。 imgcook 是什么？imgcook 是专注以各种图像（Sketch/PSD/静态图片）为原材料烹饪的匠心大厨，通过智能化手段将各种图像一键生成可维护的 UI 视图代码，期望此 imgcook (图像大厨) 未来能够成为一位 P5 级别的重构工程师，能切实提高开发的开发效率，并助力">
+<meta name="twitter:image" content="https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-imgcook" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      imgcook 体验版发布
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 波本</span>
+        
+        <span>发表于: <a href="/blog/2019/01/07/imgcook/" class="article-date">
+  <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png" alt="imgcook 体验版发布"></p>
+<h1 id="imgcook-体验版发布"><a href="#imgcook-体验版发布" class="headerlink" title="imgcook 体验版发布"></a>imgcook 体验版发布</h1><p>经过淘宝前端团队内部近一年半的打磨，imgcook 迎来了社区体验版发布，欢迎试用～。</p>
+<h2 id="imgcook-是什么？"><a href="#imgcook-是什么？" class="headerlink" title="imgcook 是什么？"></a>imgcook 是什么？</h2><p>imgcook 是专注以各种图像（Sketch/PSD/静态图片）为原材料烹饪的匠心大厨，通过智能化手段将各种图像一键生成可维护的 UI 视图代码，期望此 imgcook (图像大厨) 未来能够成为一位 P5 级别的重构工程师，能切实提高开发的开发效率，并助力开发、设计师、测试的高效协作，我们期望做到：</p>
+<ul>
+<li>100% 还原【设计师再也不用还原走查了】</li>
+<li>100% 兼容【测试再也不用适配样式了】</li>
+<li>一键上线【开发再也不用切图写样式了】</li>
+</ul>
+<p>愿景：能够高度还原各种图像，释放 UI 开发生产力，让你关注更具挑战性的事情！</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1ZGmCAXzqK1RjSZSgXXcpAVXa-1440-900.gif#align=left&amp;display=inline&amp;height=466&amp;linkTarget=_blank&amp;originHeight=900&amp;originWidth=1440&amp;width=746#align=left&amp;display=inline&amp;height=466&amp;linkTarget=_blank&amp;originHeight=900&amp;originWidth=1440&amp;width=746" alt></p>
+<h2 id="为什么做-imgcook？"><a href="#为什么做-imgcook？" class="headerlink" title="为什么做 imgcook？"></a>为什么做 imgcook？</h2><p>对于 UI 还原而言，早在很多年前，对于类似的从设计稿中还原生成静态 UI 场景的解决方案也都涌现过，比如一些设计稿标注工具（如Marketch），又或者说目前的一些可视化建站平台也都能够在搭建完后直接产出线上页面，为什么做 imgcook，它的优势体现在哪？</p>
+<p>我们回到 UI 还原主题上，当我们说图像生成代码的时候，我们关心的不仅仅是生成 UI 的还原度，也关心生成的代码是否合理、可维护，如果生成的代码属于不可读不可维护的快餐代码，开发使用上再对其进行二次开发就会显得极为艰难，而往往后者的难度相比前者更甚，如果需要在生产环境中使用，这个问题就无法避免。</p>
+<p>对此，imgcook 的定位就在于解决 UI 还原以及生成可维护代码的问题。</p>
+<h3 id="1-设计稿无约束-高还原"><a href="#1-设计稿无约束-高还原" class="headerlink" title="1. 设计稿无约束+高还原"></a>1. 设计稿无约束+高还原</h3><p>对于 UI 还原，目前比较常见的场景是从设计工具（比如Sketch、PS）入手。但比较不如意的是，设计师交付的设计稿里所带的结构化信息往往是杂乱无章的，如果需要精确得解析一个设计稿里某个模块的结构化数据，往往又需要跟设计师进行合作，规范设计稿中的设计以及制定一些约束来进行使用，这就变相要求设计师用设计的方式来写试图代码，一定程度上增加了设计师的成本。<br>imgcook 为了解决这个问题，目前在对设计稿的解析上做了一些智能化的处理，去除了对设计师图层设计规范这块的依赖，当然 imgcook 也提供了一些官方的设计稿规范建议可以让还原效果更符合预期。</p>
+<h3 id="2-生成可维护代码"><a href="#2-生成可维护代码" class="headerlink" title="2. 生成可维护代码"></a>2. 生成可维护代码</h3><p>对于可维护性代码的问题，imgcook 会对还原后的 UI 在代码层面上生成目前使用比较广泛的 Flexbox 布局以及相对定位布局，在一些自定义的命名上（比如样式命名），imgcook 也会根据开发者的习惯生成更加人性化的命名。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1EpqnAXYqK1RjSZLeXXbXppXa-2050-1214.png#align=left&amp;display=inline&amp;height=442&amp;linkTarget=_blank&amp;originHeight=1214&amp;originWidth=2050&amp;width=746#align=left&amp;display=inline&amp;height=442&amp;linkTarget=_blank&amp;originHeight=1214&amp;originWidth=2050&amp;width=746" alt></p>
+<h2 id="如何使用-imgcook？"><a href="#如何使用-imgcook？" class="headerlink" title="如何使用 imgcook？"></a>如何使用 imgcook？</h2><p>imgcook 目前对外的体验版里，暂时只开放了针对 Sketch 设计稿的还原插件。</p>
+<h3 id="1-插件导出模块"><a href="#1-插件导出模块" class="headerlink" title="1. 插件导出模块"></a>1. 插件导出模块</h3><p>在使用 Sketch 插件进行还原的时候，可选中一个模块外层的容器节点（画板、Group或者Symbol）来进行导出。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1A0N9AhTpK1RjSZR0XXbEwXXa-1482-740.png#align=left&amp;display=inline&amp;height=372&amp;linkTarget=_blank&amp;originHeight=740&amp;originWidth=1482&amp;width=746#align=left&amp;display=inline&amp;height=372&amp;linkTarget=_blank&amp;originHeight=740&amp;originWidth=1482&amp;width=746" alt></p>
+<h3 id="2-粘贴还原"><a href="#2-粘贴还原" class="headerlink" title="2. 粘贴还原"></a>2. 粘贴还原</h3><p>模块导出完毕后，可前往 imgcook 平台进行粘贴还原。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1AnKhAmzqK1RjSZFpXXakSXXa-1842-960.png#align=left&amp;display=inline&amp;height=389&amp;linkTarget=_blank&amp;originHeight=960&amp;originWidth=1842&amp;width=746#align=left&amp;display=inline&amp;height=389&amp;linkTarget=_blank&amp;originHeight=960&amp;originWidth=1842&amp;width=746" alt></p>
+<h3 id="3-保存查阅代码"><a href="#3-保存查阅代码" class="headerlink" title="3. 保存查阅代码"></a>3. 保存查阅代码</h3><p>检查模块还原 UI 以及左侧的布局结构无误后，可进行保存-&gt;查阅代码，目前对外的体验版中 imgcook 提供了几种可选择的 DSL 进行代码生成，对于每个 DSL，可在右侧的 playground 里查看具体运行的效果。<br><br><br><img src="https://gw.alicdn.com/tfs/TB120WjAbrpK1RjSZTEXXcWAVXa-1612-1078.png#align=left&amp;display=inline&amp;height=499&amp;linkTarget=_blank&amp;originHeight=1078&amp;originWidth=1612&amp;width=746#align=left&amp;display=inline&amp;height=499&amp;linkTarget=_blank&amp;originHeight=1078&amp;originWidth=1612&amp;width=746" alt></p>
+<h2 id="什么场景下使用-imgcook？"><a href="#什么场景下使用-imgcook？" class="headerlink" title="什么场景下使用 imgcook？"></a>什么场景下使用 imgcook？</h2><p>imgcook 的诞生源于业务，也最终服务于业务。</p>
+<ul>
+<li>场景使用层面上，imgcook 倾向于以页面中的<strong>模块级别</strong>图文组合的模块。</li>
+<li>技术层面上，imgcook 对于支持 Flexbox 布局类型的 DSL 都会有一个比较好的支持，目前 imgcook 提供了四种 DSL，接下来也还会陆续提供更多。<blockquote>
+<p>适合使用 imgcook 的场景例子</p>
+</blockquote>
+</li>
+</ul>
+<p><img src="https://gw.alicdn.com/tfs/TB16pblAXzqK1RjSZFCXXbbxVXa-1790-1166.png#align=left&amp;display=inline&amp;height=473&amp;linkTarget=_blank&amp;originHeight=1166&amp;originWidth=1790&amp;width=726#align=left&amp;display=inline&amp;height=486&amp;linkTarget=_blank&amp;originHeight=1166&amp;originWidth=1790&amp;width=746" alt><br><br><img src="https://gw.alicdn.com/tfs/TB1qazWApzqK1RjSZFCXXbbxVXa-1526-1000.png#align=left&amp;display=inline&amp;height=489&amp;linkTarget=_blank&amp;originHeight=1000&amp;originWidth=1526&amp;width=746" alt></p>
+<h2 id="更多信息"><a href="#更多信息" class="headerlink" title="更多信息"></a>更多信息</h2><ul>
+<li><a href="https://imgcook.taobao.org/" target="_blank" rel="noopener">下载 imgcook</a></li>
+<li><a href="https://imgcook.taobao.org/docs" target="_blank" rel="noopener">imgcook 使用指南</a><h2 id="建议反馈"><a href="#建议反馈" class="headerlink" title="建议反馈"></a>建议反馈</h2>imgcook 目前还处于体验版，会存在一些不确定性的还原 badcase 以及代码生成不合理的 badcase，请向我们反馈，我们会第一时间进行问题收集、跟进处理。</li>
+<li><a href="https://github.com/taobaofed/imgcook/issues" target="_blank" rel="noopener">Issue</a></li>
+<li>钉钉交流</li>
+</ul>
+<p><img src="https://gw.alicdn.com/tfs/TB11YVgAbrpK1RjSZTEXXcWAVXa-842-1114.png#align=left&amp;display=inline&amp;height=314&amp;linkTarget=_blank&amp;originHeight=1114&amp;originWidth=842&amp;width=237#align=left&amp;display=inline&amp;height=987&amp;linkTarget=_blank&amp;originHeight=1114&amp;originWidth=842&amp;width=746" alt></p>
+<blockquote>
+<p>题图出处：<a href="https://unsplash.com/photos/LrPKL7jOldI" target="_blank" rel="noopener">https://unsplash.com/photos/LrPKL7jOldI</a>，寓意为萌芽阶段的前端智能。</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2019/01/07/imgcook/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2019/01/07/imgcook/" data-id="cjt6lbxyw004mjeu1e39js7l4" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2019/01/07/imgcook/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AI/">AI</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/imgcook/">imgcook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/智能还原/">智能还原</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2019/03/13/fed-2019/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          淘宝前端团队 2019 年实习生内部推荐通道已开启
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2018/12/17/webgl-texture/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">WebGL 纹理详解</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

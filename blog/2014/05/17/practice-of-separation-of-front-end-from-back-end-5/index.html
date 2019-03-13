@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>前后端分离的思考与实践（五） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="基于前后端分离的多终端适配前言近年来各站点基于 Web 的多终端适配进行得如火如荼，行业间也发展出依赖各种技术的解决方案。有如基于浏览器原生 CSS3 Media Query 的响应式设计、基于云端智能重排的「云适配」方案等。本文则主要探讨在前后端分离基础下的多终端适配方案。 关于前后端分离 关于前后端分离的方案，在《前后端分离的思考与实践（一）》中有非常清晰的解释。我们在服务端接口和浏览器之间">
+<meta name="keywords" content="Nodes.js,Midway">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前后端分离的思考与实践（五）">
+<meta property="og:url" content="http://taobaofed.org/blog/2014/05/17/practice-of-separation-of-front-end-from-back-end-5/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="基于前后端分离的多终端适配前言近年来各站点基于 Web 的多终端适配进行得如火如荼，行业间也发展出依赖各种技术的解决方案。有如基于浏览器原生 CSS3 Media Query 的响应式设计、基于云端智能重排的「云适配」方案等。本文则主要探讨在前后端分离基础下的多终端适配方案。 关于前后端分离 关于前后端分离的方案，在《前后端分离的思考与实践（一）》中有非常清晰的解释。我们在服务端接口和浏览器之间">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1v_GBQpXXXXaIaXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1CiO7PVXXXXcaXVXXXXXXXXXX-968-509.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1OeyTPVXXXXaRXVXXXXXXXXXX-200-220.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1wl1RPVXXXXa3aXXXXXXXXXXX-507-400.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1w56lPVXXXXaSXpXXXXXXXXXX-531-348.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1f750PVXXXXa5XVXXXXXXXXXX-685-520.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1RnWTPVXXXXcSXVXXXXXXXXXX-1327-494.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前后端分离的思考与实践（五）">
+<meta name="twitter:description" content="基于前后端分离的多终端适配前言近年来各站点基于 Web 的多终端适配进行得如火如荼，行业间也发展出依赖各种技术的解决方案。有如基于浏览器原生 CSS3 Media Query 的响应式设计、基于云端智能重排的「云适配」方案等。本文则主要探讨在前后端分离基础下的多终端适配方案。 关于前后端分离 关于前后端分离的方案，在《前后端分离的思考与实践（一）》中有非常清晰的解释。我们在服务端接口和浏览器之间">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1v_GBQpXXXXaIaXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-practice-of-separation-of-front-end-from-back-end-5" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      前后端分离的思考与实践（五）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 筱谷</span>
+        
+        <span>发表于: <a href="/blog/2014/05/17/practice-of-separation-of-front-end-from-back-end-5/" class="article-date">
+  <time datetime="2014-05-16T17:40:00.000Z" itemprop="datePublished">2014-05-17</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1v_GBQpXXXXaIaXXXXXXXXXXX-900-500.jpg" alt="前后端分离的思考与实践（五）"></p>
+<h2 id="基于前后端分离的多终端适配"><a href="#基于前后端分离的多终端适配" class="headerlink" title="基于前后端分离的多终端适配"></a>基于前后端分离的多终端适配</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>近年来各站点基于 Web 的多终端适配进行得如火如荼，行业间也发展出依赖各种技术的解决方案。有如基于浏览器原生 CSS3 Media Query 的响应式设计、基于云端智能重排的「云适配」方案等。本文则主要探讨在前后端分离基础下的多终端适配方案。</p>
+<h2 id="关于前后端分离"><a href="#关于前后端分离" class="headerlink" title="关于前后端分离"></a>关于前后端分离</h2><blockquote>
+<p>关于前后端分离的方案，在《前后端分离的思考与实践（一）》中有非常清晰的解释。我们在服务端接口和浏览器之间引入 Node.js 作为渲染层，因为 Node.js 层彻底与数据抽离，同时无需关心大量的业务逻辑，所以十分适合在这一层进行多终端的适配工作。</p>
+</blockquote>
+<h2 id="UA-探测"><a href="#UA-探测" class="headerlink" title="UA 探测"></a>UA 探测</h2><p>进行多终端适配首先要解决的是 UA 探测问题，对于一个过来的请求，我们需要知道这个设备的类型才能针对对它输出对应的内容。现在市面上已经有非常成熟的兼容大量设备的 User Agent 特征库和探测工具，这里有 Mozilla 整理的一个<a href="https://wiki.mozilla.org/Compatibility/UADetectionLibraries" target="_blank" rel="noopener">列表</a>。其中，既有运行在浏览器端的，也有运行在服务端代码层的，甚至有些工具提供了 nginx/Apache 的模块，负责解析每个请求的 UA 信息。</p>
+<p>实际上我们推荐最后一种方式。基于前后端分离的方案决定了 UA 探测只能运行在服务器端，但如果把探测的代码和特征库耦合在业务代码里并不是一个足够友好的方案。我们把这个行为再往前挪，挂在 nginx/Apache 上，它们负责解析每个请求的 UA 信息，再通过如 HTTP Header 的方式传递给业务代码。</p>
+<p>这样做有几点好处：</p>
+<ol>
+<li>我们的代码里面无需再去关注 UA 如何解析，直接从上层取出解析后的信息即可。</li>
+<li>如果在同一台服务器上有多个应用，则能够共同使用同一个 nginx 解析后的 UA 信息，节省了不同应用间的解析损耗。</li>
+</ol>
+<p><img src="https://img.alicdn.com/tps/TB1CiO7PVXXXXcaXVXXXXXXXXXX-968-509.png" alt></p>
+<p>淘宝的 Tengine Web 服务器也提供了类似的模块 <code>ngx_http_user_agent_module</code>。</p>
+<p>值得一提的是，选用 UA 探测工具时必须要考虑特征库的可维护性，因为市面上新增的设备类型越来越多，每个设备都会有独立的 User Agent，所以该特征库必须提供良好的更新和维护策略，以适应不断变化的设备。</p>
+<h2 id="建立在-MVC-模式中的几种适配方案"><a href="#建立在-MVC-模式中的几种适配方案" class="headerlink" title="建立在 MVC 模式中的几种适配方案"></a>建立在 MVC 模式中的几种适配方案</h2><p>取得 UA 信息后，我们就要考虑如果根据指定的 UA 进行终端适配了。即使在 Node.js 层，虽然没有了大部分的业务逻辑，但我们依然把内部区分为 Model / Controller / View 三个模型。</p>
+<p><img src="https://img.alicdn.com/tps/TB1OeyTPVXXXXaRXVXXXXXXXXXX-200-220.png" alt></p>
+<p>我们先利用上面的图，去解析一些已有的多终端适配方案。</p>
+<h2 id="建立在-Controller-上的适配方案"><a href="#建立在-Controller-上的适配方案" class="headerlink" title="建立在 Controller 上的适配方案"></a>建立在 Controller 上的适配方案</h2><p><img src="https://img.alicdn.com/tps/TB1wl1RPVXXXXa3aXXXXXXXXXXX-507-400.png" alt></p>
+<p>这种方案应该是最简单粗暴的处理方法。通过路由（Router）将相同的 URL 统一传递到同一个控制层（Controller）。控制层再通过 UA 信息将数据和模型（Model）逻辑派发到对应的展现（View）进行渲染，渲染层则按预先的约定提供了适配几个终端的模板。</p>
+<p>这种方案的好处是，保持了数据和控制层的统一性，业务逻辑只需处理一次遍可以应用在所有终端上。但这种场景只适合如展示型页面等低交互型的应用，一旦业务比较复杂，各个终端的 Controller 可能有各自的处理逻辑，如果还是共用一个 Controller ，会导致 Controller 非常的臃肿而且难以维护，这无疑是一个错误的选择。</p>
+<h2 id="建立在-Router-上的适配方案"><a href="#建立在-Router-上的适配方案" class="headerlink" title="建立在 Router 上的适配方案"></a>建立在 Router 上的适配方案</h2><p>为了解决上面遇到的问题，我们可以在 Router 上就将设备区分，针对不同的终端分发到不同的 Controller 上：</p>
+<p><img src="https://img.alicdn.com/tps/TB1w56lPVXXXXaSXpXXXXXXXXXX-531-348.png" alt></p>
+<p>这也是最常见的方案之一，大多表现在针对不同终端使用各自独立的一套应用。如 PC 淘宝首页和 WAP 版的淘宝首页，不同设备访问 <code>www.taobao.com</code>，服务器会通过 Router 的控制，重定向到 WAP 版的淘宝首页或者 PC 版的淘宝首页，它们各自是完全独立的两套应用。</p>
+<p>但这种方案无疑带来了数据和部分逻辑无法共用的问题，各种终端之间无法分享同一份数据和业务逻辑，产生大量重复性工作，效率低下。</p>
+<p>为了缓解这个问题，有人提出了优化后的方案：依然是在同一套应用里面，各个数据来源抽象成各个 Model，提供给不同终端的 Controller 组合使用：</p>
+<p><img src="https://img.alicdn.com/tps/TB1f750PVXXXXa5XVXXXXXXXXXX-685-520.png" alt></p>
+<p>这个方案解决了前面数据无法共用的问题。在 Controller 上各个终端还是相互独立，但能共同使用同一批数据源，至少在数据上无需再针对终端类型开发独立的接口了。</p>
+<p>以上两种基于 Router 的方案，由于 Controller 的独立，各个终端可以为自己的页面实现不同的交互逻辑，保证了各终端自身足够的灵活度，这也是为什么大部分应用采用这种方案的主要原因。</p>
+<h2 id="建立在-View-层的适配方案"><a href="#建立在-View-层的适配方案" class="headerlink" title="建立在 View 层的适配方案"></a>建立在 View 层的适配方案</h2><p>这是淘宝下单页面使用的方案，不过区别是下单页将整体的渲染层放在了浏览器端，而不是 Node.js 层。不过无论是浏览器还是 Node.js，整体设计思路还是一致的：</p>
+<p><img src="https://img.alicdn.com/tps/TB1RnWTPVXXXXcSXVXXXXXXXXXX-1327-494.png" alt></p>
+<p>在这个方案里面，Router、Controller 和 Model 都无需关注设备信息，终端类型的判断完全交给展现层来处理。图中主要的模块是「View Factory」，Model 和 Controller 将数据和渲染逻辑传递过来之后，通过 View Factory 根据设备信息和其它状态（不仅仅是 UA 信息、也可以是网络环境、用户地区等等）从一堆预设好的组件（View Component）中抓取特定的组件，再组合成最终的页面。</p>
+<p>这种方案有几个优势：</p>
+<ol>
+<li>上层无需关注设备信息（UA），多终端的视频还是交由和最终展现最大关系的 View 层来处理；</li>
+<li>不仅仅是多终端适配，除了 UA 信息，各个 View Component 还可以根据用户状态决定自身输出何种模版，如低网速下默认隐藏图片、指定地区输出活动 Banner。</li>
+<li>每个 View Component 的不同模版间可以自行决定是否使用同一份数据、业务逻辑，提供十分灵活的实现方式。</li>
+</ol>
+<p>但明显的是，这个方案也是最复杂的，尤其是要考虑一些富交互的应用场景时，Router 和 Controller 也许无法保持这么纯粹。特别对于一些整体性比较强的业务，本身无法被拆分成组件，这种方案也许并不适用；而且对于一些简单的业务，使用这种架构可能不是最佳的选择。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上几种方案，都各自体现在 MVC 模型中的一个或多个部分，在业务上如果一个方案不满足需求，更可以采取多个方案同时采用的方式。或是可以理解为，业务上的复杂度和交互属性决定了该产品更适合采用哪种多终端适配方案。</p>
+<p>对比基于浏览器的响应式设计方案，因为绝大部分终端探测和渲染逻辑迁移到了服务端，所以在 Node.js 层进行适配无疑带来了更好的性能和用户体验；另外，相对于一些所谓的「云适配」方案带来的转换质量问题，在基于前后端分离的「定制式」方案中也不会存在。前后端分离的适配方案在这些方面有着天然优势。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/IXpM0AMsZIQ" target="_blank" rel="noopener">https://unsplash.com/photos/IXpM0AMsZIQ</a> By @Annie Spratt</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2014/05/17/practice-of-separation-of-front-end-from-back-end-5/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2014/05/17/practice-of-separation-of-front-end-from-back-end-5/" data-id="cjt6lby1900a6jeu1ds2309ss" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2014/05/17/practice-of-separation-of-front-end-from-back-end-5/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Midway/">Midway</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nodes-js/">Nodes.js</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2014/05/31/practice-of-separation-of-front-end-from-back-end-6/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前后端分离的思考与实践（六）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2014/05/10/practice-of-separation-of-front-end-from-back-end-4/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前后端分离的思考与实践（四）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

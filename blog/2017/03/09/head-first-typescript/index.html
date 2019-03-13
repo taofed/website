@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>认识 TypeScript | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="这是一个系列文章，一共会有三篇：  [本篇] 认识 TypeScript - 简单描述 TypeScript 的定位、特点。 TypeScript 语法学习 - 比较文档化的讲述 TypeScript 的使用方式。 TypeScript 工程使用 - 讲述如何在工程 —— 包括 Node.js 工程、React 工程 —— 中应用 TypeScript。  最近几个月有幸体验了 TypeScri">
+<meta name="keywords" content="TypeScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="认识 TypeScript">
+<meta property="og:url" content="http://taobaofed.org/blog/2017/03/09/head-first-typescript/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="这是一个系列文章，一共会有三篇：  [本篇] 认识 TypeScript - 简单描述 TypeScript 的定位、特点。 TypeScript 语法学习 - 比较文档化的讲述 TypeScript 的使用方式。 TypeScript 工程使用 - 讲述如何在工程 —— 包括 Node.js 工程、React 工程 —— 中应用 TypeScript。  最近几个月有幸体验了 TypeScri">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gw.alicdn.com/tfs/TB1_NDSPVXXXXcUXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1G_7nPVXXXXX1XXXXXXXXXXXX-935-1277.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="认识 TypeScript">
+<meta name="twitter:description" content="这是一个系列文章，一共会有三篇：  [本篇] 认识 TypeScript - 简单描述 TypeScript 的定位、特点。 TypeScript 语法学习 - 比较文档化的讲述 TypeScript 的使用方式。 TypeScript 工程使用 - 讲述如何在工程 —— 包括 Node.js 工程、React 工程 —— 中应用 TypeScript。  最近几个月有幸体验了 TypeScri">
+<meta name="twitter:image" content="http://gw.alicdn.com/tfs/TB1_NDSPVXXXXcUXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-head-first-typescript" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      认识 TypeScript
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 九十</span>
+        
+        <span>发表于: <a href="/blog/2017/03/09/head-first-typescript/" class="article-date">
+  <time datetime="2017-03-09T07:17:52.000Z" itemprop="datePublished">2017-03-09</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//gw.alicdn.com/tfs/TB1_NDSPVXXXXcUXVXXXXXXXXXX-900-500.jpg" alt="认识 TypeScript"></p>
+<p>这是一个系列文章，一共会有三篇：</p>
+<ol>
+<li>[本篇] 认识 TypeScript - 简单描述 TypeScript 的定位、特点。</li>
+<li>TypeScript 语法学习 - 比较文档化的讲述 TypeScript 的使用方式。</li>
+<li>TypeScript 工程使用 - 讲述如何在工程 —— 包括 Node.js 工程、React 工程 —— 中应用 TypeScript。</li>
+</ol>
+<p>最近几个月有幸体验了 TypeScript，它对大型软件 —— 大型 JavaScript 软件 —— 开发来说真是一把利刃。就像我斜后方那个男人一样，写了 TypeScript 就不想再写 JavaScript 了 —— 真乃取其精华去其糟粕啊！</p>
+<p>没想到我一个 Linux 的老用户 Copyleft 的忠实拥护者，也会像今天这样喜欢用 M$ 出的东西，17 岁到 19 岁的我一定会鄙视死现在的我。</p>
+<h2 id="背景认识"><a href="#背景认识" class="headerlink" title="背景认识"></a>背景认识</h2><p>TypeScript 是微软开发一款开源的编程语言，本质上是向 JavaScript 增加静态类型系统。它是 JavaScript 的超集，所有现有的 JavaScript 都可以不加改变就在其中使用。它是为大型软件开发而设计的，它最终编译产生 JavaScript，所以可以运行在浏览器、Node.js 等等的运行时环境。</p>
+<h2 id="什么是类型系统"><a href="#什么是类型系统" class="headerlink" title="什么是类型系统"></a>什么是类型系统</h2><p>下面是摘自 <code>《 Types And Programming Languages 》</code> 中的定义： </p>
+<blockquote>
+<p>A type system is a tractable syntactic method for proving the absence of certain program behaviors by classifying phrases according to the kinds of values they compute.</p>
+</blockquote>
+<p>第一个重点是 <code>Proving the absence of certain program behaviors</code>，所以我们亦可将类型检查器看做一个程序推理工具，可以静态的证明程序成立。</p>
+<p>另一个重点是 <code>Classifying phrases according to the kinds of values they compute</code>，对词语（比如变量）的值的性质进行分类，比如说 TypeScript 中的 <code>Interface</code> 、 <code>Class</code> 等能力。</p>
+<h2 id="静态类型系统是什么"><a href="#静态类型系统是什么" class="headerlink" title="静态类型系统是什么"></a>静态类型系统是什么</h2><p>增加<code>静态</code>这个定语，是为了和运行时的类型检查机制加以区分，强调<code>静态类型系统</code>是在编译时进行类型分析。</p>
+<p>JavaScript 不是一个静态编译语言,不存在编译这一步骤。但从 <code>程序推理工具</code> 的角度来看，JavaScript 的配套中还是有不少的，比如 <code>ESLint</code> 这个不完备的 <code>程序推理工具</code>。</p>
+<h2 id="静态类型系统与-Lint-工具的关系"><a href="#静态类型系统与-Lint-工具的关系" class="headerlink" title="静态类型系统与 Lint 工具的关系"></a>静态类型系统与 Lint 工具的关系</h2><p>我们先看 <code>ESLint</code> 的定义：</p>
+<blockquote>
+<p>Code linting is a type of static analysis that is frequently used to find problematic patterns or code that doesn’t adhere to certain style guidelines. </p>
+</blockquote>
+<h3 id="区别一"><a href="#区别一" class="headerlink" title="区别一"></a>区别一</h3><p>同样强调 <code>Static Analysis</code>，不过更强调 <code>Certain Style Guidelines</code> ，<code>Lint 工具</code>是一种团队协作时的风格规范工具。</p>
+<h3 id="区别二"><a href="#区别二" class="headerlink" title="区别二"></a>区别二</h3><p><code>静态类型类型分析</code>和 <code>Lint 工具</code> 的区别在于 <code>Lint 工具</code> 没有 <code>Classifying phrases according to the kinds of values they compute</code>。</p>
+<p><code>Lint 工具</code>无法基于类型对程序进行静态分析，但两者都有基于 <code>CFG （控制流图，Control Flow Graph）</code>对程序进行分析的能力。比如 TypeScript 的控制流分析、<code>ESLint</code> 的 <code>complexity</code> （当你想写个比较复杂的迭代算法时，这个规则就是个渣） 规则等。</p>
+<h2 id="TypeScript-和-JavaScript-的关系"><a href="#TypeScript-和-JavaScript-的关系" class="headerlink" title="TypeScript 和 JavaScript 的关系"></a>TypeScript 和 JavaScript 的关系</h2><p>和一些基于 JavaScript 的激进语言不同（比如 CoffeeScript），TypeScript 的语法设计首先考虑的就是兼容 JavaScript，或者说对 JavaScript 的语法做扩展。基本上是在 JavaScript 的基础之上增加了一些类型标记语法，以实现静态类型分析。把这些类型标注语法去掉之后，仍是一个标准的 JavaScript 语言。</p>
+<p>TypeScript 同样也在做一些新语法编译到老语法的事情（就像 Babel 做的）， 基本实现常用的 <code>EcmaScript Stage 1</code> 以上的语法特性。</p>
+<h2 id="类型系统的益处"><a href="#类型系统的益处" class="headerlink" title="类型系统的益处"></a>类型系统的益处</h2><h3 id="侦测错误"><a href="#侦测错误" class="headerlink" title="侦测错误"></a>侦测错误</h3><p>静态类型分析首要优点就是能尽早的发现逻辑错误，而不是上线之后才发现。比如我们在 JavaScript 中经常发生的问题，函数返回值含混。在开发过程中坚信一个函数返回字符串，但到了线上接受了真实数据却返回了 <code>undefined</code>。看似一个简单错误，却可能给公司造成数以万计的损失。</p>
+<p>看个例子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过分数获取图标</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getRankIcon</span>(<span class="params">score</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (score &gt;= <span class="number">100</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (score &gt;= <span class="number">500</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (score &gt;= <span class="number">1500</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">''</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> icon = getRankIcon(<span class="number">5</span>);</span><br><span class="line"><span class="keyword">const</span> iconArray = icon.split();</span><br></pre></td></tr></table></figure>
+<p>脆弱的 JS 啊，执行一下，Ops！</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> node taste.js</span></span><br><span class="line">TypeError: Cannot read property 'split' of undefined</span><br></pre></td></tr></table></figure>
+<p>相同的逻辑我们用 <code>tsc</code> 编译一下（甚至不需要增加任何的类型标注）。直接静态分析出来程序有一个 <code>undefined</code> 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> tsc --strictNullChecks taste.ts</span></span><br><span class="line">x.ts(11,19): error TS2532: Object is possibly 'undefined'.</span><br></pre></td></tr></table></figure>
+<p>另一个重要的用处是作为维护工具（重构辅助工具），假如我们有一个很通用的函数，在工程里用的到处都是，有一天我们要在这个函数最前面增加一个参数。TypeScript 中你只需要改那个函数就好了，然后再执行静态类型分析，所有和这个函数参数不匹配的地方都会提示出来。但是，在 JavaScript 里，这个改动很有可能被忽略或者漏掉，打包也不会报错，然后发布后线上就挂了……</p>
+<h3 id="抽象"><a href="#抽象" class="headerlink" title="抽象"></a>抽象</h3><p>类型系统的另一个优点是强化规范编程，TypeScript 提供了简便的方式定义接口。这一点在大型软件开发时尤为重要，一个系统模块可以抽象的看做一个 TypeScript 定义的接口。</p>
+<p>用带清晰接口的模块来结构化大型系统，这是一种更为抽象的设计形式。接口设计（讨论）与最终实现方式无关，对接口思考得越抽象越有利。</p>
+<p>换句话说就是让设计脱离实现，最终体现出一种 <code>IDL（接口定义语言，Interface Define Language）</code>，让程序设计回归本质。</p>
+<p>看个例子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">interface Avatar &#123;</span><br><span class="line">  cdnUrl: string; <span class="comment">// 用户头像在 CDN 上的地址</span></span><br><span class="line">  filePath: string; <span class="comment">// 用户头像在对象存储上的路径</span></span><br><span class="line">  fileSize: number; <span class="comment">// 文件大小</span></span><br><span class="line">&#125;</span><br><span class="line">interface UserProfile &#123;</span><br><span class="line">  cuid?: string; <span class="comment">// 用户识别 ID，可选</span></span><br><span class="line">  avatar?: Avatar; <span class="comment">// 用户形象，可选</span></span><br><span class="line">  name: string; <span class="comment">// 用户名，必选</span></span><br><span class="line">  gender: string; <span class="comment">// 用户性别，必选</span></span><br><span class="line">  age: number; <span class="comment">// 用户年龄，必选</span></span><br><span class="line">&#125;</span><br><span class="line">interface UserModel &#123;</span><br><span class="line">  createUser(profile: UserProfile): string; <span class="comment">// 创建用户</span></span><br><span class="line">  getUser(cuid: string): UserProfile; <span class="comment">// 根据 cuid 获取用户</span></span><br><span class="line">  listFollowers(cuid: string): UserProfile[]; <span class="comment">// 获取所有关注者</span></span><br><span class="line">  followByCuid(cuid: string, <span class="attr">who</span>: string): string; <span class="comment">// 关注某人</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那我实现上述 <code>Interface</code> 也只需如下进行。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserModelImpl</span> <span class="title">implements</span> <span class="title">UserModel</span> </span>&#123;</span><br><span class="line">   createUser(profile: UserProfile): string &#123;</span><br><span class="line">     <span class="comment">// do something</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 把 UserModel 定义的都实现</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h3><p>读程序时类型标注也有用处，不止是说人在读的时候。基于类型定义 IDE 可以对我们进行很多辅助，比如找到一个函数所有的使用，编写代码时对参数进行提示等等。</p>
+<p>更重要的是这种文档能力不像纯人工维护的注释一样，稍不留神就忘了更新注释，最后注释和程序不一致。</p>
+<p>更强大的是，可以自动根据类型标注产生文档，甚至都不需要编写注释（详细的人类语言描述还是要写注释的）。</p>
+<p>首先安装全局的 <code>typedoc</code> 命令。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> npm install -g typedoc</span></span><br></pre></td></tr></table></figure>
+<p>然后我们尝试对上面抽象的 <code>Interface</code> 产生文档。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> typedoc taste.ts --module commonjs --out doc</span></span><br></pre></td></tr></table></figure>
+<p>然后下面就是效果了。</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1G_7nPVXXXXX1XXXXXXXXXXXX-935-1277.jpg" alt></p>
+<h2 id="编写第一个-TypeScript-程序"><a href="#编写第一个-TypeScript-程序" class="headerlink" title="编写第一个 TypeScript 程序"></a>编写第一个 TypeScript 程序</h2><p>这一节会介绍如何开始体验 TypeScript，下一节开始会介绍一些有特点、有趣的例子。</p>
+<h3 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h3><p>安装 TypeScript。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g typescript</span><br></pre></td></tr></table></figure>
+<p>初始化工作区。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir learning-typescript</span><br><span class="line">cd learning-typescript</span><br></pre></td></tr></table></figure>
+<p>新建第一个测试文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">touch taste.ts</span><br></pre></td></tr></table></figure>
+<h3 id="第一个例子"><a href="#第一个例子" class="headerlink" title="第一个例子"></a>第一个例子</h3><p>我们刚才已经新建了一个名为 <code>taste.ts</code> 的文件，对 TypeScript 的后缀名为 <code>ts</code>，那我们写点什么进去吧！</p>
+<p>taste.ts</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">say</span>(<span class="params">text: string</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line">say(<span class="string">'hello!'</span>);</span><br></pre></td></tr></table></figure>
+<p>然后执行命令（tsc 是刚才 npm 装的 typescript 中带的）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tsc taste.ts</span><br></pre></td></tr></table></figure>
+<p>然后我们得到一个编译后的文件 <code>taste.js</code>，内容如下。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">say</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line">say(<span class="string">'hello!'</span>);</span><br></pre></td></tr></table></figure>
+<p>可以看到，只是简单去除了 text 后面的类型标注，然后我们用 <code>node</code> 执行 <code>taste.js</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">node taste.js</span><br><span class="line">// hello!</span><br></pre></td></tr></table></figure>
+<p>完美执行，让我再改写东西看看？</p>
+<p>taste.ts</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">say</span>(<span class="params">text: string</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(text);</span><br><span class="line">&#125;</span><br><span class="line">say(<span class="number">969</span>);</span><br></pre></td></tr></table></figure>
+<p>然后再执行 <code>tsc taste.ts</code>，然后就类型检查就报错了。这就是 TypeScript 的主要功能 —— 静态类型检查。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> tsc taste.ts </span></span><br><span class="line">taste.ts(4,5): error TS2345: Argument of type '969' is not assignable to parameter of type 'string'.</span><br></pre></td></tr></table></figure>
+<h2 id="有趣的例子-基于控制流的分析"><a href="#有趣的例子-基于控制流的分析" class="headerlink" title="有趣的例子 - 基于控制流的分析"></a>有趣的例子 - 基于控制流的分析</h2><p>看一个 JavaScript 的例子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getDefaultValue</span> (<span class="params">key, emphasis</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> ret;</span><br><span class="line">  <span class="keyword">if</span> (key === <span class="string">'name'</span>) &#123;</span><br><span class="line">    ret = <span class="string">'GuangWong'</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span>(key=== <span class="string">'gender'</span>) &#123;</span><br><span class="line">    ret = <span class="string">'Man'</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key === <span class="string">'age'</span>) &#123;</span><br><span class="line">    ret = <span class="number">23</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Unkown key '</span> + info.type);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (emphasis) &#123;</span><br><span class="line">    ret = ret.toUpperCase();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">getDefaultValue(<span class="string">'name'</span>); <span class="comment">// GuangWong</span></span><br><span class="line">getDefaultValue(<span class="string">'gender'</span>, <span class="literal">true</span>) <span class="comment">// MAN</span></span><br><span class="line">getDefaultValue(<span class="string">'age'</span>, <span class="literal">true</span>) <span class="comment">// Error: toUpperCase is not a function</span></span><br></pre></td></tr></table></figure>
+<p>这是一个简单的函数，第一个参数 <code>key</code> 用来获得一个默认值。第二参数 <code>emphasis</code> 为了某些场景下要大写强调，只需要传入 <code>true</code> 即可自动将结果转成大写。 </p>
+<p>但是我不小心将 <code>age</code> 的值写成了数字字面量，如果我调用 <code>getDefaultValue(&#39;age&#39;, true)</code> 就会在运行时报错。这个有可能是软件上线了之后才发生，直接导致业务不可用。</p>
+<p>TypeScript 就能避免这类问题，我们只需要进行一个简单的标注。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getDefaultValue</span> (<span class="params">key, emphasis?</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> ret: string;</span><br><span class="line">  <span class="keyword">if</span> (key === <span class="string">'name'</span>) &#123;</span><br><span class="line">    ret = <span class="string">'GuangWong'</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key === <span class="string">'gender'</span>) &#123;</span><br><span class="line">    ret = <span class="string">'Man'</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key === <span class="string">'age'</span>) &#123;</span><br><span class="line">    ret = <span class="number">23</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Unkown key '</span> + key);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (emphasis) &#123;</span><br><span class="line">    ret = ret.toUpperCase();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">getDefaultValue(<span class="string">'name'</span>); <span class="comment">// GuangWong</span></span><br><span class="line">getDefaultValue(<span class="string">'gender'</span>, <span class="literal">true</span>) <span class="comment">// MAN</span></span><br><span class="line">getDefaultValue(<span class="string">'age'</span>, <span class="literal">true</span>) <span class="comment">// Error: toUpperCase is not a function</span></span><br></pre></td></tr></table></figure>
+<p>在 <code>tsc</code> 编译时，逻辑错误会自动报出来。妈妈再也不怕我的逻辑混乱了！ </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> tsc taste.ts</span></span><br><span class="line">x.ts(8,5): error TS2322: Type '23' is not assignable to type 'string'.</span><br></pre></td></tr></table></figure>
+<h2 id="有趣的例子-Interface"><a href="#有趣的例子-Interface" class="headerlink" title="有趣的例子 - Interface"></a>有趣的例子 - Interface</h2><p>JavaScript 的类型我们称为鸭子类型。</p>
+<blockquote>
+<p>当看到一只鸟走起来像鸭子、游泳起来像鸭子、叫起来也像鸭子，那么这只鸟就可以被称为鸭子。</p>
+</blockquote>
+<p>鸭子类型总是有点损的感觉，不如叫做面向接口编程。所以 JavaScript 就是一门面向接口编程的语言，TypeScript 中相对应的就是 <code>Interface</code>。</p>
+<p>接下来看个例子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">interface Profile &#123;</span><br><span class="line">  name: string;</span><br><span class="line">  gender: <span class="string">'man'</span> | <span class="string">'woman'</span>;</span><br><span class="line">  age: number;</span><br><span class="line">  height?: number;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">printProfile</span>(<span class="params">profile: Profile</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'name'</span>, profile.name);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'gender'</span>, profile. gender);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'age'</span>, profile.age);</span><br><span class="line">  <span class="keyword">if</span> (profile.height) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'height'</span>, profile.height);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">printProfile(&#123;<span class="attr">name</span>: <span class="string">'GuangWong'</span>, <span class="attr">gender</span>: <span class="string">'man'</span>, <span class="attr">age</span>: <span class="number">23</span>&#125;);</span><br></pre></td></tr></table></figure>
+<p>使用 <code>tsc</code> 编译一切完美，那我们尝试下面的调用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">printProfile(&#123;<span class="attr">name</span>: <span class="string">'GuangWong'</span>, <span class="attr">age</span>: <span class="number">23</span>&#125;);</span><br></pre></td></tr></table></figure>
+<p>使用 <code>tsc</code> 编译，报错了！说没有传属性 <code>gender</code>。不过 <code>height</code> 也没传怎么没报错呢？因为 <code>height?: number</code>，其中的 <code>?</code> 表示这个是可选的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> tsc taste.ts</span></span><br><span class="line">x.ts(19,14): error TS2345: Argument of type '&#123; name: string; age: number; &#125;' is not assignable to parameter of type 'Profile'.</span><br><span class="line">  Property 'gender' is missing in type '&#123; name: string; age: number; &#125;'.</span><br></pre></td></tr></table></figure>
+<p>接下来我们试着传个非 <code>number</code> 的 <code>height</code> 试试看。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">printProfile(&#123;<span class="attr">height</span>: <span class="string">'190cm'</span>, <span class="attr">name</span>: <span class="string">'GuangWong'</span>, <span class="attr">gender</span>: <span class="string">'man'</span>, <span class="attr">age</span>: <span class="number">23</span>&#125;);</span><br></pre></td></tr></table></figure>
+<p>使用 <code>tsc</code> 编译，报错了！<code>string</code> 类型无法赋值给 <code>number</code> 类型。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> tsc taste.ts</span></span><br><span class="line">x.ts(17,14): error TS2345: Argument of type '&#123; height: string; name: string; gender: "man"; age: number; &#125;' is not assignable to parameter of type 'Profile'.</span><br><span class="line">  Types of property 'height' are incompatible.</span><br><span class="line">    Type 'string' is not assignable to type 'number'.</span><br></pre></td></tr></table></figure>
+<h2 id="有趣的例子-Implements"><a href="#有趣的例子-Implements" class="headerlink" title="有趣的例子 - Implements"></a>有趣的例子 - Implements</h2><p>这也是 <code>Interface</code> 的应用，假设我们有这么一个 <code>Interface</code>，是某个架构师写的让我来实现一种事物，比如榴莲。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">type Fell = <span class="string">'good'</span> | <span class="string">'bad'</span>;</span><br><span class="line">interface Eatable &#123;</span><br><span class="line">  calorie: number;</span><br><span class="line">  looks(): Fell;</span><br><span class="line">  taste(): Fell;</span><br><span class="line">  flavour(): Fell;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我只需要简单的实现  <code>Eatable</code> 即可，即 <code>implements Eatable</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Durian</span> <span class="title">implements</span> <span class="title">Eatable</span> </span>&#123;</span><br><span class="line">  calorie = <span class="number">1000</span>;</span><br><span class="line">  looks(): Fell &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'good'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  taste(): Fell &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'good'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  flavour(): Fell &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">'bad'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我删掉 <code>flavour</code> 的实现，那就会报错了！说我错误的实现了 <code>Eatable</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> tsc taste.ts</span></span><br><span class="line">x.ts(8,7): error TS2420: Class 'Durian' incorrectly implements interface 'Eatable'.</span><br><span class="line">  Property 'flavour' is missing in type 'Durian'.</span><br></pre></td></tr></table></figure>
+<h2 id="有趣的例子-函数重载"><a href="#有趣的例子-函数重载" class="headerlink" title="有趣的例子 - 函数重载"></a>有趣的例子 - 函数重载</h2><p>什么重载啊、多态啊、分派啊，在 JavaScript 里都是不存在的！那都是都是我们 Hacking 出来，Ugly！</p>
+<p>TypeScript 对函数重载有一定的支持，不过因为 TypeScript 不扩展 JavaScript 的运行时机制，还是需要我们来处理根据宗量分派的问题（说白了就是运行时类型判断）。</p>
+<p>下面是 TypeScript 文档中的一个例子。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> suits = [<span class="string">"hearts"</span>, <span class="string">"spades"</span>, <span class="string">"clubs"</span>, <span class="string">"diamonds"</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">pickCard</span>(<span class="params">x: &#123;suit: string; card: number; &#125;[]</span>): <span class="title">number</span>;</span></span><br><span class="line"><span class="function"><span class="title">function</span> <span class="title">pickCard</span>(<span class="params">x: number</span>): </span>&#123;suit: string; card: number; &#125;;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">pickCard</span>(<span class="params">x</span>): <span class="title">any</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Check to see if we're working with an object/array</span></span><br><span class="line">    <span class="comment">// if so, they gave us the deck and we'll pick the card</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> x == <span class="string">"object"</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> pickedCard = <span class="built_in">Math</span>.floor(<span class="built_in">Math</span>.random() * x.length);</span><br><span class="line">        <span class="keyword">return</span> pickedCard;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Otherwise just let them pick the card</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> x == <span class="string">"number"</span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> pickedSuit = <span class="built_in">Math</span>.floor(x / <span class="number">13</span>);</span><br><span class="line">        <span class="keyword">return</span> &#123; <span class="attr">suit</span>: suits[pickedSuit], <span class="attr">card</span>: x % <span class="number">13</span> &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> myDeck = [&#123; <span class="attr">suit</span>: <span class="string">"diamonds"</span>, <span class="attr">card</span>: <span class="number">2</span> &#125;, &#123; <span class="attr">suit</span>: <span class="string">"spades"</span>, <span class="attr">card</span>: <span class="number">10</span> &#125;, &#123; <span class="attr">suit</span>: <span class="string">"hearts"</span>, <span class="attr">card</span>: <span class="number">4</span> &#125;];</span><br><span class="line"><span class="keyword">let</span> pickedCard1 = myDeck[pickCard(myDeck)];</span><br><span class="line">alert(<span class="string">"card: "</span> + pickedCard1.card + <span class="string">" of "</span> + pickedCard1.suit);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> pickedCard2 = pickCard(<span class="number">15</span>);</span><br><span class="line">alert(<span class="string">"card: "</span> + pickedCard2.card + <span class="string">" of "</span> + pickedCard2.suit);</span><br></pre></td></tr></table></figure>
+<p>这样至少在函数头的描述上清晰多了，而且函数的各个分派函数的类型定义也可以明确的标记出来了。</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>第一篇就先这样简单介绍 TypeScript 吧，详细的语法、工程应用接下来的篇幅中再详细介绍。</p>
+<ol>
+<li>如果大家对 TypeScript 真的有兴趣的话，可以移步官方文档继续学习。<br><a href="http://www.typescriptlang.org/docs/tutorial.html" target="_blank" rel="noopener">http://www.typescriptlang.org/docs/tutorial.html</a></li>
+<li>如果大家对类型系统的理论比较感兴趣的，建议把 <code>《 Types And Programming Languages 》</code> 买了并看了。</li>
+</ol>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/HbbHfXvb6Xw" target="_blank" rel="noopener">https://unsplash.com/photos/HbbHfXvb6Xw</a> By Nirzar Pangarkar</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2017/03/09/head-first-typescript/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2017/03/09/head-first-typescript/" data-id="cjt6lbxyo003wjeu1fpvg3df1" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2017/03/09/head-first-typescript/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TypeScript/">TypeScript</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2017/03/16/javascript-functional-programing/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          我眼中的 JavaScript 函数式编程
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2017/03/03/to-my-future-friend/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">致未来的实习生</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

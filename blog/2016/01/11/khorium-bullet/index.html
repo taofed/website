@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>D2 论坛淘宝 FED 展台游戏「氪金弹头」制作始末 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="「氪金弹头」游戏，是淘宝 FED 团队互动小组为 D2 开发的展台游戏，也是互动技术的一片试验田。这款游戏的设计类似经典的「坦克大战」，每个玩家控制一辆坦克，在一篇草丛中作战（互相攻击）。基本玩法是，使用一台大屏电视显示战场和坦克，玩家使用手机扫码登录，手机「变身」为遥控器，控制大屏幕上属于自己的坦克。目前，这款游戏已经部署在淘宝 FED 博客上，亲可以点击下面的按钮进入游戏。  D2 当天，承">
+<meta name="keywords" content="游戏 氪金弹头 D2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="D2 论坛淘宝 FED 展台游戏「氪金弹头」制作始末">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/11/khorium-bullet/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="「氪金弹头」游戏，是淘宝 FED 团队互动小组为 D2 开发的展台游戏，也是互动技术的一片试验田。这款游戏的设计类似经典的「坦克大战」，每个玩家控制一辆坦克，在一篇草丛中作战（互相攻击）。基本玩法是，使用一台大屏电视显示战场和坦克，玩家使用手机扫码登录，手机「变身」为遥控器，控制大屏幕上属于自己的坦克。目前，这款游戏已经部署在淘宝 FED 博客上，亲可以点击下面的按钮进入游戏。  D2 当天，承">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1CtRgLpXXXXc0XXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1qQXjLpXXXXcQXpXXXXXXXXXX-241-90.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1iE1bLXXXXXauXVXXXXXXXXXX-600-450.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1DnqvLXXXXXbWXXXXXXXXXXXX-600-450.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1KhX_LXXXXXcjXVXXXXXXXXXX-600-450.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1K7uaKFXXXXXbaXXXXXXXXXXX-600-450.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1i4iuLXXXXXcZXXXXXXXXXXXX-450-600.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1.yR7LXXXXXcYXFXXXXXXXXXX-640-400.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB103MDLXXXXXbsaXXXXXXXXXXX-726-441.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Iud1LXXXXXcrXVXXXXXXXXXX-640-400.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB16XZWLXXXXXakXFXXXXXXXXXX-527-417.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1TFV1LXXXXXc1XVXXXXXXXXXX-452-217.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1wSQ4LXXXXXaOXpXXXXXXXXXX-589-202.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB11sI5LXXXXXacXpXXXXXXXXXX-302-202.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Y33QLXXXXXXBXVXXXXXXXXXX-862-202.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB11Xc.LXXXXXbwXXXXXXXXXXXX-800-378.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1qXs_LXXXXXcjXXXXXXXXXXXX-810-378.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Hzo4LXXXXXbeXpXXXXXXXXXX-414-378.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB15xQ3LXXXXXbSXpXXXXXXXXXX-842-304.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="D2 论坛淘宝 FED 展台游戏「氪金弹头」制作始末">
+<meta name="twitter:description" content="「氪金弹头」游戏，是淘宝 FED 团队互动小组为 D2 开发的展台游戏，也是互动技术的一片试验田。这款游戏的设计类似经典的「坦克大战」，每个玩家控制一辆坦克，在一篇草丛中作战（互相攻击）。基本玩法是，使用一台大屏电视显示战场和坦克，玩家使用手机扫码登录，手机「变身」为遥控器，控制大屏幕上属于自己的坦克。目前，这款游戏已经部署在淘宝 FED 博客上，亲可以点击下面的按钮进入游戏。  D2 当天，承">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB1CtRgLpXXXXc0XXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-khorium-bullet" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      D2 论坛淘宝 FED 展台游戏「氪金弹头」制作始末
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 叶斋</span>
+        
+        <span>发表于: <a href="/blog/2016/01/11/khorium-bullet/" class="article-date">
+  <time datetime="2016-01-11T12:57:42.000Z" itemprop="datePublished">2016-01-11</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://img.alicdn.com/tps/TB1CtRgLpXXXXc0XXXXXXXXXXXX-900-500.jpg" alt="D2 论坛淘宝 FED 展台游戏「氪金弹头」制作始末"></p>
+<p>「氪金弹头」游戏，是淘宝 FED 团队互动小组为 D2 开发的展台游戏，也是互动技术的一片试验田。这款游戏的设计类似经典的「坦克大战」，每个玩家控制一辆坦克，在一篇草丛中作战（互相攻击）。基本玩法是，使用一台大屏电视显示战场和坦克，玩家使用手机扫码登录，手机「变身」为遥控器，控制大屏幕上属于自己的坦克。目前，这款游戏已经部署在淘宝 FED 博客上，亲可以点击下面的按钮进入游戏。</p>
+<p><a target="_blank" href="http://taobaofed.org/tank/"><img src="http://img.alicdn.com/tps/TB1qQXjLpXXXXcQXpXXXXXXXXXX-241-90.png"></a></p>
+<p>D2 当天，承载这款游戏淘宝 FED 团队展台成为了最火爆的展台，吸引了大量 D2 的参会者游玩这款游戏。</p>
+<p><img src="http://img.alicdn.com/tps/TB1iE1bLXXXXXauXVXXXXXXXXXX-600-450.jpg" alt></p>
+<p><strong>大清早就聚集在展台前的同学们</strong></p>
+<p><img src="http://img.alicdn.com/tps/TB1DnqvLXXXXXbWXXXXXXXXXXXX-600-450.jpg" alt></p>
+<p><strong>午间高峰期盛况</strong></p>
+<p><img src="http://img.alicdn.com/tps/TB1KhX_LXXXXXcjXVXXXXXXXXXX-600-450.jpg" alt></p>
+<p><strong>里面的会议开始了，但是小朋友还在专心致志地玩耍</strong></p>
+<p><img src="http://img.alicdn.com/tps/TB1K7uaKFXXXXXbaXXXXXXXXXXX-600-450.jpg" alt></p>
+<p><strong>夜场开始前</strong></p>
+<p><img src="http://img.alicdn.com/tps/TB1i4iuLXXXXXcZXXXXXXXXXXXX-450-600.jpg" alt></p>
+<p><strong>BOSS 们愉快地交往着、玩耍着</strong></p>
+<p>这款游戏的策划、设计、实现、部署全部是由互动小组完成的。趁着这款游戏的热度还未完全消退，本文对这款游戏的策划、设计、开发，以及当天的「运营」过程作个总结。</p>
+<h2 id="游戏策划"><a href="#游戏策划" class="headerlink" title="游戏策划"></a>游戏策划</h2><p>在确认「承包」了 FED 团队展台之后，我们互动小组就开始思索展台的创意。在若干个最初的灵感中，「手机遥控，大屏互动」的创意获得了所有人的赞同。之后，互动小组通过一次周会讨论了具体的游戏形式，又从若干个经典游戏（贪吃蛇、炸弹人、飞机大战、坦克大战等）中选出了「坦克大战」，作为我们游戏的原型。</p>
+<p>我们将这款游戏命名为「氪金弹头」。</p>
+<blockquote>
+<p>「氪金」是 MMRPG 「魔兽争霸」的「燃烧的远征」资料片中的一种稀有金属，后引申为（调侃地）形容某种高档材质。</p>
+</blockquote>
+<p>我们不是专业的游戏策划，很难在策划阶段就产出完整的游戏方案（即使产出了，多半也是漏洞百出，在实现的过程不得不推翻重来）。我们的做法是，有了比较具体的想法后就动手开始设计和实现，并在其过程中根据实际体验，敏捷地改进和修正。</p>
+<ul>
+<li>比如，初期手机模拟遥控器的摇杆，体验很差，用户很难准确地控制坦克，我们改进了摇杆的实现原理。</li>
+<li>比如，初期坦克出现时没有「无敌」效果，当场地用户较多时，容易出现「出生在敌人枪口上的情况」。</li>
+<li>比如，初期飞行的炮弹是可以互相穿过的，「互相开炮，同归于尽」成为主流的情形。我们增加了炮弹互相抵消的机制，大大增强了可玩性。</li>
+<li>当天的游戏仅有一块大屏幕，后来我们增加了房间功能。每块大屏幕是一个独立的房间，左下方的二维码（扫码加入对战）中即包含了房间信息。</li>
+</ul>
+<h2 id="游戏设计"><a href="#游戏设计" class="headerlink" title="游戏设计"></a>游戏设计</h2><p>由于没有专职的视觉设计师，@一位 承担了全部的视觉设计工作。由于缺乏手绘功底，我们最初的方案是，直接使用 <a href="https://www.sketchapp.com/" target="_blank" rel="noopener">Sketch</a> 绘制游戏元素：坦克、石块、树林等。初版设计稿如下：</p>
+<p><img src="http://img.alicdn.com/tps/TB1.yR7LXXXXXcYXFXXXXXXXXXX-640-400.jpg" alt="初版设计稿"></p>
+<p>后来，我们发现另一款 3D 建模软件 <a href="https://www.sketchup.com" target="_blank" rel="noopener">SketchUp</a> 更加适合。SketchUp 能够导出 PDF 格式的矢量数据，并导入 Sketch 进行二次编辑。前者相比后者，有以下优点：</p>
+<ol>
+<li>能够明显增强游戏元素的质感。由于光照的原因，物体不同表面的颜色是不一致的，这种「不一致」是影响质感的关键因素。在二维平面直接进行绘制时，难以把控元素的质感。</li>
+<li>能够生成特定光照条件的非常真实的阴影，而且是矢量格式的。在二维平面绘制时，阴影只能凭着「感觉」来。</li>
+<li>而且能方便地输出和更新需要四向图的单位，比如坦克。在二维平面绘制时，四向图元素需要绘制四遍，如果有修改，也需要改动四处。而在三维建模中，只需一次建模，便可导出四个方向的图。</li>
+<li>能够方便地生成海报，比如本文的题图就是 SketchUp 渲染出来的。</li>
+</ol>
+<p>我们的方案是，在 SketchUp 中进行建模，然后将模型导出成二维的矢量数据 PDF，再导入 Sketch 进行微调，最后导出成 PNG。在 SketchUp 中的模型如下所示：</p>
+<p><img src="https://img.alicdn.com/tps/TB103MDLXXXXXbsaXXXXXXXXXXX-726-441.jpg" alt="SketchUp"></p>
+<p>最终导出的设计稿，如下所示。这也是游戏最终呈现给玩家的样子。</p>
+<p><img src="http://img.alicdn.com/tps/TB1Iud1LXXXXXcrXVXXXXXXXXXX-640-400.jpg" alt="再版设计稿"></p>
+<p>制作这款游戏的过程中，我深深地感受到 Sketch 导出切片的方便之处。我的感觉是，如果视觉设计的下游是前端开发，需要将元素分块导出的，那么使用 Sketch 而不是 Photoshop 的效率也许会高一些。后者也许更适合下游直接出单张图片的情形（比如制作海报）。</p>
+<h2 id="游戏实现"><a href="#游戏实现" class="headerlink" title="游戏实现"></a>游戏实现</h2><p>游戏的开发主要由 @叶斋 完成。开发分为三个部分，大屏幕（战场），手机端（遥控器），服务器（转发）。具体的思路是，手机端和大屏幕端同时 socket 连接到服务器，服务器将玩家手机上的状态实时同步到大屏幕端，游戏逻辑在大屏幕上计算，并把一些关键事件（击毁坦克）传回服务器。</p>
+<p><img src="http://img.alicdn.com/tps/TB16XZWLXXXXXakXFXXXXXXXXXX-527-417.png" alt></p>
+<p>手机与大屏幕端，都是典型的单页面应用。服务器使用 socket.io 实现消息的转发。</p>
+<h3 id="大屏幕端"><a href="#大屏幕端" class="headerlink" title="大屏幕端"></a>大屏幕端</h3><p>大屏幕是游戏的主战场，坦克间的「爱恨情仇」都发生在这里，大部分游戏运行时运算也发生在这里，仅把一些关键信息传回服务器。大屏幕端的开发量占到整个开发量的 60% 以上。</p>
+<p>因为主要运算都发生在大屏幕的浏览器端，所以我们在服务器端作了控制，同时仅允许一个大屏幕连接到服务器。</p>
+<blockquote>
+<p>将游戏运行时的运算放在服务器进行，确实更加「理所应当」，不仅更安全，也允许多个大屏幕存在（每个玩家有自己的视角）。几乎所有的网络游戏都是这样做的，但此时我们必须考虑多屏同步的问题。</p>
+</blockquote>
+<blockquote>
+<p>显示器的帧率是 60Hz，但是服务器和客户端怎么也无法确保每 1/60 秒就通讯一次，所以必然存在一些客户端「推测」出来的中间状态，客户端会在收到下一个服务器响应时验证和修复。何况我们还要考虑网络短暂阻塞的情况（你总不能客户端 1s 没有响应，就判定其掉线吧）。如果你玩过「魔兽争霸」或「魔兽世界」这样的联机游戏，你肯定会遇到这样的情况：你自己还能动，但周围的人都不动了，两三秒（也许十几秒）之后，其他人都瞬移到了不远处的其他地方，而你，也许已经死了。这是因为你「卡」了，网络恢复后，客户端同步了服务器的最新状态。</p>
+</blockquote>
+<blockquote>
+<p>完成上述功能需要一笔可观的学习和时间成本，但当时的情况并不允许。后续，我们也许会把运算移到服务器端，然后推出远程分屏联机模式的。</p>
+</blockquote>
+<p>大屏幕端作为典型的单页应用，我们使用 webpack 组织项目代码。除了玩家排行榜、在线玩家等功能区域是用 DOM 结构，游戏的主场景是用 Canvas 渲染出来的。游戏使用的 FED 团队产出的游戏框架 Gama，有以下一些小的技术点，也许可以关注下：</p>
+<ol>
+<li>状态机。逻辑稍微复杂一点的游戏应用，如果不用一点状态机的思想，全靠异步回调和事件来实现逻辑，那么代码很快就会变成不可维护了。</li>
+<li>分层 Canvas 渲染。由于 Canvas 绘制的元素很多，但是需要绘制的帧率却不一，如果全部绘制的一个 Canvas 上，性能肯定会大打折扣。这个坦克大战场景虽然不复杂，但也分了 4 层 Canvas，石块、松树这些一动也不动的元素，其实仅仅绘制了一次而已。</li>
+<li>素材与声音的合并。虽然现在带宽不是什么大问题了，但是该做的优化还是得做（尤其是在移动设备上）。大家也许已经习惯了合并图片资源，其实声音也是可以合并的。（推荐 <a href="https://github.com/tonistiigi/audiosprite" target="_blank" rel="noopener">audiosprite</a>）。</li>
+</ol>
+<h3 id="手机端"><a href="#手机端" class="headerlink" title="手机端"></a>手机端</h3><p>手机端引导用户登录，然后显示遥控器界面，用户在遥控器上滑动手指，控制大屏幕上属于自己的坦克。</p>
+<p><img src="http://img.alicdn.com/tps/TB1TFV1LXXXXXc1XVXXXXXXXXXX-452-217.jpg" alt="遥控器"></p>
+<p>我们希望，用户在横置手机的情况下进行操作。当用户扫码打开页面后，如果是竖屏，则提示用户将手机横置过来。</p>
+<h4 id="模拟摇杆"><a href="#模拟摇杆" class="headerlink" title="模拟摇杆"></a>模拟摇杆</h4><p>手机通过模拟遥控器上的「摇杆」，方便用户控制坦克的行进方向。</p>
+<p>最初的方案是，把手机屏幕左侧划分为四个部分，监测用户手指滑动：手指滑动到哪个位置，就是那个方向。</p>
+<p><img src="http://img.alicdn.com/tps/TB1wSQ4LXXXXXaOXpXXXXXXXXXX-589-202.jpg" alt></p>
+<p>然而我们发现，在不看手机屏幕的情况下，这很难精准地控制方向。在尝试了几个其他方案后，我们确定使用以下方案：</p>
+<p>手指按到屏幕上时，确定一个基准点，之后滑动手指，依靠这个基准点计算方向。</p>
+<p><img src="http://img.alicdn.com/tps/TB11sI5LXXXXXacXpXXXXXXXXXX-302-202.jpg" alt></p>
+<p>这一处优化是由 @文龙 完成的，该优化大大提高了手机模拟遥控器的体验。</p>
+<h4 id="声音反馈"><a href="#声音反馈" class="headerlink" title="声音反馈"></a>声音反馈</h4><p>与传统意义上的遥控器不同，手机模拟的遥控器没有实体按钮，无法把遥控器的状态通过触觉反馈给用户；更糟糕的是，用户玩游戏时眼睛始终是盯着大屏幕的，遥控器状态也无法通过视觉被反馈给用户。</p>
+<blockquote>
+<p>很多动作类手游也会模拟摇杆，但至少玩家会盯着手机看！</p>
+</blockquote>
+<p>退而求其次，我们利用浏览器播放声音的能力，在遥控器状态发生变化（如由「向上」变为「向左」）时播放「咔嗒」声，通知用户（您的操作成功了）。</p>
+<h3 id="服务器"><a href="#服务器" class="headerlink" title="服务器"></a>服务器</h3><p>服务器的功能比较简单，主要包括：处理登录，转发 socket 请求数据：包括将遥控端的状态同步到大屏端，以及把大屏端的某些重要事件（坦克被摧毁）转发到遥控端，以及记录下来。服务器是基于 socket.io 实现的。</p>
+<h2 id="游戏数据"><a href="#游戏数据" class="headerlink" title="游戏数据"></a>游戏数据</h2><h3 id="基础数据"><a href="#基础数据" class="headerlink" title="基础数据"></a>基础数据</h3><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>次数</th>
+<th>人数</th>
+<th style="text-align:right">人均</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>登录</td>
+<td>770</td>
+<td>391</td>
+<td style="text-align:right">1.97</td>
+</tr>
+<tr>
+<td>游玩</td>
+<td>5857</td>
+<td>207</td>
+<td style="text-align:right">28.29</td>
+</tr>
+</tbody>
+</table>
+<h3 id="细分"><a href="#细分" class="headerlink" title="细分"></a>细分</h3><h4 id="时间：高峰与低谷"><a href="#时间：高峰与低谷" class="headerlink" title="时间：高峰与低谷"></a>时间：高峰与低谷</h4><p>如下图所示。访问登陆页的高峰出现在 9:00 和 13:00，低谷出现在 10:00~11:00，游玩的高峰出现在 9:00 和 13:00~16:00 和 18:00，低谷出现在 10:00 和 17:00，与会议安排基本一致（会议举行时为低谷，会议休息区间为高峰）。</p>
+<p><img src="http://img.alicdn.com/tps/TB1Y33QLXXXXXXBXVXXXXXXXXXX-862-202.png" alt></p>
+<h4 id="按平台细分："><a href="#按平台细分：" class="headerlink" title="按平台细分："></a>按平台细分：</h4><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>登陆人数</th>
+<th>登录占比</th>
+<th>人均登录次数</th>
+<th>游玩人数</th>
+<th>游玩占比</th>
+<th style="text-align:right">人均游玩次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iOS</td>
+<td>277</td>
+<td>70.8%</td>
+<td>2.15</td>
+<td>162</td>
+<td>78.2%</td>
+<td style="text-align:right">32.46</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>103</td>
+<td>26.3%</td>
+<td>1.67</td>
+<td>47</td>
+<td>22.7%</td>
+<td style="text-align:right">12.7</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.alicdn.com/tps/TB11Xc.LXXXXXbwXXXXXXXXXXXX-800-378.jpg" alt="按操作系统细分"></p>
+<h4 id="按浏览器细分"><a href="#按浏览器细分" class="headerlink" title="按浏览器细分"></a>按浏览器细分</h4><table>
+<thead>
+<tr>
+<th>平台</th>
+<th>登陆人数</th>
+<th>登录占比</th>
+<th>人均登录次数</th>
+<th>游玩人数</th>
+<th>游玩占比</th>
+<th style="text-align:right">人均游玩次数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>微信</td>
+<td>129</td>
+<td>33.0%</td>
+<td>2.43</td>
+<td>82</td>
+<td>39.6%</td>
+<td style="text-align:right">32.46</td>
+</tr>
+<tr>
+<td>无线 Safari</td>
+<td>101</td>
+<td>25.8%</td>
+<td>2.05</td>
+<td>65</td>
+<td>31.4%</td>
+<td style="text-align:right">28.5</td>
+</tr>
+<tr>
+<td>Android 浏览器</td>
+<td>101</td>
+<td>25.8%</td>
+<td>47</td>
+<td>47</td>
+<td>22.7%</td>
+<td style="text-align:right">12.7</td>
+</tr>
+<tr>
+<td>无线 Mozilla</td>
+<td>24</td>
+<td>6.10%</td>
+<td>2.00</td>
+<td>0</td>
+<td>0%</td>
+<td style="text-align:right">N/A</td>
+</tr>
+<tr>
+<td>UC</td>
+<td>21</td>
+<td>5.37%</td>
+<td>1.31</td>
+<td>10</td>
+<td>2.46%</td>
+<td style="text-align:right">5.8</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>5</td>
+<td>1.27%</td>
+<td>N/A</td>
+<td>3</td>
+<td>1.45%</td>
+<td style="text-align:right">N/A</td>
+</tr>
+</tbody>
+</table>
+<p><img src="http://img.alicdn.com/tps/TB1qXs_LXXXXXcjXXXXXXXXXXXX-810-378.jpg" alt="按浏览器细分"></p>
+<h4 id="游玩得分情况"><a href="#游玩得分情况" class="headerlink" title="游玩得分情况"></a>游玩得分情况</h4><p>统计到的玩家 ID 数量为 282 个。得分分布如下：</p>
+<p>50 分以上：12 人，最高 867 分。深度沉迷游戏的「骨灰玩家」。<br>10 分到 50 分：49 人。资深玩家。熟悉游戏玩法，并掌握了一定技巧，在游戏中获得了较大乐趣的玩家。<br>3 分到 10 分：90 人。主流玩家。基本熟悉游戏玩法，对游戏很感兴趣。<br>1 分到 3 分：70 人。浅尝辄止的玩家，稍微尝试了一下游戏，便离开了。<br>0 分：61 人。扫码后由于各种原因直接离开的玩家。</p>
+<p><img src="https://img.alicdn.com/tps/TB1Hzo4LXXXXXbeXpXXXXXXXXXX-414-378.jpg" alt></p>
+<p><img src="http://img.alicdn.com/tps/TB15xQ3LXXXXXbSXpXXXXXXXXXX-842-304.jpg" alt></p>
+<h3 id="评价"><a href="#评价" class="headerlink" title="评价"></a>评价</h3><p>游戏具有相当的可玩性。有 61 人（21%）的得分在 10 以上，这部分人已经被这款游戏所吸引，并认真地参与到游玩的过程中去。有  151 人（53%）的得分在 3 分以上，这部分人基本熟悉了游戏的玩法，对这款游戏很感兴趣。对资深玩家的访谈也印证了这一点。</p>
+<p>游戏的火爆程度超出预期，即使在 10:00 这样的低谷（会场内正在进行分享活动），游戏依然保持着一定的热度。</p>
+<p>问题：为何登录页流失率接近 50%？</p>
+<p>登陆页访问人数 391 人，而进入到游玩页的则仅有 207 人。流失率 47%。有几点原因：</p>
+<ul>
+<li>统计策略失误：微信扫码后，引导用 Safari 打开，这部分实际上也统计到流失里面去了。</li>
+<li>其他原因：如用户不愿切换横屏模式，用户 GitHub ID 泄露，用户对游戏不感兴趣等。</li>
+</ul>
+<p>实际的流失率准确值已不可考，但是通过统计到各个浏览器的流失率（也不准确）：大约在 30% 左右。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总得来说，「氪金弹头」游戏是比较成功的。这款游戏的意义在于：</p>
+<ul>
+<li>探索了多屏互动的玩法新模式，并实际应用在具体的场景中，积累了的实战经验。</li>
+<li>成为一块极佳的互动技术实验田，便于实践新兴的、极具想象力的 Web 互动技术，如体感技术、虚拟现实技术等等。</li>
+<li>在没有专业的策划、设计团队下，完成这个项目，能够实实在在地锻炼团队成员担当「多面手」的能力。</li>
+</ul>
+<p>未来，我们互动小组会将项目中用到的技术和方案沉淀下来，思索如何利用这些技术与方案增强互动相关业务的体验。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/11/khorium-bullet/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/11/khorium-bullet/" data-id="cjt6lbxz8005ojeu17pzk0vuz" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/11/khorium-bullet/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/游戏-氪金弹头-D2/">游戏 氪金弹头 D2</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/13/node-subway-beijing/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          让我们谈谈「生产环境中的 Node.js」- Node 地下铁第 1 次线下沙龙总结
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/08/karma-origin/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">karma 测试框架的前世今生</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

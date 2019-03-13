@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>使用 JS 构建跨平台的原生应用：React Native iOS 通信机制初探 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="在初识 React Native 时，非常令人困惑的一个地方就是 JS 和 Native 两个端之间是如何相互通信的。本篇文章对 iOS 端 React Native 启动时的调用流程做下简要总结，以此窥探其背后的通信机制。 JS 启动过程React Native 的 iOS 端代码是直接从 Xcode IDE 里启动的。在启动时，首先要对代码进行编译，不出意外，在编译后会弹出一个命令行窗口，这">
+<meta name="keywords" content="ReactNative">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 JS 构建跨平台的原生应用：React Native iOS 通信机制初探">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/30/the-communication-scheme-of-react-native-in-ios/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="在初识 React Native 时，非常令人困惑的一个地方就是 JS 和 Native 两个端之间是如何相互通信的。本篇文章对 iOS 端 React Native 启动时的调用流程做下简要总结，以此窥探其背后的通信机制。 JS 启动过程React Native 的 iOS 端代码是直接从 Xcode IDE 里启动的。在启动时，首先要对代码进行编译，不出意外，在编译后会弹出一个命令行窗口，这">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1BQ6kLXXXXXbKXXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1LUCPKVXXXXajXpXXU1Xb2pXX-854-177.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1N1aqKVXXXXXNapXXmixOZFXX-1417-440.png">
+<meta property="og:image" content="http://gtms03.alicdn.com/tps/i3/TB1ISqYKVXXXXbaXXXXumPIRFXX-799-433.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1Uf_4KVXXXXcoXXXXXXXXXXXX-861-623.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1sM93KVXXXXaaXXXXXXXXXXXX-751-953.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 JS 构建跨平台的原生应用：React Native iOS 通信机制初探">
+<meta name="twitter:description" content="在初识 React Native 时，非常令人困惑的一个地方就是 JS 和 Native 两个端之间是如何相互通信的。本篇文章对 iOS 端 React Native 启动时的调用流程做下简要总结，以此窥探其背后的通信机制。 JS 启动过程React Native 的 iOS 端代码是直接从 Xcode IDE 里启动的。在启动时，首先要对代码进行编译，不出意外，在编译后会弹出一个命令行窗口，这">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1BQ6kLXXXXXbKXXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-the-communication-scheme-of-react-native-in-ios" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      使用 JS 构建跨平台的原生应用：React Native iOS 通信机制初探
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 乾秋</span>
+        
+        <span>发表于: <a href="/blog/2015/12/30/the-communication-scheme-of-react-native-in-ios/" class="article-date">
+  <time datetime="2015-12-30T14:02:34.000Z" itemprop="datePublished">2015-12-30</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1BQ6kLXXXXXbKXXXXXXXXXXXX-900-500.jpg" alt="使用 JS 构建跨平台的原生应用：React Native iOS 通信机制初探"></p>
+<p>在初识 React Native 时，非常令人困惑的一个地方就是 JS 和 Native 两个端之间是如何相互通信的。本篇文章对 iOS 端 React Native 启动时的调用流程做下简要总结，以此窥探其背后的通信机制。</p>
+<h1 id="JS-启动过程"><a href="#JS-启动过程" class="headerlink" title="JS 启动过程"></a>JS 启动过程</h1><p>React Native 的 iOS 端代码是直接从 Xcode IDE 里启动的。在启动时，首先要对代码进行编译，不出意外，在编译后会弹出一个命令行窗口，这个窗口就是通过 Node.js 启动的 <strong>development server</strong>。</p>
+<p>问题是这个命令行是怎么启动起来的呢？实际上，Xcode 在 Build Phase 的最后一个阶段对此做了配置：<br><img src="//gtms01.alicdn.com/tps/i1/TB1LUCPKVXXXXajXpXXU1Xb2pXX-854-177.png" alt></p>
+<p>因此，代码编译后，就会执行 <code>packager/react-native-xcode.sh</code> 这个脚本。<br>查看这个脚本中的内容，发现它主要是读取 XCode 带过来的环境变量，同时加载 nvm 包使得 Node.js 环境可用，最后执行 react-native-cli 的命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">react-native bundle \</span><br><span class="line">  --entry-file index.ios.js \</span><br><span class="line">  --platform ios \</span><br><span class="line">  --dev $DEV \</span><br><span class="line">  --bundle-output &quot;$DEST/main.jsbundle&quot; \</span><br><span class="line">  --assets-dest &quot;$DEST&quot;</span><br></pre></td></tr></table></figure>
+<p><code>react-native</code> 命令是全局安装的，在我本机上它的地址是 <code>/usr/local/bin/react-native</code>。查看该文件，它调用了  react-native 包里的<code>local-cli/cli.js</code> 中的 run 方法，最终进入了 <code>private-cli/src/bundle/buildBundle.js</code>。它的调用过程为：</p>
+<ol>
+<li>ReactPackager.createClientFor</li>
+<li>client.buildBundle</li>
+<li>processBundle</li>
+<li>saveBundleAndMap</li>
+</ol>
+<p>上面四步完成的是 <strong>buildBundle</strong> 的功能，细节很多很复杂。总体来说，buildBundle 的功能类似于 browerify 或 webpack ：</p>
+<ol>
+<li>从入口文件开始分析模块之间的依赖关系；</li>
+<li>对 JS 文件转化，比如 JSX 语法的转化等；</li>
+<li>把转化后的各个模块一起合并为一个 <code>bundle.js</code>。</li>
+</ol>
+<p>之所以 React Native 单独去实现这个打包的过程，而不是直接使用 webpack ，是因为它对模块的分析和编译做了不少优化，大大提升了打包的速度，这样能够保证在 liveReload 时用户及时得到响应。</p>
+<p><strong>Tips</strong>: 通过访问 <a href="http://localhost:8081/debug/bundles" target="_blank" rel="noopener">http://localhost:8081/debug/bundles</a> 可以看到内存中缓存的所有编译后的文件名及文件内容，如：<br><img src="//gtms02.alicdn.com/tps/i2/TB1N1aqKVXXXXXNapXXmixOZFXX-1417-440.png" alt></p>
+<h1 id="Native-启动过程"><a href="#Native-启动过程" class="headerlink" title="Native 启动过程"></a>Native 启动过程</h1><p>Native 端就是一个 iOS 程序，程序入口是 main 函数，像通常一样，它负责对应用程序做初始化。</p>
+<p>除了 main 函数之外，<code>AppDelegate</code> 也是一个比较重要的类，它主要用于做一些全局的控制。在应用程序启动之后，其中的 <code>didFinishLaunchingWithOptions</code> 方法会被调用，在这个方法中，主要做了几件事：</p>
+<ul>
+<li>定义了 JS 代码所在的位置，它在 dev 环境下是一个 URL，通过 development server 访问；在生产环境下则从磁盘读取，当然前提是已经手动生成过了 bundle 文件；</li>
+<li>创建了一个 <code>RCTRootView</code> 对象，该类继承于 <code>UIView</code>，处于程序所有 View 的最外层；</li>
+<li>调用 RCTRootView 的 <code>initWithBundleURL</code> 方法。在该方法中，创建了 <code>bridge</code> 对象。顾名思义，bridge 起着两个端之间的桥接作用，其中真正工作的是类就是大名鼎鼎的 <strong>RCTBatchedBridge</strong>。</li>
+</ul>
+<p>RCTBatchedBridge 是初始化时通信的核心，我们重点关注的是 start 方法。在 start 方法中，会创建一个 GCD 线程，该线程通过串行队列调度了以下几个关键的任务。</p>
+<h2 id="loadSource"><a href="#loadSource" class="headerlink" title="loadSource"></a>loadSource</h2><p>该任务负责加载 JS 代码到内存中。和前面一致，如果 JS 地址是 URL 的形式，就通过网络去读取，如果是文件的形式，则通过读本地磁盘文件的方式读取。</p>
+<h2 id="initModules"><a href="#initModules" class="headerlink" title="initModules"></a>initModules</h2><p>该任务会扫描所有的 Native 模块，提取出要暴露给 JS 的那些模块，然后保存到一个字典对象中。<br>一个 Native 模块如果想要暴露给 JS，需要在声明时显示地调用 <code>RCT_EXPORT_MODULE</code>。它的定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#define RCT_EXPORT_MODULE(js_name) \</span><br><span class="line">RCT_EXTERN void RCTRegisterModule(Class); \</span><br><span class="line">+ (NSString *)moduleName &#123; return @#js_name; &#125; \</span><br><span class="line">+ (void)load &#123; RCTRegisterModule(self); &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，这就是一个宏，定义了 load 方法，该方法会自动被调用，在方法中对当前类进行注册。<br>模块如果要暴露出指定的方法，需要通过 RCT_EXPORT_METHOD 宏进行声明，原理类似。</p>
+<h2 id="setupExecutor"><a href="#setupExecutor" class="headerlink" title="setupExecutor"></a>setupExecutor</h2><p>这里设置的是 JS 引擎，同样分为调试环境和生产环境：<br>在调试环境下，对应的 Executor 为 RCTWebSocketExecutor，它通过 WebSocket 连接到 Chrome 中，在 Chrome 里运行 JS;<br>在生产环境下，对应的 Executor 为 RCTContextExecutor，这应该就是传说中的 <code>javascriptcore</code>。</p>
+<h2 id="moduleConfig"><a href="#moduleConfig" class="headerlink" title="moduleConfig"></a>moduleConfig</h2><p>根据保存的模块信息，组装成一个 JSON ，对应的字段为 remoteModuleConfig。</p>
+<h2 id="injectJSONConfiguration"><a href="#injectJSONConfiguration" class="headerlink" title="injectJSONConfiguration"></a>injectJSONConfiguration</h2><p>该任务将上一个任务组装的 JSON 注入到 Executor 中。<br>下面是一个 JSON 示例，由于实际的对象太大，这里只截取了前面的部分：<br><img src="//gtms03.alicdn.com/tps/i3/TB1ISqYKVXXXXbaXXXXumPIRFXX-799-433.png" alt><br>JSON 里面就是所有暴露出来的模块信息。</p>
+<h2 id="executeSourceCode"><a href="#executeSourceCode" class="headerlink" title="executeSourceCode"></a>executeSourceCode</h2><p>该任务中会执行加载过来的 JS 代码，执行时传入之前注入的 JSON。<br>在调试模式下，会通过 WebSocket 给 Chrome 发送一条 message，内容大致为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    id = 10305;</span><br><span class="line">    inject = &#123;remoteJSONConfig...&#125;;</span><br><span class="line">    method = executeApplicationScript;</span><br><span class="line">    url = &quot;http://localhost:8081/index.ios.bundle?platform=ios&amp;dev=true&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>JS 接收消息后，执行打包后的代码。如果是非调试模式，则直接通过 javascriptcore 的虚拟环境去执行相关代码，效果类似。</p>
+<h1 id="JS-调用-Native"><a href="#JS-调用-Native" class="headerlink" title="JS 调用 Native"></a>JS 调用 Native</h1><p>前面我们看到，<strong> Native 调用 JS </strong> 是通过发送消息到 Chrome 触发执行、或者直接通过 javascriptcore 执行 JS 代码的。而对于 JS 调用 Native 的情况，又是什么样的呢？</p>
+<p>在 JS 端调用 Native 一般都是直接通过引用模块名，然后就使用了，比如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var RCTAlertManager = require(&apos;NativeModules&apos;).AlertManager</span><br></pre></td></tr></table></figure></p>
+<p>可见，NativeModules 是所有本地模块的操作接口，找到它的定义为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">var NativeModules = require(&apos;BatchedBridge&apos;).RemoteModules;</span><br></pre></td></tr></table></figure></p>
+<p>而BatchedBridge中是一个MessageQueue的对象：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">let BatchedBridge = new MessageQueue(</span><br><span class="line">  __fbBatchedBridgeConfig.remoteModuleConfig,</span><br><span class="line">  __fbBatchedBridgeConfig.localModulesConfig,</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>在 MessageQueue 实例中，都有一个 RemoteModules 字段。在 MessageQueue 的构造函数中可以看出，RemoteModules 就是 __fbBatchedBridgeConfig.remoteModuleConfig 稍微加工后的结果。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">class MessageQueue &#123;</span><br><span class="line"></span><br><span class="line">  constructor(remoteModules, localModules, customRequire) &#123;</span><br><span class="line">    this.RemoteModules = &#123;&#125;;</span><br><span class="line">    this._genModules(remoteModules);</span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>所以问题就变为:  <code>__fbBatchedBridgeConfig.remoteModuleConfig</code> 是在哪里赋值的？</p>
+<p>实际上，这个值就是 <strong>从 Native 端传过来的JSON</strong> 。如前所述，Executor 会把模块配置组装的 JSON 保存到内部：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[_javaScriptExecutor injectJSONText:configJSON</span><br><span class="line">                  asGlobalObjectNamed:@&quot;__fbBatchedBridgeConfig&quot;</span><br><span class="line">                             callback:onComplete];</span><br></pre></td></tr></table></figure></p>
+<p>configJSON 实际保存的字段为：<code>_injectedObjects[&#39;__fbBatchedBridgeConfig&#39;]</code>。</p>
+<p>在 Native 第一次调用 JS 时，_injectedObjects 会作为传递消息的 <strong>inject</strong> 字段。<br>JS 端收到这个消息，经过下面这个重要的处理过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&apos;executeApplicationScript&apos;: function(message, sendReply) &#123;</span><br><span class="line">    for (var key in message.inject) &#123;</span><br><span class="line">      self[key] = JSON.parse(message.inject[key]);</span><br><span class="line">    &#125;</span><br><span class="line">    importScripts(message.url);</span><br><span class="line">    sendReply();</span><br><span class="line">  &#125;,</span><br></pre></td></tr></table></figure>
+<p>看到没，这里读取了 inject 字段并进行了赋值。self 是一个全局的命名空间，在浏览器里 <code>self===window</code>。</p>
+<p>因此，上面代码执行过后，window.__fbBatchedBridgeConfig 就被赋值为了传过来的 JSON 反序列化后的值。</p>
+<p>总之：<br><strong>NativeModules = __fbBatchedBridgeConfig.remoteModuleConfig = JSON.parse(message.inject[‘__fbBatchedBridgeConfig’]) = 模块暴露出的所有信息</strong></p>
+<p>好，有了上述的前提之后，接下来以一个实际调用例子说明下 JS 调用 Native 的过程。<br>首先我们通过 JS 调用一个 Native 的方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">RCTUIManager.measureLayoutRelativeToParent(</span><br><span class="line">   React.findNodeHandle(scrollComponent),</span><br><span class="line">   logError,</span><br><span class="line">   this._setScrollVisibleLength</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>所有 Native 方法调用时都会先进入到下面的方法中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">fn = function(...args) &#123;</span><br><span class="line">  let lastArg = args.length &gt; 0 ? args[args.length - 1] : null;</span><br><span class="line">  let secondLastArg = args.length &gt; 1 ? args[args.length - 2] : null;</span><br><span class="line">  let hasSuccCB = typeof lastArg === &apos;function&apos;;</span><br><span class="line">  let hasErrorCB = typeof secondLastArg === &apos;function&apos;;</span><br><span class="line">  let numCBs = hasSuccCB + hasErrorCB;</span><br><span class="line">  let onSucc = hasSuccCB ? lastArg : null;</span><br><span class="line">  let onFail = hasErrorCB ? secondLastArg : null;</span><br><span class="line">  args = args.slice(0, args.length - numCBs);</span><br><span class="line">  return self.__nativeCall(module, method, args, onFail, onSucc);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>也就是倒数后两个参数是错误和正确的回调，剩下的是方法调用本身的参数。<br>在 __nativeCall 方法中，会将两个回调压到 callback 数组中，同时把  <strong>(模块、方法、参数)</strong> 也单独保存到内部的队列数组中：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">onFail &amp;&amp; params.push(this._callbackID);</span><br><span class="line">this._callbacks[this._callbackID++] = onFail;</span><br><span class="line">onSucc &amp;&amp; params.push(this._callbackID);</span><br><span class="line">this._callbacks[this._callbackID++] = onSucc;</span><br><span class="line">this._queue[0].push(module);</span><br><span class="line">this._queue[1].push(method);</span><br><span class="line">this._queue[2].push(params);</span><br></pre></td></tr></table></figure></p>
+<p>到这一步，JS 端告一段落。接下来是 Native 端，在调用 JS 时，经过如下的流程：<br><img src="https://img.alicdn.com/tps/TB1Uf_4KVXXXXcoXXXXXXXXXXXX-861-623.jpg" alt></p>
+<p>总之，就是在调用 JS 时，顺便把之前保存的 queue <strong>作为返回值</strong> 一并返回，然后会对该返回值进行解析。<br>在 _handleRequestNumber 方法中，终于完成了 Native 方法的调用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)_handleRequestNumber:(NSUInteger)i</span><br><span class="line">                    moduleID:(NSUInteger)moduleID</span><br><span class="line">                    methodID:(NSUInteger)methodID</span><br><span class="line">                      params:(NSArray *)params</span><br><span class="line">&#123;</span><br><span class="line">  // 解析模块和方法</span><br><span class="line">  RCTModuleData *moduleData = _moduleDataByID[moduleID];</span><br><span class="line">  id&lt;RCTBridgeMethod&gt; method = moduleData.methods[methodID];</span><br><span class="line">  @try &#123;</span><br><span class="line">    // 完成调用</span><br><span class="line">    [method invokeWithBridge:self module:moduleData.instance arguments:params];</span><br><span class="line">  &#125;</span><br><span class="line">  @catch (NSException *exception) &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  NSMutableDictionary *args = [method.profileArgs mutableCopy];</span><br><span class="line">  [args setValue:method.JSMethodName forKey:@&quot;method&quot;];</span><br><span class="line">  [args setValue:RCTJSONStringify(RCTNullIfNil(params), NULL) forKey:@&quot;args&quot;];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>与此同时，执行后还会通过 <code>invokeCallbackAndReturnFlushedQueue</code> 触发 JS 端的回调。具体细节在 RCTModuleMethod 的 processMethodSignature 方法中。</p>
+<p>再小结一下，JS 调用 Native 的过程为 ：</p>
+<ul>
+<li>JS 把(调用模块、调用方法、调用参数) 保存到队列中；</li>
+<li>Native 调用 JS 时，顺便把队列返回过来；</li>
+<li>Native 处理队列中的参数，同样解析出(模块、方法、参数)，并通过 NSInvocation 动态调用；</li>
+<li>Native方法调用完毕后，再次主动调用 JS。JS 端通过 callbackID，找到对应JS端的 callback，进行一次调用</li>
+</ul>
+<p>整个过程大概就是这样，剩下的一个问题就是，为什么要等待 Native 调用 JS 时才会触发，中间会不会有很长延时？<br>事实上，只要有事件触发，Native 就会调用 JS。比如，用户只要对屏幕进行触摸，就会触发在 RCTRootView 中注册的 Handler，并发送给JS：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[_bridge enqueueJSCall:@&quot;RCTEventEmitter.receiveTouches&quot;</span><br><span class="line">                  args:@[eventName, reactTouches, changedIndexes]];</span><br></pre></td></tr></table></figure></p>
+<p>除了触摸事件，还有 Timer 事件，系统事件等，只要事件触发了，JS 调用时就会把队列返回。这块理解可以参看 <a href="http://blog.cnbang.net/tech/2698/" target="_blank" rel="noopener">React Native通信机制详解</a> 一文中的“事件响应”一节。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>俗话说一图胜千言，整个启动过程用一张图概括起来就是：<br><img src="https://img.alicdn.com/tps/TB1sM93KVXXXXaaXXXXXXXXXXXX-751-953.jpg" alt></p>
+<p>本文简要介绍了 iOS 端启动时 JS 和 Native 的交互过程，可以看出 BatchedBridge 在两端通信过程中扮演了重要的角色。Native 调用 JS 是通过 WebSocket 或直接在 javascriptcore 引擎上执行；JS 调用 Native 则只把调用的模块、方法和参数先缓存起来，等到事件触发后通过返回值传到 Native 端，另外两端都保存了所有暴露的 Native 模块信息表作为通信的基础。由于对 iOS 端开发并不熟悉，文中如有错误的地方还请指出。</p>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://developer.apple.com/library/ios/documentation/Performance/Reference/GCD_libdispatch_Ref/index.html" target="_blank" rel="noopener">GCD Reference</a></li>
+<li><a href="http://tadeuzagallo.com/blog/react-native-bridge/" target="_blank" rel="noopener">BRIDGING IN REACT NATIVE</a></li>
+<li><a href="http://blog.csdn.net/lihuiqwertyuiop/article/details/45241909" target="_blank" rel="noopener">React Native 调研报告</a></li>
+<li><a href="http://blog.cnbang.net/tech/2698/" target="_blank" rel="noopener">React Native通信机制详解</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/30/the-communication-scheme-of-react-native-in-ios/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/30/the-communication-scheme-of-react-native-in-ios/" data-id="cjt6lby1k00bejeu1udwglua3" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/30/the-communication-scheme-of-react-native-in-ios/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ReactNative/">ReactNative</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/31/nodejs-drain/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          探究 Node.js 中的 drain 事件
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/29/nodejs-unit-tests-workflow/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">Node.js 单元测试：workflow</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

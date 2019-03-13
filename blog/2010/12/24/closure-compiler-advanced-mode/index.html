@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Closure Compiler 高级模式及更多思考 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="前言Google Closure Compiler 是 Google Closure Tools 的一员，在 2009 年底被 Google 释出，本文将详细介绍 CC 的高级模式部分，更重要的是，阐述 CC 高级模式背后的思考。 CC 是真正的编译器Closure Compiler 和 YUICompressor 并不是同类产品，虽然 CC 和 YC 同样产出压缩后的 JS 文件，但是 YC">
+<meta name="keywords" content="Closure Compiler">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Closure Compiler 高级模式及更多思考">
+<meta property="og:url" content="http://taobaofed.org/blog/2010/12/24/closure-compiler-advanced-mode/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="前言Google Closure Compiler 是 Google Closure Tools 的一员，在 2009 年底被 Google 释出，本文将详细介绍 CC 的高级模式部分，更重要的是，阐述 CC 高级模式背后的思考。 CC 是真正的编译器Closure Compiler 和 YUICompressor 并不是同类产品，虽然 CC 和 YC 同样产出压缩后的 JS 文件，但是 YC">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1HP5MQpXXXXb2apXXXXXXXXXX-900-500.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Closure Compiler 高级模式及更多思考">
+<meta name="twitter:description" content="前言Google Closure Compiler 是 Google Closure Tools 的一员，在 2009 年底被 Google 释出，本文将详细介绍 CC 的高级模式部分，更重要的是，阐述 CC 高级模式背后的思考。 CC 是真正的编译器Closure Compiler 和 YUICompressor 并不是同类产品，虽然 CC 和 YC 同样产出压缩后的 JS 文件，但是 YC">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1HP5MQpXXXXb2apXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/工具-平台/">工具&平台</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-closure-compiler-advanced-mode" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Closure Compiler 高级模式及更多思考
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 法海</span>
+        
+        <span>发表于: <a href="/blog/2010/12/24/closure-compiler-advanced-mode/" class="article-date">
+  <time datetime="2010-12-23T22:08:00.000Z" itemprop="datePublished">2010-12-24</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1HP5MQpXXXXb2apXXXXXXXXXX-900-500.jpg" alt="Closure Compiler 高级模式及更多思考"></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="http://code.google.com/closure/compiler/" target="_blank" rel="noopener">Google Closure Compiler</a> 是 <a href="http://code.google.com/closure/" target="_blank" rel="noopener">Google Closure Tools</a> 的一员，在 2009 年底被 Google 释出，本文将详细介绍 CC 的高级模式部分，更重要的是，阐述 CC 高级模式背后的思考。</p>
+<h2 id="CC-是真正的编译器"><a href="#CC-是真正的编译器" class="headerlink" title="CC 是真正的编译器"></a>CC 是真正的编译器</h2><p><code>Closure Compiler</code> 和 <code>YUICompressor</code> 并不是同类产品，虽然 CC 和 YC 同样产出压缩后的 JS 文件，但是 YC 只做了词法上的扫描，而 CC 并不只是一个 compressor 那么简单，器如其名，它是一个 compiler。</p>
+<p>对于一个 compiler，一般地，它需要做到</p>
+<ul>
+<li>检查源文本中语法、语义、语用上的错误</li>
+<li>根据分析产出物（符号表、语法树等）产出目标 / 中间代码</li>
+<li>优化</li>
+</ul>
+<p>代码错误一般来自三个方面：</p>
+<h4 id="1-语法（Syntax）"><a href="#1-语法（Syntax）" class="headerlink" title="1. 语法（Syntax）"></a>1. 语法（Syntax）</h4><p>表示构成语言句子的各个记号之间的组合规律。大体上，parser / interpreter 在词法分析和语法分析阶段，产生符号表、语法树等分析产出物，具体见编译原理教科书。</p>
+<p>语法上的错误，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">doSomething(;) <span class="comment">// SyntaxError: Unexpected token ;</span></span><br></pre></td></tr></table></figure>
+<p>根据语法规则，在非 for 语句中的 ; 意义是分隔符，而分隔符前的 ( 并没有配对 )，<br>因此报错。</p>
+<h4 id="2-语义（Semantics）"><a href="#2-语义（Semantics）" class="headerlink" title="2. 语义（Semantics）"></a>2. 语义（Semantics）</h4><p>表示各个记号的特定含义（各个记号和记号所表示的对象之间的关系）。compiler 需要根据语义分析产出中间代码，对于不产生中间代码的语言如 JS，则在运行时的<br>解释期间指出错误</p>
+<p>语义上的错误，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span> = &#123;&#125;; <span class="comment">// ReferenceError: Invalid left-hand side in assignment</span></span><br></pre></td></tr></table></figure>
+<p>根据赋值运算符 = 的意义，左操作数不能为字面量，所以虽然这个赋值语句包含了必需的<br>左操作数、运算符、右操作数，仍然出错。</p>
+<h4 id="3-语用（Pragmatics）"><a href="#3-语用（Pragmatics）" class="headerlink" title="3. 语用（Pragmatics）"></a>3. 语用（Pragmatics）</h4><p>表示在各个记号所出现的行为中，它们的来源、使用和影响。</p>
+<p>语用上的错误，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">doSomething(); <span class="comment">// ReferenceError: doSomething is not defined</span></span><br></pre></td></tr></table></figure>
+<p>在这里直接调用了一个未定义的函数，导致出错。</p>
+<p>在一些其他场景中，虽然程序运行正确无误，但是仍然可以优化（这种优化并不是技巧上的），比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">function doSomethingElse() &#123;&#125;</span><br><span class="line">(function() &#123;</span><br><span class="line">    return;</span><br><span class="line">    doSomethingElse(); // No Exception but Redundant: Unreachable code</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+<p>在这里，<code>doSomethingElse</code> 函数之前由于有 <code>return</code>，因此这个函数调用将永远不能执行，这种冗余代码<br>对整个程序来说毫无用处，可以去掉</p>
+<p>对于 <code>Closure Compiler</code> 来说，它处理的对象是 js，不需要产生其他中间代码或汇编代码 / 机器码，因此输出的还是 js，但是是经过分析的、优化后的 js；另外，它也可以选择输出 parse tree（使用 <code>–print_tree</code> 参数），所以，CC 的确完成了一个编译器需要实现的功能。</p>
+<h2 id="CC-功能概述"><a href="#CC-功能概述" class="headerlink" title="CC 功能概述"></a>CC 功能概述</h2><p>在详细讨论 CC 的高级模式前，还是简明介绍一下功能体系：</p>
+<h3 id="编译级别"><a href="#编译级别" class="headerlink" title="编译级别"></a>编译级别</h3><p>CC 的 <code>compilation_level</code> 包括三个级别：</p>
+<ul>
+<li><p><code>WHITESPACE_ONLY</code>：只删除空白、注释</p>
+</li>
+<li><p><code>SIMPLE_OPTIMIZATIONS</code>：在 WHITESPACE_ONLY 基础上将局部变量和参数转成短名称</p>
+</li>
+<li><p><code>ADVANCED_OPTIMIZATIONS</code>：更加激进的重命名、移除垃圾代码、内联函数</p>
+</li>
+</ul>
+<p>可以看到，<code>SIMPLE_OPTIMIZATIONS</code> 级别的 CC，和 YC 无异，没做什么真正的编译工作，所以说，使用了高级模式的 CC 才是四肢健全的 CC =。=</p>
+<h3 id="约束条件"><a href="#约束条件" class="headerlink" title="约束条件"></a>约束条件</h3><p>使用 CC 有一定约束条件，这影响到我们的编码风格：</p>
+<ul>
+<li>WHITESPACE_ONLY<ul>
+<li>不认可 JS 1.5 以上版本的语言特性</li>
+<li>不保留注释</li>
+</ul>
+</li>
+<li>SIMPLE_OPTIMIZATIONS：<ul>
+<li>完全禁用 with 和 eval</li>
+<li>字符串中引用的函数名 / 参数名不会改动（CC 不改动所有字符串）</li>
+</ul>
+</li>
+<li>ADVANCED_OPTIMIZATIONS<ul>
+<li>模式下的约束放到下文详述</li>
+</ul>
+</li>
+</ul>
+<h3 id="注解"><a href="#注解" class="headerlink" title="注解"></a>注解</h3><p><code>Annotations</code> 也是 CC 的重要组成部分，使用 <code>JSDoc</code> 风格，用以辅助高级模式下的编译，下文详述。</p>
+<h3 id="使用-CC-高级模式"><a href="#使用-CC-高级模式" class="headerlink" title="使用 CC 高级模式"></a>使用 CC 高级模式</h3><p>在 CC 下，启用高级模式的方法是加入参数 <code>--compilation_level ADVANCED_OPTIMIZATION</code>。</p>
+<p>作为一个 compiler，CC 的高级模式下，额外的优化政策是</p>
+<ul>
+<li>更激进的重命名，如 <code>obj.property</code> 改为 <code>a.b</code>，将深度过高的命名空间平坦化等</li>
+<li>移除垃圾代码，如删除未被调用的方法定义，警告逻辑死角（<code>return</code> 后的语句等）</li>
+<li>将函数内联，如 a call b, b call c，<code>a()</code>，那么直接执行 <code>c()</code></li>
+</ul>
+<p>要达到高级模式的预期优化效果，开发者必须对自己做一些约束，因为 js 是弱类型、动态性的。否则 js 的这种灵活将使 compiler 无能为力</p>
+<p>总体上，这种约束包括限定某些 js 编码风格，以及使用相应的 <code>JSDoc</code> 注解</p>
+<p>以下详述具体的约束以及代码的检查 / 优化效果：</p>
+<h3 id="强类型的模拟"><a href="#强类型的模拟" class="headerlink" title="强类型的模拟"></a>强类型的模拟</h3><ul>
+<li><code>@param</code> 和 <code>@type</code> 中定义的类型会在编译期间得到检查，同样避免了在运行时检查，提高性能</li>
+<li><code>@const</code> 标记常量，当常量被写时会报错</li>
+<li>模拟枚举，将同类可枚举常量定义为一个对象字面量，使用 <code>@enum</code> 标记：</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> STATUS = &#123;</span><br><span class="line">    LOADING: <span class="number">3</span>,</span><br><span class="line">    COMPLETE: <span class="number">4</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>编译结果中 <code>STATUS.LOADING</code> 会被直接替换为 3，其实完全模拟了 C 等语言中的枚举</p>
+<ul>
+<li>使用 <code>@constructor</code> 标注函数为构造器，它仅能被实例化，而不可用作普通方法，<br>甚至是工厂方法，CC 会确保构造器被合法使用，否则报错。这样确保开发者不必在 运行时<br>判断，构造器函数到底以怎样的形式被调用</li>
+<li>在表达式中也可以使用 <code>@type</code> 来限定类型，这对于 JSON 特别有用，如</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> data = <span class="comment">/** @type &#123;UserModel&#125; */</span>(&#123;</span><br><span class="line">    firstName : <span class="string">'foo'</span>,</span><br><span class="line">    lastName : <span class="string">'bar'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在这里 <code>UserModel</code> 是个构造器，也可以使用 <code>@typedef</code> 来自定义复杂的数据类型</p>
+<h3 id="域可见性的模拟"><a href="#域可见性的模拟" class="headerlink" title="域可见性的模拟"></a>域可见性的模拟</h3><ul>
+<li>使用 <code>@private</code> 标注私有域，私有域被外部引用会报错。开发者也可以按照“国际惯例”给私有域加上 _ 前缀或后缀，以提醒自己 / 协作者这是一个私有域，<code>@private</code> 注解用来告诉 CC；这样，开发者可以不必使用诸如老道的“模块模式”等技巧来真正地隐藏私有变量，将检查工作丢给 CC，让开发尽可能朴实简单</li>
+<li>类似有 <code>@protect</code></li>
+</ul>
+<h3 id="类系统的模拟"><a href="#类系统的模拟" class="headerlink" title="类系统的模拟"></a>类系统的模拟</h3><ul>
+<li>使用 <code>@extends</code> 标注继承关系，继承体系会被优化</li>
+<li>使用 <code>@interface</code> 标注接口，接口是类似 <code>function ThisIsAInterface(obj) {}</code><br>的函数体为空的构造器定义，编译后将移除其相关代码。同时，标注 <code>@implements</code> 的构造器必须实现 <code>implemented</code> 的接口的所有方法（正如其他 OO 语言一样），否则，CC 报错。这同样简化了接口 / 实现的约束，靠 CC 来保证实现关系的可靠性</li>
+</ul>
+<h3 id="条件编译的模拟"><a href="#条件编译的模拟" class="headerlink" title="条件编译的模拟"></a>条件编译的模拟</h3><ul>
+<li>使用 <code>@define</code> 标记状态开关，适用于调试 logger 等 开发 / 发布 状态需要分离的模式。<br>可以在编译时指定参数来标识 define 参数的状态。这其实就是一个条件编译，真给力……</li>
+</ul>
+<h3 id="对象平坦化及属性名缩减"><a href="#对象平坦化及属性名缩减" class="headerlink" title="对象平坦化及属性名缩减"></a>对象平坦化及属性名缩减</h3><ul>
+<li>对象属性会被编译为单变量，比如 <code>foo.bar</code> to <code>oo$bar</code>，这种标记方法看起来很像 java<br>中被编译出来的内部类~~之后 foo$bar 被进一步缩短。对象之所以能被平坦化是因为在<br>js 中对象可以看做是一群引用 / 原始数据类型的容器</li>
+<li>但是，js 对象实际上更复杂，所以被平坦化后会带来一些副作用，比如如果在对象（字面量）中使用<br>this 指针，则编译后的结果会导致 this 指向错误。所以 Google 建议仅在 constructor 和<br>prototype methods 中使用 this，这意味着，在所谓类单例（对象字面量）和类的静态方法（绑定到<br>constructor 上的函数）中都避免使用 this 指针</li>
+<li>在缩减对象属性 / 方法的名称长度时，有另外一个注意点，那就是必须始终使用 <code>dot syntax</code>（.运算符），而不使用 <code>quoted string</code>（[] 运算符），除非索引名是一个变量。这是因为 CC<br>始终不处理字符串中的内容，所以，<code>var o = { longName: 0 }; o[&quot;longName&quot;]</code> 会被翻译为<br><code>var a = { b: 0 }; a[&quot;longName&quot;]</code> 导致出错。实在想使用 quoted string，则在 定义的时候也要使用 <code>quoted string</code></li>
+<li>对于全局变量，如果出现以 <code>window.property</code> 的形式引用的，必须始终定义为 </li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.porperty 形式：</span><br><span class="line"><span class="built_in">window</span>.property = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">var</span> property = <span class="number">1</span>; <span class="comment">// wrong!</span></span><br></pre></td></tr></table></figure>
+<p>否则也会杯具，CC 可不会 <code>window.property</code> 翻译为 <code>window.a</code></p>
+<h3 id="垃圾代码的移除"><a href="#垃圾代码的移除" class="headerlink" title="垃圾代码的移除"></a>垃圾代码的移除</h3><ul>
+<li>一个函数声明却未被调用时，默认地，声明体将被干掉</li>
+<li>在这种机制下，如果一个方法是以 <code>for in</code> 的形式调用的，那么原方法也会被干掉，因为这种 动态特征<br>使得 CC 无法清楚方法是否确实在 for in 的时候被调用了</li>
+<li>对于一些 unreachable 的代码，CC 将报警告</li>
+<li>如果要产出一份被调用的公共接口，例如库，使用称作 <code>export</code> 的方法将函数导出，防止函数定义被 CC 回收。具体的做法是将函数绑定到某个容器，比如：</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">displayNoteTitle</span>(<span class="params">note</span>) </span>&#123;</span><br><span class="line">    alert(note[<span class="string">'myTitle'</span>]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Store the function in a global property referenced by a string:</span></span><br><span class="line"><span class="built_in">window</span>[<span class="string">'displayNoteTitle'</span>] = displayNoteTitle;</span><br></pre></td></tr></table></figure>
+<p>对于需要 export 的函数，均使用 <code>quoted string</code> 风格</p>
+<h2 id="背后的思考"><a href="#背后的思考" class="headerlink" title="背后的思考"></a>背后的思考</h2><p>根据以上高级模式优化的行为分析可知，CC 附加给开发者的约束主要有：</p>
+<ul>
+<li><p>强制以强类型的静态语言风格编写 js，将关注点从 运行时的动态技巧 转移到 组织代码、编写逻辑本身。而可能由弱类型系统和动态特征产生的问题和风险则交给 CC，即通过开发者与 CC 达成一种编码约定而规避掉</p>
+</li>
+<li><p>严格要求区分 <strong>面向开发者的代码</strong> 和 <strong>面向机器的代码</strong>。<br>虽然不像 C 等语言会编译产生目标代码，但是 CC 在一定程度上也生成了 面向机器的 js，包括压缩空白、缩减标识符、条件编译和冗余代码去除。这和第一点其实是一脉相承的，同样要求开发者 将关注点转移到开发本身</p>
+</li>
+<li><p>使用规范化的接口方式。这不仅包括要求开发者使用恰当的 annotation（extend, interface, …），同时也给整个 <code>OO-JS</code> 打下了一个框架，开发者必须使用同样的模式进行 OO 编码。另外，要求使用 export 技术统一导出公共接口更强化了这一点。总之，这一点进一步限定了开发者的编码风格，但是带来的好处是明显的：可读、可控、一致性。</p>
+</li>
+</ul>
+<p>曾经有读过 Closure Library 源码的同学评论道：</p>
+<blockquote>
+<p>Google 根本不懂怎么写 javascript！代码里面各种冗余，并且充满了 java 的味道！</p>
+</blockquote>
+<p>当时确实也有这种感觉，比如 Google 把 <code>if(foo)</code> 写作 <code>if(foo != undefined)</code> 等等。</p>
+<p>Javascript 固然充满了丰富的动态特征，而且很多特性非常优雅，能够让代码简洁精悍，或者构造出一些令人惊叹的技巧，但是也会产生一些副作用：</p>
+<ul>
+<li>首要的问题是可读性，静态的东西容易一目了然，动态的东西需要经过一番运算才能得出结论。比如 js 中的 极晚绑定，再比如标识符运行时重写</li>
+<li>其次的问题是执行性能。一个比较经典的众 js 工程师都在使用的技巧就是“模拟函数重载” —— 在函数体内判断 arguments 的特征，从而对应给出不同的逻辑。由于缺乏强类型，js 本身不能具备真正的重载，但是运行时的判断在带来灵活性的同时，必然会多出很多模拟重载的逻辑，降低性能。</li>
+</ul>
+<p>在今年的 D2 大会上，Hedger 同学指出，大多数 js 开发者像是个 ninja（忍者），他们身怀绝技、神鬼莫测，单兵作战还可以，但是一旦碰到 army（军队，比如 Google 团队这样的 =，=）就是个悲剧。</p>
+<p>我比较欣赏这个比喻，大团队要良好地协作，必需遵循一定的规范和限制，优先保证可读性和一致性，与此同时失去的是奇技淫巧、自由灵活。所以采用何种编程风格、理念，需要具体问题具体分析…………</p>
+<p>至少，目前 CC 提供了一个好的思路，它的高级模式推崇的编程风格也是很值得尝试、借鉴的。</p>
+<p>最后附上 CC 的常用命令选项……选项实在是有够多……</p>
+<h2 id="CC-常用命令选项"><a href="#CC-常用命令选项" class="headerlink" title="CC 常用命令选项"></a>CC 常用命令选项</h2><ul>
+<li>–charset VAL 对所有文件定义的编码格式</li>
+<li>–compilationlevel [WHITESPACEONLY | SIMPLEOPTIMIZATIONS | ADVANCEDOPTIMIZATIONS]<br>设定编译级别</li>
+<li>–debug 开启 debug 选项</li>
+<li>–define (–D, -D) VAL 设定文件中使用 @define 标注的开关值，即条件编译</li>
+<li>–externs VAL 编译代码需要调用未编译的代码时，使用它</li>
+<li>–formatting [PRETTYPRINT | PRINTINPUT_DELIMITER] 格式化输出</li>
+<li>–js VAL 输入文件，多指定多个，将会被合并</li>
+<li>–jsoutputfile VAL 输出文件，如果不指定的话，直接输出到 standard output 流</li>
+<li>–module VAL 定义模块</li>
+<li>–output_manifest VAL 打印编译文件清单</li>
+<li>–print_tree 打印语法分析树</li>
+<li>–warning_level [QUIET | DEFAULT | VERBOSE] 设定报错模式</li>
+</ul>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/LFRUBa-tiGs" target="_blank" rel="noopener">https://unsplash.com/photos/LFRUBa-tiGs</a> By @eberhard grossgasteiger</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2010/12/24/closure-compiler-advanced-mode/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2010/12/24/closure-compiler-advanced-mode/" data-id="cjt6lbxxj0019jeu1ab3nlz5j" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2010/12/24/closure-compiler-advanced-mode/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Closure-Compiler/">Closure Compiler</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2012/04/23/juicer-template/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Juicer – 一个 JavaScript 模板引擎的实现和优化
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2010/10/15/confused-about-word-wrap/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">word-wrap 解惑</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>说说最近 Google Safe Browsing 引发页面加载阻塞的问题 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="背景一个礼拜前，在退款维权的业务中，发现这样一个问题： 在某些 Firefox 浏览器中，表单的 butterfly 加载阻塞导致功能异常了。 一开始，我们以为是即将发布的修改点导致的问题。 但再三确认本次的修改点后，确定只是改了文案啊！ 这…… 因此，我们首先怀疑是否线上已经有问题？ 经过测试发现，果然，确实是个线上问题。 经过并不算麻烦的自测后，发现问题还不小： 影响范围：所有 Firefo">
+<meta name="keywords" content="Safe Browsing">
+<meta property="og:type" content="article">
+<meta property="og:title" content="说说最近 Google Safe Browsing 引发页面加载阻塞的问题">
+<meta property="og:url" content="http://taobaofed.org/blog/2014/07/18/safe-browsing-caused-request-blocking/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="背景一个礼拜前，在退款维权的业务中，发现这样一个问题： 在某些 Firefox 浏览器中，表单的 butterfly 加载阻塞导致功能异常了。 一开始，我们以为是即将发布的修改点导致的问题。 但再三确认本次的修改点后，确定只是改了文案啊！ 这…… 因此，我们首先怀疑是否线上已经有问题？ 经过测试发现，果然，确实是个线上问题。 经过并不算麻烦的自测后，发现问题还不小： 影响范围：所有 Firefo">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1VJmlQpXXXXaEaFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1SodfQpXXXXb2XXXXXXXXXXXX-1390-726.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB11ONbQpXXXXa5XpXXXXXXXXXX-1400-864.png">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1FN8aQpXXXXXHXpXXXXXXXXXX-1408-1134.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="说说最近 Google Safe Browsing 引发页面加载阻塞的问题">
+<meta name="twitter:description" content="背景一个礼拜前，在退款维权的业务中，发现这样一个问题： 在某些 Firefox 浏览器中，表单的 butterfly 加载阻塞导致功能异常了。 一开始，我们以为是即将发布的修改点导致的问题。 但再三确认本次的修改点后，确定只是改了文案啊！ 这…… 因此，我们首先怀疑是否线上已经有问题？ 经过测试发现，果然，确实是个线上问题。 经过并不算麻烦的自测后，发现问题还不小： 影响范围：所有 Firefo">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1VJmlQpXXXXaEaFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-safe-browsing-caused-request-blocking" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      说说最近 Google Safe Browsing 引发页面加载阻塞的问题
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 玉门</span>
+        
+        <span>发表于: <a href="/blog/2014/07/18/safe-browsing-caused-request-blocking/" class="article-date">
+  <time datetime="2014-07-18T15:03:00.000Z" itemprop="datePublished">2014-07-18</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1VJmlQpXXXXaEaFXXXXXXXXXX-900-500.jpg" alt="说说最近 Google Safe Browsing 引发页面加载阻塞的问题"></p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>一个礼拜前，在退款维权的业务中，发现这样一个问题： 在某些 Firefox 浏览器中，表单的 butterfly 加载阻塞导致功能异常了。</p>
+<p>一开始，我们以为是即将发布的修改点导致的问题。</p>
+<p>但再三确认本次的修改点后，确定只是改了文案啊！ 这……</p>
+<p>因此，我们首先怀疑是否线上已经有问题？ 经过测试发现，果然，确实是个线上问题。</p>
+<p>经过并不算麻烦的自测后，发现问题还不小：</p>
+<p>影响范围：所有 Firefox 版本。<br>（注意：Firefox 部分修复，但版本为 30.00+ 的官方版 Firefox 浏览器未完全解决，原因是该版本携带有版本为 1.2.3 的“附加组件管理器”扩展程序）</p>
+<p>Chrome 在一个月前也发现过类似问题，不过近期没有类似案例，可能已经在 35 版本中修复。</p>
+<p>隐藏在 Firefox 中的 Google Safe Browsing 是如何工作的？</p>
+<p>印象中，页面在 Firefox 中请求一个 JS 文件的过程，是这样的</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1SodfQpXXXXb2XXXXXXXXXXXX-1390-726.png" alt></p>
+<p>图中看到了三个步骤：</p>
+<ol>
+<li>页面向 Firefox 发起一个 JS 的请求；</li>
+<li>Firefox 判断是否为 reload 请求或者已在缓冲，如果是则直接读缓存，返回 JS 文件给页面使用；如果为 false 则执行步骤 3；</li>
+<li>向阿里 CDN 请求，获取到 JS 文件，返回 JS 文件给页面使用，并且写入缓冲；<br>看起来没什么问题，太符合我们的认知了。</li>
+</ol>
+<p>直到有一天，发现页面因为 JS 加载阻塞导致页面功能严重受影响。而且怎么强刷、清理缓存，都无果。</p>
+<p>原来，页面在 Firefox 中请求一个 JS 文件的真正过程，是这样的。</p>
+<p>这里演示下 Google 服务正常和异常两种情况：</p>
+<p>一. Google 服务正常时：</p>
+<p><img src="https://gw.alicdn.com/tfs/TB11ONbQpXXXXa5XpXXXXXXXXXX-1400-864.png" alt></p>
+<p>二. Google 服务不正常时:</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1FN8aQpXXXXXHXpXXXXXXXXXX-1408-1134.png" alt></p>
+<p>图中可以看到多了个本地哈希碰撞和向 Google 服务发送检测的过程，更多步骤描述如下：</p>
+<ol>
+<li>CDN 返回 JS 给 Firefox 后，Firefox 先在本地 Safe Browsing 哈希库中执行哈希碰撞；</li>
+<li>碰撞结果为不通过的话，会向 Google 服务器（safebrowsing.google.com:443）发起检测通知，并进入等待状态；</li>
+<li>此时，页面的直观感受就是 JS 没有请求到，功能异常；</li>
+<li>并且，如果再次请求同一个 JS 文件，首先会查看 Safe Browsing 等待队列；</li>
+<li>如果已在 Safe Browsing 等待队列中，则什么都不做。没错！什么都不做！（这就解释了，为什么强刷，甚至清理缓存后的强刷，都毫无作用）</li>
+</ol>
+<p>似乎已经定位到了，问题了</p>
+<p>第一： Firefox 把我们的 JS 判定为可疑文件（也就是哈希碰撞结果为可疑）；<br>第二： Google 服务被墙了</p>
+<p>另外：</p>
+<p>Safe Browsing 会对所有静态资源执行哈希碰撞；<br>哈希碰撞，只针对静态资源的名称；（也就是说与 JS 文件的文件内容无关）。<br>于是，向 Firefox 的同学请求帮助</p>
+<p>无辜的受害者： “为什么 Firefox 把我们的 JS 认定为可疑文件？”</p>
+<p>Firefox 的解释是： “我也不知道为什么啊！”；</p>
+<p>Firefox：“因为 Firefox 浏览器会从 Google 下来一份 Safe Browsing 哈希库，这个哈希库会对所有静态资源请求执行哈希碰撞。 因此，具体算法，Firefox 方面，其实也是不知道的呢。”</p>
+<p>无辜的受害者： “哦！ 原来是被检查请求阻塞了呢？那要不你们添加一个阻塞行为的监控吧？”</p>
+<p>Firefox：“对啊，对啊，在最新版本：30.00 中，我们加了阻塞情况下，只进行本地检查的处理了， 你下载最新的版本就可以了。”</p>
+<p>几个小时后……</p>
+<p>无辜的受害者：“我下更新到最新版本了，可还是不行呢？”</p>
+<p>Firefox：“要怪就怪 GFW 吧，为了伪造成是 Google 自己服务器的问题，而不是国内封锁，现在 GFW 对 Google 的封锁采用 hold 连接，不释放，不重置，一直不返回数据，造成现在火狐以为连接一直在等待数据。”</p>
+<p>无辜的受害人：“好的谢谢，保持联系”。</p>
+<p>因此，又抛出了两个新的问题：</p>
+<p>为什么升级了 Firefox 还是在本地哈希碰撞中被 fail 了？<br>为什么 Firefox 已经添加了防阻塞处理，结果却还是被阻塞了？<br>问题的答案：</p>
+<p>Firefox 升级是升级了，但是本地哈希库，并没有被更新（因为 Google 服务调不到啊~）； 自测发现哈希库被保存在 Firefox 的应用程序中，而非个人配置目录中；<br>Firefox 添加了阻塞处理没错，但是 GFW 似乎做了一件奇葩的事情： GFW 对 Google 的封锁采用 hold 连接，不释放，不重置，一直不返回数据，造成现在火狐以为连接一直在等待数据；看来是 Firefox 的解决方案不够彻底啊；<br>最后的问题变成：</p>
+<p>Firefox 没有处理到 GFW 对 Google 服务请求采取 hold 连接的情况；<br>没有得到能够让用户一次操作（如更新插件，更新浏览器）就能解决的方案，难以形成终极解决方案。</p>
+<h3 id="以后怎么办"><a href="#以后怎么办" class="headerlink" title="以后怎么办"></a>以后怎么办</h3><p>首先：考虑到网络安全敏感问题，能拿到 Google Safe Browsing 哈希库算法的可能性几乎不可能；尝试通过 hash 算法扫描本地代码库的思路不太可行。</p>
+<p>看来：还是得靠 Firefox 那边，能够自己修复这个问题。 后续我们会持续跟进这一类的问题，并就这个问题跟 Firefox 方面保持反馈和测试结果的同步。</p>
+<h3 id="临时解决方案"><a href="#临时解决方案" class="headerlink" title="临时解决方案"></a>临时解决方案</h3><p>JS 的出异常的解决方案是： 修改静态资源文件的文件名（注意如果是 JS 文件必须修改非参数部分如： g.tbcdn.cn/aaa/bbb/ccc/ddd-min.js 部分，而非 t=xxxxx.js）</p>
+<p>另外：</p>
+<p>由于 Google Safe Browsing 检测的是所有静态资源，目前已发现的出现问题的资源文件类型和解决方案是：</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AJAX</td>
+<td>修改请求名</td>
+</tr>
+<tr>
+<td>JS、CSS</td>
+<td>修改目录时间戳</td>
+</tr>
+<tr>
+<td>页面请求</td>
+<td>修改参数名或添加时间戳</td>
+</tr>
+</tbody>
+</table>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>说多了都是泪， 庆幸本次问题基本只在 Firefox 中被发现，并且没有大面积爆发。（应该多向 Chrome 团队快速精准解决问题的作风学习呢~）</p>
+<p>以后还是需要主动关注浏览器生态圈的动态，避免类似情况发生，以及对某些风险做好提前预防工作， 保证每一个使用 Firefox 的朋友有一个良好用户体验。</p>
+<p>特别感谢 Firefox 的同学积极的帮助！后续还会继续骚扰！</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/tLxV4GR1skc" target="_blank" rel="noopener">https://unsplash.com/photos/tLxV4GR1skc</a> By @Thomas Hafeneth</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2014/07/18/safe-browsing-caused-request-blocking/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2014/07/18/safe-browsing-caused-request-blocking/" data-id="cjt6lby1f00avjeu1qkbvwl0b" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2014/07/18/safe-browsing-caused-request-blocking/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Safe-Browsing/">Safe Browsing</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/10/27/node-subway/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Node地下铁
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2014/05/31/practice-of-separation-of-front-end-from-back-end-6/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前后端分离的思考与实践（六）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

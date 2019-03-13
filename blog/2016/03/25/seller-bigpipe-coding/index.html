@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>新版卖家中心 Bigpipe 实践（二） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="自从上次通过 新版卖家中心 Bigpipe 实践（一） 阐述了 Bigpipe 实现思路和原理之后，一转眼春天就来了。而整个实践过程，从开始冬天迎着冷风前行，到现在逐渐回暖。其中感受和收获良多，和大家分享下。代码偏多，请自带编译器。 核心问题一切技术的产生或者使用都是为了解决问题，所以开始前，看下要解决的问题：  同步加载首屏模块，服务端各个模块并行生成内容，客户端渲染内容依赖于最后一个内容的生">
+<meta name="keywords" content="Bigpipe,网页加载优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="新版卖家中心 Bigpipe 实践（二）">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/03/25/seller-bigpipe-coding/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="自从上次通过 新版卖家中心 Bigpipe 实践（一） 阐述了 Bigpipe 实现思路和原理之后，一转眼春天就来了。而整个实践过程，从开始冬天迎着冷风前行，到现在逐渐回暖。其中感受和收获良多，和大家分享下。代码偏多，请自带编译器。 核心问题一切技术的产生或者使用都是为了解决问题，所以开始前，看下要解决的问题：  同步加载首屏模块，服务端各个模块并行生成内容，客户端渲染内容依赖于最后一个内容的生">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1w6tIMXXXXXcDaXXXlzJZ8pXX-900-500.jpg">
+<meta property="og:image" content="http://gtms04.alicdn.com/tps/i4/TB1XhFPMXXXXXX_XpXXWYGF8FXX-1438-688.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1eRpLMXXXXXbBXpXXu4A.4VXX-1432-796.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1NxVVMXXXXXanXXXX871P.FXX-1446-742.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="新版卖家中心 Bigpipe 实践（二）">
+<meta name="twitter:description" content="自从上次通过 新版卖家中心 Bigpipe 实践（一） 阐述了 Bigpipe 实现思路和原理之后，一转眼春天就来了。而整个实践过程，从开始冬天迎着冷风前行，到现在逐渐回暖。其中感受和收获良多，和大家分享下。代码偏多，请自带编译器。 核心问题一切技术的产生或者使用都是为了解决问题，所以开始前，看下要解决的问题：  同步加载首屏模块，服务端各个模块并行生成内容，客户端渲染内容依赖于最后一个内容的生">
+<meta name="twitter:image" content="http://gtms04.alicdn.com/tps/i4/TB1w6tIMXXXXXcDaXXXlzJZ8pXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-seller-bigpipe-coding" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      新版卖家中心 Bigpipe 实践（二）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 子仲</span>
+        
+        <span>发表于: <a href="/blog/2016/03/25/seller-bigpipe-coding/" class="article-date">
+  <time datetime="2016-03-25T10:54:04.000Z" itemprop="datePublished">2016-03-25</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://gtms04.alicdn.com/tps/i4/TB1w6tIMXXXXXcDaXXXlzJZ8pXX-900-500.jpg" alt="新版卖家中心 Bigpipe 实践（二）"></p>
+<p>自从上次通过 <a href="http://taobaofed.org/blog/2015/12/17/seller-bigpipe/">新版卖家中心 Bigpipe 实践（一）</a> 阐述了 Bigpipe 实现思路和原理之后，一转眼春天就来了。而整个实践过程，从开始冬天迎着冷风前行，到现在逐渐回暖。其中感受和收获良多，和大家分享下。代码偏多，请自带编译器。</p>
+<h2 id="核心问题"><a href="#核心问题" class="headerlink" title="核心问题"></a>核心问题</h2><p>一切技术的产生或者使用都是为了解决问题，所以开始前，看下要解决的问题：</p>
+<ul>
+<li>同步加载首屏模块，服务端各个模块并行生成内容，客户端渲染内容依赖于最后一个内容的生成时间。这里的痛点是 <strong><em>同步</em></strong>。因为要多模块同步，所以难免浏览器要等待，浏览器等待也就是用户等待。</li>
+<li>于是我们采用了滚动异步加载模块，页面框架优先直出，几朵菊花旋转点缀，然后首屏模块通过异步请求逐个展现出来。虽然拿到什么就能在客户端渲染显示，但还是有延迟感。这里的痛点是 <strong><em>请求</em></strong>，每个模块都需要多一个请求，也需要时间。</li>
+<li>Facebook 的工程师们会不会是这样想的：一次请求，各个首屏模块服务端并行处理生成内容，生成的内容能直接传输给客户端渲染，用户能马上看到内容，这样好猴赛雷~</li>
+<li>其实 Bigpipe  的思路是从<a href="https://en.wikipedia.org/wiki/Instruction_pipelining" target="_blank" rel="noopener">微处理器的流水线</a>中受到启发</li>
+</ul>
+<h2 id="技术突破口"><a href="#技术突破口" class="headerlink" title="技术突破口"></a>技术突破口</h2><p>卖家中心主体也是功能模块化，和 Facebook 遇到的问题是一致的。核心的问题换个说法： <strong><em>通过一个请求链接，服务端能否将动态内容分块传输到客户端实时渲染展示，直到内容传输结束，请求结束。</em></strong></p>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+<li>技术点：HTTP 协议的分块传输（在 HTTP 1.1 提供）<a href="https://zh.wikipedia.org/wiki/%E5%88%86%E5%9D%97%E4%BC%A0%E8%BE%93%E7%BC%96%E7%A0%81" target="_blank" rel="noopener">概念入口</a></li>
+<li>如果一个 HTTP 消息（请求消息或应答消息）的 Transfer-Encoding 消息头的值为 chunked ，那么，消息体由数量未定的块组成，并以最后一个大小为 0 的块为结束。</li>
+<li>这种机制使得网页内容分成多个内容块，服务器和浏览器建立管道并管理他们在不同阶段的运行。</li>
+</ul>
+<h3 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h3><p>如何实现数据分块传输，各个语言的方式并不一样。</p>
+<h4 id="PHP-的方式"><a href="#PHP-的方式" class="headerlink" title="PHP 的方式"></a>PHP 的方式</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;php chunked&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"></span><br><span class="line">    &lt;?php sleep(1); ?&gt;</span><br><span class="line">    &lt;div id=&quot;moduleA&quot;&gt;&lt;?php echo &apos;moduleA&apos; ?&gt;&lt;/div&gt;</span><br><span class="line">    &lt;?php ob_flush(); flush(); ?&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;?php sleep(3); ?&gt;</span><br><span class="line">    &lt;div id=&quot;moduleB&quot;&gt;&lt;?php echo &apos;moduleB&apos; ?&gt;&lt;/div&gt;</span><br><span class="line">    &lt;?php ob_flush(); flush(); ?&gt;</span><br><span class="line">    </span><br><span class="line">    &lt;?php sleep(2); ?&gt;</span><br><span class="line">    &lt;div id=&quot;moduleC&quot;&gt;&lt;?php echo &apos;moduleC&apos; ?&gt;&lt;/div&gt;</span><br><span class="line">    &lt;?php ob_flush(); flush(); ?&gt;</span><br><span class="line"></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>PHP 利用  ob_flush 和 flush 把页面分块刷新缓存到浏览器，查看 network ，页面的 Transfer-Encoding=chunked ，实现内容的分块渲染。</li>
+<li>PHP 不支持线程，所以服务器无法利用多线程去并行处理多个模块的内容。</li>
+<li>PHP  也有并发执行的方案，这里不做扩展，有兴趣地可以去深入研究下。</li>
+</ul>
+<h4 id="Java-的方式"><a href="#Java-的方式" class="headerlink" title="Java 的方式"></a>Java 的方式</h4><ul>
+<li>Java 也有类似于 flush 的函数 实现简单页面的分块传输。</li>
+<li>Java 是多线程的，方便并行地处理各个模块的内容。</li>
+</ul>
+<h3 id="flush-的思考"><a href="#flush-的思考" class="headerlink" title="flush 的思考"></a>flush 的思考</h3><ul>
+<li>Yahoo 34 条性能优化 Rules 里面提到 flush 时机是 head 之后，可以让浏览器先行下载 head 中引入的 CSS/js。</li>
+<li>我们会把内容分成一块一块 flush 到浏览器端，flush 的内容优先级应该是用户关心的。比如 Yahoo 之前优先 flush 的就是搜索框，因为这个是核心功能。</li>
+<li>flush 的内容大小需要进行有效地拆分，大内容可以拆成小内容。</li>
+</ul>
+<h2 id="Node-js-实现"><a href="#Node-js-实现" class="headerlink" title="Node.js 实现"></a>Node.js 实现</h2><p>通过对比 PHP 和 Java 在实现 Bigpipe 上的优势和劣势，很容易在 Node.js 上找到幸福感。</p>
+<ul>
+<li>Node.js 的异步特性可以很容易地处理并行的问题。</li>
+<li>View 层全面控制，对于需要服务端处理数据和客户端渲染有天然的优势。</li>
+<li>Node.js 中的 HTTP 接口的设计支持许多 HTTP 协议中原本用起来很困难的特性。</li>
+</ul>
+<h3 id="回到-HelloWorld"><a href="#回到-HelloWorld" class="headerlink" title="回到 HelloWorld"></a>回到 HelloWorld</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">var http = require(&apos;http&apos;);</span><br><span class="line"></span><br><span class="line">http.createServer(function (request, response)&#123;</span><br><span class="line">  response.writeHead(200, &#123;&apos;Content-Type&apos;: &apos;text/html&apos;&#125;);</span><br><span class="line">  response.write(&apos;hello&apos;);</span><br><span class="line">  response.write(&apos; world &apos;);</span><br><span class="line">  response.write(&apos;~ &apos;);</span><br><span class="line">  response.end();</span><br><span class="line">&#125;).listen(8080, &quot;127.0.0.1&quot;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>HTTP 头 Transfer-Encoding=chunked ，我的天啊，太神奇了！</li>
+<li>如果只是 response.write 数据，没有指示 response.end ，那么这个响应就没有结束，浏览器会保持这个请求。在没有调用 response.end 之前，我们完全可以通过 response.write 来 flush 内容。</li>
+<li>把 Bigpipe  Node.js 实现是从 HelloWorld 开始，心情有点小激动。</li>
+</ul>
+<h3 id="完整点"><a href="#完整点" class="headerlink" title="完整点"></a>完整点</h3><p><strong>layout.html</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">	&lt;!-- css and js tags --&gt;</span><br><span class="line">    &lt;link rel=&quot;stylesheet&quot; href=&quot;index.css&quot; /&gt;</span><br><span class="line">    &lt;script&gt;</span><br><span class="line">    function renderFlushCon(selector, html) &#123;</span><br><span class="line">        document.querySelector(selector).innerHTML = html;</span><br><span class="line">    &#125;</span><br><span class="line">    &lt;/script&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;div id=&quot;A&quot;&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div id=&quot;B&quot;&gt;&lt;/div&gt;</span><br><span class="line">    &lt;div id=&quot;C&quot;&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>head 里面放我们要加载的 assets</li>
+<li>输出页面框架，A/B/C 模块的占位</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">var http = require(&apos;http&apos;);</span><br><span class="line">var fs = require(&apos;fs&apos;);</span><br><span class="line"></span><br><span class="line">http.createServer(function(request, response) &#123;</span><br><span class="line">  response.writeHead(200, &#123; &apos;Content-Type&apos;: &apos;text/html&apos; &#125;);</span><br><span class="line"></span><br><span class="line">  // flush layout and assets</span><br><span class="line">  var layoutHtml = fs.readFileSync(__dirname + &quot;/layout.html&quot;).toString();</span><br><span class="line">  response.write(layoutHtml);</span><br><span class="line">  </span><br><span class="line">  // fetch data and render</span><br><span class="line">  response.write(&apos;&lt;script&gt;renderFlushCon(&quot;#A&quot;,&quot;moduleA&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  response.write(&apos;&lt;script&gt;renderFlushCon(&quot;#C&quot;,&quot;moduleC&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  response.write(&apos;&lt;script&gt;renderFlushCon(&quot;#B&quot;,&quot;moduleB&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  </span><br><span class="line">  // close body and html tags</span><br><span class="line">  response.write(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">  // finish the response</span><br><span class="line">  response.end();</span><br><span class="line">&#125;).listen(8080, &quot;127.0.0.1&quot;);</span><br></pre></td></tr></table></figure>
+<p>页面输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">moduleA</span><br><span class="line">moduleB</span><br><span class="line">moduleC</span><br></pre></td></tr></table></figure>
+<ul>
+<li>flush layout 的内容 包含浏览器渲染的函数</li>
+<li>然后进入核心的取数据、模板拼装，将可执行的内容 flush 到浏览器</li>
+<li>浏览器进行渲染（此处还未引入并行处理）</li>
+<li>关闭 body 和 HTML 标签</li>
+<li>结束响应 完成一个请求</li>
+</ul>
+<h3 id="express-实现"><a href="#express-实现" class="headerlink" title="express 实现"></a>express 实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">var express = require(&apos;express&apos;);</span><br><span class="line">var app = express();</span><br><span class="line">var fs = require(&apos;fs&apos;);</span><br><span class="line"></span><br><span class="line">app.get(&apos;/&apos;, function (req, res) &#123;</span><br><span class="line">  // flush layout and assets</span><br><span class="line">  var layoutHtml = fs.readFileSync(__dirname + &quot;/layout.html&quot;).toString();</span><br><span class="line">  res.write(layoutHtml);</span><br><span class="line">  </span><br><span class="line">  // fetch data and render</span><br><span class="line">  res.write(&apos;&lt;script&gt;renderFlushCon(&quot;#A&quot;,&quot;moduleA&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  res.write(&apos;&lt;script&gt;renderFlushCon(&quot;#C&quot;,&quot;moduleC&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  res.write(&apos;&lt;script&gt;renderFlushCon(&quot;#B&quot;,&quot;moduleB&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  </span><br><span class="line">  // close body and html tags</span><br><span class="line">  res.write(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">  // finish the response</span><br><span class="line">  res.end();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.listen(3000);</span><br></pre></td></tr></table></figure>
+<p>页面输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">moduleA</span><br><span class="line">moduleB</span><br><span class="line">moduleC</span><br></pre></td></tr></table></figure>
+<ul>
+<li>express 建立在 Node.js 内置的 HTTP 模块上，实现的方式差不多</li>
+</ul>
+<h3 id="koa-实现"><a href="#koa-实现" class="headerlink" title="koa 实现"></a>koa 实现</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">var koa = require(&apos;koa&apos;);</span><br><span class="line">var app = koa();</span><br><span class="line"></span><br><span class="line">app.use(function *() &#123;</span><br><span class="line">    this.body = &apos;Hello world&apos;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.listen(3000);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Koa 不支持 直接调用底层 res 进行响应处理。</strong> res.write()/res.end() 就是个雷区，有幸踩过。</li>
+<li>koa 中，this 这个上下文对 Node.js 的 request 和 response 对象的封装。this.body 是 response 对象的一个属性。</li>
+<li>感觉 koa 的世界就剩下了 generator 和  this.body ，怎么办？继续看文档~</li>
+<li>this.body 可以设置为字符串， buffer 、stream 、 对象 、 或者 null 也行。</li>
+<li><strong>stream</strong>  <strong>stream</strong>  <strong>stream</strong>  说三遍可以变得很重要。</li>
+</ul>
+<h2 id="流的意义"><a href="#流的意义" class="headerlink" title="流的意义"></a>流的意义</h2><p>关于流，推荐看 @愈之的<a href="http://taobaofed.org/blog/2016/01/28/nodejs-stream/">通通连起来 – 无处不在的流</a>，感触良多，对流有了新的认识，于是接下来连连看。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">var koa = require(&apos;koa&apos;);</span><br><span class="line">var View = require(&apos;./view&apos;);</span><br><span class="line">var app = module.exports = koa();</span><br><span class="line"></span><br><span class="line">app.use(function* () &#123;</span><br><span class="line">  this.type = &apos;html&apos;;</span><br><span class="line">  this.body = new View(this);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.listen(3000);</span><br></pre></td></tr></table></figure>
+<p><strong>view.js</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">var Readable = require(&apos;stream&apos;).Readable;</span><br><span class="line">var util = require(&apos;util&apos;);</span><br><span class="line">var co = require(&apos;co&apos;);</span><br><span class="line">var fs = require(&apos;fs&apos;);</span><br><span class="line"></span><br><span class="line">module.exports = View</span><br><span class="line"></span><br><span class="line">util.inherits(View, Readable);</span><br><span class="line"></span><br><span class="line">function View(context) &#123;</span><br><span class="line">  Readable.call(this, &#123;&#125;);</span><br><span class="line"></span><br><span class="line">  // render the view on a different loop</span><br><span class="line">  co.call(this, this.render).catch(context.onerror);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">View.prototype._read = function () &#123;&#125;;</span><br><span class="line"></span><br><span class="line">View.prototype.render = function* () &#123;</span><br><span class="line">  // flush layout and assets</span><br><span class="line">  var layoutHtml = fs.readFileSync(__dirname + &quot;/layout.html&quot;).toString();</span><br><span class="line">  this.push(layoutHtml);</span><br><span class="line">  </span><br><span class="line">  // fetch data and render</span><br><span class="line">  this.push(&apos;&lt;script&gt;renderFlushCon(&quot;#A&quot;,&quot;moduleA&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  this.push(&apos;&lt;script&gt;renderFlushCon(&quot;#C&quot;,&quot;moduleC&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  this.push(&apos;&lt;script&gt;renderFlushCon(&quot;#B&quot;,&quot;moduleB&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">  </span><br><span class="line">  // close body and html tags</span><br><span class="line">  this.push(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">  // end the stream</span><br><span class="line">  this.push(null);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>页面输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">moduleA</span><br><span class="line">moduleB</span><br><span class="line">moduleC</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Transfer-Encoding:chunked </li>
+<li>服务端和浏览器端建立管道，通过 this.push 将内容从服务端传输到浏览器端</li>
+</ul>
+<h2 id="并行的实现"><a href="#并行的实现" class="headerlink" title="并行的实现"></a>并行的实现</h2><p>目前我们已经完成了 koa 和 express 分块传输的实现，我们知道要输出的模块 A 、模块 B 、模块 C 需要并行在服务端生成内容。<br>在这个时候来回顾下传统的网页渲染方式，A / B / C 模块同步渲染：</p>
+<p><img src="http://gtms04.alicdn.com/tps/i4/TB1XhFPMXXXXXX_XpXXWYGF8FXX-1438-688.png" width="500px"></p>
+<p>采用分块传输的模式，A / B / C 服务端顺序执行，A / B / C 分块传输到浏览器渲染：</p>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1eRpLMXXXXXbBXpXXu4A.4VXX-1432-796.png" width="500px"></p>
+<p>时间明显少了，然后把服务端的顺序执行换成并行执行的话：</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1NxVVMXXXXXanXXXX871P.FXX-1446-742.png" width="500px"></p>
+<p>通过此图，并行的意义是显而易见的。为了寻找并行执行的方案，就不得不<a href="http://wwsun.github.io/posts/evolution-of-javascript-async.html" target="_blank" rel="noopener">追溯异步编程</a>的历史。（读史可以明智，可以知道当下有多不容易）</p>
+<h3 id="callback-的方式"><a href="#callback-的方式" class="headerlink" title="callback  的方式"></a>callback  的方式</h3><ul>
+<li>首先 过多 callback 嵌套 实现异步编程是地狱</li>
+<li>第二 选择绕过地狱，选择成熟的模块来取代</li>
+</ul>
+<h3 id="async-的方式"><a href="#async-的方式" class="headerlink" title="async 的方式"></a>async 的方式</h3><ul>
+<li>async 算是异步编码流程控制中的元老。</li>
+<li>parallel(tasks, [callback]) 并行执行多个函数，每个函数都是立即执行，不需要等待其它函数先执行。传给最终 callback 的数组中的数据按照 tasks 中声明的顺序，而不是执行完成的顺序。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">var Readable = require(&apos;stream&apos;).Readable;</span><br><span class="line">var inherits = require(&apos;util&apos;).inherits;</span><br><span class="line">var co = require(&apos;co&apos;);</span><br><span class="line">var fs = require(&apos;fs&apos;);</span><br><span class="line">var async = require(&apos;async&apos;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">inherits(View, Readable);</span><br><span class="line"></span><br><span class="line">function View(context) &#123;</span><br><span class="line">  Readable.call(this, &#123;&#125;);</span><br><span class="line"></span><br><span class="line">  // render the view on a different loop</span><br><span class="line">  co.call(this, this.render).catch(context.onerror);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">View.prototype._read = function () &#123;&#125;;</span><br><span class="line"></span><br><span class="line">View.prototype.render = function* () &#123;</span><br><span class="line">  // flush layout and assets</span><br><span class="line">  var layoutHtml = fs.readFileSync(__dirname + &quot;/layout.html&quot;).toString();</span><br><span class="line">  this.push(layoutHtml);</span><br><span class="line"></span><br><span class="line">  var context = this;</span><br><span class="line"></span><br><span class="line">  async.parallel([</span><br><span class="line">    function(cb) &#123;</span><br><span class="line">      setTimeout(function()&#123;</span><br><span class="line">        context.push(&apos;&lt;script&gt;renderFlushCon(&quot;#A&quot;,&quot;moduleA&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">        cb();</span><br><span class="line">      &#125;, 1000);</span><br><span class="line">    &#125;,</span><br><span class="line">    function(cb) &#123;</span><br><span class="line">      context.push(&apos;&lt;script&gt;renderFlushCon(&quot;#C&quot;,&quot;moduleC&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">      cb();</span><br><span class="line">    &#125;,</span><br><span class="line">    function(cb) &#123;</span><br><span class="line">      setTimeout(function()&#123;</span><br><span class="line">        context.push(&apos;&lt;script&gt;renderFlushCon(&quot;#B&quot;,&quot;moduleB&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">        cb();</span><br><span class="line">      &#125;, 2000);</span><br><span class="line">    &#125;</span><br><span class="line">  ], function (err, results) &#123;</span><br><span class="line">    // close body and html tags</span><br><span class="line">    context.push(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">    // end the stream</span><br><span class="line">    context.push(null);</span><br><span class="line">  &#125;);</span><br><span class="line">  </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">module.exports = View;</span><br></pre></td></tr></table></figure>
+<p>页面输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">moduleC</span><br><span class="line">moduleA</span><br><span class="line">moduleB</span><br></pre></td></tr></table></figure>
+<ul>
+<li>模块显示的顺序是 C&gt;A&gt;B ，这个结果也说明了  Node.js IO 不阻塞</li>
+<li>优先 flush layout 的内容</li>
+<li>利用 async.parallel 并行处理 A 、B 、C ，通过 cb() 回调来表示该任务执行完成</li>
+<li>任务执行完成后 执行结束回调，此时关闭 body/html 标签 并结束 stream</li>
+</ul>
+<p>每个 task 函数执行中，如果有出错，会直接最后的 callback。此时会中断，其他未执行完的任务也会停止，所以这个并行执行的方法处理异常的情况需要比较谨慎。</p>
+<p>另外 async 里面有个 each 的方法也可以实现异步编程的并行执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">each(arr, iterator(item, callback), callback(err))</span><br></pre></td></tr></table></figure>
+<p>稍微改造下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">var options = [</span><br><span class="line">  &#123;id:&quot;A&quot;,html:&quot;moduleA&quot;,delay:1000&#125;,</span><br><span class="line">  &#123;id:&quot;B&quot;,html:&quot;moduleB&quot;,delay:0&#125;,</span><br><span class="line">  &#123;id:&quot;C&quot;,html:&quot;moduleC&quot;,delay:2000&#125;</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">async.forEach(options, function(item, callback) &#123; </span><br><span class="line">  setTimeout(function()&#123;</span><br><span class="line">    context.push(&apos;&lt;script&gt;renderFlushCon(&quot;#&apos;+item.id+&apos;&quot;,&quot;&apos;+item.html+&apos;&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">    callback();</span><br><span class="line">  &#125;, item.delay);</span><br><span class="line">  </span><br><span class="line">&#125;, function(err) &#123; </span><br><span class="line">  // close body and html tags</span><br><span class="line">  context.push(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">  // end the stream</span><br><span class="line">  context.push(null);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>结果和 parallel 的方式是一致的，不同的是这种方式关注执行过程，而 parallel 更多的时候关注任务数据</li>
+</ul>
+<p>我们会发现在使用 async 的时候，已经引入了 co ，co 也是异步编程的利器，看能否找到更简便的方法。</p>
+<h3 id="co"><a href="#co" class="headerlink" title="co"></a>co</h3><p>co 作为一个异步流程简化工具，能否利用强大的生成器特性实现我们的并行执行的目标。其实我们要的场景很简单：</p>
+<p><strong>多个任务函数并行执行，完成最后一个任务的时候可以进行通知执行后面的任务。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">var Readable = require(&apos;stream&apos;).Readable;</span><br><span class="line">var inherits = require(&apos;util&apos;).inherits;</span><br><span class="line">var co = require(&apos;co&apos;);</span><br><span class="line">var fs = require(&apos;fs&apos;);</span><br><span class="line">// var async = require(&apos;async&apos;);</span><br><span class="line"></span><br><span class="line">inherits(View, Readable);</span><br><span class="line"></span><br><span class="line">function View(context) &#123;</span><br><span class="line">  Readable.call(this, &#123;&#125;);</span><br><span class="line"></span><br><span class="line">  // render the view on a different loop</span><br><span class="line">  co.call(this, this.render).catch(context.onerror);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">View.prototype._read = function () &#123;&#125;;</span><br><span class="line"></span><br><span class="line">View.prototype.render = function* () &#123;</span><br><span class="line">  // flush layout and assets</span><br><span class="line">  var layoutHtml = fs.readFileSync(__dirname + &quot;/layout.html&quot;).toString();</span><br><span class="line">  this.push(layoutHtml);</span><br><span class="line"></span><br><span class="line">  var context = this;</span><br><span class="line">  var options = [</span><br><span class="line">    &#123;id:&quot;A&quot;,html:&quot;moduleA&quot;,delay:100&#125;,</span><br><span class="line">    &#123;id:&quot;B&quot;,html:&quot;moduleB&quot;,delay:0&#125;,</span><br><span class="line">    &#123;id:&quot;C&quot;,html:&quot;moduleC&quot;,delay:2000&#125;</span><br><span class="line">  ];</span><br><span class="line"></span><br><span class="line">  var taskNum = options.length;</span><br><span class="line">  var exec = options.map(function(item)&#123;opt(item,function()&#123;</span><br><span class="line">    taskNum --;</span><br><span class="line">    if(taskNum === 0) &#123;</span><br><span class="line">      done();</span><br><span class="line">    &#125; </span><br><span class="line">  &#125;)&#125;);</span><br><span class="line"></span><br><span class="line">  function opt(item,callback) &#123;</span><br><span class="line">    setTimeout(function()&#123;</span><br><span class="line">      context.push(&apos;&lt;script&gt;renderFlushCon(&quot;#&apos;+item.id+&apos;&quot;,&quot;&apos;+item.html+&apos;&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">      callback();</span><br><span class="line">    &#125;, item.delay);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  function done() &#123;</span><br><span class="line">    context.push(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">      // end the stream</span><br><span class="line">    context.push(null);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  co(function* () &#123;</span><br><span class="line">     yield exec;</span><br><span class="line">  &#125;);  </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">module.exports = View;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>yield array  并行执行数组内的任务。</li>
+<li>为了不使用 promise  在数量可预知的情况 ，加了个计数器来判断是否已经结束，纯 co 实现还有更好的方式？</li>
+<li>到这个时候，才发现生成器的特性并不能应运自如，需要补一补。</li>
+</ul>
+<h3 id="co-结合-promise"><a href="#co-结合-promise" class="headerlink" title="co 结合 promise"></a>co 结合 promise</h3><p>这个方法由@大果同学赞助提供，写起来优雅很多。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">var options = [</span><br><span class="line">  &#123;id:&quot;A&quot;,html:&quot;moduleAA&quot;,delay:100&#125;,</span><br><span class="line">  &#123;id:&quot;B&quot;,html:&quot;moduleBB&quot;,delay:0&#125;,</span><br><span class="line">  &#123;id:&quot;C&quot;,html:&quot;moduleCC&quot;,delay:2000&#125;</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line">var exec = options.map(function(item)&#123; return opt(item); &#125;);</span><br><span class="line"></span><br><span class="line">function opt(item) &#123;</span><br><span class="line">  return new Promise(function (resolve, reject) &#123;</span><br><span class="line">  setTimeout(function()&#123;</span><br><span class="line">      context.push(&apos;&lt;script&gt;renderFlushCon(&quot;#&apos;+item.id+&apos;&quot;,&quot;&apos;+item.html+&apos;&quot;);&lt;/script&gt;&apos;);</span><br><span class="line">      resolve(item);</span><br><span class="line">    &#125;, item.delay);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function done() &#123;</span><br><span class="line">  context.push(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">    // end the stream</span><br><span class="line">  context.push(null);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">co(function* () &#123;</span><br><span class="line">   yield exec;</span><br><span class="line">&#125;).then(function()&#123;</span><br><span class="line">  done();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="ES-7-async-wait"><a href="#ES-7-async-wait" class="headerlink" title="ES 7 async/wait"></a>ES 7 async/wait</h3><p>如果成为标准并开始引入，相信代码会更精简、可读性会更高，而且实现的思路会更清晰。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">async function flush(Something) &#123;  </span><br><span class="line">	await Promise.all[moduleA.flush(), moduleB.flush(),moduleC.flush()]</span><br><span class="line">	context.push(&apos;&lt;/body&gt;&lt;/html&gt;&apos;);</span><br><span class="line">      // end the stream</span><br><span class="line">    context.push(null);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>此段代码未曾跑过验证，思路和代码摆在这里，ES 7 跑起来 ^_^。</li>
+</ul>
+<h2 id="Midway"><a href="#Midway" class="headerlink" title="Midway"></a>Midway</h2><p>写到这里太阳已经下山了，如果在这里来个“预知后事如何，请听下回分解”，那么前面的内容就变成一本没有主角的小说。</p>
+<p>Midway 是好东西，是前后端分离的产物。分离不代表不往来，而是更紧密和流畅。因为职责清晰，前后端有时候可以达到“你懂的，懂！”，然后一个需求就可以明确了。用 Node.js 代替 Webx MVC 中的 View 层，给前端实施 Bigpipe 带来无限的方便。</p>
+<blockquote>
+</blockquote>
+<p>Midway 封装了 koa 的功能，屏蔽了一些复杂的元素，只暴露出最简单的 MVC 部分给前端使用，降低了很大一部分配置的成本。</p>
+<h3 id="一些信息"><a href="#一些信息" class="headerlink" title="一些信息"></a>一些信息</h3><ul>
+<li>Midway 其实支持 express 框架和 koa 框架，目前主流应该都是 koa，Midway 5.1 之后应该不会兼容双框架。</li>
+<li>Midway 可以更好地支持 generators 特性</li>
+<li>midway-render this.render（xtpl,data） 内容直接通过 this.body 输出到页面。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">function renderView(basePath, viewName, data) &#123;</span><br><span class="line">  var me = this;</span><br><span class="line">  var filepath = path.join(basePath, viewName);</span><br><span class="line">  data = utils.assign(&#123;&#125;, me.state, data);</span><br><span class="line">  return new Promise(function(resolve, reject) &#123;</span><br><span class="line">    function callback(err, ret) &#123;</span><br><span class="line">      if (err) &#123;</span><br><span class="line">        return reject(err);</span><br><span class="line">      &#125;</span><br><span class="line">      // 拼装后直接赋值this.body</span><br><span class="line">      me.body = ret;</span><br><span class="line">      resolve(ret);</span><br><span class="line">    &#125;</span><br><span class="line">    render(filepath, data, callback);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="MVC"><a href="#MVC" class="headerlink" title="MVC"></a>MVC</h3><ul>
+<li>Midway 的专注点是做前后端分离，Model 层其实是对后端的 Model 做一层代理，数据依赖后端提供。</li>
+<li>View 层 模板使用 xtpl 模板，前后端的模板统一。</li>
+<li>Controller 把路由和视图完整的结合在了一起，通常在 Controller 中实现 this.render。</li>
+</ul>
+<h3 id="Bigpipe-的位置"><a href="#Bigpipe-的位置" class="headerlink" title="Bigpipe 的位置"></a>Bigpipe 的位置</h3><p>了解 Midway 这些信息，其实是为了弄清楚 Bigpipe 在 Midway 里面应该在哪里接入会比较合适：</p>
+<ul>
+<li>Bigpipe 方案需要实现对内容的分块传输，所以也是在 Controller 中使用。</li>
+<li>拼装模板需要 midway-xtpl 实现拼装好字符串，然后通过 Bigpipe 分块输出。</li>
+<li>Bigpipe 可以实现对各个模块进行取数据和拼装模块内容的功能。</li>
+</ul>
+<p><strong>建议在 Controller 中作为  Bigpipe 模块引入使用，取代原有 this.render 的方式进行内容分块输出</strong></p>
+<h2 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h2><p>什么样的场景比较适合 Bigpipe，结合我们现有的东西和开发模式。</p>
+<ul>
+<li>类似于卖家中心，模块多，页面长，首屏又是用户核心内容。</li>
+<li>每个模块的功能相对独立，模板和数据都相对独立。</li>
+<li>非首屏模块还是建议用滚动加载，减少首屏传输量。</li>
+<li>主框架输出 assets 和 bigpipe 需要的脚本，主要的是需要为模块预先占位。</li>
+<li>首屏模块是可以固定或者通过计算确认。</li>
+<li>模块除了分块输出，最好也支持异步加载渲染的方式。</li>
+</ul>
+<h2 id="封装"><a href="#封装" class="headerlink" title="封装"></a>封装</h2><p>最后卖家中心的使用和 Bigpipe 的封装，我们围绕着前面核心实现的分块传输和并行执行，目前的封装是这样的：</p>
+<p>由于 Midway  this.render 除了拼装模板会直接 将内容赋值到 this.body，这种时候回直接中断请求，无法实现我们分块传输的目标。所以做了一个小扩展：</p>
+<p>midway-render 引擎里面 添加只拼装模板不输出的方法 this.Html</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// just output html no render;</span><br><span class="line"> app.context.Html = utils.partial(engine.renderViewText, config.path);</span><br></pre></td></tr></table></figure>
+<p><strong><em>renderViewText</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">function renderViewText(basePath, viewName, data) &#123;</span><br><span class="line">  var me = this;</span><br><span class="line">  var filepath = path.join(basePath, viewName);</span><br><span class="line">  data = utils.assign(&#123;&#125;, me.state, data);</span><br><span class="line"></span><br><span class="line">  return new Promise(function(resolve, reject) &#123;</span><br><span class="line">    render(filepath, data, function(err, ret)&#123;</span><br><span class="line">      if (err) &#123;</span><br><span class="line">        return reject(err);</span><br><span class="line">      &#125;</span><br><span class="line">      //此次 去掉了 me.body=ret</span><br><span class="line">      resolve(ret);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>midway-render/midway-xtpl 应该有扩展，但是没找到怎么使用，所以选择这样的方式。</li>
+</ul>
+<p><strong><em>View.js 模块</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">var util = require(&apos;util&apos;);</span><br><span class="line">var async = require(&apos;async&apos;);</span><br><span class="line">var Readable = require(&apos;stream&apos;).Readable;</span><br><span class="line"></span><br><span class="line">var midway = require(&apos;midway&apos;);</span><br><span class="line">var DataProxy = midway.getPlugin(&apos;dataproxy&apos;);</span><br><span class="line"></span><br><span class="line">// 默认主体框架</span><br><span class="line">var defaultLayout = &apos;&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;/body&gt;&apos;;</span><br><span class="line"></span><br><span class="line">exports.createView = function() &#123;</span><br><span class="line">  function noop() &#123;&#125;;</span><br><span class="line"></span><br><span class="line">  util.inherits(View, Readable);</span><br><span class="line"></span><br><span class="line">  function View(ctx, options) &#123;</span><br><span class="line">    Readable.call(this);</span><br><span class="line"></span><br><span class="line">    ctx.type = &apos;text/html; charset=utf-8&apos;;</span><br><span class="line">    ctx.body = this;</span><br><span class="line">    ctx.options = options;</span><br><span class="line">    this.context = ctx;</span><br><span class="line"></span><br><span class="line">    this.layout = options.layout || defaultLayout;</span><br><span class="line">    this.pagelets = options.pagelets || [];</span><br><span class="line">    this.mod = options.mod || &apos;bigpipe&apos;;</span><br><span class="line">    this.endCB = options.endCB || noop;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   *</span><br><span class="line">   * @type &#123;noop&#125;</span><br><span class="line">   * @private</span><br><span class="line">   */</span><br><span class="line">  View.prototype._read = noop;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * flush 内容</span><br><span class="line">   */</span><br><span class="line">  View.prototype.flush = function* () &#123;</span><br><span class="line">    // flush layout</span><br><span class="line">    yield this.flushLayout();</span><br><span class="line"></span><br><span class="line">    // flush pagelets</span><br><span class="line">    yield this.flushPagelets();</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * flush主框架内容</span><br><span class="line">   */</span><br><span class="line">  View.prototype.flushLayout = function* () &#123;</span><br><span class="line">    this.push(this.layout);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * flushpagelets的内容</span><br><span class="line">   */</span><br><span class="line">  View.prototype.flushPagelets = function* () &#123;</span><br><span class="line">    var self = this;</span><br><span class="line">    var pagelets = this.pagelets;</span><br><span class="line"></span><br><span class="line">    // 并行执行</span><br><span class="line">    async.each(pagelets, function(pagelet, callback) &#123;</span><br><span class="line">      self.flushSinglePagelet(pagelet, callback);</span><br><span class="line">    &#125;, function(err) &#123;</span><br><span class="line">      self.flushEnd();</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * flush 单个pagelet</span><br><span class="line">   * @param pagelet</span><br><span class="line">   * @param callback</span><br><span class="line">   */</span><br><span class="line">  View.prototype.flushSinglePagelet = function(pagelet, callback) &#123;</span><br><span class="line">    var self = this,</span><br><span class="line">      context = this.context;</span><br><span class="line"></span><br><span class="line">    this.getDataByDataProxy(pagelet,function(data)&#123;</span><br><span class="line">      var data = pagelet.formateData(data, pagelet) || data;</span><br><span class="line"></span><br><span class="line">      context.Html(pagelet.tpl, data).then(function(html) &#123;</span><br><span class="line">        var selector = &apos;#&apos; + pagelet.id;</span><br><span class="line">        var js = pagelet.js;</span><br><span class="line"></span><br><span class="line">        self.arrive(selector,html,js);</span><br><span class="line"></span><br><span class="line">        callback();</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * 获取后端数据</span><br><span class="line">   * @param pagelet</span><br><span class="line">   * @param callback</span><br><span class="line">   */</span><br><span class="line">  View.prototype.getDataByDataProxy = function(pagelet, callback) &#123;</span><br><span class="line">    var context = this.context;</span><br><span class="line"></span><br><span class="line">    if (pagelet.proxy) &#123;</span><br><span class="line">      var proxy = DataProxy.create(&#123;</span><br><span class="line">        getData: pagelet.proxy</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      proxy.getData()</span><br><span class="line">        .withHeaders(context.request.headers)</span><br><span class="line">        .done(function(data) &#123;</span><br><span class="line">          callback &amp;&amp; callback(data);</span><br><span class="line">        &#125;)</span><br><span class="line">        .fail(function(err) &#123;</span><br><span class="line">          console.error(err);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;else &#123;</span><br><span class="line">      callback&amp;&amp;callback(&#123;&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  /**</span><br><span class="line">   * 关闭html结束stream</span><br><span class="line">   */</span><br><span class="line">  View.prototype.flushEnd = function() &#123;</span><br><span class="line">    this.push(&apos;&lt;/html&gt;&apos;);</span><br><span class="line">    this.push(null);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  // Replace the contents of `selector` with `html`.</span><br><span class="line">  // Optionally execute the `js`.</span><br><span class="line">  View.prototype.arrive = function (selector, html, js) &#123;</span><br><span class="line">      this.push(wrapScript(</span><br><span class="line">          &apos;BigPipe(&apos; +</span><br><span class="line">              JSON.stringify(selector) + &apos;, &apos; +</span><br><span class="line">              JSON.stringify(html) +</span><br><span class="line">              (js ? &apos;, &apos; + JSON.stringify(js) : &apos;&apos;) + &apos;)&apos;</span><br><span class="line">      ))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  function wrapScript(js) &#123;</span><br><span class="line">    var id = &apos;id_&apos; + Math.random().toString(36).slice(2)</span><br><span class="line"></span><br><span class="line">    return &apos;&lt;script id=&quot;&apos; + id + &apos;&quot;&gt;&apos;</span><br><span class="line">      + js</span><br><span class="line">      + &apos;;remove(\&apos;#&apos; + id + &apos;\&apos;);&lt;/script&gt;&apos;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return View;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>context.html 拼装各个 pagelet 的内容</li>
+</ul>
+<p><strong><em>Controller 调用</em></strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">var me = this;</span><br><span class="line">var layoutHtml = yield this.Html(&apos;p/seller_admin_b/index&apos;, data);</span><br><span class="line"></span><br><span class="line">yield new View(me, &#123;</span><br><span class="line">  layout: layoutHtml, // 拼装好layout模板</span><br><span class="line">  pagelets: pageletsConfig,</span><br><span class="line">  mod: &apos;bigpie&apos;  // 预留模式选择</span><br><span class="line">&#125;).flush();</span><br></pre></td></tr></table></figure>
+<ul>
+<li>layoutHtml 拼装好主框架模板</li>
+<li>每个 pagelets 的配置</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	id: &apos;seller_info&apos;,//该pagelet的唯一id</span><br><span class="line">    proxy: &apos;Seller.Module.Data.seller_info&apos;, // 接口配置</span><br><span class="line">    tpl: &apos;sellerInfo.xtpl&apos;, //需要的模板</span><br><span class="line">    js: &apos;&apos; //需要执行的js</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>proxy 和 tpl 获取数据和拼装模板需要并行执行</li>
+<li>js 通常进行模块的初始化</li>
+</ul>
+<h2 id="改进"><a href="#改进" class="headerlink" title="改进"></a>改进</h2><p>思路和代码实现都基于现有的场景和技术背景，目前只有实现的思路和方案尝试，还没形成统一的解决方案，需要更多的场景来支持。目前有些点还可以改进的：</p>
+<ul>
+<li>代码可以采用 ES6/ES7 新特性进行改造会更优雅，时刻结合 Midway 的升级进行改进。</li>
+<li>分块传输机制存在一些低版本浏览器不兼容的情况，最好实现异步加载模块的方案，分双路由，根据用户设备切换路由。</li>
+<li>对于每个模块和内容进行异常处理，设置一个请求的时间限制，达到限制时间，关闭链接，不要让页面挂起。此时把本来需要进行分块传输的模块通过异步的方式引入。</li>
+<li>并行的实现方案目前采用 async.each，需要从性能上进行各方案的对比</li>
+</ul>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="https://github.com/bigpipe/bigpipe" target="_blank" rel="noopener">bigpipe</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E5%88%86%E5%9D%97%E4%BC%A0%E8%BE%93%E7%BC%96%E7%A0%81" target="_blank" rel="noopener">分块传输编码</a></li>
+<li><a href="http://www.searchtb.com/2011/04/an-introduction-to-bigpipe.html" target="_blank" rel="noopener">BigPipe 学习研究</a></li>
+<li><a href="https://strongloop.com/strongblog/streaming-chunked-html-node-js-data/" target="_blank" rel="noopener">Using Streaming Chunked HTML to Get Node.js to Deliver More Data</a></li>
+<li><a href="http://wwsun.github.io/posts/evolution-of-javascript-async.html" target="_blank" rel="noopener">异步 JavaScript 的发展历程</a></li>
+<li><a href="https://www.npmjs.com/package/async" target="_blank" rel="noopener"> async </a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/03/25/seller-bigpipe-coding/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/03/25/seller-bigpipe-coding/" data-id="cjt6lby1h00b2jeu1lkbjov94" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/03/25/seller-bigpipe-coding/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Bigpipe/">Bigpipe</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/网页加载优化/">网页加载优化</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/04/01/what-can-we-learn-from-left-pad-event/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          从 left-pad 事件我们可以学到什么
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/03/23/the-growth-of-front-end/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">一个前端的自我修养</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>CSS Border 使用小分享 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="原理CSS 盒模型 一个盒子包括：margin+border+padding+content   上下左右边框交界处出呈现平滑的斜线。 利用这个特点， 通过设置不同的上下左右边框宽度或者颜色可以得到小三角， 小梯形等。  调整宽度大小可以调节三角形形状。  示例 1一般情况下， 我们设置盒子的宽高度， 及上下左右边框， 会呈现如下图：  12345678910#test2 &amp;#123;  hei">
+<meta name="keywords" content="CSS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSS Border 使用小分享">
+<meta property="og:url" content="http://taobaofed.org/blog/2010/08/05/css-border-hack/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="原理CSS 盒模型 一个盒子包括：margin+border+padding+content   上下左右边框交界处出呈现平滑的斜线。 利用这个特点， 通过设置不同的上下左右边框宽度或者颜色可以得到小三角， 小梯形等。  调整宽度大小可以调节三角形形状。  示例 1一般情况下， 我们设置盒子的宽高度， 及上下左右边框， 会呈现如下图：  12345678910#test2 &amp;#123;  hei">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1WPGoQpXXXXcRapXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1M7XFQpXXXXcKXpXXXXXXXXXX-499-494.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB16yhMQpXXXXa2XpXXXXXXXXXX-69-67.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB17xpNQpXXXXaWXpXXXXXXXXXX-50-50.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1tk0eQpXXXXa_apXXXXXXXXXX-53-37.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1htRTQpXXXXcdXXXXXXXXXXXX-64-61.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1tk0eQpXXXXa_apXXXXXXXXXX-53-37.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1X2tRQpXXXXXiXpXXXXXXXXXX-59-58.gif">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1DnFrQpXXXXb1XVXXXXXXXXXX-50-55.gif">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1lqRxQpXXXXayXVXXXXXXXXXX-245-91.gif">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1_JpQQpXXXXc2XXXXXXXXXXXX-316-56.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CSS Border 使用小分享">
+<meta name="twitter:description" content="原理CSS 盒模型 一个盒子包括：margin+border+padding+content   上下左右边框交界处出呈现平滑的斜线。 利用这个特点， 通过设置不同的上下左右边框宽度或者颜色可以得到小三角， 小梯形等。  调整宽度大小可以调节三角形形状。  示例 1一般情况下， 我们设置盒子的宽高度， 及上下左右边框， 会呈现如下图：  12345678910#test2 &amp;#123;  hei">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1WPGoQpXXXXcRapXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-css-border-hack" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      CSS Border 使用小分享
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: admin</span>
+        
+        <span>发表于: <a href="/blog/2010/08/05/css-border-hack/" class="article-date">
+  <time datetime="2010-08-04T20:03:00.000Z" itemprop="datePublished">2010-08-05</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1WPGoQpXXXXcRapXXXXXXXXXX-900-500.jpg" alt="CSS Border 使用小分享"></p>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><h4 id="CSS-盒模型"><a href="#CSS-盒模型" class="headerlink" title="CSS 盒模型"></a>CSS 盒模型</h4><p><img src="https://img.alicdn.com/tfs/TB1M7XFQpXXXXcKXpXXXXXXXXXX-499-494.png" alt></p>
+<p>一个盒子包括：margin+border+padding+content</p>
+<blockquote>
+<p> 上下左右边框交界处出呈现平滑的斜线。 利用这个特点， 通过设置不同的上下左右边框宽度或者颜色可以得到小三角， 小梯形等。</p>
+<p> 调整宽度大小可以调节三角形形状。</p>
+</blockquote>
+<h4 id="示例-1"><a href="#示例-1" class="headerlink" title="示例 1"></a>示例 1</h4><p>一般情况下， 我们设置盒子的宽高度， 及上下左右边框， 会呈现如下图：</p>
+<p><img src="https://img.alicdn.com/tfs/TB16yhMQpXXXXa2XpXXXXXXXXXX-69-67.png" alt></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#test2</span> &#123;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">overflow</span>: hidden; <span class="comment">/* 这里设置overflow， font-size， line-height */</span></span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">0</span>; <span class="comment">/*是因为， 虽然宽高度为0， 但在IE6下会具有默认的 */</span></span><br><span class="line">  <span class="attribute">line-height</span>: <span class="number">0</span>; <span class="comment">/* 字体大小和行高， 导致盒子呈现被撑开的长矩形 */</span></span><br><span class="line">  <span class="attribute">border-color</span>: <span class="number">#FF9600</span> <span class="number">#3366ff</span> # <span class="number">12</span> ad2a# f0eb7a;</span><br><span class="line">  <span class="attribute">border-style</span>: solid;</span><br><span class="line">  <span class="attribute">border-width</span>: <span class="number">20</span> px;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="示例-2"><a href="#示例-2" class="headerlink" title="示例 2"></a>示例 2</h4><p>在上面基础上， 我们把宽高度都设为 0 时，会呈现上述的边界斜线。</p>
+<p><img src="https://img.alicdn.com/tfs/TB17xpNQpXXXXaWXpXXXXXXXXXX-50-50.png" alt></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#test2</span> &#123;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">overflow</span>: hidden; <span class="comment">/* 这里设置overflow， font-size， line-height */</span></span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">0</span>; <span class="comment">/*是因为， 虽然宽高度为 0， 但在 IE 6 下会具有默认的 */</span></span><br><span class="line">  <span class="attribute">line-height</span>: <span class="number">0</span>; <span class="comment">/* 字体大小和行高， 导致盒子呈现被撑开的长矩形 */</span></span><br><span class="line">  <span class="attribute">border-color</span>: <span class="number">#FF9600</span> <span class="number">#3366ff</span> # <span class="number">12</span> ad2a# f0eb7a;</span><br><span class="line">  <span class="attribute">border-style</span>: solid;</span><br><span class="line">  <span class="attribute">border-width</span>: <span class="number">20</span> px;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时， 其实我们已经看到有上下左右四个三角形了…… 如果，我们把 4 种颜色，只保留一种颜色，余下 3 种颜色设置为透明（或者设置为和背景色相同的颜色），那不就出现一个小三角了么？</p>
+<h4 id="示例-3"><a href="#示例-3" class="headerlink" title="示例 3"></a>示例 3</h4><p>只保留上面的橙色，看看</p>
+<p><img src="https://img.alicdn.com/tfs/TB1tk0eQpXXXXa_apXXXXXXXXXX-53-37.png" alt></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#test3</span> &#123;</span><br><span class="line">  <span class="attribute">height</span>:<span class="number">0</span>;</span><br><span class="line">  <span class="attribute">width</span>:<span class="number">0</span>;</span><br><span class="line">  <span class="attribute">overflow</span>: hidden;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">line-height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">border-color</span>:<span class="number">#FF9600</span> transparent transparent transparent;</span><br><span class="line">  <span class="attribute">border-style</span>:solid;</span><br><span class="line">  <span class="attribute">border-width</span>:<span class="number">20px</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可是，IE 6 下不支持透明啊~，会出现下图的样子</p>
+<p><img src="https://img.alicdn.com/tfs/TB1htRTQpXXXXcdXXXXXXXXXXXX-64-61.png" alt></p>
+<p>找到一个在 IE 6 下边框透明的文章中找到解决办法，如下例</p>
+<h4 id="示例-4"><a href="#示例-4" class="headerlink" title="示例 4"></a>示例 4</h4><p>IE 6 下， 设置余下三条边的 border-style 为 dashed，即可达到透明的效果~ 具体原因可以见参考资料 3</p>
+<p><img src="https://img.alicdn.com/tfs/TB1tk0eQpXXXXa_apXXXXXXXXXX-53-37.png" alt></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#test3</span> &#123;</span><br><span class="line">  <span class="attribute">height</span>:<span class="number">0</span>;</span><br><span class="line">  <span class="attribute">width</span>:<span class="number">0</span>;</span><br><span class="line">  <span class="attribute">overflow</span>: hidden;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">line-height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">border-color</span>:<span class="number">#FF9600</span> transparent transparent transparent;</span><br><span class="line">  <span class="attribute">border-style</span>:solid;</span><br><span class="line">  <span class="attribute">border-width</span>:<span class="number">20px</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，在 IE 6 下，不设置透明， 将其颜色设置为背景色，使其看不出来也是可以的。</p>
+<h4 id="示例-5"><a href="#示例-5" class="headerlink" title="示例 5"></a>示例 5</h4><p>上面我们画的小三角的斜边都是依靠原来盒子的边，还有另外一种形式的小三角， 就是斜边在盒子的对角线上</p>
+<p><img src="https://img.alicdn.com/tfs/TB1X2tRQpXXXXXiXpXXXXXXXXXX-59-58.gif" alt></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#test5</span> &#123;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">overflow</span>: hidden;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">line-height</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">border-color</span>: <span class="number">#ff9600</span> <span class="number">#3366ff</span> transparent transparent;</span><br><span class="line">  <span class="attribute">border-style</span>: solid solid dashed dashed;</span><br><span class="line">  <span class="attribute">border-width</span>: <span class="number">40px</span> <span class="number">40px</span> <span class="number">0</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>保留其中一种颜色，就可以得到斜边在对角线上的三角形了…… 多个这样的三角形，通过设置边框大小，颜色，拼凑起来可以形成任意形状的三角形。</p>
+<p><img src="https://img.alicdn.com/tfs/TB1DnFrQpXXXXb1XVXXXXXXXXXX-50-55.gif" alt></p>
+<p>像这种不规则的三角形，延伸一下，放在气泡框上，就可以省去拼背景图片的麻烦了。</p>
+<p><img src="https://img.alicdn.com/tfs/TB1lqRxQpXXXXayXVXXXXXXXXXX-245-91.gif" alt></p>
+<p>另外，关于气泡框，可以使用棱形字符（◆）来实现，设置其 font-size，颜色和背景色一致，定位可以使用 margin 负值和 absolute 绝对定位来实现。</p>
+<h3 id="应用之圆角生成"><a href="#应用之圆角生成" class="headerlink" title="应用之圆角生成"></a>应用之圆角生成</h3><p>应该说是近似圆角，其实由一个高度非常小的梯形展示出来</p>
+<blockquote>
+<p>上梯形（无上边框，下左右 3px 宽度， 左右颜色去掉）+ 矩形 + 下梯形<br><img src="https://img.alicdn.com/tfs/TB1_JpQQpXXXXc2XXXXXXXXXXXX-316-56.png" alt></p>
+</blockquote>
+<p>自适应圆角 1：</p>
+<blockquote>
+<p>整个 rc 设置为 float: left 或 display: inline-block 分为top，bd，bottom， top 中又有两个层 rc1 和 rc2，rc1 只设置 border-top，高度为 0，并设置左右 margin 呈短小的一横线，rc2 只设置左右 border 并且左右 margin 小于 rc1，height 为 1px，中间 bd 设置左右 border，不设置左右 margin。</p>
+</blockquote>
+<blockquote>
+<p>不过 IE 6/7 出现 bug：rc 在 IE 6 中依然显示为 dispaly: block，而 IE 7 中 top 和 bottom 缩成一坨，不肯扩展开来，而在 rc1/rc2/rc3 中插入文字 xxx 后只能扩展到文字宽度，不能与 bd 对齐。</p>
+</blockquote>
+<p>自适应圆角 2：</p>
+<blockquote>
+<p>自 Google 系产品的 1px 圆角按钮，三层 div， 最外层 div1 正常设置边框宽度 1px， 呈现出上下边框线，中间 div2 只设置左右边框，且把左右 margin 设置成负值，呈现出圆角处的 4 个圆点 内层 div3 同样只设置左右边框，同时 margin 上下空出 div2 的高度，margin 左右也设置与 div2 相同的负值。</p>
+</blockquote>
+<h3 id="其他小问题"><a href="#其他小问题" class="headerlink" title="其他小问题"></a>其他小问题</h3><ul>
+<li>透明:</li>
+</ul>
+<blockquote>
+<p>IE 6 浏览器不支持 transparent 透明属性，就 border 生成三角技术而言，直接设置对应的透明边框的 border-style 属性为 dotted 或是 dashed 即可解决这一问题，原因是在 IE 6 下，点线与虚线均以边框宽度为基准，点线长度必须是其宽度的 3 倍以上（height &gt;= border-width * 3），虚线宽长度必须是其宽度的 5 倍以上（height &gt;= border-width * 5），否则点线和虚线都不会出现。</p>
+</blockquote>
+<ul>
+<li>IE 6 的奇偶 bug：</li>
+</ul>
+<blockquote>
+<p>如果定位外框高度或是宽度为奇数，则 IE 6 下，绝对定位元素的低定位和右定位会有1像素的误差。所以，尽量保证外框的高度或宽度为偶数值。</p>
+</blockquote>
+<ul>
+<li>IE 6 的空 div 高度 bug：</li>
+</ul>
+<blockquote>
+<p>IE 6 下，空 div 会有莫名的高度，也就是说 height: 0 不顶用，此时形成的尖角的实际占高于其他浏览器是有差异的。可使用 font-size: 0 + overflow: hidden 修复此问题。</p>
+</blockquote>
+<ul>
+<li>filter: chroma 滤镜</li>
+</ul>
+<blockquote>
+<p>该属性属性可以设置一个对象中指定的颜色为透明色，如：</p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">border-color</span>: <span class="selector-tag">pink</span>;</span><br><span class="line">filter: chroma(color=pink);</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ol>
+<li><a href="http://www.zhangxinxu.com/wordpress/?p=794" target="_blank" rel="noopener">CSS 小三角原理</a></li>
+<li><a href="http://www.zhangxinxu.com/wordpress/?p=651" target="_blank" rel="noopener">CSS 气泡效果</a></li>
+</ol>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/N1CbtMGcBN0" target="_blank" rel="noopener">https://unsplash.com/photos/N1CbtMGcBN0</a> By @Alisa Anton</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2010/08/05/css-border-hack/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2010/08/05/css-border-hack/" data-id="cjt6lbxxs001ijeu1uk7wvbj8" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2010/08/05/css-border-hack/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CSS/">CSS</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2010/10/15/confused-about-word-wrap/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          word-wrap 解惑
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2010/06/25/yui-in-taobao-lottery/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">YUI 3 在淘宝彩票中的实践小结</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

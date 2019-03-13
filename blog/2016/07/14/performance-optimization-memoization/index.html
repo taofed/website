@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>性能优化：memoization | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="memoization适用于递归计算场景，例如 fibonacci 数值 的计算。 12345678910111213141516171819&apos;use strict&apos;;let n = process.env.N || 50;console.log(&apos;process $&apos;, process.pid);console.log(&apos;fibonacci recursive version with n =">
+<meta name="keywords" content="性能优化,memoization,javascript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="性能优化：memoization">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/07/14/performance-optimization-memoization/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="memoization适用于递归计算场景，例如 fibonacci 数值 的计算。 12345678910111213141516171819&apos;use strict&apos;;let n = process.env.N || 50;console.log(&apos;process $&apos;, process.pid);console.log(&apos;fibonacci recursive version with n =">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1wxWIKVXXXXXOapXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://gtms04.alicdn.com/tps/i4/TB1d7ebKpXXXXXdXVXXue9FUVXX-1917-2180.png">
+<meta property="og:image" content="https://gtms01.alicdn.com/tps/i1/TB1Q88ZKpXXXXcmaXXX9gOTNXXX-1922-768.png">
+<meta property="og:image" content="https://gtms01.alicdn.com/tps/i1/TB1hgewKpXXXXXLXpXXASkp1VXX-1954-918.png">
+<meta property="og:image" content="https://gtms02.alicdn.com/tps/i2/TB1x71oKpXXXXcEXpXXj7Qt5VXX-3824-2270.png">
+<meta property="og:image" content="https://gtms03.alicdn.com/tps/i3/TB1TTt8KpXXXXc9XVXX4nXcUXXX-3832-2300.png">
+<meta property="og:image" content="https://gtms04.alicdn.com/tps/i4/TB18uugKpXXXXb9XFXXX9u8OXXX-3820-2304.png">
+<meta property="og:image" content="https://gtms02.alicdn.com/tps/i2/TB1soOyKpXXXXaPXVXX28mEJXXX-3814-420.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1pHCxKpXXXXcsXVXXT7Jp5pXX-3760-400.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1q4SZKpXXXXcRXXXXusZkMpXX-1918-320.png">
+<meta property="og:image" content="http://gtms02.alicdn.com/tps/i2/TB1taHXKpXXXXXqXXXXHSJCLpXX-1916-570.png">
+<meta property="og:image" content="http://gtms01.alicdn.com/tps/i1/TB1L8uRKpXXXXbkXFXXDHvXMXXX-3822-622.png">
+<meta property="og:image" content="https://gtms02.alicdn.com/tps/i2/TB1XrjXKpXXXXaxXXXXrdqLOXXX-1926-1882.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="性能优化：memoization">
+<meta name="twitter:description" content="memoization适用于递归计算场景，例如 fibonacci 数值 的计算。 12345678910111213141516171819&apos;use strict&apos;;let n = process.env.N || 50;console.log(&apos;process $&apos;, process.pid);console.log(&apos;fibonacci recursive version with n =">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1wxWIKVXXXXXOapXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-performance-optimization-memoization" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      性能优化：memoization
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 云翮</span>
+        
+        <span>发表于: <a href="/blog/2016/07/14/performance-optimization-memoization/" class="article-date">
+  <time datetime="2016-07-14T12:01:25.000Z" itemprop="datePublished">2016-07-14</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tfs/TB1wxWIKVXXXXXOapXXXXXXXXXX-900-500.jpg" alt="性能优化：memoization"></p>
+<p><code>memoization</code>适用于递归计算场景，例如 <a href="http://en.wikipedia.org/wiki/Fibonacci_number" target="_blank" rel="noopener">fibonacci 数值</a> 的计算。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> n = process.env.N || <span class="number">50</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process $'</span>, process.pid);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'fibonacci recursive version with n = '</span>, n);</span><br><span class="line"><span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fibonacci</span>(<span class="params">n</span>) </span>&#123;</span><br><span class="line">  count++;</span><br><span class="line">  <span class="comment">//console.log(count);</span></span><br><span class="line">  <span class="keyword">if</span> (n == <span class="number">0</span> || n == <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> n;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> fibonacci(n - <span class="number">1</span>) + fibonacci(n - <span class="number">2</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">fibonacci(n);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'final count'</span>, count);</span><br></pre></td></tr></table></figure>
+<p>如果使用这种递归的写法去计算第 50 个 fibonacci 数值，需要执行 40730022147 次。随着执行次数的增加，执行所需时间成指数上涨：</p>
+<p><img src="https://gtms04.alicdn.com/tps/i4/TB1d7ebKpXXXXXdXVXXue9FUVXX-1917-2180.png" alt></p>
+<p><code>memoization</code>的技巧在于将计算过的结果『缓存』下来，避免重复计算带来的成本，例如将计算 fibonacci 的代码改写为如下形式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> N = process.env.N || <span class="number">50</span>;</span><br><span class="line"><span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fibonacci = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> memo = &#123;&#125;;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">f</span>(<span class="params">n</span>) </span>&#123;</span><br><span class="line">    count++;</span><br><span class="line">    <span class="keyword">let</span> value;</span><br><span class="line">    <span class="keyword">if</span> (n <span class="keyword">in</span> memo) &#123;</span><br><span class="line">      value = memo[n];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (n == <span class="number">0</span> || n == <span class="number">1</span>) &#123;</span><br><span class="line">        value = n;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        value = f(n - <span class="number">1</span>) + f(n - <span class="number">2</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      memo[n] = value;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> f;</span><br><span class="line">&#125;)();</span><br><span class="line"></span><br><span class="line">fibonacci(N);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'final count'</span>, count);</span><br></pre></td></tr></table></figure>
+<p>计算第 50 个 fibonacci 值只需要 99 次，执行时间为 0.06 秒，只有递归版本执行时间（546.41 秒）的万分之一，使用的内存（RSS 值 20111360）只有递归版本（RSS 值为 36757504）的 54%。</p>
+<blockquote>
+<p> 值得注意的是：这里闭包使用的<code>memo</code>对象有可能造成内存泄露。</p>
+</blockquote>
+<p><img src="https://gtms01.alicdn.com/tps/i1/TB1Q88ZKpXXXXcmaXXX9gOTNXXX-1922-768.png" alt></p>
+<h3 id="处理多个参数"><a href="#处理多个参数" class="headerlink" title="处理多个参数"></a>处理多个参数</h3><p>如果需要处理多个参数，需要把缓存的内容变成多维数据结构，或者把多个参数结合起来作为一个索引。</p>
+<p>例如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> N = process.env.N || <span class="number">50</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fibonacci = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> memo = &#123;&#125;;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">f</span>(<span class="params">x, n</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> value;</span><br><span class="line">    memo[x] = memo[x] || &#123;&#125;;</span><br><span class="line">    <span class="keyword">if</span> (x <span class="keyword">in</span> memo &amp;&amp; n <span class="keyword">in</span> memo[x]) &#123;</span><br><span class="line">      value = memo[x][n];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (n == <span class="number">0</span> || n == <span class="number">1</span>) &#123;</span><br><span class="line">        value = n;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        value = f(n - <span class="number">1</span>) + f(n - <span class="number">2</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      memo[x][n] = value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> value;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> f;</span><br><span class="line">&#125;)();</span><br><span class="line"></span><br><span class="line">fibonacci(<span class="string">'a'</span>, N);</span><br><span class="line">fibonacci(<span class="string">'b'</span>, N);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br></pre></td></tr></table></figure>
+<p>上面执行了两次<code>fibonacci</code>函数，假设执行多次：</p>
+<p><img src="https://gtms01.alicdn.com/tps/i1/TB1hgewKpXXXXXLXpXXASkp1VXX-1954-918.png" alt></p>
+<p>可以看到内存的增长也是有限的，并且最终控制在了<code>22097920</code>这个值。下面是另一种处理多个参数的情况（将多个参数组成一个索引）：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> N = process.env.N || <span class="number">50</span>;</span><br><span class="line"><span class="keyword">let</span> count;</span><br><span class="line"><span class="keyword">let</span> memo = &#123;&#125;;</span><br><span class="line"><span class="keyword">const</span> slice = <span class="built_in">Array</span>.prototype.slice;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fibonacci = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  count = <span class="number">0</span>;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">f</span>(<span class="params">x, n</span>) </span>&#123;</span><br><span class="line">    count++;</span><br><span class="line">    <span class="keyword">let</span> args = slice.call(<span class="built_in">arguments</span>);</span><br><span class="line">    <span class="keyword">let</span> value;</span><br><span class="line">    memo[x] = memo[x] || &#123;&#125;;</span><br><span class="line">    <span class="keyword">if</span> (args <span class="keyword">in</span> memo) &#123;</span><br><span class="line">      value = memo[args];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span>(n == <span class="number">0</span> || n == <span class="number">1</span>) &#123;</span><br><span class="line">        value = n;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        value = f(x, n - <span class="number">1</span>) + f(x, n - <span class="number">2</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      memo[args] = value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> value;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> f;</span><br><span class="line">&#125;)();</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> result;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">  count = <span class="number">0</span>;</span><br><span class="line">  result = fibonacci(<span class="string">'#'</span> + i, i);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'final count'</span>, count);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'result of #'</span> + i, result);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>与上面版本相比，内存有所增加，速度有所下降：</p>
+<p><img src="https://gtms02.alicdn.com/tps/i2/TB1x71oKpXXXXcEXpXXj7Qt5VXX-3824-2270.png" alt="50 次对比" title="50 次对比"></p>
+<p><img src="https://gtms03.alicdn.com/tps/i3/TB1TTt8KpXXXXc9XVXX4nXcUXXX-3832-2300.png" alt="100 次对比" title="100 次对比"></p>
+<p><img src="https://gtms04.alicdn.com/tps/i4/TB18uugKpXXXXb9XFXXX9u8OXXX-3820-2304.png" alt="1000 次对比" title="1000 次对比"></p>
+<h3 id="自动memoization"><a href="#自动memoization" class="headerlink" title="自动memoization"></a>自动<code>memoization</code></h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">memoize</span>(<span class="params">func</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> memo = &#123;&#125;;</span><br><span class="line">  <span class="keyword">let</span> slice = <span class="built_in">Array</span>.prototype.slice;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> args = slice.call(<span class="built_in">arguments</span>);</span><br><span class="line">    <span class="keyword">if</span> (args <span class="keyword">in</span> memo) &#123;</span><br><span class="line">      <span class="keyword">return</span> memo[args];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> memo[args] = func.apply(<span class="keyword">this</span>, args);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是需要注意的是，并不是所有函数都可以自动<code>memoization</code>，只有<code>referential transparency</code>（引用透明）的函数可以。所谓<code>referential transparency</code>的函数是指：函数的输出完全由其输入决定，且不会有副作用的函数。下面的函数就是一个反例：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> bar = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// foo 函数的结果还受到全局变量 bar 的影响</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">baz</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> baz + bar;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo(<span class="number">1</span>);</span><br><span class="line">bar++;</span><br><span class="line">foo(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>对比自动<code>memoization</code>前后的两个版本：</p>
+<p><img src="https://gtms02.alicdn.com/tps/i2/TB1soOyKpXXXXaPXVXX28mEJXXX-3814-420.png" alt></p>
+<p>自动<code>memoization</code>处理后的版本有所提高，但相比手动完全<code>memoization</code>的版本效率还是差了很多。</p>
+<p>其实<code>memoization</code>这个词来自人工智能研究领域，其词源为拉丁语<code>memorandum</code>，这个词的创造者为<a href="http://www.aiai.ed.ac.uk/~dm/dm.html" target="_blank" rel="noopener">Donald Michie</a>，这种函数的设计初衷是为了提升机器学习的性能。随着函数式编程语言（Functional Programming，简称 FP）的兴起，例如 JavaScript、Haskell 以及 Erlang，这种用法才变得越来越流行。在前端编程中，可以使用<code>memoization</code>去处理各种需要递归计算的场景，例如缓存 canvas 动画的计算结果。</p>
+<p>上面自动<code>memoization</code>的结果并不理想，可以参考<code>underscore</code>和<code>lodash</code>的<code>memoize</code>来做优化。</p>
+<p>使用<a href="https://github.com/lodash/lodash/blob/145c3abb34ae327679d90d18804c7b955398c390/vendor/underscore/underscore.js#L777" target="_blank" rel="noopener"><code>lodash</code>的<code>memoize</code></a>方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @filename: fibonacci-memoization-with-lodash.js</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> n = process.env.N || <span class="number">50</span>;</span><br><span class="line"><span class="keyword">let</span> _ = <span class="built_in">require</span>(<span class="string">'lodash'</span>);</span><br><span class="line"><span class="keyword">let</span> memoize = _.memoize;</span><br><span class="line"><span class="keyword">let</span> fibonacci = <span class="built_in">require</span>(<span class="string">'./fibonacci-recursive.js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> newFibonacci = memoize(fibonacci);</span><br><span class="line"><span class="keyword">let</span> result = newFibonacci(n);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'result'</span>, result);</span><br></pre></td></tr></table></figure>
+<p>对比结果：</p>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1pHCxKpXXXXcsXVXXT7Jp5pXX-3760-400.png" alt></p>
+<p>可以看到<code>lodash</code>的<code>memoize</code>方法减少了一半执行时间。进一步优化：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">memoize</span>(<span class="params">func, context</span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">memoizeArg</span>(<span class="params">argPos</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> cache = &#123;&#125;;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (argPos == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(<span class="built_in">arguments</span>[argPos] <span class="keyword">in</span> cache)) &#123;</span><br><span class="line">          cache[<span class="built_in">arguments</span>[argPos]] = func.apply(context, <span class="built_in">arguments</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> cache[<span class="built_in">arguments</span>[argPos]];</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(<span class="built_in">arguments</span>[argPos] <span class="keyword">in</span> cache)) &#123;</span><br><span class="line">          cache[<span class="built_in">arguments</span>[argPos]] = memoizeArg(argPos - <span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> cache[<span class="built_in">arguments</span>[argPos]].apply(<span class="keyword">this</span>, <span class="built_in">arguments</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">var</span> arity = func.arity || func.length;</span><br><span class="line">  <span class="keyword">return</span> memoizeArg(arity - <span class="number">1</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1q4SZKpXXXXcRXXXXusZkMpXX-1918-320.png" alt></p>
+<blockquote>
+<p> 科普下：<code>function arity</code>指的是一个函数接受的参数个数，这是一个被废弃的属性，现在应使用<code>Function.prototype.length</code>。<br> <a href="https://stackoverflow.com/questions/4848149/get-a-functions-arity" target="_blank" rel="noopener">https://stackoverflow.com/questions/4848149/get-a-functions-arity</a></p>
+</blockquote>
+<p>zakas 的版本更加快，甚至比我们将<code>fibonacci</code>手动<code>memoization</code>的版本还快：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">let</span> n = process.env.N || <span class="number">50</span>;</span><br><span class="line"><span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">memoizer</span>(<span class="params">fundamental, cache</span>) </span>&#123;</span><br><span class="line">  cache = cache || &#123;&#125;;</span><br><span class="line">  <span class="keyword">let</span> shell = <span class="function"><span class="keyword">function</span>(<span class="params">arg</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!cache.hasOwnProperty(arg)) &#123;</span><br><span class="line">      cache[arg] = fundamental(shell, arg);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cache[arg];</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">return</span> shell;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fibonacci = memoizer(<span class="function"><span class="keyword">function</span>(<span class="params">recur, n</span>) </span>&#123;</span><br><span class="line">  count++;</span><br><span class="line">  <span class="keyword">return</span> recur(n - <span class="number">1</span>) + recur(n - <span class="number">2</span>);</span><br><span class="line">&#125;, &#123;</span><br><span class="line">  <span class="number">0</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="number">1</span>: <span class="number">1</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> result = fibonacci(n);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'count'</span>, count);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'result'</span>, result);</span><br></pre></td></tr></table></figure>
+<p><img src="http://gtms02.alicdn.com/tps/i2/TB1taHXKpXXXXXqXXXXHSJCLpXX-1916-570.png" alt></p>
+<p>但是上面这些函数都存在问题，如果输入数目过大，会引发调用栈超过限制异常：<code>RangeError: Maximum call stack size exceeded</code>。</p>
+<p>一种解决的方法就是将递归（<code>recursion</code>）修改为迭代（<code>iteration</code>）。例如下面这样的归并排序算法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> n = process.env.N || <span class="number">100</span>;</span><br><span class="line"><span class="keyword">let</span> isMemoized = process.env.M;</span><br><span class="line"><span class="keyword">let</span> test = [];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">merge</span>(<span class="params">left, right</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> result = [];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> (left.length &gt; <span class="number">0</span> &amp;&amp; right.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (left[<span class="number">0</span>] &lt; right[<span class="number">0</span>]) &#123;</span><br><span class="line">      result.push(left.shift());</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      result.push(right.shift());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> result.concat(left).concat(right);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">mergeSort</span>(<span class="params">items</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (items.length == <span class="number">1</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> items;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> middle = <span class="built_in">Math</span>.floor(items.length / <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">let</span> left = items.slice(<span class="number">0</span>, middle);</span><br><span class="line">    <span class="keyword">let</span> right = items.slice(middle);</span><br><span class="line">    <span class="keyword">return</span> merge(mergeSort(left), mergeSort(right));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">  test.push(<span class="built_in">Math</span>.random() * <span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> result;</span><br><span class="line"><span class="keyword">if</span> (isMemoized) &#123;</span><br><span class="line">  <span class="keyword">let</span> memoize = <span class="built_in">require</span>(<span class="string">'./zakas-memo.js'</span>);</span><br><span class="line">  mergeSort = memoize(mergeSort);</span><br><span class="line">  result = mergeSort(test);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  result = mergeSort(test);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'process memory usage'</span>, process.memoryUsage());</span><br></pre></td></tr></table></figure>
+<p><img src="http://gtms01.alicdn.com/tps/i1/TB1L8uRKpXXXXbkXFXXDHvXMXXX-3822-622.png" alt></p>
+<p>而上面的排序函数在经过<code>memoization</code>后虽然不会抛出<code>RangeError: Maximum call stack size exceeded</code>的异常，但是在极端情况下也会因为内存不够分配导致失败：</p>
+<p><img src="https://gtms02.alicdn.com/tps/i2/TB1XrjXKpXXXXaxXXXXrdqLOXXX-1926-1882.png" alt></p>
+<p>解决<code>RangeError: Maximum call stack size exceeded</code>异常的一种方法是将递归的代码改写为迭代的代码，例如<code>fibonacci</code>的递归式写法为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> <span class="title">fibonacci</span>(<span class="params">n</span>) </span>&#123;</span><br><span class="line">  n = <span class="built_in">parseInt</span>(n);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'n = '</span>, n);</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">isNaN</span>(n)) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> first = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">let</span> prev = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">let</span> sum;</span><br><span class="line">    <span class="keyword">let</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">      sum = n;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">2</span>; i &lt;= n; i++) &#123;</span><br><span class="line">        sum = first + prev;</span><br><span class="line">        first = prev;</span><br><span class="line">        prev = sum;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'i = '</span> + i + <span class="string">':'</span> + <span class="string">' sum = '</span> + sum);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="他山之石"><a href="#他山之石" class="headerlink" title="他山之石"></a>他山之石</h3><p>在 JavaScript 中我们是通过函数的形式来是实现函数的<code>memoization</code>，在 Python 中还可以用另一种被称为<code>decorator</code>的形式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">memoize</span><span class="params">(f)</span>:</span></span><br><span class="line">    memo = &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">helper</span><span class="params">(x)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> x <span class="keyword">not</span> <span class="keyword">in</span> memo:</span><br><span class="line">            memo[x] = f(x)</span><br><span class="line">        <span class="keyword">return</span> memo[x]</span><br><span class="line">    <span class="keyword">return</span> helper</span><br><span class="line"></span><br><span class="line"><span class="meta">@memoize</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fib</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> n == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    <span class="keyword">elif</span> n == <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> fib(n - <span class="number">1</span>) + fib(n - <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">print(fib(<span class="number">100</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
+<li><a href="https://www.sitepoint.com/implementing-memoization-in-javascript/" target="_blank" rel="noopener">https://www.sitepoint.com/implementing-memoization-in-javascript/</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Referential_transparency_(computer_science" target="_blank" rel="noopener">Referential transparency</a>)</li>
+<li><a href="https://addyosmani.com/blog/faster-javascript-memoization/" target="_blank" rel="noopener">https://addyosmani.com/blog/faster-javascript-memoization/</a></li>
+<li><a href="http://unscriptable.com/index.php/2009/05/01/a-better-javascript-memoizer/" target="_blank" rel="noopener">http://unscriptable.com/index.php/2009/05/01/a-better-javascript-memoizer/</a></li>
+<li><a href="http://www.nczonline.net/blog/2009/01/27/speed-up-your-javascript-part-3/" target="_blank" rel="noopener">http://www.nczonline.net/blog/2009/01/27/speed-up-your-javascript-part-3/</a></li>
+<li><a href="http://books.google.co.uk/books?id=PXa2bby0oQ0C&amp;pg=PA44&amp;lpg=PA44&amp;dq=crockford+memoization&amp;source=bl&amp;ots=HImnm6r1iH&amp;sig=lrdT9Sk4F4yQ-xQ-TLTx4SpLkuk&amp;hl=en&amp;ei=C-hyTvaIEofB8QO21Nn_DQ&amp;sa=X&amp;oi=book_result&amp;ct=result&amp;resnum=4&amp;ved=0CDMQ6AEwAw#v=onepage&amp;q&amp;f=false" target="_blank" rel="noopener">http://books.google.co.uk/books?id=PXa2bby0oQ0C&amp;pg=PA44&amp;lpg=PA44&amp;dq=crockford+memoization&amp;source=bl&amp;ots=HImnm6r1iH&amp;sig=lrdT9Sk4F4yQ-xQ-TLTx4SpLkuk&amp;hl=en&amp;ei=C-hyTvaIEofB8QO21Nn_DQ&amp;sa=X&amp;oi=book_result&amp;ct=result&amp;resnum=4&amp;ved=0CDMQ6AEwAw#v=onepage&amp;q&amp;f=false</a></li>
+<li><a href="http://my.safaribooksonline.com/book/programming/javascript/9781449399115/functions/function_propertiesma_memoization_patter#X2ludGVybmFsX0ZsYXNoUmVhZGVyP3htbGlkPTk3ODE0NDkzOTkxMTUvNzY=" target="_blank" rel="noopener">http://my.safaribooksonline.com/book/programming/javascript/9781449399115/functions/function_propertiesma_memoization_patter#X2ludGVybmFsX0ZsYXNoUmVhZGVyP3htbGlkPTk3ODE0NDkzOTkxMTUvNzY=</a></li>
+<li>memoize function javascript | npm memoize | lodash memoize | underscore memoize</li>
+<li><a href="http://unscriptable.com/2009/05/01/a-better-javascript-memoizer/" target="_blank" rel="noopener">http://unscriptable.com/2009/05/01/a-better-javascript-memoizer/</a></li>
+<li>programming optimization techniques</li>
+<li><a href="http://blog.stevenlevithan.com/archives/timed-memoization" target="_blank" rel="noopener">http://blog.stevenlevithan.com/archives/timed-memoization</a></li>
+<li><a href="https://github.com/addyosmani/memoize.js" target="_blank" rel="noopener">https://github.com/addyosmani/memoize.js</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Arity" target="_blank" rel="noopener">function arity</a></li>
+<li><a href="https://philogb.github.io/blog/2008/09/05/memoization-in-javascript/" target="_blank" rel="noopener">https://philogb.github.io/blog/2008/09/05/memoization-in-javascript/</a></li>
+<li><a href="https://stackoverflow.com/questions/6184869/what-is-difference-between-memoization-and-dynamic-programming" target="_blank" rel="noopener">https://stackoverflow.com/questions/6184869/what-is-difference-between-memoization-and-dynamic-programming</a></li>
+<li><a href="http://www.python-course.eu/python3_memoization.php" target="_blank" rel="noopener">http://www.python-course.eu/python3_memoization.php</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Iteration" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Iteration</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Iterated_function" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Iterated_function</a></li>
+<li><a href="https://www.ics.uci.edu/~eppstein/161/960109.html" target="_blank" rel="noopener">https://www.ics.uci.edu/~eppstein/161/960109.html</a></li>
+<li><a href="https://classes.soe.ucsc.edu/cmpe012/Summer09/labs/lab8-Recursion-vs-Iteration/" target="_blank" rel="noopener">https://classes.soe.ucsc.edu/cmpe012/Summer09/labs/lab8-Recursion-vs-Iteration/</a></li>
+<li>google: iterative merge sort</li>
+<li>google: maximum call stack size exceeded | avoid maximum recursive</li>
+<li><a href="http://www.python-course.eu/python3_decorators.php" target="_blank" rel="noopener">http://www.python-course.eu/python3_decorators.php</a></li>
+<li><a href="https://www.cs.cornell.edu/courses/cs3110/2011sp/lectures/lec22-memoization/memo.htm" target="_blank" rel="noopener">https://www.cs.cornell.edu/courses/cs3110/2011sp/lectures/lec22-memoization/memo.htm</a></li>
+<li>dynamic programming</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/07/14/performance-optimization-memoization/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/07/14/performance-optimization-memoization/" data-id="cjt6lby0r0094jeu15a2d3qmt" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/07/14/performance-optimization-memoization/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/">javascript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/memoization/">memoization</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能优化/">性能优化</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/07/22/es6-basics/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          ES6 你可能不知道的事 - 基础篇
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/06/02/thing-about-taobao-homepage/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">聊一聊淘宝首页和它背后的一套</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

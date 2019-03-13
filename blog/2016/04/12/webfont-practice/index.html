@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>H5 页面高级字体应用实践 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="背景 最近在开发一个 H5 活动页快速搭建平台，可以通过拖拽编辑图片，文字等元素组件，快速搭建出一个移动端的活动页面，基本交互和成品效果类似 PPT 软件。这类活动大量在微信等平台上传播，其中会包含各种动画和特效，而各类高级艺术字体（如：方正兰亭黑，方正彩云，方正大草，方正剑体等）的应用也非常广泛。 之前用户只能通过 ps 等软件将文字转化为图片再贴到平台上使用。使用成本很高，修改，调试都非常不">
+<meta name="keywords" content="webfont,艺术字,字体,TTF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="H5 页面高级字体应用实践">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/04/12/webfont-practice/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="背景 最近在开发一个 H5 活动页快速搭建平台，可以通过拖拽编辑图片，文字等元素组件，快速搭建出一个移动端的活动页面，基本交互和成品效果类似 PPT 软件。这类活动大量在微信等平台上传播，其中会包含各种动画和特效，而各类高级艺术字体（如：方正兰亭黑，方正彩云，方正大草，方正剑体等）的应用也非常广泛。 之前用户只能通过 ps 等软件将文字转化为图片再贴到平台上使用。使用成本很高，修改，调试都非常不">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1kaazMpXXXXacXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img4.tbcdn.cn/L1/461/1/bf9de797cecf959b7becc43476a85c32f49b6ea3.png">
+<meta property="og:image" content="http://img1.tbcdn.cn/L1/461/1/f61a003304e10548610be4c933c13b6a83a06c5d.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="H5 页面高级字体应用实践">
+<meta name="twitter:description" content="背景 最近在开发一个 H5 活动页快速搭建平台，可以通过拖拽编辑图片，文字等元素组件，快速搭建出一个移动端的活动页面，基本交互和成品效果类似 PPT 软件。这类活动大量在微信等平台上传播，其中会包含各种动画和特效，而各类高级艺术字体（如：方正兰亭黑，方正彩云，方正大草，方正剑体等）的应用也非常广泛。 之前用户只能通过 ps 等软件将文字转化为图片再贴到平台上使用。使用成本很高，修改，调试都非常不">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB1kaazMpXXXXacXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-webfont-practice" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      H5 页面高级字体应用实践
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 龙驭</span>
+        
+        <span>发表于: <a href="/blog/2016/04/12/webfont-practice/" class="article-date">
+  <time datetime="2016-04-12T09:11:03.000Z" itemprop="datePublished">2016-04-12</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tps/TB1kaazMpXXXXacXFXXXXXXXXXX-900-500.jpg" alt="H5 页面高级字体应用实践"></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><ul>
+<li>最近在开发一个 H5 活动页快速搭建平台，可以通过拖拽编辑图片，文字等元素组件，快速搭建出一个移动端的活动页面，基本交互和成品效果类似 PPT 软件。这类活动大量在微信等平台上传播，其中会包含各种动画和特效，而各类高级艺术字体（如：方正兰亭黑，方正彩云，方正大草，方正剑体等）的应用也非常广泛。</li>
+<li>之前用户只能通过 ps 等软件将文字转化为图片再贴到平台上使用。使用成本很高，修改，调试都非常不便，而且图片占用的资源也比较多，为了降低用户的使用成本，基于一站式搭建的理念，我们需要将高级字体的使用透明化，使用户和使用 PPT 一样直接选择字体使用即可。</li>
+</ul>
+<h2 id="技术选型"><a href="#技术选型" class="headerlink" title="技术选型"></a>技术选型</h2><ul>
+<li>第一种方案是通过用户输入的文字，和选择的字体，通过服务器生成对应的图片来使用。这种方案的优点是逻辑简单，缺点是搭建/修改时增加了复杂度，调试时无法实时预览文字在活动中的效果。而且容易出现大量冗余图片，最终页面的图片请求也会增加。</li>
+<li>第二种方案是调用 iconfont.cn 的服务接口，通过传递字体和文字内容来获取字体文件。这种方案的优点是可以直接利用现有成熟平台，开发成本低，可靠。缺点是增加了外部依赖，不但面临合作方配合的限制，而且无法自行控制可供的选择字体等。</li>
+<li>最终采用的的第三种方案是直接使用 iconfont.cn 的 Node.js 模块 （font-carrier） ，自行解析/生成字体，将生成的字体放在我们自己申请的 OSS 中存储使用。这种方法的开发量最大，且要消耗额外的 OSS 资源，但是整个流程独立自主，可以不断定制优化，自行添加字体等，由于我们的服务只面向移动端，所以只需要生成 ttf 或者 woff 一种文件类型即可兼容。</li>
+</ul>
+<h2 id="字体文件解析的基本原理"><a href="#字体文件解析的基本原理" class="headerlink" title="字体文件解析的基本原理"></a>字体文件解析的基本原理</h2><h3 id="字体文件的核心结构"><a href="#字体文件的核心结构" class="headerlink" title="字体文件的核心结构"></a>字体文件的核心结构</h3><p>以 ttf 文件为例，字体文件中主要包含了字体头表，位置索引表和图元数据表等等，其中最核心的部分就是图元数据表，也就是字形描述表，它可以包含可变数目的图元，每个图元可以有不同数目的控制点，甚至还可以有数量可变的图元指令，通过位置索引表对应到每个字符上，通过图元数据表，使其只包含需要使用的字符的图元描述。即可最小化字体，使其可用于生产环境的页面中，其他类型的字体文件（如 woff， eot， svg 等）原理也是大同小异，仅仅是压缩方式和字形描述规范不同，也可以互相转化。</p>
+<h3 id="font-carrier-模块基本原理"><a href="#font-carrier-模块基本原理" class="headerlink" title="font-carrier 模块基本原理"></a>font-carrier 模块基本原理</h3><p>font-carrier 模块使用 OpenType 模块分析 ttf 文件，可以文件的内容脚本化，使其成为一个字符 unicode 编码和其字形描述的键值对象。通过对这个对象的 min 方法，可以使其最小化，并且再逆向生成文件 Buffer 供用户使用。</p>
+<h2 id="一期实现流程"><a href="#一期实现流程" class="headerlink" title="一期实现流程"></a>一期实现流程</h2><ul>
+<li>在程序启动后通过 font-carrier 模块将本地的字体文件包装成字体对象，保存在服务器内存中。</li>
+<li>用户保存页面时，记录下此活动所有使用的高级字体和相应的文字内容</li>
+<li>通过 font-carrier 模块找到字体对应的字体对象，使用 min 命令生成最小化的字体对象</li>
+<li>使用 min 命令生成缩小后的字体文件，保存到 OSS，并以活动的 id 为路径，字体的名字为文件名。</li>
+<li>最终渲染时通过记录的活动使用的字体名拼出 OSS 路径来引用文件</li>
+</ul>
+<h4 id="存在问题"><a href="#存在问题" class="headerlink" title="存在问题"></a>存在问题</h4><ul>
+<li>由于字体数量较多，启动时将本地字体文件包装成字体对象的时间非常长，可达到数十分钟。</li>
+<li>字体对象常驻内存，占用巨大，甚至可能直接吃光内存</li>
+</ul>
+<h4 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h4><p>因为 font-carrier 模块生成的字体对象无法通过文件来持久化保存，只能生成后常驻内存中，而字体的数量多，大小也大，所以不管是生成的时间，生成时消耗的性能，生成后占用的内存都非常巨大。所以问题的关键在于如何把字体的分析结果持久化保存在服务器中。</p>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><p>在咨询了 font-carrier 模块的开发者后，了解到 font-carrier 模块还有生成字体的 svg 片段的方法，可以将字体的图元数据转变为 svg 输出，并可以将 svg 逆向导入到空字体文件中来生成最终字体文件。<br>通过将字体分析转译后的 svg 片段结果保存在数据库中，即可持久化分析结果。使用的时候通过创建空字体-&gt;配置字符-svg 的对应关系-&gt;提取字体-&gt;上传到 OSS 的流程来使用最小化后的字体即可。</p>
+<h2 id="二期实现流程"><a href="#二期实现流程" class="headerlink" title="二期实现流程"></a>二期实现流程</h2><ul>
+<li>建立提取字体任务，运行时遍历字体文件，提取其中的 svg 片段存入数据库</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> transFont = fontCarrier.transfer(__dirname + <span class="string">'/../../www/fonts/'</span> + fontInfo.font_name + <span class="string">'.ttf'</span>);</span><br><span class="line"><span class="keyword">var</span> words = [];</span><br><span class="line">	_.each(transFont.__glyphs， <span class="function"><span class="keyword">function</span>(<span class="params">n, word</span>) </span>&#123;</span><br><span class="line">	words.push(&#123;</span><br><span class="line">	  word: word,</span><br><span class="line">	  fontId: fontInfo.id,</span><br><span class="line">	  svg: transFont.getSvg(word, &#123;</span><br><span class="line">	    skipViewport: <span class="literal">true</span></span><br><span class="line">	  &#125;)</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>以下是一段方正喵呜体中的“我”字提取的 svg 片段<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line">  <span class="meta">&lt;!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">svg</span> <span class="attr">version</span>=<span class="string">"1.1"</span> <span class="attr">xmlns</span>=<span class="string">"http://www.w3.org/2000/svg"</span> <span class="attr">xmlns:xlink</span>=<span class="string">"http://www.w3.org/1999/xlink"</span> <span class="attr">x</span>=<span class="string">"0"</span> <span class="attr">y</span>=<span class="string">"0"</span> <span class="attr">width</span>=<span class="string">"100px"</span> <span class="attr">height</span>=<span class="string">"100px"</span> <span class="attr">viewBox</span>=<span class="string">"0 0 1000 1000"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">path</span> <span class="attr">d</span>=<span class="string">"M324 857Q324 837 332 819 340 801 340 775 317 775 296.5 776.5 276 778 253 778 237 778 224.5 769.5 212 761 212 742 212 731 221 722 230 713 242 712L333 703Q348 703 353 691 357 662 357.5 643 358 624 358 596L358 559Q357 554 353 554 351 554 349 554 313 554 278 558.5 243 563 208 563 193 563 182 557 171 551 171 533.5 171 516 184 507 197 498 217.5 494 238 490 261 489 286 489 306.5 488.5 327 488 342 487 357 486 358 479L358 461Q358 458 356.5 434.5 355 411 352 384 349 357 344.5 335 340 313 333 313 332 313 329 315 326 317 325 318L270 372Q265 377 259 378 255 381 248 381 217 381 217 348 217 340 218 334 219 328 225 322L420 132Q426 125 432 124 438 123 446 123 460 123 469.5 130.5 479 138 479 152 479 160 474 168 471 176 465 181 462 185 452.5 194.5 443 204 432 214.5 421 225 411.5 234.5 402 244 399 247 398 249 397 252 396 255 395 256L395 259 395 260Q402 290 408 315 414 340 417.5 364.5 421 389 423.5 414.5 426 440 428 471L433 479Q433 480 442 480 451 480 456 480 475 480 492 479.5 509 479 528 476L528 449Q528 399 523.5 348.5 519 298 519 247 519 228 523 215 529 201 550 201 565 201 573 209.5 581 218 584 231 587 244 587.5 257.5 588 271 589 281 589 287 591 310 593 335 594 362 595 389 596 412 598 437 598 442 598 447 598 451 598 457 600 462L602 476 611 479 723 479Q742 480 759.5 486.5 777 493 777 515 777 526 770.5 536 764 546 752 546L628 546 615 550Q614 551 614 553 614 557 614 559 614 564 619 583 623 604 629 625 635 646 642.5 663 650 680 656 680 666 680 673 667 682 655 691 639 701 625 714 611 726 599 743 599 756 599 766.5 606.5 777 614 777 629 777 642 764.5 658.5 752 675 736 692 722 709 709 723 697 739 697 747L697 748Q697 749 698 749 704 756 710 764 718 773 726.5 780.5 735 788 745 794 755 800 764.5 800 774 800 782 796 790 794 799 794 812 794 821 805 830 816 830 829 830 851 812 862 796 873 777 873 755 873 736.5 866 718 859 701.5 847 685 835 669.5 821 654 807 640 795 631 800 623.5 806.5 616 813 609 818.5 602 824 593.5 828.5 585 833 575 833 544 833 544 803 544 798 544.5 794.5 545 791 548 786L598 737 598 725Q576 688 562.5 642 549 596 540 554 538 550 532.5 548 527 546 522 546L519 546Q514 546 503 546 493 548 481.5 548.5 470 549 459.5 549.5 449 550 445 550 442 552 438.5 553.5 435 555 433.5 558.5 432 562 429 574 428 588 428 591 428 596 427.5 607.5 427 619 426 632.5 425 646 424 657 424 670 424 674 424 681 426 682 428 683 432 683 444 683 454.5 681 465 679 477.5 679 490 679 500.5 686.5 511 694 511 708 511 727 499 733 486 741 470 744 454 747 439.5 749 425 751 420 761 419 763 417.5 767.5 416 772 416 774 415 779 411.5 791.5 408 804 404.5 817.5 401 831 398 843 396 857 395 861 385 886 357 886 343 886 333.5 878.5 324 871 324 857M668 269Q668 254 677 246 687 240 699 240 716 240 726 251 736 262 743 277 745 281 750 292 755 303 760 316 765 329 769.5 339.5 774 350 777 355L777 369Q777 385 770.5 393.5 764 402 746 402 735 402 721.5 385 708 368 696.5 346 685 324 676 301 668 280 668 269Z"</span>/&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">svg</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>保存活动时创建空字体，导入需要的字符和其对应的 svg，并将这个字体保存到 OSS</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建空白字体，使用 svg 生成字体</span></span><br><span class="line"><span class="keyword">var</span> font = fontCarrier.create();</span><br><span class="line">values.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">v</span>) </span>&#123;</span><br><span class="line">  font.setSvg(v.word，v.svg);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">return</span> font.output(&#123;</span><br><span class="line">  types:[<span class="string">'woff'</span>]</span><br><span class="line">&#125;)[<span class="string">'woff'</span>];</span><br></pre></td></tr></table></figure>
+<ul>
+<li>最终渲染时通过的记录的活动使用的字体名拼出 OSS 路径来引用文件</li>
+</ul>
+<h4 id="新的问题"><a href="#新的问题" class="headerlink" title="新的问题"></a>新的问题</h4><p>在正常运行了一段时间后，用户反馈了新的问题，编辑和预览时的字宽度不匹配，现象为所有的字符都变为了全角模式，数字，字母和符号，都占用了一个汉字的位置。如图：</p>
+<p><img src="http://img4.tbcdn.cn/L1/461/1/bf9de797cecf959b7becc43476a85c32f49b6ea3.png" alt="新的问题"></p>
+<h4 id="分析问题-1"><a href="#分析问题-1" class="headerlink" title="分析问题"></a>分析问题</h4><p>经过排查和测试，最后发现原因在于生成 svg 片段时，模块给这个 svg 加上了宽和高，这是不必要的，在显示汉字等全角字符时，一切正常，而在显示半角字符时，则会导致两边出现空隙。</p>
+<h4 id="解决方案-1"><a href="#解决方案-1" class="headerlink" title="解决方案"></a>解决方案</h4><p>在无法改变 font-carrier 模块的前提下，只能在我们自己的流程中加补丁，我在读取 svg 使用前，额外增加了替换代码将宽高删除，证明可以解决该问题。另外我也知会了模块开发者，在未来的版本中修复此问题。修复后效果如图：</p>
+<p><img src="http://img1.tbcdn.cn/L1/461/1/f61a003304e10548610be4c933c13b6a83a06c5d.png" alt="修复问题"></p>
+<h2 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h2><ul>
+<li>目前我们采用引用字体文件的方式来定义高级字体，而最近团队的无线端最佳实践的要求，无线端使用的字体将字体文件 base 64 化，以减少请求数，未来我们也将改造成这种方式，不但符合最佳实践的要求，同时还可以节省 OSS 存储的资源。</li>
+<li>下一阶段我们将调研 svg 在移动端的兼容性和性能，未来开发的插入几何形状功能将考虑使用这一技术，同是我们也会尝试直接用 svg 绘制字体，产生更多的可能性（比如 svg 动画等），需要考虑兼容性和渐进方案。</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/04/12/webfont-practice/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/04/12/webfont-practice/" data-id="cjt6lby2300cojeu1rka76szm" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/04/12/webfont-practice/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/TTF/">TTF</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webfont/">webfont</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/字体/">字体</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/艺术字/">艺术字</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/04/16/how-to-find-memory-leak/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          如何定位 Node.js 的内存泄漏
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/04/09/node-web-framework-design/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">企业级 Node.js Web 应用解决方案设计的零零总总</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

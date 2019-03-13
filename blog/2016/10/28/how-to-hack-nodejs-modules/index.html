@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>如何 hack Node.js 模块？ | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="为何要去 hack？在业务开发过程中，往往会依赖一些 Node.js 模块，hack 这些 Node.js 模块的主要目的是在不修改工具源码的情况下，篡改一些特定的功能。可能会是出于以下几种情况的考虑：  总是存在一些特殊的本地需求，不一定能作为工具的通用需求来暴露正常的 API 给更多的用户。 临时且紧急的需求，提 PR 已经来不及了。 为什么不直接去改源码？考虑到工具会不定期升级，想使用工具">
+<meta name="keywords" content="hack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何 hack Node.js 模块？">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/10/28/how-to-hack-nodejs-modules/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="为何要去 hack？在业务开发过程中，往往会依赖一些 Node.js 模块，hack 这些 Node.js 模块的主要目的是在不修改工具源码的情况下，篡改一些特定的功能。可能会是出于以下几种情况的考虑：  总是存在一些特殊的本地需求，不一定能作为工具的通用需求来暴露正常的 API 给更多的用户。 临时且紧急的需求，提 PR 已经来不及了。 为什么不直接去改源码？考虑到工具会不定期升级，想使用工具">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1SJkrNVXXXXXsXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1QtALNVXXXXbCXXXXXXXXXXXX-720-297.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何 hack Node.js 模块？">
+<meta name="twitter:description" content="为何要去 hack？在业务开发过程中，往往会依赖一些 Node.js 模块，hack 这些 Node.js 模块的主要目的是在不修改工具源码的情况下，篡改一些特定的功能。可能会是出于以下几种情况的考虑：  总是存在一些特殊的本地需求，不一定能作为工具的通用需求来暴露正常的 API 给更多的用户。 临时且紧急的需求，提 PR 已经来不及了。 为什么不直接去改源码？考虑到工具会不定期升级，想使用工具">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1SJkrNVXXXXXsXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-how-to-hack-nodejs-modules" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      如何 hack Node.js 模块？
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 宣予</span>
+        
+        <span>发表于: <a href="/blog/2016/10/28/how-to-hack-nodejs-modules/" class="article-date">
+  <time datetime="2016-10-27T16:16:05.000Z" itemprop="datePublished">2016-10-28</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tfs/TB1SJkrNVXXXXXsXVXXXXXXXXXX-900-500.jpg" alt="如何 hack Node.js 模块？"></p>
+<h2 id="为何要去-hack？"><a href="#为何要去-hack？" class="headerlink" title="为何要去 hack？"></a>为何要去 hack？</h2><p>在业务开发过程中，往往会依赖一些 Node.js 模块，hack 这些 Node.js 模块的主要目的是在不修改工具源码的情况下，篡改一些特定的功能。可能会是出于以下几种情况的考虑：</p>
+<ol>
+<li>总是存在一些特殊的本地需求，不一定能作为工具的通用需求来暴露正常的 API 给更多的用户。</li>
+<li>临时且紧急的需求，提 PR 已经来不及了。</li>
+<li>为什么不直接去改源码？考虑到工具会不定期升级，想使用工具的最新特性，改源码可维护性太差。</li>
+</ol>
+<h2 id="期望"><a href="#期望" class="headerlink" title="期望"></a>期望</h2><p>举个栗子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a.js</span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  dosomething();</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// b.js </span></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="built_in">require</span>(a);</span><br><span class="line"><span class="comment">// c.js </span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">require</span>(b));</span><br></pre></td></tr></table></figure>
+<p>b 是项目 c 依赖的一个工具模块，b 依赖 a。希望只在项目 c 中，b 调用 a 时，a 的函数里能注入一些方法 <code>injectSomething()</code></p>
+<ul>
+<li>hack 之前 c 的输出</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  dosomething();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>期望：hack 之后 c 的输出</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  injectSomething();</span><br><span class="line">  dosomething();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><b>具体案例比如：在做个人自动化工具时，需要 mock 一些工具的手动输入；在本地构建时，需要修改通用的构建流程</b>（后面案例部分会详细说）</p>
+<h2 id="主要方法"><a href="#主要方法" class="headerlink" title="主要方法"></a>主要方法</h2><h3 id="利用模块-cache-篡改模块对象属性"><a href="#利用模块-cache-篡改模块对象属性" class="headerlink" title="利用模块 cache 篡改模块对象属性"></a>利用模块 cache 篡改模块对象属性</h3><p>这是我最早使用的方法，在模块 a 的类型是 object 的时候，可以在自己的项目 c 中提早 require 模块 a，按照你的需求修改一些属性，这样当模块 b 再去 require 模块 a 时，从缓存中取出的模块 a 已经是被修改过的了。</p>
+<p>模块 a、b、c 栗子如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a.js</span></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  p</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// b.js</span></span><br><span class="line"><span class="keyword">const</span> a = <span class="built_in">require</span>(a);</span><br><span class="line">a.p();</span><br><span class="line"><span class="comment">// c.js</span></span><br><span class="line"><span class="built_in">require</span>(b);</span><br></pre></td></tr></table></figure></p>
+<p>我想修改 a 的方法 p，在 c 中进行如下修改即可，而无需直接去修改工具 a、b 的源码:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// c.js</span></span><br><span class="line"><span class="keyword">const</span> a = <span class="built_in">require</span>(a);</span><br><span class="line"><span class="keyword">let</span> oldp = a.p; </span><br><span class="line">a.p = <span class="function"><span class="keyword">function</span>(<span class="params">...args</span>)</span>&#123;</span><br><span class="line">   injectSomething();</span><br><span class="line">   oldp.apply(<span class="keyword">this</span>, args);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">require</span>(b);</span><br></pre></td></tr></table></figure>
+<p>缺陷：在某些模块属性是动态加载的情况，不是那么灵敏，而且只能篡改引用对象。但大部分情况下还是能够满足需求的。</p>
+<h3 id="修改require-cache"><a href="#修改require-cache" class="headerlink" title="修改require.cache"></a>修改require.cache</h3><p>在遇到模块暴露的是非对象的情况，就需要直接去修改 require 的 cache 对象了。关于修改 <code>require.cache</code> 的有效性，会在后面的原理部分详细说，先来简单的说下操作：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//a.js 暴露的非对象,而是函数</span><br><span class="line">module.exports = function()&#123;</span><br><span class="line">   doSomething();</span><br><span class="line">&#125;</span><br><span class="line">//c.js</span><br><span class="line">const aOld = require(a); </span><br><span class="line">let aId = require.resolve(aPath);</span><br><span class="line">require.cache[aId] = function(...args)&#123;</span><br><span class="line">   injectSomething();</span><br><span class="line">   aOld.apply(this, args);</span><br><span class="line">&#125;</span><br><span class="line">require(b);</span><br></pre></td></tr></table></figure>
+<p>缺陷：可能后续调用链路会有人手动去修改 <code>require.cache</code>，例如热加载。</p>
+<h3 id="修改-require"><a href="#修改-require" class="headerlink" title="修改 require"></a>修改 require</h3><p>这种方法是直接去代理 <code>require</code> ，是最稳妥的方法，但是侵入性相对来说比较强。Node.js 文件中的 require 其实是在 Module 的原型方法上，即 <code>Module.prototype.require</code>。后面会详细说，先简单说下操作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Module = <span class="built_in">require</span>(<span class="string">'module'</span>);</span><br><span class="line"><span class="keyword">const</span> _require = Module.prototype.require;</span><br><span class="line">Module.prototype.require = <span class="function"><span class="keyword">function</span>(<span class="params">...args</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">let</span> res = _require.apply(<span class="keyword">this</span>, args);</span><br><span class="line">    <span class="keyword">if</span>(args[<span class="number">0</span>] === <span class="string">'a'</span>) &#123; <span class="comment">// 只修改a模块内容</span></span><br><span class="line">        injectSomething();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>缺陷：对整个 Node.js 进程的 require 操作都具有侵入性。</p>
+<h2 id="相关原理"><a href="#相关原理" class="headerlink" title="相关原理"></a>相关原理</h2><h3 id="node的启动过程"><a href="#node的启动过程" class="headerlink" title="node的启动过程"></a>node的启动过程</h3><p>我们先来看看在运行 <strong><code>node a.js</code></strong> 时发生些什么？<a href="https://github.com/nodejs/node/tree/master" target="_blank" rel="noopener">node源码</a><br><img src="https://img.alicdn.com/tfs/TB1QtALNVXXXXbCXXXXXXXXXXXX-720-297.png" alt="node_main"></p>
+<p>上图是node运行 <code>a.js</code> 的一个核心流程，Node.js 的启动程序 <code>bootstrap_node.js</code> 是在 <code>node::LoadEnvironment</code> 中被立即执行的，<code>bootstrap_node.js</code> 中的 <code>startup()</code> 是包裹在一个匿名函数里面的，所以在一次执行 <code>node</code> 的行为中 <code>startup()</code> 只会被调用了一次，来保证 <code>bootstrap_node.js</code> 的所执行的所有依赖只会被加载一次。<code>C++</code> 语言部分中：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//node_main.cc 如果在win环境执行wmain()，unix则执行main()，函数最后都执行了node::Start(argc, argv)  </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> _WIN32</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">wmain</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">else</span></span></span></span><br><span class="line"><span class="function">  <span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="meta">#<span class="meta-keyword">endif</span></span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">//node::Start(argc, argv) 提供载入 Node.js 进程的 V8 环境</span></span></span><br><span class="line">Environment::AsyncCallbackScope callback_scope(&amp;env);</span><br><span class="line">LoadEnvironment(&amp;env);</span><br><span class="line"></span><br><span class="line"><span class="comment">//node::LoadEnvironment(Environment* env) 加载 Node.js 环境</span></span><br><span class="line">Local&lt;String&gt; script_name = FIXED_ONE_BYTE_STRING(env-&gt;isolate(),<span class="string">" bootstrap_node.js"</span>);</span><br><span class="line">Local&lt;Value&gt; f_value = ExecuteString(env, MainSource(env), script_name);</span><br></pre></td></tr></table></figure>
+<p>  在 <code>bootstrap_node.js</code> 中，会去执行 Module 的静态方法 <code>runMain</code>，而 <code>runMain</code> 中则去执行了 <code>Module._load</code>，也就是模块加载的过程。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// bootstrap_node.js</span></span><br><span class="line"><span class="keyword">const</span> Module = NativeModule.require(<span class="string">'module'</span>);</span><br><span class="line">……</span><br><span class="line">run(Module.runMain);</span><br><span class="line"><span class="comment">// Module.js</span></span><br><span class="line">Module.runMain = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    Module._load(process.argv[<span class="number">1</span>], <span class="literal">null</span>, <span class="literal">true</span>);</span><br><span class="line">    process._tickCallback();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="一个进程只存在一个-cache-对象？"><a href="#一个进程只存在一个-cache-对象？" class="headerlink" title="一个进程只存在一个 cache 对象？"></a>一个进程只存在一个 cache 对象？</h3><p>先来看看 <code>module._load</code> 干了什么？<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Module._load = <span class="function"><span class="keyword">function</span>(<span class="params">request, parent, isMain</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> filename = Module._resolveFilename(request, parent, isMain);</span><br><span class="line">  <span class="keyword">var</span> cachedModule = Module._cache[filename]; <span class="comment">// get cache</span></span><br><span class="line">  <span class="keyword">if</span> (cachedModule) &#123;</span><br><span class="line">    <span class="keyword">return</span> cachedModule.exports; </span><br><span class="line">  &#125;</span><br><span class="line">  ……</span><br><span class="line">  <span class="keyword">var</span> <span class="built_in">module</span> = <span class="keyword">new</span> Module(filename, parent);</span><br><span class="line">  ……</span><br><span class="line">  Module._cache[filename] = <span class="built_in">module</span>; <span class="comment">// set cache</span></span><br><span class="line">  tryModuleLoad(<span class="built_in">module</span>, filename);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">module</span>.exports;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，在 load 的一个模块时，会先读缓存 <code>Module._cache</code>，如果没有就会去 new 一个 Module 的实例,<br>然后再把实例放到缓存里。由前面的 Node.js 启动过程可以知道， <code>bootstrap_node.js</code> 中的 <code>startup()</code> 只会执行了一次，其中产生的 Module 对象在整个node进程调用链路中只会存在一个，进而 <code>Module._cache</code> 只有一个。</p>
+<h3 id="Module-cache-和-require-cache-的关系"><a href="#Module-cache-和-require-cache-的关系" class="headerlink" title="Module._cache 和 require.cache 的关系"></a><code>Module._cache</code> 和 <code>require.cache</code> 的关系</h3><p>可以看下 <code>Module.prototype._compile</code> 这个方法，这里面会对大家写的 Node.js 文件进行一个包装，注入一些上下文，包括 <code>require</code>:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="built_in">require</span> = internalModule.makeRequireFunction.call(<span class="keyword">this</span>);</span><br><span class="line"><span class="keyword">var</span> args = [<span class="keyword">this</span>.exports, <span class="built_in">require</span>, <span class="keyword">this</span>, filename, dirname];</span><br><span class="line"><span class="keyword">var</span> depth = internalModule.requireDepth;</span><br><span class="line"><span class="keyword">var</span> result = compiledWrapper.apply(<span class="keyword">this</span>.exports, args);</span><br></pre></td></tr></table></figure>
+<p>而在 <code>internalModule.makeRequireFunction</code> 中我们会发现</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在 makeRequireFunction 中</span></span><br><span class="line"><span class="built_in">require</span>.cache = Module._cache;</span><br></pre></td></tr></table></figure>
+<p>所以，<code>Module._cache</code> 和 <code>require.cache</code> 是一样的，那么我们直接修改 <code>require.cache</code> 的缓存内容，在一个 Node.js 进程里都是有效的。</p>
+<h3 id="require-不同场景的挂载"><a href="#require-不同场景的挂载" class="headerlink" title="require 不同场景的挂载"></a><code>require</code> 不同场景的挂载</h3><p>最开始我以为 require 是挂载在 global 上的，为了图省事，一般用 Node.js repl 来测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ node</span><br><span class="line">&gt; global.require</span><br><span class="line">&#123; [Function: require]</span><br><span class="line">  resolve: [Function: resolve],</span><br><span class="line">  main: undefined,</span><br><span class="line">  extensions: &#123; <span class="string">'.js'</span>: [Function], <span class="string">'.json'</span>: [Function], <span class="string">'.node'</span>: [Function] &#125;,</span><br><span class="line">  cache: &#123;&#125; &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，repl 下，global.require 是存在的，如果以为可以直接在 Node.js 文件中代理 <code>global.require</code> 那就踩坑了，因为如果在 Node.js 文件中使用会发现：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(global.require);</span><br><span class="line"><span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+<p>从上文可知，Node.js 文件中的 require 其实是来自于 <code>Module.prototype._compile</code> 中注入的 <code>Module.prototype.require</code>, 而最终的指向其实是 <code>Module._load</code>，并没有挂载到 module 上下文环境中的 global 对象上。</p>
+<p>而 repl 中也是有 module 实例，于是我尝试在 repl 中打印：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ node</span><br><span class="line">&gt; global.require === module.require</span><br><span class="line">  <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+<p>结果有点奇怪，于是我继续探究了下。在 <code>bootstrap_node.js</code> 中找到 repl 的调用文件 <code>repl.js</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">require</span> = internalModule.makeRequireFunction.call(<span class="built_in">module</span>);</span><br><span class="line">context.module = <span class="built_in">module</span>;</span><br><span class="line">context.require = <span class="built_in">require</span>;</span><br></pre></td></tr></table></figure>
+<p>得到结论：在 repl 中，<code>module.require</code> 和 <code>global.require</code> 最终的调用方法是一样的，只是函数指向不同而已。</p>
+<h2 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h2><h3 id="path路径"><a href="#path路径" class="headerlink" title="path路径"></a>path路径</h3><p><code>require.cache</code> 是一个 key、value 的 map，key 看上去是模块所在的绝对路径，然而是不能用绝对路径直接去用的，需要 <code>require.resolve</code> 来解析路径，解析后才是 cache 中正确的 key 格式。</p>
+<p>下面对比下区别：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 模块的绝对路径</span><br><span class="line">/Users/kino/.def/def_modules/.builders/@ali/builder-cake-kpm/node_modules/@ali/builder-cake-kpm/node_modules/@ali/cake-webpack-config/index.js</span><br><span class="line"></span><br><span class="line">// 用 require.resolve 转义后的结果</span><br><span class="line">/Users/kino/.def/def_modules/.builders/@ali/builder-cake-kpm/node_modules/.0.16.23@@ali/cake-webpack-config/index.js</span><br></pre></td></tr></table></figure>
+<h3 id="多进程的情况"><a href="#多进程的情况" class="headerlink" title="多进程的情况"></a>多进程的情况</h3><p>模块间调用的链路比较长，有可能会新建子进程，需要考虑你项目中的入口文件和你需要代理的文件是否在一个进程中，简单的方法就是在入口文件和你需要代理的文件打印 pid：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(process.pid)</span><br></pre></td></tr></table></figure>
+<p>如果一致，那么直接在入口调用前代理即可，否则情况会更复杂点，需要找到相应的进程调用处进行代理。</p>
+<h2 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h2><p>DEF 是淘宝前端的集成开发环境，支持前端模块创建、构建打包、发布等一系列流程。 在以下案例中，主要 hack 的 Node.js 项目便是 DEF。</p>
+<h3 id="篡改输入-prompt"><a href="#篡改输入-prompt" class="headerlink" title="篡改输入(prompt)"></a>篡改输入(prompt)</h3><p>场景：使用 DEF 创建模块 or 发布模块时</p>
+<p>原因：想一键完成批量创建 or 批量发布，不想手动输入。</p>
+<p>解决过程：以创建模块为例</p>
+<ul>
+<li><p>首先找到 DEF 的入口文件，即一个 bin 目录下的路径，可以通过这个入口文件不断追溯下去，发现创建模块的 generator 用的是 yeoman-generator 的方法。对 prompt 的方法进行代理，可以将该基础库提前 require，更改掉其 prompt 的方法即可。</p>
+</li>
+<li><p>附上示例代码（示例只篡改 <code>def add</code> 模块的创建类型，其他输入的篡改方法类似）：</p>
+</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env node</span></span><br><span class="line"></span><br><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">require</span>(<span class="string">'shelljs/global'</span>);</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> HOME = process.env.HOME;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> yeomanRouter = <span class="built_in">require</span>(path.join(HOME, <span class="string">'.def/def_modules/.generators/@ali/generator-abs-router/node_modules/@ali/generator-abs-router/node_modules/yeoman-generator'</span>));</span><br><span class="line"></span><br><span class="line">yeomanRouter.generators.Base.prototype.prompt = <span class="function"><span class="keyword">function</span>(<span class="params">list, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> item = list[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">let</span> prop = &#123;&#125;;</span><br><span class="line">  prop[item.name] = <span class="string">'kissy-pc'</span>; <span class="comment">// 让模块类型输入自动为pc</span></span><br><span class="line">  callback(prop);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//require real def path</span></span><br><span class="line"><span class="keyword">const</span> defPath = which(<span class="string">'def'</span>).stdout;</span><br><span class="line"><span class="built_in">require</span>(defPath);</span><br></pre></td></tr></table></figure>
+<h3 id="篡改构建流程（webpackconfig）"><a href="#篡改构建流程（webpackconfig）" class="headerlink" title="篡改构建流程（webpackconfig）"></a>篡改构建流程（webpackconfig）</h3><p>场景：一个淘宝的前端组件，需要在使用def本地调试时提前更改一个文件内容。（淘宝组件的构建会按照组件类型统一构建器，并不是每个组件单独去配置）</p>
+<p>原因：一般来说，这种情况可以选择注释代码大法，本地调试时打开注释，发布前干掉。但这样造成代码很不美观，也容易引起误操作。不妨在本地调试的 reflect 过程中动态更换掉就好了。</p>
+<p>解决过程：</p>
+<ul>
+<li><p>追溯 <code>def dev</code> 调用链路，找到最终reflect的文件, 在这个构建器 <code>@ali/builder-cake-kpm</code> 项目里。所使用的webpack的配置项在 <code>@ali/cake-webpack-config</code> 下。</p>
+</li>
+<li><p>现在就是往 webpack 配置项里动态注入一个 webpack loader 的过程了，我需要的 loader 是一个 preLoader，代码非常简单，我把它放在业务项目的文件里:</p>
+</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">content</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> content.replace(<span class="string">'require\(\'\.\/plugin\'\)'</span>, <span class="string">"require('./localPlugin')"</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>@ali/cake-webpack-config</code> 暴露的是个函数而非对象，所以必须从 require 下手了，最后附上案例的代理过程：</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env node</span></span><br><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">require</span>(<span class="string">'shelljs/global'</span>);</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> HOME = process.env.HOME;</span><br><span class="line"><span class="keyword">const</span> CWD = process.cwd();</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> cakeWcPath = path.join(HOME, <span class="string">'.def/def_modules/.builders/@ali/builder-cake-kpm/node_modules/@ali/builder-cake-kpm/node_modules/@ali/cake-webpack-config'</span>);</span><br><span class="line"><span class="keyword">const</span> preLoaderPath = path.join(CWD, <span class="string">'debug/plugin_compile.js'</span>); <span class="comment">// 注入的loader路径</span></span><br><span class="line"><span class="keyword">const</span> cakeWebpackConfig = <span class="built_in">require</span>(cakeWcPath);</span><br><span class="line"><span class="keyword">const</span> requireId = <span class="built_in">require</span>.resolve(cakeWcPath);</span><br><span class="line"><span class="built_in">require</span>.cache[requireId].exports = <span class="function">(<span class="params">options</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (options.callback) &#123;</span><br><span class="line">    <span class="keyword">let</span> oldCb = options.callback;</span><br><span class="line">    options.callback = <span class="function"><span class="keyword">function</span>(<span class="params">err, obj</span>) </span>&#123;</span><br><span class="line">      obj.module.preLoaders = [&#123;</span><br><span class="line">        <span class="string">'test'</span>: <span class="regexp">/index\.js$/</span>,</span><br><span class="line">        <span class="string">'loader'</span>: preLoaderPath</span><br><span class="line">      &#125;];</span><br><span class="line">      oldCb(err, obj);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  cakeWebpackConfig(options);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//require real def path</span></span><br><span class="line"><span class="keyword">const</span> defPath = which(<span class="string">'def'</span>).stdout;</span><br><span class="line"><span class="built_in">require</span>(defPath);</span><br></pre></td></tr></table></figure>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>去 hack 一个 Node.js 模块，需要对该 Node.js 模块的调用链路有一定的了解，在很多情况下，不一定是最优的方法，但也不失为一种解决方案。有趣的是，Node.js 源码中其实有一行这样的注释：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Hello, and welcome to hacking node.js!</span></span><br><span class="line"><span class="comment">// some descriptions</span></span><br></pre></td></tr></table></figure>
+<p>So, just hacking for fun!</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/10/28/how-to-hack-nodejs-modules/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/10/28/how-to-hack-nodejs-modules/" data-id="cjt6lbxyv004fjeu12gskn5fb" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/10/28/how-to-hack-nodejs-modules/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hack/">hack</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/11/03/es6-advanced/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          ES6 你可能不知道的事 - 进阶篇
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/10/19/chrome-remote-debugging-technics/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">揭秘浏览器远程调试技术</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

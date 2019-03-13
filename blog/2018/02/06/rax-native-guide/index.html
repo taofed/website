@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Rax 系列教程（native 扫盲） | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="引子Rax 天生就是一个跨容器的解决方案，这让我们不必单独了解 iOS 和 安卓背后做了什么，让我们的开发变得很省心。但真实情况是我们的业务往往同时跑在 web 和 native 两端，web 我们轻车熟路是前端天生的优势，native 对很多人来说就会有些陌生，native 上出现的各种问题用 web 的路子去解释往往会解释不通。据 2017 年底粗略统计 Rax 的用户 70% 是前端同学，">
+<meta name="keywords" content="Weex,Rax,native">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rax 系列教程（native 扫盲）">
+<meta property="og:url" content="http://taobaofed.org/blog/2018/02/06/rax-native-guide/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="引子Rax 天生就是一个跨容器的解决方案，这让我们不必单独了解 iOS 和 安卓背后做了什么，让我们的开发变得很省心。但真实情况是我们的业务往往同时跑在 web 和 native 两端，web 我们轻车熟路是前端天生的优势，native 对很多人来说就会有些陌生，native 上出现的各种问题用 web 的路子去解释往往会解释不通。据 2017 年底粗略统计 Rax 的用户 70% 是前端同学，">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1nuoFXTtYBeNjy1XdXXXXyVXa-900-500.jpg">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/14e53ead86ead4d3355813e935072df0742a2c95">
+<meta property="og:image" content="http://img1.tbcdn.cn/L1/461/1/dff0329b60fe0637fa286a58a2de4f41497407cf">
+<meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/d3562f1fc42fc59767ff05edff11f6e691ad5c86">
+<meta property="og:image" content="https://gw.alicdn.com/tfs/TB1cOnwk2DH8KJjy1XcXXcpdXXa-414-219.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rax 系列教程（native 扫盲）">
+<meta name="twitter:description" content="引子Rax 天生就是一个跨容器的解决方案，这让我们不必单独了解 iOS 和 安卓背后做了什么，让我们的开发变得很省心。但真实情况是我们的业务往往同时跑在 web 和 native 两端，web 我们轻车熟路是前端天生的优势，native 对很多人来说就会有些陌生，native 上出现的各种问题用 web 的路子去解释往往会解释不通。据 2017 年底粗略统计 Rax 的用户 70% 是前端同学，">
+<meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1nuoFXTtYBeNjy1XdXXXXyVXa-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-rax-native-guide" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      Rax 系列教程（native 扫盲）
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 亚城</span>
+        
+        <span>发表于: <a href="/blog/2018/02/06/rax-native-guide/" class="article-date">
+  <time datetime="2018-02-06T11:28:12.000Z" itemprop="datePublished">2018-02-06</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tfs/TB1nuoFXTtYBeNjy1XdXXXXyVXa-900-500.jpg" alt="Rax 系列教程（native 扫盲）"></p>
+<h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>Rax 天生就是一个跨容器的解决方案，这让我们不必单独了解 iOS 和 安卓背后做了什么，让我们的开发变得很省心。但真实情况是我们的业务往往同时跑在 web 和 native 两端，web 我们轻车熟路是前端天生的优势，native 对很多人来说就会有些陌生，native 上出现的各种问题用 web 的路子去解释往往会解释不通。据 2017 年底粗略统计 Rax 的用户 70% 是前端同学，本文面向前端，简单介绍一下 Rax 背后的 native 端在做的一些事情。本文吸取了大量前人的经验，对于过深的 native 概念进行了剔除，以求前端同学更好理解，如果想更深入了解的同学可以参考下面附件内容。</p>
+<h2 id="Rax-＝-RN-语法-Weex-能力"><a href="#Rax-＝-RN-语法-Weex-能力" class="headerlink" title="Rax ＝ RN 语法 + Weex 能力"></a>Rax ＝ RN 语法 + Weex 能力</h2><p>Rax 是一套基于 React 写法的 Weex 上层 DSL，很自然的我们就会拿来和 RN 进行对比。实际上 Rax 的设计上也是在尽量靠拢 RN。下面我们先来了解一下。</p>
+<h3 id="Rax-与-React-Native"><a href="#Rax-与-React-Native" class="headerlink" title="Rax 与 React Native"></a>Rax 与 React Native</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RN: Learn once, write anywhere</span><br></pre></td></tr></table></figure>
+<p>Rax 的使用方式和 RN 类似，RN 基于开源 JavaScript 库 React.js 来开发 iOS 和 Android 原生 App，在 JavaScript 中用 React 抽象操作系统原生的 UI 组件，代替 DOM 元素来渲染，比如以 View 取代 div，以 Image 替代 img 等（Rax 此处步调一致）。</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/14e53ead86ead4d3355813e935072df0742a2c95" alt="image | center"></p>
+<p>一次学习，便可以编写 iOS 和 Android 两端的代码，这是 RN 的理念。与 RN 不同，Rax 在靠拢 RN 规范的同时，还做了另外一件事情就是跨端，让一次学习变成了一次编写。</p>
+<p>作为背景了解可以了解 <a href="https://facebook.github.io/react-native/" target="_blank" rel="noopener">ReactNative</a> 官网，RN 的学习资料比较容易获取这里不再展开。</p>
+<h3 id="Rax-与-Weex"><a href="#Rax-与-Weex" class="headerlink" title="Rax 与 Weex"></a>Rax 与 Weex</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Weex: write once run anywhere</span><br></pre></td></tr></table></figure>
+<p>Rax 在 Native 端的背后实现则是 Weex，Weex 是一款轻量级的移动端跨平台动态性技术解决方案</p>
+<p><img src="http://img1.tbcdn.cn/L1/461/1/dff0329b60fe0637fa286a58a2de4f41497407cf" alt="image | center"></p>
+<p>（图引自 ppt《weex-前端》by 子宽/饮源）</p>
+<p>流程如下</p>
+<ul>
+<li>开发者使用 Weex DSL 编程（Vue/Rax）<ul>
+<li>历史上还有过 .we 框架，已经不推荐使用</li>
+</ul>
+</li>
+<li>用 transformer 将代码转换为纯 JS 代码</li>
+<li>客户端 JS 解析与 UI 绘制</li>
+</ul>
+<p>Server 端主要职责是 weex DSL 到 JS 的转换，以及 JS 的部署下发<br>Client 端则负责客户端的绘制部分，具体如下：</p>
+<ul>
+<li>JS framework 其实就是一个 JS 文件, Weex SDK 中的 main.js。framework 主要负责 JS 与 natvie 之间的交互。数据绑定、事件逻辑处理等。</li>
+<li>Render Engine 由 Native 代码实现，主要负责界面渲染和少量的事件触发逻辑。所有的布局元素，都会在这一层转化为原生组件。Weex 当前支持内建组件包括 list、scroller、text、image、input 等</li>
+<li>目前 V8 已经全部被 JSC 取代</li>
+</ul>
+<h3 id="framework"><a href="#framework" class="headerlink" title="framework"></a>framework</h3><p>(iOS 角度解析，弱化了部分纯客户端的概念)</p>
+<p>SDK 初始化时比业务先注入 JS framework，如下</p>
+<p><strong>Weex runtime 初始化</strong></p>
+<ul>
+<li>Native初始化（JS framework）initSDKEnvironment</li>
+<li>JSContext 扩展属性，比如 <code>name</code>，<code>WXEnvironment</code> 等全局的 API</li>
+<li>WXBridgeContext registerGlobalFunctions 注册 <code>Native module</code>，<code>component</code>等，给 JSContext 扩展 callback，全部转换成数字 id，每一个 module，component 等都有其对应的 id。</li>
+<li>JSContext evaluateScript 执行 JS <code>framework.js</code> 代码</li>
+</ul>
+<p><strong>业务 bundle 初始化脉络研究</strong></p>
+<ul>
+<li>WXSDKInstance renderWithURL 注入业务 bundle url</li>
+<li>WXBridgeContext callJSMethod 传入 @”createInstance”，以及组织参数args @[instance, temp, options ?: @{}, data]，data就是业务bundle JavaScript字符串</li>
+<li>判断 frameworkLoadFinished 是否准备就绪，准备就绪调用@”createInstance”</li>
+<li>JSContext globalObject invokeMethod 方法，获取之前初始化时JSContext的“全局对象”引用，类似浏览器的 “window” 对象，也就是执行weex-framework.js中的 <code>createInstance</code> 方法，接收的参数是@[instance, temp, options ?: @{}];</li>
+<li>从 weex-framework.js 中的 createInstance 调用到了 Rax framework 的 <code>window api</code> 注入</li>
+<li>Rax framework 初始化页面代码，返回全局的 window 环境，（未来使用 createInstanceContext 替换的场景将在后续 framework 的教程中解释）</li>
+</ul>
+<p>创建 UI 界面的计算是在 JavaScript 这边的，创建和销毁阶段都是由 Native 主动调起 JavaScript 的方法。这里先介绍一下 JSCore，JavaScriptCore 是封装了 JavaScript 和 Objective-C 桥接的 Objective-C API，可以做到 JavaScript 调用 Objective-C，或者 Objective-C 调用 JavaScript。</p>
+<p>createInstance 最后 sendTasks 实际上是调用 Weex 仓库 runtime/config.js 的 sendTasks ，而这个方法传递给 callNative。callNative，是Native注册的block，这是JS framework 与 Native 连接脉络的最后一步。</p>
+<h3 id="Weex-virtual-DOM"><a href="#Weex-virtual-DOM" class="headerlink" title="Weex virtual-DOM"></a>Weex virtual-DOM</h3><p>Weex 在 JS 端有一层 virtual-DOM 的设计，这一层设计一方面使得 Weex 能够通过 JS 控制 native 的视图层，另外也提供了一个相对中立的规范，供上层 JS 框架调用。</p>
+<p><img src="http://img2.tbcdn.cn/L1/461/1/d3562f1fc42fc59767ff05edff11f6e691ad5c86" alt><br>(图片引自《Weex 中的 virtual-DOM 介绍》 by 勾股)</p>
+<p>我们在 Weex 中所能感受到的各种视觉效果和交互效果，实际上都是通过这样的 virtual-DOM 结构进行分解和执行的。virtual-DOM 的设计很大程度上借鉴了 HTML DOM 的设计，不论从 API 还是 class，但做了一定的简化和取舍，主要包括以下几点：</p>
+<ul>
+<li>传统的 HTML DOM 分了很多种 nodeType，比如 Element、TextNode、Comment、CDATA、Entity、Attribute、Fragment … 等， Weex 只保留了 Element 和 Comment ，一个 Element 对应着 native 的一个 View，而 Comment 通常对 native 来说是无意义的，但是它可以帮助 JS 上层的框架用作一些特殊处理时的 placeholder。</li>
+<li>传统的 HTML DOM 是既有 attribute 又有 property 的，property 里还包括 style、方法调用这样的特殊 property， Weex 只保留了 attributes，没有 properties ，但支持一个特殊的维度，就是样式 style。</li>
+<li>传统的 HTML DOM 是支持同一个 Element 绑定多个事件的，从 JS 和 native 通信的角度，这样做是没有必要的， 所以 Weex 只提供了 DOM Level 0 的事件模型，也就是 onxxx=”fn”。 如果同一个 Element 需要在业务层绑定多个事件，可以在 virtual-DOM 上层再进行封装</li>
+<li>传统的 HTML DOM 事件是存在捕获和冒泡阶段的， Weex 做了精简，没有支持冒泡或捕获事件 ，只有在 native 层的当前元素触发该事件才会 fireEvent 给 JS。<br>传统的 HTML DOM 针对每个页面有唯一且现成的 document、document.documentElement、document.body，但是在 Weex 中，由于每个页面需要的初始化 body 类型是有选择的，基本上分 scroller、div、list 这三种，根据页面不同的展示特征而定， 所以 Weex 页面的 document.body 是需要手动创建的，并且有机会制定其类型为 scroller、div、list 其中的一种。</li>
+<li>Weex 不支持 XML 的 namespace 语法</li>
+</ul>
+<h2 id="Weex-与-Web-的天生不同"><a href="#Weex-与-Web-的天生不同" class="headerlink" title="Weex 与 Web 的天生不同"></a>Weex 与 Web 的天生不同</h2><h3 id="页面布局"><a href="#页面布局" class="headerlink" title="页面布局"></a>页面布局</h3><p><strong>布局</strong></p>
+<p>Flexbox 是 Weex 中默认且唯一的布局模型，不需要手动为元素添加 display: flex; 属性。传统 web 布局花样繁多，不过 Weex 上我们布局的方式有些局限，比如我们无法使用 float 布局，对于 absolute 布局最好我们也需要谨慎使用（长列表性能考虑）。（布局样式参考<a href="https://weex.apache.org/cn/references/common-style.html" target="_blank" rel="noopener">这里</a></p>
+<p><strong>样式</strong></p>
+<p>Weex 中样式使用限制包括</p>
+<ul>
+<li>写在组件 style 里的样式只能用在当前组（作用域默认是 scoped）</li>
+<li>样式不能继承</li>
+<li>文本样式只能作用于 Text 标签，如 fontSize</li>
+<li>支持的样式属性有限，如不支持 z-index</li>
+</ul>
+<p>Weex 对于 CSS 的支持相比 Web 弱了很多，很多酷炫的 CSS 必杀技在 Weex 上是不太好施展拳脚的，所以在我们写样式之前最好能先读一读 Weex 的 <a href="http://weex.apache.org/cn/references/common-style.html" target="_blank" rel="noopener">通用样式</a> 和 <a href="http://weex.apache.org/cn/references/text-style.html" target="_blank" rel="noopener">文本样式</a></p>
+<p><strong>单位</strong></p>
+<p>Weex 中做元素的布局时需要先了解一下 Rax 在 Weex 上的单位，Weex 天生支持 wx 和 px</p>
+<ul>
+<li>rem:  Rax 中推荐单位，无单位默认也是 rem，rem 单位是将页面 750 等分计算的，同 Weex 中的 px 单位</li>
+<li>wx：该单位是 Weex 特有的单位，它与像素无关</li>
+<li>px &amp; 没有单位：对于没有单位或单位为 px 的尺寸，Weex 会乘上当前屏幕的宽和 750 的比值，以这种方式来进行适配不同分辨率的屏幕</li>
+</ul>
+<p><strong>霸道的 list cell</strong></p>
+<p>除了 Web 和 Weex 的差异，在 iOS 和 Android 上同样存在细微的差异。Android list 中的 cell，无法展示内部超出的元素。如下图，我们如果要实现 图 1 的效果，如果直接用绝对定位飘出去，可能在安卓下会被 cell 截断得到图 2 的效果</p>
+<p><img src="https://gw.alicdn.com/tfs/TB1cOnwk2DH8KJjy1XcXXcpdXXa-414-219.jpg" alt></p>
+<h3 id="list"><a href="#list" class="headerlink" title="list"></a>list</h3><p>Web 页面天生是可以滚动的，Native 中却不是。于是 Native 中提供了滚动容器来解决。Rax 中的滚动容器有如下几个（对于列表的详细分析这里也不展开，只说 list native 原理部分）</p>
+<ul>
+<li>ScrollView 的 Weex 实现是 slider，支持垂直和水平的滚动</li>
+<li>RecyclerView 的 Weex 实现是 list，可回收的长列表（此标签下面会举例展开细说）</li>
+<li>ListView 是 RecyclerView 的上层包装，对标 RN 的能力</li>
+<li>WaterFall 底层实现上也是 list 的一个扩展，在 api 能力上向 ListView 靠拢</li>
+<li>TemplateList 的 Weex 实现是 recycler-list，是一个基于数据与模版的高性能长列表</li>
+</ul>
+<p><strong>可回收的长列表 RecyclerView</strong></p>
+<p>Rax 的 RecyclerView 是一个高性能的可回收长列表，它的内部实现是 Weex 的 list 标签。Weex Android 的 List 的原生实现是 Android RecyclerView 组件，在 iOS 上则使用的是原生的 UITableView。它又一个重要特性就是可以回收非可视区域的 cell，并进行复用。</p>
+<p>Android RecyclerView </p>
+<p>在 Android 中，RecyclerView 提供了复用机制来减少内存开销、提升滑动效率，Weex 中 List 也暴露出相应的 API 支持 Cell 复用：设置相同 scopeValue 的 Cell 支持 ViewHolder 复用，这里的 ViewHolder 服用是只重复的数据类型复用，cell 内如果拥有相同的 children 结构，则该类型的 cell 可以复用，滑出可视区域的 cell 会被回收，在内部实现中不通 RecyclerView 的相同结构 cell 也有复用的策略。</p>
+<p>iOS UITableView</p>
+<p>UITableView 是一个以行数据概念实现的列表，每一行数据都是一个 UITableViewCell。<br>为了性能上更优，利用有限的结构动态切换其内容来尽可能减少资源占用，以达到 cell 复用。<br>UITableView内部有一个缓存池，初始化时使用 initWithStyle:(UITableViewCellStyle) reuseIdentifier:(NSString *) 方法指定一个可重用标识，就可以将这个 cell 放到缓存池。然后在使用时使用指定的标识去缓存池中取得对应的 cell 然后修改 cell 内容即可。以达到滚动时创建的 cell 地址是初始化时已经创建的。（详细不展开，原理在<a href="http://www.cnblogs.com/kenshincui/p/3931948.html" target="_blank" rel="noopener">这里</a>）</p>
+<h3 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h3><p>Web 中我们不指定图片的宽高页面会自动撑开，Weex 中却不会，内部实现的不同导致我们渲染图片的时候必须传入宽高（图片默认高度为 0）。虽然我们在图片的 onLoad 事件中可以拿到宽高信息，但此时再设置宽高会产生页面的抖动。在做瀑布流布局时图片的宽高就更加必要了。</p>
+<p>另外 Weex 中相比 Web 图片额外做了加载的优化，我们不用考虑 Weex 上的图片懒加载。</p>
+<p>不能设置背景图，只能使用图片插入到文档中</p>
+<p>针对 gif 图片的显示依赖客户端的图片库，手淘环境可以在 attribute 和 style 上设置 quality=’original’ 解决，这个属性主要是让客户端的图片库不去优化该图片（避免一些 cdn 优化策略在某些 Weex 图片上不适用）</p>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><p>Weex 支持的事件类型有限，支持的事件类型见 <a href="https://weex.apache.org/cn/references/common-event.html" target="_blank" rel="noopener">通用事件</a>，且不区分事件的捕获阶段和冒泡阶段，相当于 DOM 0 级事件。Appear 事件，Page 事件都是和传统 Web 开发思路有所不同的。</p>
+<h3 id="内建模块"><a href="#内建模块" class="headerlink" title="内建模块"></a>内建模块</h3><p>Weex 为我们提供了许多内建模块：<br>animation、WebSocket、picker、meta、clipboard、dom、modal、navigator、storage、stream、webview、globalEvent 等等。</p>
+<p>这部分是区别于 Web 的一些功能，直接调用移动端设备能力，Rax 中使用内建模块方式如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> dom = <span class="built_in">require</span>(<span class="string">'@weex-module/dom'</span>);</span><br><span class="line">dom.getComponentRect(<span class="string">'viewport'</span>, (e) =&gt; &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(e.result, e.size);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>在 Rax 项目的实际开发过程中有很多和传统 Web 开发是不同的。我们更多的了解一些背后的机制，会对我们排查问题有所帮助。文章有遗漏之处或者不准确的地方欢迎指出。</p>
+<blockquote>
+<p>题图：<a href="https://unsplash.com/photos/i-P1lmY_e1w" target="_blank" rel="noopener">https://unsplash.com/photos/i-P1lmY_e1w</a> By @Sergey Pesterev</p>
+</blockquote>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2018/02/06/rax-native-guide/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2018/02/06/rax-native-guide/" data-id="cjt6lby1g00ayjeu1npr8lh3u" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2018/02/06/rax-native-guide/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rax/">Rax</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Weex/">Weex</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/native/">native</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2018/02/27/2018-intern-recruitment/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          淘宝技术部 2018 实习生内部推荐启动啦
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2018/01/23/implement-javascriptcore-debugger-ios/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">实现一个 JavaScriptCore 的 debugger —— iOS 篇</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

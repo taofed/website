@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>「开往春天的 Node.js」 - Node 地下铁第二期线下沙龙总结 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="前言寒冬已逝，春之伊始。 3 月 26 日下午，Node 地下铁第 2 次线下沙龙在上海世博展览馆万信酒店举行。本次沙龙邀请了四位在不同领域应用 Node.js 进行探索的大牛，带着我们在温暖的午后，感受 Node.js 的魅力。 虽然当天是近来久违的好天气，而且会场地点有些偏，但这些都没有令同学们对 Node.js 的热情衰减，13 点半签到，很快会议室的位置所剩无几了，在这里，组委会感谢各位">
+<meta name="keywords" content="沙龙,Node-subway,Node地下铁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="「开往春天的 Node.js」 - Node 地下铁第二期线下沙龙总结">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/04/01/node-subway-shanghai/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="前言寒冬已逝，春之伊始。 3 月 26 日下午，Node 地下铁第 2 次线下沙龙在上海世博展览馆万信酒店举行。本次沙龙邀请了四位在不同领域应用 Node.js 进行探索的大牛，带着我们在温暖的午后，感受 Node.js 的魅力。 虽然当天是近来久违的好天气，而且会场地点有些偏，但这些都没有令同学们对 Node.js 的热情衰减，13 点半签到，很快会议室的位置所剩无几了，在这里，组委会感谢各位">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1bA_SMXXXXXckXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB12YYVMXXXXXa0XpXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1LevOMXXXXXaPXFXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1_APUMXXXXXa4XpXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Ht6AMXXXXXXlaXXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Wf22MXXXXXbyXXXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Iq6wMXXXXXbhaXXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1O2nPMXXXXXc5XpXXXXXXXXXX-5184-3456.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="「开往春天的 Node.js」 - Node 地下铁第二期线下沙龙总结">
+<meta name="twitter:description" content="前言寒冬已逝，春之伊始。 3 月 26 日下午，Node 地下铁第 2 次线下沙龙在上海世博展览馆万信酒店举行。本次沙龙邀请了四位在不同领域应用 Node.js 进行探索的大牛，带着我们在温暖的午后，感受 Node.js 的魅力。 虽然当天是近来久违的好天气，而且会场地点有些偏，但这些都没有令同学们对 Node.js 的热情衰减，13 点半签到，很快会议室的位置所剩无几了，在这里，组委会感谢各位">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB1bA_SMXXXXXckXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-node-subway-shanghai" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      「开往春天的 Node.js」 - Node 地下铁第二期线下沙龙总结
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 凌恒</span>
+        
+        <span>发表于: <a href="/blog/2016/04/01/node-subway-shanghai/" class="article-date">
+  <time datetime="2016-04-01T11:41:23.000Z" itemprop="datePublished">2016-04-01</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://img.alicdn.com/tps/TB1bA_SMXXXXXckXpXXXXXXXXXX-900-500.jpg" alt="「开往春天的 Node.js」 - Node 地下铁第二期线下沙龙总结"></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>寒冬已逝，春之伊始。</p>
+<p>3 月 26 日下午，Node 地下铁第 2 次线下沙龙在上海世博展览馆万信酒店举行。本次沙龙邀请了四位在不同领域应用 Node.js 进行探索的大牛，带着我们在温暖的午后，感受 Node.js 的魅力。</p>
+<p>虽然当天是近来久违的好天气，而且会场地点有些偏，但这些都没有令同学们对 Node.js 的热情衰减，13 点半签到，很快会议室的位置所剩无几了，在这里，组委会感谢各位同学的支持。</p>
+<p><img src="http://img.alicdn.com/tps/TB12YYVMXXXXXa0XpXXXXXXXXXX-5184-3456.jpg" alt="图一"></p>
+<p><img src="http://img.alicdn.com/tps/TB1LevOMXXXXXaPXFXXXXXXXXXX-5184-3456.jpg" alt="图二"></p>
+<h2 id="回顾"><a href="#回顾" class="headerlink" title="回顾"></a>回顾</h2><h3 id="Node-js-源站的发展与挑战"><a href="#Node-js-源站的发展与挑战" class="headerlink" title="Node.js 源站的发展与挑战"></a>Node.js 源站的发展与挑战</h3><p>淘宝首页是淘宝很重要的一个页面，它原本一直运行在数量庞大的应用集群上，性能浪费非常严重。过去的一年，淘宝使用 Node.js 源站解决了已有的问题，我们用几十台虚拟机支撑了淘宝数十亿 PV 的流量。</p>
+<p>但 Node.js 源站也为我们带来了新的挑战：</p>
+<ul>
+<li>如何设计伪静态的缓存方案，保障对时间、多终端的良好支持？</li>
+<li>如何优化模块文件合并分发渠道，让首页数百个模块不再产生 IO 瓶颈？</li>
+<li>如何在高压力下解决源站的异地多活等高可用问题？</li>
+</ul>
+<p>你可以在基德同学的分享中深入了解这其中的奥妙，另外，也欢迎喜欢挑战的人加入我们，让 Node.js 源站更加强大。</p>
+<p><img src="http://img.alicdn.com/tps/TB1_APUMXXXXXa4XpXXXXXXXXXX-5184-3456.jpg" alt="基德"></p>
+<h3 id="alinode-基于-Node-js-运行时的应用性能管理解决方案"><a href="#alinode-基于-Node-js-运行时的应用性能管理解决方案" class="headerlink" title="alinode - 基于 Node.js 运行时的应用性能管理解决方案"></a>alinode - 基于 Node.js 运行时的应用性能管理解决方案</h3><p>你是否还在为自己的 Node.js 应用的稳定性而担忧？是否在应用出错时手足无措，不知道从何下手？是否每每在内存溢出发生时，才发现自己原来挖了这样一个坑？</p>
+<p>有了 alinode，这些苦恼便能轻松化解。它是阿里云出品的 Node.js 应用服务解决方案，是一套基于社区 Node.js 改进的运行时环境和服务平台。在社区的基础上内建了强大的支持功能，帮助开发者迅速洞见性能细节，快速定位疑难杂症，直探问题根源。</p>
+<p>在穆客的分享中，你可以详细了解 alinode 的使用，以及手把手的问题处理教程。</p>
+<p><img src="http://img.alicdn.com/tps/TB1Ht6AMXXXXXXlaXXXXXXXXXXX-5184-3456.jpg" alt="穆客"></p>
+<h3 id="使用-NW-js-构建桌面钉钉"><a href="#使用-NW-js-构建桌面钉钉" class="headerlink" title="使用 NW.js 构建桌面钉钉"></a>使用 NW.js 构建桌面钉钉</h3><p>移动端技术和工具链最近几年发展的非常快，桌面端却没有太大的发展。WEB 技术发展的也非常快，同时 Chromium 项目提供了优秀的跨平台浏览器内核，现在最快的构建桌面应用的方式变成了 nw.js 或者 Electron 这样的利用 WEB 技术加 Node.js 的方案。</p>
+<p>在钉钉，使用了 NW.js 来构建跨平台的桌面应用，但只靠 JavaScript 依然搞不定所有的事情，比如自动更新应用，截图功能，读写系统剪切版等等。结合 Node.js Addon 技术来和 C++ 模块的实用，完成一些 Javascript 暂时不好实现的需求。</p>
+<p>想了解钉钉为什么不使用风头正热的 Electron，或者想知道如何使用 nw.js 构建一个体验不输给 Native 的应用以及面临的挑战，快来听听云际的分享吧。</p>
+<p><img src="http://img.alicdn.com/tps/TB1Wf22MXXXXXbyXXXXXXXXXXXX-5184-3456.jpg" alt="云际"></p>
+<h3 id="Thunk-Redis"><a href="#Thunk-Redis" class="headerlink" title="Thunk-Redis"></a>Thunk-Redis</h3><p>thunks 和 redis 对大家来说也许并不陌生，但是两者的结合你了解吗？是在造轮子，还是在追求极致的速度体验。</p>
+<p>在来自 Teambition 严清的分享中，我们可以了解到如何遵照 RESP (REdis Serialization Protocol) 协议，实现一个更快，更强大的 Redis 客户端，以及 Redis 和 Node.js 在 Teambition 关键系统中的使用，比如：消息系统，邮件队列等。感觉要学到很多姿势了呢。</p>
+<p><img src="http://img.alicdn.com/tps/TB1Iq6wMXXXXXbhaXXXXXXXXXXX-5184-3456.jpg" alt="严清"></p>
+<h3 id="讨论"><a href="#讨论" class="headerlink" title="讨论"></a>讨论</h3><p><img src="http://img.alicdn.com/tps/TB1O2nPMXXXXXc5XpXXXXXXXXXX-5184-3456.jpg" alt="讨论"></p>
+<p>四位同学的精彩分享结束后，接下来的环节是圆桌讨论（并没有圆桌 - -！）。在讨论中，大家纷纷提出了自己在 Node.js 实践中遇到的问题，也有的分享了自己在实践中的一些心得。</p>
+<p>几个比较受关注的问题：</p>
+<ul>
+<li><p>NPM 的安全以及可靠性，对 Node.js 生态的担忧等。</p>
+<p>  这是由最近 @Azer 在 NPM 社区中引发的讨论。@johnhax 等人纷纷表达了自己的观点。爱之深，责之切，依赖质量以及依赖方式，确实是 Node.js 生态中目前比较薄弱的环节，但是在一个活跃的社区推动下，这些都会有很好的解决方案的，毕竟 Node.js 也在成长。</p>
+</li>
+<li><p>如何使用 aliNode 分析错误，以及错误处理的相关经验</p>
+<p>  社区中，有很多人在使用 aliNode 来监控、分析自己应用的性能以及问题。但是，对于新人来说，从一个 heapdump 中分析出问题所在，还是有一些难度的，很多人希望可以学习到一些经验，当然，很多人也分享了自己如果踩坑、填坑的。</p>
+</li>
+<li><p>在开发 Node.js 应用中遇到的问题</p>
+<p>  这部分主要围绕如何填开发过程中踩过的坑。比如一位同学提到，自己在用 Node.js live reload 配置文件时，经常会导致内存占用过高的情况，大家根据他的描述，提出了一些解决方案。小编认为，如果合理的使用 Node.js 的流 API，或许能解决这个问题。</p>
+</li>
+<li><p>想使用 Node.js 或者在 Node.js 和其他语言混用的情况</p>
+<p>  有些来参会的同学，并是不以 Node.js 作为主语言的人，想尝试一下，通过讨论，使他们对 Node.js 有了更深入的了解。跟淘宝一样，很多公司也面临着 Node.js 和其他语言混用的情况，嘉宾们和同学沟通了自己所采用的方案，希望可以给你们提供一些思路。</p>
+</li>
+</ul>
+<h2 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h2><p>在此感谢各位同学的参与，我们下次再约！同时感谢博文视点对本次活动的图书赞助！欢迎关注 Node 地下铁微信公共账号，随时关注下一次线下沙龙动态。</p>
+<p>错过了这次分享的同学也不要急，我们不会忘了你们的，请往下拉。。。</p>
+<h2 id="分享资料下载"><a href="#分享资料下载" class="headerlink" title="分享资料下载"></a>分享资料下载</h2><ul>
+<li><p>PPT</p>
+<p>  下载地址：<a href="http://pan.baidu.com/s/1c1zV9oW" target="_blank" rel="noopener">网盘</a></p>
+</li>
+<li><p>视频</p>
+<ul>
+<li><a href="http://v.youku.com/v_show/id_XMTUxODMzNDMyNA==.html" target="_blank" rel="noopener">《Node.js 源站的发展与挑战》- 基德 @淘宝</a></li>
+<li><a href="http://v.youku.com/v_show/id_XMTUxODMzODkzNg==.html" target="_blank" rel="noopener">《aliNode - 基于 Node.js 运行时的应用性能管理解决方案》 - 穆客 @阿里云</a></li>
+<li><a href="http://v.youku.com/v_show/id_XMTUxODM0MTc5Mg==.html" target="_blank" rel="noopener">《使用 NW.js 构建桌面钉钉》- 云际 @钉钉</a></li>
+<li><a href="http://v.youku.com/v_show/id_XMTUxODM0NjAzMg==.html" target="_blank" rel="noopener">《Thunk-Redis》- 严清 @Teambition</a></li>
+</ul>
+</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/04/01/node-subway-shanghai/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/04/01/node-subway-shanghai/" data-id="cjt6lbxzp0070jeu15vkntyq5" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/04/01/node-subway-shanghai/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-subway/">Node-subway</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node地下铁/">Node地下铁</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/沙龙/">沙龙</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/04/06/optimize-in-tbhome/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          淘宝首页性能优化实践
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/04/01/lose-statistics/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">页面跳转时，统计数据丢失问题探讨</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>JSON Schema 那些事儿：基本概念 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="引子在早期的淘宝 TMS 页面搭建系统中，为了解决页面模板和数据的分离问题，机智的先知们扩充了一系列灵活的 PHP 标签函数，得以将数据的定义从模板视图中解耦出来。以其中一个最为常用的函数为例： 1_tms_custom(&amp;apos;&amp;#123;&amp;quot;name&amp;quot;:&amp;quot;TextLinks&amp;quot;,&amp;quot;title&amp;quot;:&amp;quot;文字链接&amp;quot;,&amp;q">
+<meta name="keywords" content="josn,schema">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JSON Schema 那些事儿：基本概念">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/25/jsonschema/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="引子在早期的淘宝 TMS 页面搭建系统中，为了解决页面模板和数据的分离问题，机智的先知们扩充了一系列灵活的 PHP 标签函数，得以将数据的定义从模板视图中解耦出来。以其中一个最为常用的函数为例： 1_tms_custom(&amp;apos;&amp;#123;&amp;quot;name&amp;quot;:&amp;quot;TextLinks&amp;quot;,&amp;quot;title&amp;quot;:&amp;quot;文字链接&amp;quot;,&amp;q">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1r6MALpXXXXahXpXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1EqYwLpXXXXcwXVXXXXXXXXXX-508-84.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1aTbxLpXXXXaqaXXXXXXXXXXX-488-258.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JSON Schema 那些事儿：基本概念">
+<meta name="twitter:description" content="引子在早期的淘宝 TMS 页面搭建系统中，为了解决页面模板和数据的分离问题，机智的先知们扩充了一系列灵活的 PHP 标签函数，得以将数据的定义从模板视图中解耦出来。以其中一个最为常用的函数为例： 1_tms_custom(&amp;apos;&amp;#123;&amp;quot;name&amp;quot;:&amp;quot;TextLinks&amp;quot;,&amp;quot;title&amp;quot;:&amp;quot;文字链接&amp;quot;,&amp;q">
+<meta name="twitter:image" content="https://img.alicdn.com/tps/TB1r6MALpXXXXahXpXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-jsonschema" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      JSON Schema 那些事儿：基本概念
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 邦彦</span>
+        
+        <span>发表于: <a href="/blog/2016/01/25/jsonschema/" class="article-date">
+  <time datetime="2016-01-25T10:32:21.000Z" itemprop="datePublished">2016-01-25</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://img.alicdn.com/tps/TB1r6MALpXXXXahXpXXXXXXXXXX-900-500.png" alt="JSON Schema 那些事儿：基本概念"></p>
+<h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>在早期的淘宝 TMS 页面搭建系统中，为了解决页面模板和数据的分离问题，机智的先知们扩充了一系列灵活的 PHP 标签函数，得以将数据的定义从模板视图中解耦出来。以其中一个最为常用的函数为例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_tms_custom(&apos;&#123;&quot;name&quot;:&quot;TextLinks&quot;,&quot;title&quot;:&quot;文字链接&quot;,&quot;group&quot;:&quot;文字链接&quot;,&quot;row&quot;:&quot;10&quot;,&quot;defaultRow&quot;:&quot;5&quot;,&quot;fields&quot;:&quot;text:文字:string,href:链接地址(URL):href&quot;&#125;&apos;);</span><br></pre></td></tr></table></figure>
+<p>当调用 <code>_tms_custom(...)</code> 函数并传入指定格式的 JSON 参数，交由翻译引擎处理后，会构建出这样的编辑表单：</p>
+<p><img src="https://img.alicdn.com/tps/TB1EqYwLpXXXXcwXVXXXXXXXXXX-508-84.jpg" alt></p>
+<p>而通过编辑表单录入的数据，最终会在页面中以 PHP 数组的形式填充和占位：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">array(5) &#123;</span><br><span class="line">	[0]=&gt;</span><br><span class="line">	array(2) &#123;</span><br><span class="line">		[&quot;text&quot;]=&gt;</span><br><span class="line">		string(6) &quot;淘宝网&quot;</span><br><span class="line">		[&quot;href&quot;]=&gt;</span><br><span class="line">		string(22) &quot;http://www.taobao.com/&quot;</span><br><span class="line">	&#125;,</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从标签函数到数据对象的运转流程，可以用一张图简单予以概括：</p>
+<p><img src="https://img.alicdn.com/tps/TB1aTbxLpXXXXaqaXXXXXXXXXXX-488-258.png" alt></p>
+<p>这种模板和数据分离的方式，在早些年那是相当先进的。它用简单的语法，描述了模板所需的数据格式，还可以根据标签定义，直接构造出模拟数据，方便在开发阶段使用 <code>“标签 + 模拟数据”</code> 的方式调试页面。</p>
+<p>从 <strong>描述数据格式</strong>、 <strong>构造模拟数据</strong> 的角度，这和我们要谈的 JSON Schema 不谋而合。我们用 JSON 格式来重写数据对象，应该是酱紫的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">	&#123;</span><br><span class="line">	    &quot;text&quot;: &quot;淘宝网&quot;,</span><br><span class="line">	    &quot;href&quot;: &quot;http://www.taobao.com/&quot;</span><br><span class="line">	&#125;,</span><br><span class="line">	...</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>如果用 JSON Schema 语法描述这份数据，可以完全替代标签函数的方案。这也正是淘宝 TMS 页面搭建系统在数据这块的演化过程：即从使用标签函数定义数据的方式，转变为使用 JSON Schema 描述数据。</p>
+<h2 id="什么是-Schema"><a href="#什么是-Schema" class="headerlink" title="什么是 Schema?"></a>什么是 Schema?</h2><p>当我们在描述 <code>文字链接</code> 的时候，需要约定数据的组织方式，比如，需要知道有哪些字段，这些字段的取值如何表示等，这就是 JSON Schema 的来源。</p>
+<p>我们以 <code>文字链接</code> 为例，它对应的 JSON Schema 大概如此：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;type&quot;: &quot;object&quot;,</span><br><span class="line">	&quot;properties&quot;: &#123;</span><br><span class="line">		&quot;text&quot;: &#123;</span><br><span class="line">			&quot;type&quot;: &quot;string&quot;,</span><br><span class="line">			&quot;title&quot;: &quot;文字&quot;</span><br><span class="line">		&#125;,</span><br><span class="line">		&quot;href&quot;: &#123;</span><br><span class="line">			&quot;type&quot;: &quot;string&quot;,</span><br><span class="line">			&quot;title&quot;: &quot;链接地址(URL)&quot;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>JSON Schema 定义了如何基于 JSON 格式描述 JSON 数据结构的规范，进而提供数据校验、文档生成和接口数据交互控制等一系列能力。它的特性和用途，可以大致归纳为以下几点：</p>
+<h3 id="1-用于描述数据结构"><a href="#1-用于描述数据结构" class="headerlink" title="1. 用于描述数据结构"></a>1. 用于描述数据结构</h3><p>在描述 JSON 数据时，如果数据本身的复杂度很高，高到三维四维，普通的标签函数已经无法表示这种层级结构了，而 JSON Schema 利用 <code>object</code> 和 <code>array</code> 字段类型的反复嵌套，可以规避掉这个缺陷。</p>
+<p>当然，除了键值等基本信息，规范层面还提供了丰富的关键词支持，如果想通过自定义扩展字段，解决特定场景的业务需求，也是非常方便的。</p>
+<h3 id="2-用于构建人机可读的文档"><a href="#2-用于构建人机可读的文档" class="headerlink" title="2. 用于构建人机可读的文档"></a>2. 用于构建人机可读的文档</h3><p>计算机领域有个概念叫做自描述。所谓自描述，可以理解为：文档本身包含了自身与其他文档交互相关的描述信息，不需要其他的配置文件或者额外信息来描述。</p>
+<p>而 JSON Schema 就是自描述的，它本身就是一份很完善的说明文档，字段的含义说明、该如何取值、格式的要求等都清晰明了。</p>
+<h3 id="3-用于生成模拟数据"><a href="#3-用于生成模拟数据" class="headerlink" title="3. 用于生成模拟数据"></a>3. 用于生成模拟数据</h3><p>通过标签函数生成模拟数据，只能解决基本的格式要求。比如 <code>string</code> 类型的字段，模拟出来的数据，无非是一个随机字符串。</p>
+<p>但在 JSON Schema 中，由于字段的描述不仅仅是类型，更多的约束条件，可以确保模拟数据更接近于真实数据。</p>
+<h3 id="4-用于校验数据，实现自动化测试"><a href="#4-用于校验数据，实现自动化测试" class="headerlink" title="4. 用于校验数据，实现自动化测试"></a>4. 用于校验数据，实现自动化测试</h3><p>接口数据的校验工作，往往依赖于测试代码逻辑和用例。如果用 JSON Schema 描述一个数据接口，就不需要再编写测试代码了，所有的逻辑都可以移植到 JSON Schema 中维护。配合 <code>jsv</code>、<code>tv4</code> 等二方校验工具，接口测试可以真正自动化。</p>
+<h2 id="基本约束"><a href="#基本约束" class="headerlink" title="基本约束"></a>基本约束</h2><p>在 JSON Schema 的世界里，一个空对象，可以描述和校验任意形式的 JSON 数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>下面的三份数据，如果用空对象来校验的话，都是符合要求的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">250</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;我是一个字符串&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;code&quot;: 200, &quot;data&quot;: &quot;&quot;, &quot;message&quot;: &quot;呵呵&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，如果这么玩的话，JSON Schema 就完全没有意义了。</p>
+<h3 id="type-关键字"><a href="#type-关键字" class="headerlink" title="type 关键字"></a>type 关键字</h3><p>所以，我们需要使用 <code>type</code> 关键字，将 JSON Schema 限制为特定的数据类型。比如下面这个 JSON Schema 描述，只有字符串类型的数据，才能顺利通过校验：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; &quot;type&quot;: &quot;string&quot; &#125;</span><br></pre></td></tr></table></figure>
+<p>可以校验通过：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;我是一个字符串&quot;</span><br></pre></td></tr></table></figure>
+<p>无法校验通过：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">250</span><br></pre></td></tr></table></figure>
+<p><code>type</code> 关键字也取值为其他数据类型，比如 <code>object</code>，<code>array</code> 等，当 <code>type</code> 为 <code>object</code> 类型时，<code>properties</code> 关键字是必需的，当 <code>type</code> 为 <code>array</code> 类型时，<code>items</code> 关键字是必需的。</p>
+<p>于此同时，<code>object</code> 和 <code>array</code> 类型的引入使得数据结构可以支持无限级嵌套，也就突破了我们在引子中提到的，标签函数描述过于扁平的问题。</p>
+<h3 id="title-和-description"><a href="#title-和-description" class="headerlink" title="title 和 description"></a>title 和 description</h3><p><code>title</code> 和 <code>description</code> 关键字是描述性的，并不对数据具有约束作用，只是用来对文档作补充说明：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;title&quot;: &quot;标题&quot;,</span><br><span class="line">	&quot;description&quot;: &quot;描述&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="声明-JSON-Schema"><a href="#声明-JSON-Schema" class="headerlink" title="声明 JSON Schema"></a>声明 JSON Schema</h3><p>考虑到 JSON Schema 文档本身也是 JSON 格式的，初识 JSON Schema 的人，不一定能将普通 JSON 和 JSON Schema 区分开来，于是草案提供了一个 <code>$schema</code> 关键字，专门用来声明当前文档是标准的 JSON Schema 文档，当然，这个关键词并不是必需的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; &quot;$schema&quot;: &quot;http://json-schema.org/schema#&quot; &#125;</span><br></pre></td></tr></table></figure>
+<p>实际情况中，陈旧的 JSON Schema 文档可以仍然遵循旧的草案，所以，利用 <code>$schema</code> 也能够指明具体依赖的草案版本，规避草案演进可能带来的差异问题。</p>
+<p>为了表示文档的唯一性，还可选指定一个 <code>id</code> 关键字，通常是一个具体的 URL 地址，比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; &quot;id&quot;: &quot;http://example.com/schemas/my_schema.json&quot; &#125;</span><br></pre></td></tr></table></figure>
+<p>在整个 JSON Schema 文档中，<code>id</code> 的取值一定是唯一的，就像 <code>css</code> 中的 <code>id</code> 一样在当前文档中是不可重复的。</p>
+<h2 id="简单的例子"><a href="#简单的例子" class="headerlink" title="简单的例子"></a>简单的例子</h2><p>还是以引子中提到的场景为例，尝试用 JSON Schema 语法描述标签函数，可以从一个基本轮廓开始：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;$schema&quot;: &quot;http://json-schema.org/draft-04/schema#&quot;,</span><br><span class="line">    &quot;title&quot;: &quot;TextLinks&quot;,</span><br><span class="line">    &quot;description&quot;: &quot;文字链接&quot;,</span><br><span class="line">    &quot;type&quot;: &quot;array&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，第一个维度为数组，而每个数组成员，又都是由 <code>text</code> 和 <code>href</code> 两个字段构成的对象，分别表示链接的标题和地址。因此，描述可以扩充为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;$schema&quot;: &quot;http://json-schema.org/draft-04/schema#&quot;,</span><br><span class="line">    &quot;title&quot;: &quot;TextLinks&quot;,</span><br><span class="line">    &quot;description&quot;: &quot;文字链接&quot;,</span><br><span class="line">    &quot;type&quot;: &quot;array&quot;,</span><br><span class="line">    &quot;items&quot;: &#123;</span><br><span class="line">    	&quot;type&quot;: &quot;object&quot;,</span><br><span class="line">    	&quot;properties&quot;: &#123;</span><br><span class="line">    		&quot;text&quot;: &#123;</span><br><span class="line">    			&quot;type&quot;: &quot;string&quot;,</span><br><span class="line">    			&quot;title&quot;: &quot;文字&quot;</span><br><span class="line">    		&#125;,</span><br><span class="line">    		&quot;href&quot;: &#123;</span><br><span class="line">    			&quot;type&quot;: &quot;string&quot;,</span><br><span class="line">    			&quot;title&quot;: &quot;链接地址(URL)&quot;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据标签函数的定义，对数据行数的控制，还有 <code>row</code> 和 <code>defaultRow</code> 两个附加约束，可以分别对应到 JSON Schema 规范中的最大条目限制 <code>maxItems</code> 和最小条目限制 <code>minItems</code> 两个关键字。那么，最终的数据描述就变成了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	&quot;$schema&quot;: &quot;http://json-schema.org/draft-04/schema#&quot;,</span><br><span class="line">    &quot;title&quot;: &quot;TextLinks&quot;,</span><br><span class="line">    &quot;description&quot;: &quot;文字链接&quot;,</span><br><span class="line">    &quot;type&quot;: &quot;array&quot;,</span><br><span class="line">    &quot;items&quot;: &#123;</span><br><span class="line">    	&quot;type&quot;: &quot;object&quot;,</span><br><span class="line">    	&quot;properties&quot;: &#123;</span><br><span class="line">    		&quot;text&quot;: &#123;</span><br><span class="line">    			&quot;type&quot;: &quot;string&quot;,</span><br><span class="line">    			&quot;title&quot;: &quot;文字&quot;</span><br><span class="line">    		&#125;,</span><br><span class="line">    		&quot;href&quot;: &#123;</span><br><span class="line">    			&quot;type&quot;: &quot;string&quot;,</span><br><span class="line">    			&quot;title&quot;: &quot;链接地址(URL)&quot;</span><br><span class="line">    		&#125;</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;maxItems&quot;: 10,</span><br><span class="line">    &quot;minItems&quot;: 5</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>好了，例子潦潦草草地讲完了，没有深入地展开，你可能对 JSON Schema 已经有了基本认知，也可能一头雾水。没有关系，更多细节，我们将在接下来的系列文章中娓娓道来。</p>
+<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><ul>
+<li><a href="http://json-schema.org/" target="_blank" rel="noopener">JSON Schema and Hyper-Schema</a></li>
+<li><a href="https://en.wikipedia.org/wiki/JSON#JSON_Schema" target="_blank" rel="noopener">Schema and metadata</a></li>
+<li><a href="http://tools.ietf.org/html/draft-zyp-json-schema-04" target="_blank" rel="noopener">draft-zyp-json-schema-04</a></li>
+</ul>
+<h2 id="注"><a href="#注" class="headerlink" title="注"></a>注</h2><ul>
+<li>[1]: TMS 为淘宝内部运营活动系统。</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/25/jsonschema/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/25/jsonschema/" data-id="cjt6lbxz30058jeu149oq7y7u" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/25/jsonschema/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/josn/">josn</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/schema/">schema</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/27/nodejs-ipc/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          进程间通信的另类实现
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/21/feders-should-kown-some-docker-2/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前端也应该了解点 docker 知识：docker 架构（上）</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

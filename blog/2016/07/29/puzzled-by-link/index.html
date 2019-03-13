@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>纠结的链接：ln、ln -s、fs.symlink、require | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="最近在使用 fs.symlink 实现软链时，发现文档里面写的是：fs.symlink(target, path)；然而 man ln 的时候显示的是：ln source_file target_file；而且，require 模块的时候其实还会处理软链但是处理的又不是想象中那样。于是，我彻底被相关东西绕晕。这篇文章算是我的学习笔记，希望对你有帮助。">
+<meta name="keywords" content="链接,require">
+<meta property="og:type" content="article">
+<meta property="og:title" content="纠结的链接：ln、ln -s、fs.symlink、require">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/07/29/puzzled-by-link/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="最近在使用 fs.symlink 实现软链时，发现文档里面写的是：fs.symlink(target, path)；然而 man ln 的时候显示的是：ln source_file target_file；而且，require 模块的时候其实还会处理软链但是处理的又不是想象中那样。于是，我彻底被相关东西绕晕。这篇文章算是我的学习笔记，希望对你有帮助。">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1eKetLXXXXXalXVXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1IUOkKXXXXXX2aXXXXXXXXXXX-1126-980.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1Q31gKXXXXXbLaXXXXXXXXXXX-912-438.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1mYuqKXXXXXbGXVXXXXXXXXXX-300-361.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1xOeTKXXXXXabXXXXXXXXXXXX-994-488.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1PhakKXXXXXaSaXXXXXXXXXXX-300-366.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1UrifKXXXXXXjapXXXXXXXXXX-994-618.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="纠结的链接：ln、ln -s、fs.symlink、require">
+<meta name="twitter:description" content="最近在使用 fs.symlink 实现软链时，发现文档里面写的是：fs.symlink(target, path)；然而 man ln 的时候显示的是：ln source_file target_file；而且，require 模块的时候其实还会处理软链但是处理的又不是想象中那样。于是，我彻底被相关东西绕晕。这篇文章算是我的学习笔记，希望对你有帮助。">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1eKetLXXXXXalXVXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Node-js/">Node.js</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-puzzled-by-link" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      纠结的链接：ln、ln -s、fs.symlink、require
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 栖邀</span>
+        
+        <span>发表于: <a href="/blog/2016/07/29/puzzled-by-link/" class="article-date">
+  <time datetime="2016-07-29T11:50:30.000Z" itemprop="datePublished">2016-07-29</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tfs/TB1eKetLXXXXXalXVXXXXXXXXXX-900-500.jpg" alt="纠结的链接：ln、ln -s、fs.symlink、require"></p>
+<p>最近在使用 <code>fs.symlink</code> 实现软链时，发现<a href="https://nodejs.org/api/fs.html#fs_fs_symlink_target_path_type_callback" target="_blank" rel="noopener">文档</a>里面写的是：<code>fs.symlink(target, path)</code>；然而 <code>man ln</code> 的时候显示的是：<code>ln source_file target_file</code>；而且，<code>require</code> 模块的时候其实还会处理软链但是处理的又不是想象中那样。于是，我彻底被相关东西绕晕。这篇文章算是我的学习笔记，希望对你有帮助。</p>
+<a id="more"></a>
+<h2 id="inode"><a href="#inode" class="headerlink" title="inode"></a>inode</h2><p>我们首先来看看 Linux 系统里面的一个重要概念：inode。</p>
+<p>我们知道，文件存储在硬盘上，硬盘存储的最小单位是扇区（sector，每个扇区 512 B）。而操作系统读取文件时，按块读取（连续的多个扇区），也就是说文件存取的最小单位是块（block，块通常是 4 KB）。</p>
+<p>除了文件数据，我们还必须存储文件的元信息（如：文件大小、文件创建者、文件数据的块位置、文件读/写/执行权限、文件时间戳等等），这种存储文件元信息的结构就称为 inode。我们可以使用 <code>stat</code> 命令查看文件的 inode 信息。在 Node.js 中，调用 <code>fs.stat</code> 后返回的结果中也有相关信息</p>
+<p><img src="http://img.alicdn.com/tps/TB1IUOkKXXXXXX2aXXXXXXXXXXX-1126-980.png" alt="stat"></p>
+<p>每个 inode 都有一个唯一的号码标志，Linux 系统内部使用 inode 的号码来识别文件，并不使用文件名。我们打开一个文件时，系统首先找到文件名对应的 inode 号码，然后通过 inode 号码获取 inode 信息，最后根据 inode 信息中的文件数据所在的 block 读出数据。</p>
+<p>实际上，在 Linux 系统中，目录也是一种文件。目录文件包含一系列目录项，每个目录项由两部分组成：所包含文件的文件名，以及该文件名对应的 inode 号码。我们可以使用 <code>ls -i</code> 来列出目录中的文件以及它们的 inode 号码。这其实也解释了仅更改目录的读权限，并不能实现读取目录下所有文件内容的原因，通常需要 <code>chmod -R</code> 来进行递归更改。</p>
+<p>总结下：</p>
+<ul>
+<li>硬盘存取的最小单位是扇区，文件存取的最小单位是块（连续的扇区）</li>
+<li>存储文件元信息（文件大小、创建者、块位置、时间戳、权限等非数据信息）的结构称为 inode</li>
+<li>每个 inode 拥有一个唯一号码，系统内部通过它来识别文件</li>
+<li>目录也是一种文件，其内容包含一系列目录项（每个目录项由文件的文件名和文件对应的 inode 号码组成）</li>
+</ul>
+<h2 id="硬链接和软链接"><a href="#硬链接和软链接" class="headerlink" title="硬链接和软链接"></a>硬链接和软链接</h2><h3 id="硬链接"><a href="#硬链接" class="headerlink" title="硬链接"></a>硬链接</h3><p>一般情况，一个文件名“唯一”对应一个 inode。但是，Linux 允许多个文件名都指向同一个 inode。这表示我们可以使用不同的文件名访问同样的内容；对文件内容进行修改将“反映”到所有文件；删除一个文件不影响另一个文件的访问  。这种机制就被称为“硬链接”。</p>
+<p>我们可以使用 <code>ln source target</code> 来建立硬链接（注意：<code>source</code> 是本身已存在的文件，<code>target</code> 是将要建立的链接）。</p>
+<p><img src="http://img.alicdn.com/tps/TB1Q31gKXXXXXbLaXXXXXXXXXXX-912-438.png" alt="hard link"></p>
+<p>形象化的表示为下图：</p>
+<p><img src="http://img.alicdn.com/tps/TB1mYuqKXXXXXbGXVXXXXXXXXXX-300-361.png" alt="hard link graph"></p>
+<p>需要注意的是，只能给文件建立硬链接，而不能给目录建立硬链接。另外，<code>source</code> 文件必须存在，否则将会报错。</p>
+<p>删除一个文件为什么不影响另一个文件的访问呢？实际上，文件 inode 中还有一个链接数的信息，每多一个文件指向这个 inode，该数字就会加 1，每少一个文件指向这个 inode，该数字就会减 1，当值减到 0，系统就自动回收 inode 及其对应的 block 区域。很像是一种引用计数的垃圾回收机制。</p>
+<p>当我们对某个文件建立了硬链接后，对应的 inode 的链接数会是 2（原文件本身已经有一个指向），当删除一个文件时，链接数变成 1，并没达到回收的条件，所以我们还是可以访问文件。</p>
+<h3 id="软链接"><a href="#软链接" class="headerlink" title="软链接"></a>软链接</h3><p>软链接类似于 Windows 中的”快捷方式“。两个文件虽然 inode 号码不一样，但是文件 A 内部会指向文件 B 的 inode。当我们读取文件 A 时，系统就自动导向文件 B，文件 A 就是文件 B 的软链接（或者叫符号链接）。这表示我们同样可以使用不同的文件名访问同样的内容；对文件内容修改将”反映“到所有文件。但是当我们删除掉源文件 B 时，再访问文件 A 时会报错 “No such file or directory”。</p>
+<p>我们可以使用 <code>ln -s source target</code> 来建立软链接（注意：表示让 <code>target</code> “指向” <code>source</code>）。</p>
+<p><img src="http://img.alicdn.com/tps/TB1xOeTKXXXXXabXXXXXXXXXXXX-994-488.png" alt="soft link"></p>
+<p>形象化的表示为下图：</p>
+<p><img src="http://img.alicdn.com/tps/TB1PhakKXXXXXaSaXXXXXXXXXXX-300-366.png" alt="soft link graph"></p>
+<p>和硬链接不同，我们可以给目录建立软链接，这带来许多便利。比如我们有一个模块有很多个版本，分别存放在 1.0.0、2.0.0 这样的目录下面，当更新模块时，只需要建立一个软链接指向最新版本号的目录就能很方便的切换版本。</p>
+<p>另外，建立软链接时，<code>source</code> 是可以不存在的。这很像一种”运行时“机制，而不是“编译时”机制，建立的时候不报错，等执行的时候发现找不到就报错了。</p>
+<p><img src="http://img.alicdn.com/tps/TB1UrifKXXXXXXjapXXXXXXXXXX-994-618.png" alt="danggling soft link"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>使用 <code>ln source target</code> 建立硬链接；使用 <code>ln -s source target</code> 建立软链接</li>
+<li>硬链接不会创建额外 inode，和源文件共用同一个 inode；软链接会创建额外一个文件（额外 inode），指向源文件的 inode</li>
+<li>建立硬链接时，<code>source</code> 必须存在且只能是文件；建立软链接时，<code>source</code> 可以不存在而且可以是目录</li>
+<li>删除源文件不会影响硬链接文件的访问（因为 inode 还在）；删除源文件会影响软链接文件的访问（因为指向的 inode 已经不存在了）</li>
+<li>对于已经建立的同名链接，不能再次建立，除非删掉或者使用 <code>-f</code> 参数</li>
+</ul>
+<h3 id="关于软链接的补充"><a href="#关于软链接的补充" class="headerlink" title="关于软链接的补充"></a>关于软链接的补充</h3><p>上面的例子 <code>ln -s file file-soft</code> 给我们的感觉像是 <code>file-soft</code> 是“凭空”出现的。当我们跨目录来创建软链接时，可能会“幻想”这样的命令也是可以生效的：<code>ln -s ~/development/mod ~/production/dir-not-exits/mod</code>。</p>
+<p>这里并没有 <code>~/production/dir-not-exits/</code> 这个目录，而软链接本质上是一个新的“文件”，所以，我们不可能正确建立软链接（会报错说 “no such file or directory”）。</p>
+<p>如果我们先通过 <code>mkdir</code> 建立好目录 <code>~/production/dir-not-exits/</code>，再进行软链接，即可达到预期效果。</p>
+<h2 id="fs-symlink"><a href="#fs-symlink" class="headerlink" title="fs.symlink"></a>fs.symlink</h2><p>在 Node.js 中，我们可以使用方法 <code>fs.symink(target, path)</code> 建立软链接（符号链接），没有直接的方法建立硬链接（就算通过子进程的方式直接指向 shell 命令也不能跨平台）。</p>
+<p>如果是对目录建立链接，请总是传递第三个参数 <code>dir</code>（虽然第三个参数只在 Windows 下生效，这可以保证代码跨平台）：<code>fs.symlink(target, path, &#39;dir&#39;)</code>。</p>
+<p>为啥这个接口的参数会是 <code>target</code> 和 <code>path</code>。实际上这是一个 Linux 的 API，<a href="http://man7.org/linux/man-pages/man2/symlink.2.html" target="_blank" rel="noopener">symlink(target, linkpath)</a>。它是这样描述的：建立一个名为 <code>linkpath</code> 的符号链接并且含有内容 <code>target</code>。其实就是让 <code>linkpath</code> 指向 <code>target</code>，和 <code>ln -s source target</code> 功能一样，让 <code>target</code> 指向 <code>source</code>。</p>
+<p>是不是有点晕？其实我们只需要明白 <code>ln -s</code> 和 <code>fs.symlink</code> 后面传递的两个参数顺序是一致的，只是叫法不一样，使用起来也就没那么纠结了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ln -s file file-soft <span class="comment"># file-soft -&gt; file</span></span><br><span class="line">ln -s dir dir-soft <span class="comment"># dir-soft -&gt; dir</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fs.symlinkSync(<span class="string">'file'</span>, <span class="string">'file-soft'</span>); <span class="comment">// file-soft -&gt; file</span></span><br><span class="line">fs.symlinkSync(<span class="string">'dir'</span>, <span class="string">'dir-soft'</span>, <span class="string">'dir'</span>); <span class="comment">// dir-soft -&gt; dir</span></span><br></pre></td></tr></table></figure>
+<h2 id="require"><a href="#require" class="headerlink" title="require"></a>require</h2><p>在 Node.js 中，我们经常通过 <code>require</code> 来引用模块。非常有趣的是，<code>require</code> 引用模块时，会“考虑”符号链接，但是却使用模块的真实路径作为 <code>__filename</code>、<code>__dirname</code>，而不是符号链接的路径。</p>
+<p>考虑下面的目录结构：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- app</span><br><span class="line">  - index.js // require(<span class="string">'dep1'</span>)</span><br><span class="line">  - node_modules</span><br><span class="line">    - dep1 -&gt; ../../mods/dep1 //符号链接</span><br><span class="line">- mods</span><br><span class="line">  - dep1</span><br><span class="line">    - index.js</span><br></pre></td></tr></table></figure>
+<p>以及下面的文件内容：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'index.js'</span>, __dirname, __filename);</span><br><span class="line"><span class="built_in">require</span>(<span class="string">'dep1'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// dep1/index.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'dep1'</span>, __dirname, __filename);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">module</span>.paths);</span><br></pre></td></tr></table></figure>
+<p>执行 <code>node index.js</code> 后输出是下面这样：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">index.js /Users/kohpoll/Workspace/<span class="built_in">test</span>/app /Users/kohpoll/Workspace/<span class="built_in">test</span>/app/index.js</span><br><span class="line"></span><br><span class="line">dep1 /Users/kohpoll/Workspace/<span class="built_in">test</span>/mods/dep1 /Users/kohpoll/Workspace/<span class="built_in">test</span>/mods/dep1/index.js</span><br><span class="line">[ <span class="string">'/Users/kohpoll/Workspace/test/mods/dep1/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/Workspace/test/mods/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/Workspace/test/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/Workspace/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/node_modules'</span>,</span><br><span class="line">  <span class="string">'/node_modules'</span> ]</span><br></pre></td></tr></table></figure>
+<p>我们发现，<code>index.js</code> 可以成功的 <code>require(&#39;dep1&#39;)</code>。这很好啊，这让我们调试本地开发中的 npm 模块很方便。我们只需要去 <code>require</code> 模块的文件所在的 <code>node_modules</code> 下面建立一个符号链接就行了。</p>
+<p>但是在模块 <code>dep1</code> 中，<code>__dirname</code>、<code>__filename</code> 都变成了模块实际的路径，更要命的是模块查找路径 <code>module.paths</code> 也变成了从实际路径开始查找。</p>
+<p>这会带来什么问题？</p>
+<p>再考虑下面的目录结构：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- app</span><br><span class="line">  - index.js // require(<span class="string">'dep1'</span>)</span><br><span class="line">  - node_modules</span><br><span class="line">    - dep1 -&gt; ../../mods/dep1 // require(<span class="string">'dep2'</span>)</span><br><span class="line">    - dep2 -&gt; ../../mods/dep2 // 符号连接</span><br><span class="line">- mods</span><br><span class="line">  - dep1</span><br><span class="line">    - index.js</span><br><span class="line">  - dep2</span><br><span class="line">    - index.js</span><br></pre></td></tr></table></figure>
+<p>以及下面的文件内容：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'index.js'</span>, __dirname, __filename);</span><br><span class="line"><span class="built_in">require</span>(<span class="string">'dep1'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// dep1/index.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'dep1'</span>, __dirname, __filename);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">module</span>.paths);</span><br><span class="line"><span class="built_in">require</span>(<span class="string">'dep2'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// dep2/index.js</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'dep2'</span>, __dirname, __filename);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">module</span>.paths);</span><br></pre></td></tr></table></figure>
+<p>当我们再执行 <code>node index.js</code> 时，输出是下面这样：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">index.js /Users/kohpoll/Workspace/<span class="built_in">test</span>/app /Users/kohpoll/Workspace/<span class="built_in">test</span>/app/index.js</span><br><span class="line"></span><br><span class="line">dep1 /Users/kohpoll/Workspace/<span class="built_in">test</span>/mods/dep1 /Users/kohpoll/Workspace/<span class="built_in">test</span>/mods/dep1/index.js</span><br><span class="line">[ <span class="string">'/Users/kohpoll/Workspace/test/mods/dep1/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/Workspace/test/mods/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/Workspace/test/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/Workspace/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/kohpoll/node_modules'</span>,</span><br><span class="line">  <span class="string">'/Users/node_modules'</span>,</span><br><span class="line">  <span class="string">'/node_modules'</span> ]</span><br><span class="line">  </span><br><span class="line">module.js:339</span><br><span class="line">    throw err;</span><br><span class="line">    ^</span><br><span class="line">Error: Cannot find module <span class="string">'dep2'</span></span><br><span class="line">    at Function.Module._resolveFilename (module.js:337:15)</span><br><span class="line">    at Function.Module._load (module.js:287:25)</span><br><span class="line">    at Module.require (module.js:366:17)</span><br><span class="line">    at require (module.js:385:17)</span><br><span class="line">    at Object.&lt;anonymous&gt; (/Users/kohpoll/Workspace/<span class="built_in">test</span>/mods/dep1/index.js:6:1)</span><br><span class="line">    at Module._compile (module.js:435:26)</span><br><span class="line">    at Object.Module._extensions..js (module.js:442:10)</span><br><span class="line">    at Module.load (module.js:356:32)</span><br><span class="line">    at Function.Module._load (module.js:311:12)</span><br><span class="line">    at Module.require (module.js:366:17)</span><br></pre></td></tr></table></figure>
+<p>发现了吗？<code>dep1</code> 根本就 <code>require</code> 不到 <code>dep2</code>，因为 <code>dep2</code> 不在它的查找路径里面！</p>
+<p>关于这个问题，github 上有一个冗长的 issue 在讨论。问题解决起来确实很麻烦，而且会 break 掉一大堆已有功能，所以，最终的结论是在找到更好的方法前给 Node.js v6 增加了一个 <code>--preserve-symlinks</code> 选项来禁止这种 <code>require</code> 的行为，而是使用全新的 <code>require</code> 逻辑。有兴趣和闲情的可以去围观：<a href="https://github.com/nodejs/node/issues/3402" target="_blank" rel="noopener">https://github.com/nodejs/node/issues/3402</a>（真的好长……）。</p>
+<p>至于全新的 <code>require</code> 逻辑会不会有新的坑，在没有具体实践前，我也不知道。</p>
+<p>那我们上面的情况有办法解决吗？其实也有，那就是将目录结构调整成下面这样，从而让 <code>dep2</code> 能在 <code>dep1</code> 的查找路径里面：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- app</span><br><span class="line">  - index.js // require(<span class="string">'dep1'</span>)</span><br><span class="line">  - node_modules</span><br><span class="line">    - dep1 -&gt; ../../mods/node_modules/dep1 // 软链接</span><br><span class="line">    - dep2 -&gt; ../../mods/node_modules/dep2 // 软连接</span><br><span class="line">- mods</span><br><span class="line">  - node_modules</span><br><span class="line">    - dep1</span><br><span class="line">      - index.js</span><br><span class="line">    - dep2</span><br><span class="line">      - index.js</span><br></pre></td></tr></table></figure>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><ul>
+<li><a href="http://www.ruanyifeng.com/blog/2011/12/inode.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2011/12/inode.html</a></li>
+<li><a href="http://www.geekride.com/hard-link-vs-soft-link/" target="_blank" rel="noopener">http://www.geekride.com/hard-link-vs-soft-link/</a></li>
+<li><a href="http://man7.org/linux/man-pages/man2/symlink.2.html" target="_blank" rel="noopener">http://man7.org/linux/man-pages/man2/symlink.2.html</a></li>
+<li><a href="https://nodejs.org/api/fs.html" target="_blank" rel="noopener">https://nodejs.org/api/fs.html</a></li>
+<li><a href="https://github.com/nodejs/node/issues/3402" target="_blank" rel="noopener">https://github.com/nodejs/node/issues/3402</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/07/29/puzzled-by-link/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/07/29/puzzled-by-link/" data-id="cjt6lby14009ujeu1n3wmi04f" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/07/29/puzzled-by-link/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/require/">require</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/链接/">链接</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/08/05/instructions-of-semver/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          论版本号的正确打开方式
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/07/22/es6-basics/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">ES6 你可能不知道的事 - 基础篇</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

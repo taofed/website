@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>无线性能优化：页面可见时间与异步加载 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="如何让页面尽可能早地渲染页面，页面更早可见，让白屏时间更短，尤其是无线环境下，一直是性能优化的话题。 页面可见时间页面可见要经历以下过程：  解析 HTML 为 DOM，解析 CSS 为 CSSOM（CSS Object Model） 将 DOM 和 CSSOM 合成一棵渲染树（render tree） 完成渲染树的布局（layout） 将渲染树绘制到屏幕   layout  由于 JS 可能随">
+<meta name="keywords" content="无线性能优化,页面可见时间,异步加载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无线性能优化：页面可见时间与异步加载">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/01/20/mobile-wpo-pageshow-async/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="如何让页面尽可能早地渲染页面，页面更早可见，让白屏时间更短，尤其是无线环境下，一直是性能优化的话题。 页面可见时间页面可见要经历以下过程：  解析 HTML 为 DOM，解析 CSS 为 CSSOM（CSS Object Model） 将 DOM 和 CSSOM 合成一棵渲染树（render tree） 完成渲染树的布局（layout） 将渲染树绘制到屏幕   layout  由于 JS 可能随">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1ybHcLpXXXXceaXXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1U89HLpXXXXaxXXXXXXXXXXXX-759-352.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1nZyyLpXXXXbCXpXXXXXXXXXX-610-274.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB10ruuLpXXXXaEXFXXXXXXXXXX-1853-779.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1e4yFLpXXXXcHXXXXXXXXXXXX-1395-224.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1bIilLpXXXXX2XVXXXXXXXXXX-1394-225.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="无线性能优化：页面可见时间与异步加载">
+<meta name="twitter:description" content="如何让页面尽可能早地渲染页面，页面更早可见，让白屏时间更短，尤其是无线环境下，一直是性能优化的话题。 页面可见时间页面可见要经历以下过程：  解析 HTML 为 DOM，解析 CSS 为 CSSOM（CSS Object Model） 将 DOM 和 CSSOM 合成一棵渲染树（render tree） 完成渲染树的布局（layout） 将渲染树绘制到屏幕   layout  由于 JS 可能随">
+<meta name="twitter:image" content="http://img.alicdn.com/tps/TB1ybHcLpXXXXceaXXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-mobile-wpo-pageshow-async" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      无线性能优化：页面可见时间与异步加载
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 妙净</span>
+        
+        <span>发表于: <a href="/blog/2016/01/20/mobile-wpo-pageshow-async/" class="article-date">
+  <time datetime="2016-01-20T11:22:59.000Z" itemprop="datePublished">2016-01-20</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://img.alicdn.com/tps/TB1ybHcLpXXXXceaXXXXXXXXXXX-900-500.jpg" alt="无线性能优化：页面可见时间与异步加载"></p>
+<p>如何让页面尽可能早地渲染页面，页面更早可见，让白屏时间更短，尤其是无线环境下，一直是性能优化的话题。</p>
+<h2 id="页面可见时间"><a href="#页面可见时间" class="headerlink" title="页面可见时间"></a>页面可见时间</h2><p>页面可见要经历以下过程：</p>
+<ul>
+<li>解析 HTML 为 DOM，解析 CSS 为 CSSOM（CSS Object Model）</li>
+<li>将 DOM 和 CSSOM 合成一棵渲染树（<a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction?hl=zh-cn" target="_blank" rel="noopener">render tree</a>）</li>
+<li>完成渲染树的布局（layout）</li>
+<li>将渲染树绘制到屏幕</li>
+</ul>
+<p><img src="http://img.alicdn.com/tps/TB1U89HLpXXXXaxXXXXXXXXXXXX-759-352.jpg" alt></p>
+<p>layout</p>
+<p><img src="http://img.alicdn.com/tps/TB1nZyyLpXXXXbCXpXXXXXXXXXX-610-274.jpg" alt></p>
+<p>由于 JS 可能随时会改变 <code>DOM</code> 和 <code>CSSOM</code>，当页面中有大量的 JS 想立刻执行时，浏览器下载并执行，直到完成 CSSOM 下载与构建，而在我们等待时，DOM 构建同样被阻塞。为了 JS 不阻塞 DOM 和 CSSDOM 的构建，不影响首屏可见的时间，测试几种 JS 加载策略对页面可见的影响：</p>
+<h2 id="几种异步加载方式测试"><a href="#几种异步加载方式测试" class="headerlink" title="几种异步加载方式测试"></a>几种异步加载方式测试</h2><ul>
+<li>A. head script: 即普通的将 JS 放在 <code>head</code> 中或放在 <code>body</code> 中间：<a href="http://codepen.io/taobaofed/pen/LGOdRX" target="_blank" rel="noopener">DEMO 地址</a></li>
+<li>B. bottom script: 即常规的优化策略，JS 放<code>body</code>的底部：<a href="http://codepen.io/taobaofed/pen/NxwYpR" target="_blank" rel="noopener">DEMO 地址</a></li>
+<li><p>C. document.write: 以前 PC 优化少用的一种异步加载 JS 的策略：<a href="http://codepen.io/taobaofed/pen/yePKoz" target="_blank" rel="noopener">DEMO 地址</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function injectWrite(src)&#123;</span><br><span class="line">  document.write(&apos;&lt;script src=&quot;&apos; + src + &apos;&quot;&gt;&lt;/sc&apos; + &apos;ript&gt;&apos;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>D. getScript: 形如以下，也是 KISSY 内部的<code>getScript</code>函数的简易实现：<a href="http://codepen.io/taobaofed/pen/VerXzO" target="_blank" rel="noopener">DEMO 地址</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">  var script = document.createElement(&apos;script&apos;);</span><br><span class="line">  script.src = &quot;//g.tbcdn.com/xx.js&quot;;</span><br><span class="line">  document.getElementsByTagName(&apos;head&apos;)[0].appendChild(script);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>E. 加 <code>async</code> 属性：<a href="http://codepen.io/taobaofed/pen/eJeMRV" target="_blank" rel="noopener">DEMO 地址</a></p>
+</li>
+<li>F. 加 <code>defer</code> 属性：<a href="http://codepen.io/taobaofed/pen/BjmrdK" target="_blank" rel="noopener">DEMO 地址</a></li>
+<li>G. 同时加 <code>async</code> <code>defer</code> 属性：<a href="http://codepen.io/taobaofed/pen/adVYWa" target="_blank" rel="noopener">DEMO 地址</a></li>
+</ul>
+<h3 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h3><p>以下提到的 <code>domReady</code> 同 <code>DOMContentLoaded</code> 事件。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th>A (head script)</th>
+<th>B (bottom script)</th>
+<th>C (document.write)</th>
+<th>D (getScript)</th>
+<th>E (async)</th>
+<th>F (defer)</th>
+<th>G (async + defer)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>PC Chrome</td>
+<td>页面白屏长、domReady:5902.545、onLoad:5931.48</td>
+<td>页面先显示、domReady:5805.21、onLoad:5838.255</td>
+<td>页面先显示、domReady:5917.95、onLoad:5949.30</td>
+<td>页面先显示、domReady:244.41、onLoad:5857.645</td>
+<td>页面先显示、domReady:567.01、onLoad:5709.33</td>
+<td>页面先显示、domReady:5812.12、onLoad:5845.6</td>
+<td>页面先显示、domReady:576.12、onLoad:5743.79</td>
+</tr>
+<tr>
+<td>2</td>
+<td>iOS Safari</td>
+<td>页面白屏长、domReady:6130、onLoad:6268.41</td>
+<td>页面白屏长、domReady:5175.80、onLoad:5182.75</td>
+<td>页面白屏长、domReady:5617.645、onLoad:5622.115</td>
+<td>502s 白屏然后页面显示最后变更 load finish 时间、domReady:502.71、onLoad:6032.95</td>
+<td>508s 白屏然后页面显示最后变更 load finish time domReady:508.95、onLoad:5538.135</td>
+<td>页面白屏长、domReady:5178.98、onLoad:5193.58</td>
+<td>556s 白屏然后页面显示最后变更 load finish 时间、domReady:556、onLoad:5171.95</td>
+</tr>
+<tr>
+<td>3</td>
+<td>iOS 手淘 WebView</td>
+<td>页面白屏长、页面出现 loading 消失、domReady: 5291.29、onLoad:5292.78</td>
+<td>页面白屏长、页面未跳转 loading 消失、domReady: 5123.46、onLoad:5127.85</td>
+<td>页面白屏长、页面未跳转 loading 消失、domReady: 5074.86、onLoad:5079.875</td>
+<td>页面可见快、loading 消失快在 domReady 稍后、domReady:14.06、load finish:5141.735</td>
+<td>页面可见快、loading 消失快在 domReady 稍后、domReady:13.89、load finish:5157.15</td>
+<td>页面白屏长、loading 先消失再出现页面、domReady: 5132.395、onLoad:5137.52</td>
+<td>页面可见快、然后 loading 消失、domReady:13.49、load finish:5124.08</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Android browser</td>
+<td>页面白屏长、domReady: 5097.29、onLoad:5100.37</td>
+<td>页面白屏长、domReady: 5177.48、onLoad:5193.66</td>
+<td>页面白屏长、domReady: 5125.96、onLoad:5165.06</td>
+<td>页面可见快、等 5s 后更新 load finish 时间 domReady:463.33、load finish:5092.90</td>
+<td>页面可见快、等 5s 后更新 load finish 时间 domReady:39.34、load finish:5136.55</td>
+<td>页面白屏长、domReady: 5092.45、onLoad:5119.81</td>
+<td>页面可见快、等 5s 后更新 load finish 时间 domReady:50.49、load finish:5507.668</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Android 手淘 WebView</td>
+<td>白屏时间长、一直 loading 直接页面可见、domReady:5058.91、onLoad:5073.81</td>
+<td>页面立即可见、loading 消失快、等 5s 后更新 domReady 时间和 load 时间 domReady:4176.34、onLoad:4209.50</td>
+<td>页面立即可见、loading 消失快、domReady:6011.18、onLoad:6031.93</td>
+<td>页面可见快、loading 之后消失、等 5s 后更新 load finish 时间 domReady:36.31、load finish:5081.76</td>
+<td>页面可见快、loading 随后消失、等 5s 后更新 load finish 时间 domReady:25.11、load finish:5113.81</td>
+<td>页面可见快、loading 随后消失、等 5s 后更新 domReady 时间和 load 时间  domReady:5213.11、load finish:5312.19</td>
+<td>页面可见快、loading 随后消失、等 5s 后更新 load finish 时间 domReady:89.67、load finish:5589.95</td>
+</tr>
+</tbody>
+</table>
+<p>从以上测试结果可以看出以下结论：</p>
+<ul>
+<li>横向看， iOS Safari 和 Android browser 的在页面可见、domReady、onLoad 的时间表现一致。</li>
+<li>纵向看，bottom script、document.write 和 defer 三列，可知 document.write 和 defer 无任何异步效果，可见时间、domReady、onLoad 的触发时间和 bottom script 的情况一致。</li>
+<li>纵向看，async + defer 联合用和 async 的表现一致，故合并为 async。</li>
+<li>纵向看，script 放页头（head script）和 script 放 body 底部（bottom script）。iOS Safari 、Android browser 和 iOS WebView 表现一致，即使 script 放在 body 的底部也无济于事，页面白屏时间长，要等到 domReady 5s 多后结束才显示页面；唯独 Android WebView 的表现和 PC 的 Chrome 一致。</li>
+<li>单纯看手淘 WebView 容器中 loading 消失的时间，这个时间点 iOS 和 Android 的表现一致，即都是在 UIWebView 的 didFinishLoad 事件触发时消失。这个事件的触发可能在 domReady 之前（如：A3、B3），也可能在 domReady 之后（如：D3、E3）；这个事件触发和 JS 中的 onLoad 触发时机也没有必然的联系，可能在 onLoad 之前（如：D3、E3）也可能在 onLoad 几乎同时（如：A5）。 didiFinishLoad 到底是什么时机触发的呢，详见下章。</li>
+<li>页面可见时间，getScript 方式和 async 方式页面可见都非常快，domReady 的时间触发得也非常快，客户端的 loading 在 domReady 稍后即消失。原因是因为<a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/adding-interactivity-with-javascript?hl=zh-cn" target="_blank" rel="noopener">最后耗时的 JS 请求异步化了</a>，没有阻塞浏览器的 DOM + CSSOM 构建，页面渲染完成就立刻可见了。整体看，如果 domReady 的时间快，则页面可见快；反之如果页面可见快，domReady 的时间不一定快，如 B5、B1、C1、C5、F1、F5。如果异步化耗时长的 JS，domReady 和 onLoad 的时间差距是很大的，不做任何处理 onLoad 的时间 domReady 的时间差 30ms 左右。所以在异步化的前提下，可以用 domReady 的时间作为页面可见的时间。</li>
+</ul>
+<h2 id="didFinishLoad-到底什么时候触发"><a href="#didFinishLoad-到底什么时候触发" class="headerlink" title="didFinishLoad 到底什么时候触发"></a>didFinishLoad 到底什么时候触发</h2><p>didFinishLoad 是 native 定义的事件，该事件触发时手淘 loading 菊花消失，并且 windvane 中的发出请求不再收集，也就是 native 统计出的 pageLoad 时间。在用户数据平台看到的瀑布流请求，就是在 didFinishLoad 触发前收集到的所有请求。</p>
+<p><img src="https://img.alicdn.com/tps/TB10ruuLpXXXXaEXFXXXXXXXXXX-1853-779.jpg" alt></p>
+<p>经过上方测试，客户端的 didFinisheLoad 事件的触发和 JS 中的 domReady（DOMContentLoaded）和 onLoad 触发没有任何关联。可能在 domReady 之前或之后，也可能在 onLoad 之前或之后。</p>
+<p>那它到底是什么时候触发呢？ <a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIWebViewDelegate_Protocol/#//apple_ref/occ/intfm/UIWebViewDelegate/webViewDidFinishLoad:" target="_blank" rel="noopener">iOS 官方文档</a> 是 Sent after a web view finishes loading a frame。 结合收集的用户请求和测试，didFinishLoad 是在连续发起的请求结束之后触发，监听一段时间内无请求则触发。</p>
+<p>所以经常会看到 data_sufei 这个 JS 文件，在有些用户的瀑布流里面有，在有些用户的又没有。原因是这个 JS 是 aplus_wap.js 故意 setTimeout 1s 后发出的，如果页面在 1s 前所有的请求都发完了则触发 didFinishLoad，后面的 data_sufei.js 的时间就不算到 pageLoad 的时间；反之如果接近 1s 页面还有图片等请求还在发，则 data_sufei.js 的时间也会被算到里面。</p>
+<p>因此在 JS 中用 setTimeout 来延迟发送请求也有可能会影响 didFinishLoad 的时间，建议 setTimeout 的时间设置得更长一点，如 3s。</p>
+<h2 id="async-和-defer"><a href="#async-和-defer" class="headerlink" title="async 和 defer"></a>async 和 defer</h2><p>script 标签上可以添加 defer 和 async 属性来优化此 script 的下载和执行。</p>
+<h3 id="defer-：延迟"><a href="#defer-：延迟" class="headerlink" title="defer ：延迟"></a>defer ：延迟</h3><p>HTML 4.0 规范，其作用是，告诉浏览器，等到 DOM+CSSOM 渲染完成，再执行指定脚本。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script defer src=&quot;xx.js&quot;&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<ul>
+<li>浏览器开始解析 HTML 网页</li>
+<li>解析过程中，发现带有 defer 属性的 script 标签</li>
+<li>浏览器继续往下解析 HTML 网页，解析完就渲染到页面上，同时并行下载 script 标签中的外部脚本</li>
+<li>浏览器完成解析 HTML 网页，此时再执行下载的脚本，完成后触发 DOMContentLoaded</li>
+</ul>
+</blockquote>
+<p>下载的脚本文件在 DOMContentLoaded 事件触发前执行（即刚刚读取完\&lt;\/html&gt;标签），而且可以保证执行顺序就是它们在页面上出现的顺序。所以 添加 defer 属性后，domReady 的时间并没有提前，但它可以让页面更快显示出来。</p>
+<p>将放在页面上方的 script 加 defer，在 PC Chrome 下其效果相当于 把这个 script 放在底部，页面会先显示。 但对 iOS Safari 和 iOS WebView 加 defer 和 script 放底部一样都是长时间白屏。</p>
+<h3 id="async-异步"><a href="#async-异步" class="headerlink" title="async: 异步"></a>async: 异步</h3><p>HTML 5 规范，其作用是，使用另一个进程下载脚本，下载时不会阻塞渲染，并且下载完成后立刻执行。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script async src=&quot;yy.js&quot;&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<ul>
+<li>浏览器开始解析 HTML 网页</li>
+<li>解析过程中，发现带有 async 属性的 script 标签</li>
+<li>浏览器继续往下解析 HTML 网页，解析完先显示页面并触发 DOMContentLoaded，同时并行下载 script 标签中的外部脚本</li>
+<li>脚本下载完成，浏览器暂停解析 HTML 网页，开始执行下载的脚本</li>
+<li>脚本执行完毕，浏览器恢复解析 HTML 网页</li>
+</ul>
+</blockquote>
+<p>async 属性可以保证脚本下载的同时，浏览器继续渲染。但是 async 无法保证脚本的执行顺序。哪个脚本先下载结束，就先执行那个脚本。</p>
+<h3 id="如何选择-async-和-defer"><a href="#如何选择-async-和-defer" class="headerlink" title="如何选择 async 和 defer"></a>如何选择 async 和 defer</h3><ul>
+<li><code>defer</code> 可以保证执行顺序，<code>async</code> 不行【注：&lt;=IE 9 defer 执行顺序有 bug，但可以 <a href="https://github.com/h5bp/lazyweb-requests/issues/42" target="_blank" rel="noopener">hack</a>】</li>
+<li><code>async</code> 可以提前触发 <code>domReady</code>，<code>defer</code> 不行【注：Firefox 的 <code>defer</code> 也可以提前触发 <code>domready</code>】</li>
+<li><code>defer</code> 在 iOS 和部分 Android 下依然阻塞渲染，白屏时间长。</li>
+<li>当 script 同时加 <code>async</code> 和 <code>defer</code> 属性时，后者不起作用，浏览器行为由 <code>async</code> 属性决定。</li>
+<li><code>async</code> 和 <code>defer</code> 的兼容性不一致，好在 <code>async</code> 和 <code>defer</code> 无线端基本都支持，<code>async</code> 不支持 IE 9-。<br>附 <a href="http://caniuse.com/#search=async" target="_blank" rel="noopener">async 兼容性</a> <a href="http://caniuse.com/#search=defer" target="_blank" rel="noopener">defer 兼容性</a></li>
+</ul>
+<h2 id="script-inject-和-async"><a href="#script-inject-和-async" class="headerlink" title="script inject 和 async"></a>script inject 和 async</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">  &lt;!-- BAD --&gt;</span><br><span class="line">&lt;script src=&quot;//g.alicdn.com/large.js&quot;&gt;&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- GOOD --&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">  var script = document.createElement(&apos;script&apos;);</span><br><span class="line">  script.src = &quot;//g.alicdn.com/large.js&quot;;</span><br><span class="line">  document.getElementsByTagName(&apos;head&apos;)[0].appendChild(script);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>我们通常用这种 inject script 的方式来异步加载文件，特别是以前 <code>Sea.js</code>、<code>KISSY</code> 的盛行时，出现大量使用<code>$.use</code> 来加载页面入口文件。这种方式和 <code>async</code> 的一样都能异步化 JS，不阻塞页面渲染。但真的是最快的吗？</p>
+<p>一个常见的页面如下：一个 CSS，两个异步的 JS</p>
+<p>JS 使用 script inject 的方式测试结果如下，<a href="http://codepen.io/taobaofed/pen/YwEYgx" target="_blank" rel="noopener">DEMO</a>：</p>
+<p><img src="http://img.alicdn.com/tps/TB1e4yFLpXXXXcHXXXXXXXXXXXX-1395-224.jpg" alt></p>
+<p>JS 使用 async 的方式测试结果如下， <a href="http://codepen.io/taobaofed/pen/pgdaev" target="_blank" rel="noopener">DEMO</a>：</p>
+<p><img src="http://img.alicdn.com/tps/TB1bIilLpXXXXX2XVXXXXXXXXXX-1394-225.jpg" alt></p>
+<p>对比结果发现，通过 <code>&lt;script async&gt;</code> 的方式的 JS 可以和 CSS 并发下载，这样整个页面 load 时间变得更短，JS 更快执行完，这样页面的交互或数据等可以更快更新。为什么呢？因为浏览器有类似 ‘<a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/adding-interactivity-with-javascript?hl=zh-cn" target="_blank" rel="noopener">preload scanner</a>’ 的功能，在 HTML 解析时就可以提前并发去下载 JS 文件，如果把 JS 的文件隐藏在 JS 逻辑中，浏览器就没这么智能发现了。</p>
+<p>也许大家会说，现在 CSS/JS 都预加载到客户端了，怎么加载不重要。但页面有可能分享出去也有可能运行在浏览器中，也有可能预加载失效。</p>
+<p>综合上面 async 和 defer，推荐以下用法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 现代浏览器用 &apos;async&apos;, ie9-用 &apos;defer&apos; --&gt;</span><br><span class="line">&lt;script src=&quot;//g.alicdn.com/alilog/mlog/aplus_wap.js&quot; async defer&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>其实现在无线站点 aplus.js 可以完全用这种方式引入，既不会阻塞 <code>DOM</code> 和<code>CSSOM</code>，也不会延长整个页面 <code>onLoad</code> 时间，而不是原来的 PC 上的 <code>script inject</code>方式。</p>
+<p>如果 aplus.js 在 PC 上这么用，IE 8/IE 9 应用的是 defer 属性，不会阻塞页面渲染，但是这个 JS 需要执行完后才触发 domReady（DOMContentLoaded）事件，故在 IE 8/IE 9 下可能会影响 domReady 的时间。</p>
+<h2 id="最后建议"><a href="#最后建议" class="headerlink" title="最后建议"></a>最后建议</h2><ul>
+<li>业务 JS 尽量异步，放 body 底部的 JS 在 iOS 上和部分 Android 是无效的，依然会阻塞首屏渲染。</li>
+<li>异步的方式尽可能原生用<code>async</code>，容器（浏览器、webview 等）级别自带优化，不要通过 JS 去模拟实现，如 <code>getScript/ajax/KISSY.use/$.use</code> 等。</li>
+<li>有顺序依赖关系的 JS 可以加 defer，不改变执行顺序，相当于放到页面底部，如 TMS head 中一时无法挪动位置的类库等。</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="http://javascript.ruanyifeng.com/bom/engine.html#toc5" target="_blank" rel="noopener">http://javascript.ruanyifeng.com/bom/engine.html#toc5</a></li>
+<li><a href="http://www.stevesouders.com/blog/2013/11/16/async-ads-with-html-imports/" target="_blank" rel="noopener">http://www.stevesouders.com/blog/2013/11/16/async-ads-with-html-imports/</a></li>
+<li><a href="https://www.igvita.com/2014/05/20/script-injected-async-scripts-considered-harmful/" target="_blank" rel="noopener">https://www.igvita.com/2014/05/20/script-injected-async-scripts-considered-harmful/</a></li>
+<li><a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction?hl=zh-cn" target="_blank" rel="noopener">https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-tree-construction?hl=zh-cn</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/01/20/mobile-wpo-pageshow-async/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/01/20/mobile-wpo-pageshow-async/" data-id="cjt6lbxzj006ejeu1vgn9wplb" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/01/20/mobile-wpo-pageshow-async/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异步加载/">异步加载</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/无线性能优化/">无线性能优化</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/页面可见时间/">页面可见时间</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/21/feders-should-kown-some-docker-2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          前端也应该了解点 docker 知识：docker 架构（上）
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/01/19/feders-should-kown-some-docker-1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">前端也应该了解点 docker 知识：docker 的理念与场景</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

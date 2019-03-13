@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>细说 webpack 之流程篇 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="引言目前，几乎所有业务的开发构建都会用到 webpack 。的确，作为模块加载和打包神器，只需配置几个文件，加载各种 loader 就可以享受无痛流程化开发。但对于 webpack 这样一个复杂度较高的插件集合，它的整体流程及思想对我们来说还是很透明的。那么接下来我会带你了解 webpack 这样一个构建黑盒，首先来谈谈它的流程。 准备工作1. webstorm 中配置 webpack-webs">
+<meta name="keywords" content="webpack">
+<meta property="og:type" content="article">
+<meta property="og:title" content="细说 webpack 之流程篇">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/09/09/webpack-flow/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="引言目前，几乎所有业务的开发构建都会用到 webpack 。的确，作为模块加载和打包神器，只需配置几个文件，加载各种 loader 就可以享受无痛流程化开发。但对于 webpack 这样一个复杂度较高的插件集合，它的整体流程及思想对我们来说还是很透明的。那么接下来我会带你了解 webpack 这样一个构建黑盒，首先来谈谈它的流程。 准备工作1. webstorm 中配置 webpack-webs">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1_ZnHNXXXXXXBXpXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1B0DXNXXXXXXdXFXXXXXXXXXX-368-522.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1GVGFNXXXXXaTapXXXXXXXXXX-4436-4244.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1kvfbNXXXXXarXpXXXXXXXXXX-500-111.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1UgS4NXXXXXXZXVXXXXXXXXXX-693-940.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1WOiRNXXXXXcJaXXXXXXXXXXX-445-1228.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1cz5.NXXXXXc7XpXXXXXXXXXX-959-807.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="细说 webpack 之流程篇">
+<meta name="twitter:description" content="引言目前，几乎所有业务的开发构建都会用到 webpack 。的确，作为模块加载和打包神器，只需配置几个文件，加载各种 loader 就可以享受无痛流程化开发。但对于 webpack 这样一个复杂度较高的插件集合，它的整体流程及思想对我们来说还是很透明的。那么接下来我会带你了解 webpack 这样一个构建黑盒，首先来谈谈它的流程。 准备工作1. webstorm 中配置 webpack-webs">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1_ZnHNXXXXXXBXpXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/Web开发/">Web开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-webpack-flow" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      细说 webpack 之流程篇
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 七珏</span>
+        
+        <span>发表于: <a href="/blog/2016/09/09/webpack-flow/" class="article-date">
+  <time datetime="2016-09-09T12:02:58.000Z" itemprop="datePublished">2016-09-09</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="//img.alicdn.com/tfs/TB1_ZnHNXXXXXXBXpXXXXXXXXXX-900-500.jpg" alt="细说 webpack 之流程篇"></p>
+<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>目前，几乎所有业务的开发构建都会用到 webpack 。的确，作为模块加载和打包神器，只需配置几个文件，加载各种 loader 就可以享受无痛流程化开发。但对于 webpack 这样一个复杂度较高的插件集合，它的整体流程及思想对我们来说还是很透明的。那么接下来我会带你了解 webpack 这样一个构建黑盒，首先来谈谈它的流程。</p>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h5 id="1-webstorm-中配置-webpack-webstorm-debugger-script"><a href="#1-webstorm-中配置-webpack-webstorm-debugger-script" class="headerlink" title="1. webstorm 中配置 webpack-webstorm-debugger-script"></a>1. webstorm 中配置 webpack-webstorm-debugger-script</h5><p>在开始了解之前，必须要能对 webpack 整个流程进行 debug ，配置过程比较简单。</p>
+<p>先将 <a href="https://www.npmjs.com/package/webpack-webstorm-debugger-script" target="_blank" rel="noopener">webpack-webstorm-debugger-script</a> 中的 <code>webstorm-debugger.js</code> 置于 <code>webpack.config.js</code> 的同一目录下，搭建好你的脚手架后就可以直接 Debug 这个 webstorm-debugger.js 文件了。</p>
+<h5 id="2-webpack-config-js-配置"><a href="#2-webpack-config-js-配置" class="headerlink" title="2. webpack.config.js 配置"></a>2. webpack.config.js 配置</h5><p>估计大家对 webpack.config.js 的配置也尝试过不少次了，这里就大致对这个配置文件进行个分析。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">var</span> node_modules = path.resolve(__dirname, <span class="string">'node_modules'</span>);</span><br><span class="line"><span class="keyword">var</span> pathToReact = path.resolve(node_modules, <span class="string">'react/dist/react.min.js'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  <span class="comment">// 入口文件，是模块构建的起点，同时每一个入口文件对应最后生成的一个 chunk。</span></span><br><span class="line">  entry: &#123;</span><br><span class="line">    bundle: [</span><br><span class="line">      <span class="string">'webpack/hot/dev-server'</span>,</span><br><span class="line">      <span class="string">'webpack-dev-server/client?http://localhost:8080'</span>,</span><br><span class="line">      path.resolve(__dirname, <span class="string">'app/app.js'</span>)</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 文件路径指向(可加快打包过程)。</span></span><br><span class="line">  resolve: &#123;</span><br><span class="line">    alias: &#123;</span><br><span class="line">      <span class="string">'react'</span>: pathToReact</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 生成文件，是模块构建的终点，包括输出文件与输出路径。</span></span><br><span class="line">  output: &#123;</span><br><span class="line">    path: path.resolve(__dirname, <span class="string">'build'</span>),</span><br><span class="line">    filename: <span class="string">'[name].js'</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 这里配置了处理各模块的 loader ，包括 css 预处理 loader ，es6 编译 loader，图片处理 loader。</span></span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    loaders: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.js$/</span>,</span><br><span class="line">        loader: <span class="string">'babel'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          presets: [<span class="string">'es2015'</span>, <span class="string">'react'</span>]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ],</span><br><span class="line">    noParse: [pathToReact]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// webpack 各插件对象，在 webpack 的事件流中执行对应的方法。</span></span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> webpack.HotModuleReplacementPlugin()</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>除此之外再大致介绍下 webpack 的一些核心概念：</p>
+<ul>
+<li>loader：能转换各类资源，并处理成对应模块的加载器。loader 间可以串行使用。</li>
+<li>chunk：code splitting 后的产物，也就是按需加载的分块，装载了不同的 module。</li>
+</ul>
+<p>对于 module 和 chunk 的关系可以参照 webpack 官方的这张图：</p>
+<p><img src="https://img.alicdn.com/tps/TB1B0DXNXXXXXXdXFXXXXXXXXXX-368-522.jpg" alt></p>
+<ul>
+<li><p>plugin：webpack 的插件实体，这里以 UglifyJsPlugin 为例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">UglifyJsPlugin</span>(<span class="params">options</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.options = options;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = UglifyJsPlugin;</span><br><span class="line"></span><br><span class="line">UglifyJsPlugin.prototype.apply = <span class="function"><span class="keyword">function</span>(<span class="params">compiler</span>) </span>&#123;</span><br><span class="line">  compiler.plugin(<span class="string">"compilation"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">compilation</span>) </span>&#123;</span><br><span class="line">    compilation.plugin(<span class="string">"build-module"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">module</span>) </span>&#123;</span><br><span class="line">    &#125;);</span><br><span class="line">    compilation.plugin(<span class="string">"optimize-chunk-assets"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">chunks, callback</span>) </span>&#123;</span><br><span class="line">      <span class="comment">// Uglify 逻辑</span></span><br><span class="line">    &#125;);</span><br><span class="line">    compilation.plugin(<span class="string">"normal-module-loader"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">context</span>) </span>&#123;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在 webpack 中你经常可以看到 compilation.plugin(‘xxx’, callback) ，你可以把它当作是一个事件的绑定，这些事件在打包时由 webpack 来触发。</p>
+</li>
+</ul>
+<h5 id="3-流程总览"><a href="#3-流程总览" class="headerlink" title="3. 流程总览"></a>3. 流程总览</h5><p>在具体流程学习前，可以先通过这幅 <a href="https://img.alicdn.com/tps/TB1GVGFNXXXXXaTapXXXXXXXXXX-4436-4244.jpg" target="_blank" rel="noopener">webpack 整体流程图</a> 了解一下大致流程（建议保存下来查看）。</p>
+<p><img src="https://img.alicdn.com/tps/TB1GVGFNXXXXXaTapXXXXXXXXXX-4436-4244.jpg" alt></p>
+<h3 id="shell-与-config-解析"><a href="#shell-与-config-解析" class="headerlink" title="shell 与 config 解析"></a>shell 与 config 解析</h3><p>每次在命令行输入 webpack 后，操作系统都会去调用 <code>./node_modules/.bin/webpack</code> 这个 shell 脚本。这个脚本会去调用 <code>./node_modules/webpack/bin/webpack.js</code> 并追加输入的参数，如 -p , -w 。(图中 webpack.js 是 webpack 的启动文件，而 $@ 是后缀参数)</p>
+<p><img src="https://img.alicdn.com/tps/TB1kvfbNXXXXXarXpXXXXXXXXXX-500-111.jpg" alt></p>
+<p>在 webpack.js 这个文件中 webpack 通过 optimist 将用户配置的 webpack.config.js 和 shell 脚本传过来的参数整合成 options 对象传到了下一个流程的控制对象中。</p>
+<h5 id="1-optimist"><a href="#1-optimist" class="headerlink" title="1. optimist"></a>1. optimist</h5><p>和 commander 一样，<a href="https://github.com/substack/node-optimist" target="_blank" rel="noopener">optimist</a> 实现了 node 命令行的解析，其 API 调用非常方便。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> optimist = <span class="built_in">require</span>(<span class="string">"optimist"</span>);</span><br><span class="line"></span><br><span class="line">optimist</span><br><span class="line">  .boolean(<span class="string">"json"</span>).alias(<span class="string">"json"</span>, <span class="string">"j"</span>).describe(<span class="string">"json"</span>)</span><br><span class="line">  .boolean(<span class="string">"colors"</span>).alias(<span class="string">"colors"</span>, <span class="string">"c"</span>).describe(<span class="string">"colors"</span>)</span><br><span class="line">  .boolean(<span class="string">"watch"</span>).alias(<span class="string">"watch"</span>, <span class="string">"w"</span>).describe(<span class="string">"watch"</span>)</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<p>获取到后缀参数后，optimist 分析参数并以键值对的形式把参数对象保存在 optimist.argv 中，来看看 argv 究竟有什么？</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// webpack --hot -w</span><br><span class="line">&#123;</span><br><span class="line">  hot: true,</span><br><span class="line">  profile: false,</span><br><span class="line">  watch: true,</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="2-config-合并与插件加载"><a href="#2-config-合并与插件加载" class="headerlink" title="2. config 合并与插件加载"></a>2. config 合并与插件加载</h5><p>在加载插件之前，webpack 将 webpack.config.js 中的各个配置项拷贝到 options 对象中，并加载用户配置在 webpack.config.js 的 plugins 。接着 optimist.argv 会被传入到 <code>./node_modules/webpack/bin/convert-argv.js</code> 中，通过判断 argv 中参数的值决定是否去加载对应插件。(至于 webpack 插件运行机制，在之后的运行机制篇会提到)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ifBooleanArg(<span class="string">"hot"</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  ensureArray(options, <span class="string">"plugins"</span>);</span><br><span class="line">  <span class="keyword">var</span> HotModuleReplacementPlugin = <span class="built_in">require</span>(<span class="string">"../lib/HotModuleReplacementPlugin"</span>);</span><br><span class="line">  options.plugins.push(<span class="keyword">new</span> HotModuleReplacementPlugin());</span><br><span class="line">&#125;);</span><br><span class="line">...</span><br><span class="line"><span class="keyword">return</span> options;</span><br></pre></td></tr></table></figure>
+<p><code>options</code> 作为最后返回结果，包含了之后构建阶段所需的重要信息。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">  entry: &#123;&#125;,//入口配置</span><br><span class="line">  output: &#123;&#125;, //输出配置</span><br><span class="line">  plugins: [], //插件集合(配置文件 + shell指令) </span><br><span class="line">  module: &#123; loaders: [ [Object] ] &#125;, //模块配置</span><br><span class="line">  context: //工程路径</span><br><span class="line">  ... </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这和 webpack.config.js 的配置非常相似，只是多了一些经 shell 传入的插件对象。插件对象一初始化完毕， options 也就传入到了下个流程中。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> webpack = <span class="built_in">require</span>(<span class="string">"../lib/webpack.js"</span>);</span><br><span class="line"><span class="keyword">var</span> compiler = webpack(options);</span><br></pre></td></tr></table></figure>
+<h3 id="编译与构建流程"><a href="#编译与构建流程" class="headerlink" title="编译与构建流程"></a>编译与构建流程</h3><p>在加载配置文件和 shell 后缀参数申明的插件，并传入构建信息 options 对象后，开始整个 webpack 打包最漫长的一步。而这个时候，真正的 webpack 对象才刚被初始化，具体的初始化逻辑在 <code>lib/webpack.js</code> 中，如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">webpack</span>(<span class="params">options</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> compiler = <span class="keyword">new</span> Compiler();</span><br><span class="line">  ...<span class="comment">// 检查options,若watch字段为true,则开启watch线程</span></span><br><span class="line">  <span class="keyword">return</span> compiler;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>webpack 的实际入口是 Compiler 中的 run 方法，run 一旦执行后，就开始了编译和构建流程 ，其中有几个比较关键的 webpack 事件节点。</p>
+<ul>
+<li><code>compile</code>    开始编译</li>
+<li><code>make</code>    从入口点分析模块及其依赖的模块，创建这些模块对象</li>
+<li><code>build-module</code>    构建模块</li>
+<li><code>after-compile</code>     完成构建</li>
+<li><code>seal</code>     封装构建结果</li>
+<li><code>emit</code>     把各个chunk输出到结果文件</li>
+<li><code>after-emit</code>     完成输出</li>
+</ul>
+<h5 id="1-核心对象-Compilation"><a href="#1-核心对象-Compilation" class="headerlink" title="1. 核心对象 Compilation"></a>1. 核心对象 Compilation</h5><p>compiler.run 后首先会触发 compile ，这一步会构建出 Compilation 对象：</p>
+<p><img src="https://img.alicdn.com/tps/TB1UgS4NXXXXXXZXVXXXXXXXXXX-693-940.png" alt="compilation类图"></p>
+<p>这个对象有两个作用，一是负责组织整个打包过程，包含了每个构建环节及输出环节所对应的方法，可以从图中看到比较关键的步骤，如 <code>addEntry()</code> ,  <code>_addModuleChain()</code> ,  <code>buildModule()</code> ,  <code>seal()</code> ,  <code>createChunkAssets()</code>  (在每一个节点都会触发 webpack 事件去调用各插件)。二是该对象内部存放着所有 module ，chunk，生成的 asset 以及用来生成最后打包文件的 template 的信息。</p>
+<h5 id="2-编译与构建主流程"><a href="#2-编译与构建主流程" class="headerlink" title="2. 编译与构建主流程"></a>2. 编译与构建主流程</h5><p>在创建 module 之前，Compiler 会触发 make，并调用 <code>Compilation.addEntry</code> 方法，通过 options 对象的 entry 字段找到我们的入口js文件。之后，在 addEntry 中调用私有方法 <code>_addModuleChain</code> ，这个方法主要做了两件事情。一是根据模块的类型获取对应的模块工厂并创建模块，二是构建模块。</p>
+<p>而构建模块作为最耗时的一步，又可细化为三步：</p>
+<ul>
+<li><p>调用各 loader 处理模块之间的依赖</p>
+<p>webpack 提供的一个很大的便利就是能将所有资源都整合成模块，不仅仅是 js 文件。所以需要一些 loader ，比如 <code>url-loader</code> ， <code>jsx-loader</code> ， <code>css-loader</code> 等等来让我们可以直接在源文件中引用各类资源。webpack 调用 <code>doBuild()</code> ，对每一个 require() 用对应的 loader 进行加工，最后生成一个 js module。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Compilation.prototype._addModuleChain = <span class="function"><span class="keyword">function</span> <span class="title">process</span>(<span class="params">context, dependency, onModule, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> start = <span class="keyword">this</span>.profile &amp;&amp; +<span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// 根据模块的类型获取对应的模块工厂并创建模块</span></span><br><span class="line">  <span class="keyword">var</span> moduleFactory = <span class="keyword">this</span>.dependencyFactories.get(dependency.constructor);</span><br><span class="line">  ...</span><br><span class="line">  moduleFactory.create(context, dependency, <span class="function"><span class="keyword">function</span>(<span class="params">err, module</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> result = <span class="keyword">this</span>.addModule(<span class="built_in">module</span>);</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">this</span>.buildModule(<span class="built_in">module</span>, <span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">      ...</span><br><span class="line">      <span class="comment">// 构建模块，添加依赖模块</span></span><br><span class="line">    &#125;.bind(<span class="keyword">this</span>));</span><br><span class="line">  &#125;.bind(<span class="keyword">this</span>));</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>调用 <a href="https://github.com/ternjs/acorn" target="_blank" rel="noopener">acorn</a> 解析经 loader 处理后的源文件生成抽象语法树 AST</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> Parser.prototype.parse = <span class="function"><span class="keyword">function</span> <span class="title">parse</span>(<span class="params">source, initialState</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> ast;</span><br><span class="line">  <span class="keyword">if</span> (!ast) &#123;</span><br><span class="line">    <span class="comment">// acorn以es6的语法进行解析</span></span><br><span class="line">    ast = acorn.parse(source, &#123;</span><br><span class="line">      ranges: <span class="literal">true</span>,</span><br><span class="line">      locations: <span class="literal">true</span>,</span><br><span class="line">      ecmaVersion: <span class="number">6</span>,</span><br><span class="line">      sourceType: <span class="string">"module"</span></span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>遍历 AST，构建该模块所依赖的模块</p>
+<p>对于当前模块，或许存在着多个依赖模块。当前模块会开辟一个依赖模块的数组，在遍历 AST 时，将 require() 中的模块通过 <code>addDependency()</code> 添加到数组中。当前模块构建完成后，webpack 调用 <code>processModuleDependencies</code> 开始递归处理依赖的 module，接着就会重复之前的构建步骤。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"> Compilation.prototype.addModuleDependencies = <span class="function"><span class="keyword">function</span>(<span class="params">module, dependencies, bail, cacheGroup, recursive, callback</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 根据依赖数组(dependencies)创建依赖模块对象</span></span><br><span class="line">  <span class="keyword">var</span> factories = [];</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; dependencies.length; i++) &#123;</span><br><span class="line">    <span class="keyword">var</span> factory = _this.dependencyFactories.get(dependencies[i][<span class="number">0</span>].constructor);</span><br><span class="line">    factories[i] = [factory, dependencies[i]];</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// 与当前模块构建步骤相同</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="3-构建细节"><a href="#3-构建细节" class="headerlink" title="3. 构建细节"></a>3. 构建细节</h5><p>module 是 webpack 构建的核心实体，也是所有 module 的 父类，它有几种不同子类：<code>NormalModule</code> ,  <code>MultiModule</code> ,  <code>ContextModule</code> , <code>DelegatedModule</code>  等。但这些核心实体都是在构建中都会去调用对应方法，也就是 <code>build()</code> 。来看看其中具体做了什么：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化module信息，如context,id,chunks,dependencies等。</span></span><br><span class="line">NormalModule.prototype.build = <span class="function"><span class="keyword">function</span> <span class="title">build</span>(<span class="params">options, compilation, resolver, fs, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.buildTimestamp = <span class="keyword">new</span> <span class="built_in">Date</span>().getTime(); <span class="comment">// 构建计时</span></span><br><span class="line">  <span class="keyword">this</span>.built = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.doBuild(options, compilation, resolver, fs, <span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 指定模块引用，不经acorn解析</span></span><br><span class="line">    <span class="keyword">if</span> (options.module &amp;&amp; options.module.noParse) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="built_in">Array</span>.isArray(options.module.noParse)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (options.module.noParse.some(<span class="function"><span class="keyword">function</span>(<span class="params">regExp</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">typeof</span> regExp === <span class="string">"string"</span> ?</span><br><span class="line">            <span class="keyword">this</span>.request.indexOf(regExp) === <span class="number">0</span> :</span><br><span class="line">              regExp.test(<span class="keyword">this</span>.request);</span><br><span class="line">          &#125;, <span class="keyword">this</span>)) &#123;</span><br><span class="line">          <span class="keyword">return</span> callback();</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> options.module.noParse === <span class="string">"string"</span> ?</span><br><span class="line">        <span class="keyword">this</span>.request.indexOf(options.module.noParse) === <span class="number">0</span> :</span><br><span class="line">          options.module.noParse.test(<span class="keyword">this</span>.request)) &#123;</span><br><span class="line">        <span class="keyword">return</span> callback();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 由acorn解析生成ast</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.parser.parse(<span class="keyword">this</span>._source.source(), &#123;</span><br><span class="line">        current: <span class="keyword">this</span>,</span><br><span class="line">        <span class="built_in">module</span>: <span class="keyword">this</span>,</span><br><span class="line">        compilation: compilation,</span><br><span class="line">        options: options</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">      <span class="keyword">var</span> source = <span class="keyword">this</span>._source.source();</span><br><span class="line">      <span class="keyword">this</span>._source = <span class="literal">null</span>;</span><br><span class="line">      <span class="keyword">return</span> callback(<span class="keyword">new</span> ModuleParseError(<span class="keyword">this</span>, source, e));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> callback();</span><br><span class="line">  &#125;.bind(<span class="keyword">this</span>));</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>对于每一个 module ，它都会有这样一个构建方法。当然，它还包括了从构建到输出的一系列的有关 module 生命周期的函数，我们通过 module 父类类图其子类类图(这里以 NormalModule 为例)来观察其真实形态：</p>
+<p><img src="https://img.alicdn.com/tps/TB1WOiRNXXXXXcJaXXXXXXXXXXX-445-1228.png" alt="module类图"></p>
+<p>可以看到无论是构建流程，处理依赖流程，包括后面的封装流程都是与 module 密切相关的。</p>
+<h3 id="打包输出"><a href="#打包输出" class="headerlink" title="打包输出"></a>打包输出</h3><p>在所有模块及其依赖模块 build 完成后，webpack 会监听 <code>seal</code> 事件调用各插件对构建后的结果进行封装，要逐次对每个 module 和 chunk 进行整理，生成编译后的源码，合并，拆分，生成 hash 。 同时这是我们在开发时进行代码优化和功能添加的关键环节。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Compilation.prototype.seal = <span class="function"><span class="keyword">function</span> <span class="title">seal</span>(<span class="params">callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.applyPlugins(<span class="string">"seal"</span>); <span class="comment">// 触发插件的seal事件</span></span><br><span class="line">  <span class="keyword">this</span>.preparedChunks.sort(<span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (a.name &lt; b.name) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (a.name &gt; b.name) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">this</span>.preparedChunks.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">preparedChunk</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> <span class="built_in">module</span> = preparedChunk.module;</span><br><span class="line">    <span class="keyword">var</span> chunk = <span class="keyword">this</span>.addChunk(preparedChunk.name, <span class="built_in">module</span>);</span><br><span class="line">    chunk.initial = chunk.entry = <span class="literal">true</span>;</span><br><span class="line">    <span class="comment">// 整理每个Module和chunk，每个chunk对应一个输出文件。</span></span><br><span class="line">    chunk.addModule(<span class="built_in">module</span>);</span><br><span class="line">    <span class="built_in">module</span>.addChunk(chunk);</span><br><span class="line">  &#125;, <span class="keyword">this</span>);</span><br><span class="line">  <span class="keyword">this</span>.applyPluginsAsync(<span class="string">"optimize-tree"</span>, <span class="keyword">this</span>.chunks, <span class="keyword">this</span>.modules, <span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (err) &#123;</span><br><span class="line">      <span class="keyword">return</span> callback(err);</span><br><span class="line">    &#125;</span><br><span class="line">    ... <span class="comment">// 触发插件的事件</span></span><br><span class="line">    <span class="keyword">this</span>.createChunkAssets(); <span class="comment">// 生成最终assets</span></span><br><span class="line">    ... <span class="comment">// 触发插件的事件</span></span><br><span class="line">  &#125;.bind(<span class="keyword">this</span>));</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h5 id="1-生成最终-assets"><a href="#1-生成最终-assets" class="headerlink" title="1. 生成最终 assets"></a>1. 生成最终 assets</h5><p>在封装过程中，webpack 会调用 Compilation 中的 <code>createChunkAssets</code> 方法进行打包后代码的生成。 createChunkAssets 流程如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1cz5.NXXXXXc7XpXXXXXXXXXX-959-807.png" alt="createChunkAssets流程"></p>
+<ul>
+<li><p>不同的 Template</p>
+<p>从上图可以看出通过判断是入口 js 还是需要异步加载的 js 来选择不同的模板对象进行封装，入口 js 会采用 webpack 事件流的 render 事件来触发 <code>Template类</code> 中的 <code>renderChunkModules()</code> (异步加载的 js 会调用 chunkTemplate 中的 render 方法)。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(chunk.entry) &#123;</span><br><span class="line">  source = <span class="keyword">this</span>.mainTemplate.render(<span class="keyword">this</span>.hash, chunk, <span class="keyword">this</span>.moduleTemplate, <span class="keyword">this</span>.dependencyTemplates);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  source = <span class="keyword">this</span>.chunkTemplate.render(chunk, <span class="keyword">this</span>.moduleTemplate, <span class="keyword">this</span>.dependencyTemplates);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在 webpack 中有四个 Template 的子类，分别是 <code>MainTemplate.js</code>  ， <code>ChunkTemplate.js</code> ，<code>ModuleTemplate.js</code> ， <code>HotUpdateChunkTemplate.js</code> ，前两者先前已大致有介绍，而 ModuleTemplate 是对所有模块进行一个代码生成，HotUpdateChunkTemplate 是对热替换模块的一个处理。</p>
+</li>
+<li><p>模块封装</p>
+<p>模块在封装的时候和它在构建时一样，都是调用各模块类中的方法。封装通过调用 <code>module.source()</code> 来进行各操作，比如说 require() 的替换。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">MainTemplate.prototype.requireFn = <span class="string">"__webpack_require__"</span>;</span><br><span class="line">MainTemplate.prototype.render = <span class="function"><span class="keyword">function</span>(<span class="params">hash, chunk, moduleTemplate, dependencyTemplates</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> buf = [];</span><br><span class="line">    <span class="comment">// 每一个module都有一个moduleId,在最后会替换。</span></span><br><span class="line">    buf.push(<span class="string">"function "</span> + <span class="keyword">this</span>.requireFn + <span class="string">"(moduleId) &#123;"</span>);</span><br><span class="line">    buf.push(<span class="keyword">this</span>.indent(<span class="keyword">this</span>.applyPluginsWaterfall(<span class="string">"require"</span>, <span class="string">""</span>, chunk, hash)));</span><br><span class="line">    buf.push(<span class="string">"&#125;"</span>);</span><br><span class="line">    buf.push(<span class="string">""</span>);</span><br><span class="line">    ... <span class="comment">// 其余封装操作</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成 assets</p>
+<p>各模块进行 doBlock 后，把 module 的最终代码循环添加到 source 中。一个 source 对应着一个 asset 对象，该对象保存了单个文件的文件名( name )和最终代码( value )。</p>
+</li>
+</ul>
+<h5 id="2-输出"><a href="#2-输出" class="headerlink" title="2. 输出"></a>2. 输出</h5><p>最后一步，webpack 调用 Compiler 中的 <code>emitAssets()</code> ，按照 output 中的配置项将文件输出到了对应的 path 中，从而 webpack 整个打包过程结束。要注意的是，若想对结果进行处理，则需要在 <code>emit</code> 触发后对自定义插件进行扩展。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>webpack 的整体流程主要还是依赖于 <code>compilation</code> 和 <code>module</code> 这两个对象，但其思想远不止这么简单。最开始也说过，webpack 本质是个插件集合，并且由 <code>tapable</code> 控制各插件在 webpack 事件流上运行，至于具体的思想和细节，将会在后一篇文章中提到。同时，在业务开发中，无论是为了提升构建效率，或是减小打包文件大小，我们都可以通过编写 webpack 插件来进行流程上的控制，这个也会在之后提到。</p>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/09/09/webpack-flow/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/09/09/webpack-flow/" data-id="cjt6lby2b00d3jeu14lvs2asr" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/09/09/webpack-flow/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/">webpack</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/09/20/type-casts-between-node-and-cpp/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Node.js 和 C++ 之间的类型转换
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/08/25/react-key/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">React 实践心得：key 属性的原理和用法</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

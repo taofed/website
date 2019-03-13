@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>无线性能优化：Composite | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="一个 Web 页面的展示，简单来说可以认为经历了以下下几个步骤。   JavaScript：一般来说，我们会使用 JavaScript 来实现一些视觉变化的效果。比如做一个动画或者往页面里添加一些 DOM 元素等。 Style：计算样式，这个过程是根据 CSS 选择器，对每个 DOM 元素匹配对应的 CSS 样式。这一步结束之后，就确定了每个 DOM 元素上该应用什么 CSS 样式规则。 Lay">
+<meta name="keywords" content="性能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无线性能优化：Composite">
+<meta property="og:url" content="http://taobaofed.org/blog/2016/04/25/performance-composite/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="一个 Web 页面的展示，简单来说可以认为经历了以下下几个步骤。   JavaScript：一般来说，我们会使用 JavaScript 来实现一些视觉变化的效果。比如做一个动画或者往页面里添加一些 DOM 元素等。 Style：计算样式，这个过程是根据 CSS 选择器，对每个 DOM 元素匹配对应的 CSS 样式。这一步结束之后，就确定了每个 DOM 元素上该应用什么 CSS 样式规则。 Lay">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="http://img.alicdn.com/tfs/TB1XT4kMFXXXXaBXXXXXXXXXXXX-900-500.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1eabOLpXXXXX3XFXXXXXXXXXX-1093-167.jpg_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1VFRDMXXXXXahXpXXXXXXXXXX-814-320.png_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1XMzqMXXXXXXsXFXXXXXXXXXX-959-370.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1sZbvMXXXXXXlXXXXXXXXXXXX-491-300.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1qzzmMXXXXXX1XpXXXXXXXXXX-491-300.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB13cYmMXXXXXaXXpXXXXXXXXXX-491-300.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1yslCMXXXXXahaXXXXXXXXXXX-755-406.png_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1xxh1MXXXXXX_XXXXXXXXXXXX-755-406.png_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1SHBOMXXXXXbnXFXXXXXXXXXX-690-484.jpg_640x640.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1IrRGMXXXXXXxaXXXXXXXXXXX-690-484.jpg_640x640.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1mJjwMXXXXXajXpXXXXXXXXXX-960-391.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1dZG.MXXXXXX2XVXXXXXXXXXX-276-164.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1EQu4MXXXXXXiaXXXXXXXXXXX-709-717.png_600x600.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1.uznMXXXXXbcXFXXXXXXXXXX-325-195.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1uCgsLpXXXXXNXFXXXXXXXXXX-333-260.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB163nGMXXXXXatXXXXXXXXXXXX-1440-756.jpg_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1_6P9LpXXXXblXXXXXXXXXXXX-1252-284.png_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB14YwvLpXXXXXGXFXXXXXXXXXX-1093-167.jpg_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1XsAVLpXXXXbzXpXXXXXXXXXX-712-411.png_640x640.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1j9M7LpXXXXaiXXXXXXXXXXXX-713-424.png_640x640.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1SK_9LpXXXXcaaXXXXXXXXXXX-699-304.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1EMYKMXXXXXcUXXXXXXXXXXXX-972-480.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1E7PEMXXXXXbAXpXXXXXXXXXX-1390-778.jpg_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1LxrnMXXXXXcIXVXXXXXXXXXX-1366-777.jpg_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1FoDwMXXXXXc2XFXXXXXXXXXX-947-485.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1OE6uMXXXXXc8XFXXXXXXXXXX-1368-774.jpg_720x720.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1eYvqMXXXXXbJXVXXXXXXXXXX-936-480.jpg">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="无线性能优化：Composite">
+<meta name="twitter:description" content="一个 Web 页面的展示，简单来说可以认为经历了以下下几个步骤。   JavaScript：一般来说，我们会使用 JavaScript 来实现一些视觉变化的效果。比如做一个动画或者往页面里添加一些 DOM 元素等。 Style：计算样式，这个过程是根据 CSS 选择器，对每个 DOM 元素匹配对应的 CSS 样式。这一步结束之后，就确定了每个 DOM 元素上该应用什么 CSS 样式规则。 Lay">
+<meta name="twitter:image" content="http://img.alicdn.com/tfs/TB1XT4kMFXXXXaBXXXXXXXXXXXX-900-500.png">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-performance-composite" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      无线性能优化：Composite
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 冬萌</span>
+        
+        <span>发表于: <a href="/blog/2016/04/25/performance-composite/" class="article-date">
+  <time datetime="2016-04-25T10:21:18.000Z" itemprop="datePublished">2016-04-25</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="http://img.alicdn.com/tfs/TB1XT4kMFXXXXaBXXXXXXXXXXXX-900-500.png" alt="无线性能优化：Composite"></p>
+<p>一个 Web 页面的展示，简单来说可以认为经历了以下下几个步骤。</p>
+<p><img src="https://img.alicdn.com/tps/TB1eabOLpXXXXX3XFXXXXXXXXXX-1093-167.jpg_720x720.jpg" alt></p>
+<ul>
+<li>JavaScript：一般来说，我们会使用 JavaScript 来实现一些视觉变化的效果。比如做一个动画或者往页面里添加一些 DOM 元素等。</li>
+<li>Style：计算样式，这个过程是根据 CSS 选择器，对每个 DOM 元素匹配对应的 CSS 样式。这一步结束之后，就确定了每个 DOM 元素上该应用什么 CSS 样式规则。</li>
+<li>Layout：布局，上一步确定了每个 DOM 元素的样式规则，这一步就是具体计算每个 DOM 元素最终在屏幕上显示的大小和位置。web 页面中元素的布局是相对的，因此一个元素的布局发生变化，会联动地引发其他元素的布局发生变化。比如，<code>&lt;body&gt;</code> 元素的宽度的变化会影响其子元素的宽度，其子元素宽度的变化也会继续对其孙子元素产生影响。因此对于浏览器来说，布局过程是经常发生的。</li>
+<li>Paint：绘制，本质上就是填充像素的过程。包括绘制文字、颜色、图像、边框和阴影等，也就是一个 DOM 元素所有的可视效果。一般来说，这个绘制过程是在多个层上完成的。</li>
+<li>Composite：渲染层合并，由上一步可知，对页面中 DOM 元素的绘制是在多个层上进行的。在每个层上完成绘制过程之后，浏览器会将所有层按照合理的顺序合并成一个图层，然后显示在屏幕上。对于有位置重叠的元素的页面，这个过程尤其重要，因为一旦图层的合并顺序出错，将会导致元素显示异常。</li>
+</ul>
+<p>当然，本文我们只来关注 Composite 部分。</p>
+<h2 id="浏览器渲染原理"><a href="#浏览器渲染原理" class="headerlink" title="浏览器渲染原理"></a>浏览器渲染原理</h2><p>在讨论 Composite 之前，有必要先简单了解下一些浏览器（本文只是针对 Chrome 来说）的渲染原理，方便对之后一些概念的理解。更多详细的内容可以参阅 <a href="http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome" target="_blank" rel="noopener">GPU Accelerated Compositing in Chrome</a></p>
+<p>注：由于 Chrome 对 Blank 引擎某些实现的修改，某些我们之前熟知的类名有了变化，比如 RenderObject 变成了 LayoutObject，RenderLayer 变成了 PaintLayer。感兴趣的看以参阅 <a href="https://www.chromium.org/blink/slimming-paint" target="_blank" rel="noopener">Slimming Paint</a>。</p>
+<p>在浏览器中，页面内容是存储为由 Node 对象组成的树状结构，也就是 DOM 树。每一个 HTML element 元素都有一个 Node 对象与之对应，DOM 树的根节点永远都是 Document Node。这一点相信大家都很熟悉了，但其实，从 DOM 树到最后的渲染，需要进行一些转换映射。</p>
+<p><img src="https://img.alicdn.com/tps/TB1VFRDMXXXXXahXpXXXXXXXXXX-814-320.png_720x720.jpg" alt></p>
+<h3 id="从-Nodes-到-LayoutObjects"><a href="#从-Nodes-到-LayoutObjects" class="headerlink" title="从 Nodes 到 LayoutObjects"></a>从 Nodes 到 LayoutObjects</h3><p>DOM 树中得每个 Node 节点都有一个对应的 LayoutObject 。LayoutObject 知道如何在屏幕上 paint Node 的内容。</p>
+<h3 id="从-LayoutObjects-到-PaintLayers"><a href="#从-LayoutObjects-到-PaintLayers" class="headerlink" title="从 LayoutObjects 到 PaintLayers"></a>从 LayoutObjects 到 PaintLayers</h3><p>一般来说，拥有相同的坐标空间的 LayoutObjects，属于同一个渲染层（PaintLayer）。PaintLayer 最初是用来实现 <a href="https://developer.mozilla.org/zh-CN/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context" target="_blank" rel="noopener">stacking contest（层叠上下文）</a>，以此来保证页面元素以正确的顺序合成（composite），这样才能正确的展示元素的重叠以及半透明元素等等。因此满足形成层叠上下文条件的 LayoutObject 一定会为其创建新的渲染层，当然还有其他的一些特殊情况，为一些特殊的 LayoutObjects 创建一个新的渲染层，比如 <code>overflow != visible</code> 的元素。根据创建 PaintLayer 的原因不同，可以将其分为常见的 3 类：</p>
+<ul>
+<li><p>NormalPaintLayer</p>
+<ul>
+<li>根元素（HTML）</li>
+<li>有明确的定位属性（relative、fixed、sticky、absolute）</li>
+<li>透明的（opacity 小于 1）</li>
+<li>有 CSS 滤镜（fliter）</li>
+<li>有 CSS mask 属性</li>
+<li>有 CSS mix-blend-mode 属性（不为 normal）</li>
+<li>有 CSS transform 属性（不为 none）</li>
+<li>backface-visibility 属性为 hidden</li>
+<li>有 CSS reflection 属性</li>
+<li>有 CSS column-count 属性（不为 auto）或者 有 CSS column-width 属性（不为 auto）</li>
+<li>当前有对于 opacity、transform、fliter、backdrop-filter 应用动画</li>
+</ul>
+</li>
+<li><p>OverflowClipPaintLayer</p>
+<ul>
+<li>overflow 不为 visible</li>
+</ul>
+</li>
+<li><p>NoPaintLayer</p>
+<ul>
+<li>不需要 paint 的 PaintLayer，比如一个没有视觉属性（背景、颜色、阴影等）的空 div。</li>
+</ul>
+</li>
+</ul>
+<p>满足以上条件的 LayoutObject 会拥有独立的渲染层，而其他的 LayoutObject 则和其第一个拥有渲染层的父元素共用一个。</p>
+<h3 id="从-PaintLayers-到-GraphicsLayers"><a href="#从-PaintLayers-到-GraphicsLayers" class="headerlink" title="从 PaintLayers 到 GraphicsLayers"></a>从 PaintLayers 到 GraphicsLayers</h3><p>某些特殊的渲染层会被认为是合成层（Compositing Layers），合成层拥有单独的 GraphicsLayer，而其他不是合成层的渲染层，则和其第一个拥有 GraphicsLayer 父层公用一个。</p>
+<p>每个 GraphicsLayer 都有一个 GraphicsContext，GraphicsContext 会负责输出该层的位图，位图是存储在共享内存中，作为纹理上传到 GPU 中，最后由 GPU 将多个位图进行合成，然后 draw 到屏幕上，此时，我们的页面也就展现到了屏幕上。</p>
+<p>渲染层提升为合成层的原因有一下几种：</p>
+<p>注：渲染层提升为合成层有一个先决条件，该渲染层必须是 SelfPaintingLayer（基本可认为是上文介绍的 NormalPaintLayer）。以下所讨论的渲染层提升为合成层的情况都是在该渲染层为 SelfPaintingLayer 前提下的。</p>
+<ul>
+<li><p>直接原因（direct reason）</p>
+<ul>
+<li>硬件加速的 iframe 元素（比如 iframe 嵌入的页面中有合成层）<a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/direct/iframe.html" target="_blank" rel="noopener">demo</a></li>
+<li>video 元素</li>
+<li>覆盖在 video 元素上的视频控制栏</li>
+<li><p>3D 或者 硬件加速的 2D Canvas 元素</p>
+<ul>
+<li><a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/direct/canvas.html" target="_blank" rel="noopener">demo：普通 2D Canvas 不会提升为合成层</a></li>
+<li><a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/direct/webgl.html" target="_blank" rel="noopener">demo：3D Canvas 提升为合成层</a></li>
+</ul>
+</li>
+<li><p>硬件加速的插件，比如 flash 等等</p>
+</li>
+<li>在 DPI 较高的屏幕上，fix 定位的元素会自动地被提升到合成层中。但在 DPI 较低的设备上却并非如此，因为这个渲染层的提升会使得字体渲染方式由子像素变为灰阶（详细内容请参考：<a href="http://www.html5rocks.com/en/tutorials/internals/antialiasing-101/?redirect_from_locale=zh#toc-text-rendering" target="_blank" rel="noopener">Text Rendering</a>）</li>
+<li>有 3D transform</li>
+<li>backface-visibility 为 hidden</li>
+<li><p>对 opacity、transform、fliter、backdropfilter 应用了 animation 或者 transition（需要是 active 的 animation 或者 transition，当 animation 或者 transition 效果未开始或结束后，提升合成层也会失效）</p>
+<ul>
+<li><a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/direct/animation.html" target="_blank" rel="noopener">demo：animation</a></li>
+<li><p><a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/direct/transition.html" target="_blank" rel="noopener">demo：transition</a></p>
+<p><img src="https://img.alicdn.com/tps/TB1XMzqMXXXXXXsXFXXXXXXXXXX-959-370.jpg" alt></p>
+</li>
+</ul>
+</li>
+<li><p>will-change 设置为 opacity、transform、top、left、bottom、right（其中 top、left 等需要设置明确的定位属性，如 relative 等）<a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/direct/will-change.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+</ul>
+</li>
+<li><p>后代元素原因</p>
+<ul>
+<li>有合成层后代同时本身有 transform、opactiy（小于 1）、mask、fliter、reflection 属性 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/descendant/combo.html" target="_blank" rel="noopener">demo</a></li>
+<li>有合成层后代同时本身 overflow 不为 visible（如果本身是因为明确的定位因素产生的 SelfPaintingLayer，则需要 z-index 不为 auto） <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/descendant/overflow.html" target="_blank" rel="noopener">demo</a></li>
+<li>有合成层后代同时本身 fixed 定位 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/descendant/fixed.html" target="_blank" rel="noopener">demo</a></li>
+<li>有 3D transfrom 的合成层后代同时本身有 preserves-3d 属性 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/descendant/preserves-3d.html" target="_blank" rel="noopener">demo</a></li>
+<li>有 3D transfrom 的合成层后代同时本身有 perspective 属性 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/descendant/perspective.html" target="_blank" rel="noopener">demo</a></li>
+</ul>
+</li>
+<li><p>overlap 重叠原因</p>
+<p>  为什么会因为重叠原因而产生合成层呢？举个简单的栗子。</p>
+<p>  <img src="https://img.alicdn.com/tps/TB1sZbvMXXXXXXlXXXXXXXXXXXX-491-300.jpg" alt></p>
+<p>  蓝色的矩形重叠在绿色矩形之上，同时它们的父元素是一个 GraphicsLayer。此时假设绿色矩形为一个 GraphicsLayer，如果 overlap 无法提升合成层的话，那么蓝色矩形不会提升为合成层，也就会和父元素公用一个 GraphicsLayer。</p>
+<p>  <img src="https://img.alicdn.com/tps/TB1qzzmMXXXXXX1XpXXXXXXXXXX-491-300.jpg" alt></p>
+<p>  此时，渲染顺序就会发生错误，因此为保证渲染顺序，overlap 也成为了合成层产生的原因，也就是如下的正常情形。</p>
+<p>  <img src="https://img.alicdn.com/tps/TB13cYmMXXXXXaXXpXXXXXXXXXX-491-300.jpg" alt></p>
+<p>  当然 overlap 的原因也会细分为几类，接下来我们会详细看下。</p>
+<ul>
+<li><p>重叠或者说部分重叠在一个合成层之上。</p>
+<p>  那如何算是重叠呢，最常见和容易理解的就是元素的 border box（content + padding + border） 和合成层的有重叠，比如：<a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/normal.html" target="_blank" rel="noopener">demo</a>，当然 margin area 的重叠是无效的（<a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/margin.html" target="_blank" rel="noopener">demo</a>）。其他的还有一些不常见的情况，也算是同合成层重叠的条件，如下：</p>
+<ul>
+<li>filter 效果同合成层重叠 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/filter.html" target="_blank" rel="noopener">demo</a></li>
+<li>transform 变换后同合成层重叠 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/transform.html" target="_blank" rel="noopener">demo</a></li>
+<li>overflow scroll 情况下同合成层重叠。即如果一个 overflow scroll（不管 <code>overflow:auto</code> 还是 <code>overflow:scrill</code>，只要是能 scroll 即可） 的元素同一个合成层重叠，则其可视子元素也同该合成层重叠 <a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/overflow.html" target="_blank" rel="noopener">demo</a></li>
+</ul>
+</li>
+<li><p>假设重叠在一个合成层之上（assumedOverlap）。</p>
+<p>  这个原因听上去有点虚，什么叫假设重叠？其实也比较好理解，比如一个元素的 CSS 动画效果，动画运行期间，元素是有可能和其他元素有重叠的。针对于这种情况，于是就有了 assumedOverlap 的合成层产生原因，示例可见：<a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/animation.html" target="_blank" rel="noopener">demo</a>。在本 demo 中，动画元素视觉上并没有和其兄弟元素重叠，但因为 assumedOverlap 的原因，其兄弟元素依然提升为了合成层。</p>
+<p>  需要注意的是该原因下，有一个很特殊的情况：</p>
+<p>  如果合成层有内联的 transform 属性，会导致其兄弟渲染层 assume overlap，从而提升为合成层。比如：<a href="http://taobaofed.github.io/demo/performance-composite-demo/layer-create/overlap/inline.html" target="_blank" rel="noopener">demo</a>。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="层压缩"><a href="#层压缩" class="headerlink" title="层压缩"></a>层压缩</h4><p>基本上常见的一些合成层的提升原因如上所说，你会发现，由于重叠的原因，可能随随便便就会产生出大量合成层来，而每个合成层都要消耗 CPU 和内存资源，岂不是严重影响页面性能。这一点浏览器也考虑到了，因此就有了层压缩（Layer Squashing）的处理。如果多个渲染层同一个合成层重叠时，这些渲染层会被压缩到一个 GraphicsLayer 中，以防止由于重叠原因导致可能出现的“层爆炸”。具体可以看如下 <a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squash-hover.html" target="_blank" rel="noopener">demo</a>。一开始，蓝色方块由于<br><code>translateZ</code> 提升为了合成层，其他的方块元素因为重叠的原因，被压缩了一起，大小就是包含这 3 个方块的矩形大小。</p>
+<p><img src="https://img.alicdn.com/tps/TB1yslCMXXXXXahaXXXXXXXXXXX-755-406.png_720x720.jpg" alt></p>
+<p>当我们 hover 绿色方块时，会给其设置 <code>translateZ</code> 属性，导致绿色方块也被提升为合成层，则剩下的两个被压缩到了一起，大小就缩小为包含这 2 个方块的矩形大小。</p>
+<p><img src="https://img.alicdn.com/tps/TB1xxh1MXXXXXX_XXXXXXXXXXXX-755-406.png_720x720.jpg" alt></p>
+<p>当然，浏览器的自动的层压缩也不是万能的，有很多特定情况下，浏览器是无法进行层压缩的，如下所示，而这些情况也是我们应该尽量避免的。（注：以下情况都是基于重叠原因而言）</p>
+<ul>
+<li><p>无法进行会打破渲染顺序的压缩（squashingWouldBreakPaintOrder）</p>
+<p>  示例如下：<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squashingWouldBreakPaintOrder-mask.html" target="_blank" rel="noopener">demo</a></p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&lt;style&gt;</span><br><span class="line">  #ancestor &#123;</span><br><span class="line">    -webkit-mask-image: -webkit-linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0));</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  #composited &#123;</span><br><span class="line">    width: 100%;</span><br><span class="line">    height: 100%;</span><br><span class="line">    transform: translateZ(0);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  #container &#123;</span><br><span class="line">    position: relative;</span><br><span class="line">    width: 400px;</span><br><span class="line">    height: 60px;</span><br><span class="line">    border: 1px solid black;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  #overlap-child &#123;</span><br><span class="line">    position: absolute;</span><br><span class="line">    left: 0;</span><br><span class="line">    top: 0 ;</span><br><span class="line">    bottom: 0px;</span><br><span class="line">    width: 100%;</span><br><span class="line">    height: 60px;</span><br><span class="line">    background-color: orange;</span><br><span class="line">  &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line"></span><br><span class="line">&lt;div id=&quot;container&quot;&gt;</span><br><span class="line">  &lt;div id=&quot;composited&quot;&gt;Text behind the orange box.&lt;/div&gt;</span><br><span class="line">  &lt;div id=&quot;ancestor&quot;&gt;</span><br><span class="line">    &lt;div id=&quot;overlap-child&quot;&gt;&lt;/div&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>  在本例中，<code>#overlap-child</code> 同合成层重叠，如果进行压缩，会导致渲染顺序的改变，其父元素 <code>#ancestor</code> 的 mask 属性将失效，因此类似这种情况下，是无法进行层压缩的。目前常见的产生这种原因的情况有两种，一种是上述的祖先元素使用 mask 属性的情况，另一种是祖先元素使用 filter 属性的情况（<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squashingWouldBreakPaintOrder-filter.html" target="_blank" rel="noopener">demo</a>）。</p>
+</li>
+<li><p>video 元素的渲染层无法被压缩同时也无法将别的渲染层压缩到 video 所在的合成层上（squashingVideoIsDisallowed）<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/video.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>iframe、plugin 的渲染层无法被压缩同时也无法将别的渲染层压缩到其所在的合成层上（squashingLayoutPartIsDisallowed）<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/layoutpart.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>无法压缩有 reflection 属性的渲染层（squashingReflectionDisallowed）<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/reflection.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>无法压缩有 blend mode 属性的渲染层（squashingBlendingDisallowed）<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/blend-mode.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>当渲染层同合成层有不同的裁剪容器（clipping container）时，该渲染层无法压缩（squashingClippingContainerMismatch）。</p>
+<p>  示例如下：<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squashingClippingContainerMismatch.html" target="_blank" rel="noopener">demo</a></p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">&lt;style&gt;</span><br><span class="line">  .clipping-container &#123;</span><br><span class="line"></span><br><span class="line">    overflow: hidden;</span><br><span class="line">    height: 10px; </span><br><span class="line">    background-color: blue;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  .composited &#123;</span><br><span class="line"></span><br><span class="line">    transform: translateZ(0); </span><br><span class="line">    height: 10px; </span><br><span class="line">    background-color: red;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  .target &#123;</span><br><span class="line"></span><br><span class="line">    position:absolute; </span><br><span class="line">    top: 0px; </span><br><span class="line">    height:100px; </span><br><span class="line">    width:100px; </span><br><span class="line">    background-color: green;</span><br><span class="line">    color: #fff;</span><br><span class="line">  &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line"></span><br><span class="line">&lt;div class=&quot;clipping-container&quot;&gt;</span><br><span class="line">  &lt;div class=&quot;composited&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;div class=&quot;target&quot;&gt;不会被压缩到 composited div 上&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>  本例中 <code>.target</code> 同 合成层 <code>.composited</code> 重叠，但是由于 <code>.composited</code> 在一个 <code>overflow: hidden</code> 的容器中，导致 <code>.target</code> 和合成层有不同的裁剪容器，从而 <code>.target</code> 无法被压缩。</p>
+</li>
+<li><p>相对于合成层滚动的渲染层无法被压缩（scrollsWithRespectToSquashingLayer）</p>
+<p>  示例如下：<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/scrollsWithRespectToSquashingLayer.html" target="_blank" rel="noopener">demo</a></p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;style&gt;</span><br><span class="line">  body &#123;</span><br><span class="line">    height: 1500px;</span><br><span class="line">    overflow-x: hidden;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  .composited &#123;</span><br><span class="line"></span><br><span class="line">    width: 50px;</span><br><span class="line">    height: 50px;</span><br><span class="line">    background-color: red;</span><br><span class="line">    position: absolute;</span><br><span class="line">    left: 50px;</span><br><span class="line">    top: 400px;</span><br><span class="line">    transform: translateZ(0);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  .overlap &#123;</span><br><span class="line">    width: 200px;</span><br><span class="line">    height: 200px;</span><br><span class="line">    background-color: green;</span><br><span class="line">    position: fixed;</span><br><span class="line">    left: 0px;</span><br><span class="line">    top: 0px;</span><br><span class="line">  &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line"></span><br><span class="line">&lt;div class=&quot;composited&quot;&gt;&lt;/div&gt;</span><br><span class="line">&lt;div class=&quot;overlap&quot;&gt;&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+<p>  本例中，红色的 <code>.composited</code> 提升为了合成层，绿色的 <code>.overlap</code> fix 在页面顶部，一开始只有 <code>.composited</code> 合成层。</p>
+<p>  <img src="https://img.alicdn.com/tps/TB1SHBOMXXXXXbnXFXXXXXXXXXX-690-484.jpg_640x640.jpg" alt></p>
+<p>  当滑动页面，<code>.overlap</code> 重叠到 <code>.composited</code> 上时，<code>.overlap</code> 会因重叠原因提升为合成层，同时，因为相对于合成层滚动，因此无法被压缩。</p>
+<p>  <img src="https://img.alicdn.com/tps/TB1IrRGMXXXXXXxaXXXXXXXXXXX-690-484.jpg_640x640.jpg" alt></p>
+</li>
+<li><p>当渲染层同合成层有不同的具有 opacity 的祖先层（一个设置了 opacity 且小于 1，一个没有设置 opacity，也算是不同）时，该渲染层无法压缩（squashingOpacityAncestorMismatch，同 squashingClippingContainerMismatch）<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squashingOpacityAncestorMismatch.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>当渲染层同合成层有不同的具有 transform 的祖先层时，该渲染层无法压缩（squashingTransformAncestorMismatch，同上） <a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squashingTransformAncestorMismatch.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>当渲染层同合成层有不同的具有 filter 的祖先层时，该渲染层无法压缩（squashingFilterAncestorMismatch，同上）<a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/squashingFilterAncestorMismatch.html" target="_blank" rel="noopener">demo</a></p>
+</li>
+<li><p>当覆盖的合成层正在运行动画时，该渲染层无法压缩（squashingLayerIsAnimating），当动画未开始或者运行完毕以后，该渲染层才可以被压缩 <a href="http://taobaofed.github.io/demo/performance-composite-demo/squash/animating.html" target="_blank" rel="noopener">demo</a></p>
+<p>  <img src="https://img.alicdn.com/tps/TB1mJjwMXXXXXajXpXXXXXXXXXX-960-391.jpg" alt></p>
+</li>
+</ul>
+<h2 id="如何查看合成层"><a href="#如何查看合成层" class="headerlink" title="如何查看合成层"></a>如何查看合成层</h2><p>使用 Chrome DevTools 工具来查看页面中合成层的情况。</p>
+<p>比较简单的方法是打开 DevTools，勾选上 <code>Show layer borders</code></p>
+<p><img src="https://img.alicdn.com/tps/TB1dZG.MXXXXXX2XVXXXXXXXXXX-276-164.png" alt></p>
+<p>其中，页面上的合成层会用黄色边框框出来。</p>
+<p><img src="https://img.alicdn.com/tps/TB1EQu4MXXXXXXiaXXXXXXXXXXX-709-717.png_600x600.jpg" alt></p>
+<p>当然，更加详细的信息可以通过 Timeline 来查看。</p>
+<p>每一个单独的帧，看到每个帧的渲染细节：</p>
+<p><img src="https://img.alicdn.com/tps/TB1.uznMXXXXXbcXFXXXXXXXXXX-325-195.jpg" alt></p>
+<p>点击之后，你就会在视图中看到一个新的选项卡：Layers。</p>
+<p><img src="https://img.alicdn.com/tps/TB1uCgsLpXXXXXNXFXXXXXXXXXX-333-260.jpg" alt></p>
+<p>点击这个 Layers 选项卡，你会看到一个新的视图。在这个视图中，你可以对这一帧中的所有合成层进行扫描、缩放等操作，同时还能看到每个渲染层被创建的原因。</p>
+<p><img src="https://img.alicdn.com/tps/TB163nGMXXXXXatXXXXXXXXXXXX-1440-756.jpg_720x720.jpg" alt></p>
+<p>有了这个视图，你就能知道页面中到底有多少个合成层。如果你在对页面滚动或渐变效果的性能分析中发现 Composite 过程耗费了太多时间，那么你可以从这个视图里看到页面中有多少个渲染层，它们为何被创建，从而对合成层的数量进行优化。</p>
+<h2 id="性能优化"><a href="#性能优化" class="headerlink" title="性能优化"></a>性能优化</h2><p>提升为合成层简单说来有以下几点好处：</p>
+<ul>
+<li>合成层的位图，会交由 GPU 合成，比 CPU 处理要快</li>
+<li>当需要 repaint 时，只需要 repaint 本身，不会影响到其他的层</li>
+<li>对于 transform 和 opacity 效果，不会触发 layout 和 paint</li>
+</ul>
+<p>利用合成层对于提升页面性能方面有很大的作用，因此我们也总结了一下几点优化建议。</p>
+<h3 id="提升动画效果的元素"><a href="#提升动画效果的元素" class="headerlink" title="提升动画效果的元素"></a>提升动画效果的元素</h3><p>合成层的好处是不会影响到其他元素的绘制，因此，为了减少动画元素对其他元素的影响，从而减少 paint，我们需要把动画效果中的元素提升为合成层。</p>
+<p>提升合成层的最好方式是使用 CSS 的 will-change 属性。从上一节合成层产生原因中，可以知道 will-change 设置为 opacity、transform、top、left、bottom、right 可以将元素提升为合成层。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#target &#123;</span><br><span class="line">  will-change: transform;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其兼容如下所示：</p>
+<p><img src="https://img.alicdn.com/tps/TB1_6P9LpXXXXblXXXXXXXXXXXX-1252-284.png_720x720.jpg" alt></p>
+<p>对于那些目前还不支持 will-change 属性的浏览器，目前常用的是使用一个 3D transform 属性来强制提升为合成层：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#target &#123;</span><br><span class="line">  transform: translateZ(0);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但需要注意的是，不要创建太多的渲染层。因为每创建一个新的渲染层，就意味着新的内存分配和更复杂的层的管理。之后我们会详细讨论。</p>
+<p>如果你已经把一个元素放到一个新的合成层里，那么可以使用 Timeline 来确认这么做是否真的改进了渲染性能。别盲目提升合成层，一定要分析其实际性能表现。</p>
+<h3 id="使用-transform-或者-opacity-来实现动画效果"><a href="#使用-transform-或者-opacity-来实现动画效果" class="headerlink" title="使用 transform 或者 opacity 来实现动画效果"></a>使用 transform 或者 opacity 来实现动画效果</h3><p>文章最开始，我们讲到了页面呈现出来所经历的渲染流水线，其实从性能方面考虑，最理想的渲染流水线是没有布局和绘制环节的，只需要做合成层的合并即可：</p>
+<p><img src="https://img.alicdn.com/tps/TB14YwvLpXXXXXGXFXXXXXXXXXX-1093-167.jpg_720x720.jpg" alt></p>
+<p>为了实现上述效果，就需要只使用那些仅触发 Composite 的属性。目前，只有两个属性是满足这个条件的：transforms 和 opacity。更详细的信息可以查看 <a href="http://csstriggers.com/" target="_blank" rel="noopener">CSS Triggers</a>。</p>
+<p>注意：元素提升为合成层后，transform 和 opacity 才不会触发 paint，如果不是合成层，则其依然会触发 paint。具体见如下两个 demo。</p>
+<ul>
+<li><p><a href="http://taobaofed.github.io/demo/performance-composite-demo/paint/promote-element/no-promote-transform.html" target="_blank" rel="noopener">demo 1：transform</a></p>
+<p>  <img src="https://img.alicdn.com/tps/TB1XsAVLpXXXXbzXpXXXXXXXXXX-712-411.png_640x640.jpg" alt="no-promote-transform"></p>
+</li>
+<li><p><a href="http://taobaofed.github.io/demo/performance-composite-demo/paint/promote-element/no-promote-opacity.html" target="_blank" rel="noopener">demo 2：opacity</a></p>
+<p>  <img src="https://img.alicdn.com/tps/TB1j9M7LpXXXXaiXXXXXXXXXXXX-713-424.png_640x640.jpg" alt="no-promote-opacity"></p>
+</li>
+</ul>
+<p>可以看到未提升 target element 为合成层，transform 和 opacity 依然会触发 paint。</p>
+<h3 id="减少绘制区域"><a href="#减少绘制区域" class="headerlink" title="减少绘制区域"></a>减少绘制区域</h3><p>对于不需要重新绘制的区域应尽量避免绘制，以减少绘制区域，比如一个 fix 在页面顶部的固定不变的导航 header，在页面内容某个区域 repaint 时，整个屏幕包括 fix 的 header 也会被重绘，见 <a href="http://taobaofed.github.io/demo/performance-composite-demo/paint/reduce/no-reduce.html" target="_blank" rel="noopener">demo</a>，结果如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1SK_9LpXXXXcaaXXXXXXXXXXX-699-304.png" alt="no-reduce"></p>
+<p>而对于固定不变的区域，我们期望其并不会被重绘，因此可以通过之前的方法，将其提升为独立的合成层。</p>
+<p>减少绘制区域，需要仔细分析页面，区分绘制区域，减少重绘区域甚至避免重绘。</p>
+<h3 id="合理管理合成层"><a href="#合理管理合成层" class="headerlink" title="合理管理合成层"></a>合理管理合成层</h3><p>看完上面的文章，你会发现提升合成层会达到更好的性能。这看上去非常诱人，但是问题是，创建一个新的合成层并不是免费的，它得消耗额外的内存和管理资源。实际上，在内存资源有限的设备上，合成层带来的性能改善，可能远远赶不上过多合成层开销给页面性能带来的负面影响。同时，由于每个渲染层的纹理都需要上传到 GPU 处理，因此我们还需要考虑 CPU 和 GPU 之间的带宽问题、以及有多大内存供 GPU 处理这些纹理的问题。</p>
+<p>对于合成层占用内存的问题，我们简单做了几个 demo 进行了验证。</p>
+<p><a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/multi-layers-expect.html" target="_blank" rel="noopener">demo 1</a> 和 <a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/multi-layers.html" target="_blank" rel="noopener">demo 2</a> 中，会创建 2000 个同样的 div 元素，不同的是 <a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/multi-layers.html" target="_blank" rel="noopener">demo 2</a> 中的元素通过 will-change 都提升为了合成层，而两个 demo 页面的内存消耗却有很明显的差别。</p>
+<p><img src="https://img.alicdn.com/tps/TB1EMYKMXXXXXcUXXXXXXXXXXXX-972-480.jpg" alt></p>
+<h4 id="防止层爆炸"><a href="#防止层爆炸" class="headerlink" title="防止层爆炸"></a>防止层爆炸</h4><p>通过之前的介绍，我们知道同合成层重叠也会使元素提升为合成层，虽然有浏览器的层压缩机制，但是也有很多无法进行压缩的情况。也就是说除了我们显式的声明的合成层，还可能由于重叠原因不经意间产生一些不在预期的合成层，极端一点可能会产生大量的额外合成层，出现层爆炸的现象。我们简单写了一个极端点但其实在我们的页面中比较常见的 <a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/layer-explode.html" target="_blank" rel="noopener">demo</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">&lt;style&gt;</span><br><span class="line">  @-webkit-keyframes slide &#123;</span><br><span class="line">    from &#123; transform: none; &#125;</span><br><span class="line">    to &#123; transform: translateX(100px); &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    .animating &#123;</span><br><span class="line">    </span><br><span class="line">    width: 300px;</span><br><span class="line">    height: 30px;</span><br><span class="line">    background-color: orange;</span><br><span class="line">    color: #fff;</span><br><span class="line">      -webkit-animation: slide 5s alternate linear infinite;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  ul &#123;</span><br><span class="line"></span><br><span class="line">    padding: 5px;</span><br><span class="line">    border: 1px solid #000;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">    .box &#123;</span><br><span class="line"></span><br><span class="line">    width: 600px;</span><br><span class="line">    height: 30px;</span><br><span class="line">    margin-bottom: 5px;</span><br><span class="line">    background-color: blue;</span><br><span class="line">    color: #fff;</span><br><span class="line">    position: relative;</span><br><span class="line">    /* 会导致无法压缩：squashingClippingContainerMismatch */</span><br><span class="line">    overflow: hidden;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    .inner &#123;</span><br><span class="line">      position: absolute;</span><br><span class="line">      top: 2px;</span><br><span class="line">      left: 2px;</span><br><span class="line">      font-size: 16px;</span><br><span class="line">      line-height: 16px;</span><br><span class="line">      padding: 2px;</span><br><span class="line">      margin: 0;</span><br><span class="line">      background-color: green;</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 动画合成层 --&gt;</span><br><span class="line">&lt;div class=&quot;animating&quot;&gt;composited animating&lt;/div&gt;</span><br><span class="line">&lt;ul&gt;</span><br><span class="line">  &lt;!-- assume overlap --&gt;</span><br><span class="line">  &lt;li class=&quot;box&quot;&gt;</span><br><span class="line">    &lt;!-- assume overlap --&gt;</span><br><span class="line">    &lt;p class=&quot;inner&quot;&gt;asume overlap, 因为 squashingClippingContainerMismatch 无法压缩&lt;/p&gt;</span><br><span class="line">  &lt;/li&gt;</span><br><span class="line">  </span><br><span class="line">  ...</span><br><span class="line">&lt;/ul&gt;</span><br></pre></td></tr></table></figure>
+<p><a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/layer-explode.html" target="_blank" rel="noopener">demo</a> 中，<code>.animating</code> 的合成层在运行动画，会导致 <code>.inner</code> 元素因为上文介绍过的 assumedOverlap 的原因，而被提升为合成层，同时，<code>.inner</code> 的父元素 <code>.box</code> 设置了 <code>overflow: hidden</code>，导致 <code>.inner</code> 的合成层因为 squashingClippingContainerMismatch 的原因，无法压缩，就出现了层爆炸的问题。</p>
+<p><img src="https://img.alicdn.com/tps/TB1E7PEMXXXXXbAXpXXXXXXXXXX-1390-778.jpg_720x720.jpg" alt></p>
+<p>这种情况平时在我们的业务中还是很常见的，比如 slider + list 的结构，一旦满足了无法进行层压缩的情况，就很容易出现层爆炸的问题。</p>
+<p>解决层爆炸的问题，最佳方案是打破 overlap 的条件，也就是说让其他元素不要和合成层元素重叠。对于上述的示例，我们可以将 <code>.animation</code> 的 z-index 提高。修改后 <a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/layer-explode-zIndex.html" target="_blank" rel="noopener">demo</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.animating &#123;</span><br><span class="line">  </span><br><span class="line">  ...</span><br><span class="line">  /* 让其他元素不和合成层重叠 */</span><br><span class="line">  position: relative;</span><br><span class="line">  z-index: 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时，就只有 <code>.animating</code> 提升为合成层，如下：</p>
+<p><img src="https://img.alicdn.com/tps/TB1LxrnMXXXXXcIXVXXXXXXXXXX-1366-777.jpg_720x720.jpg" alt></p>
+<p>同时，内存占用比起之前也降低了很多。</p>
+<p><img src="https://img.alicdn.com/tps/TB1FoDwMXXXXXc2XFXXXXXXXXXX-947-485.jpg" alt></p>
+<p>如果受限于视觉需要等因素，其他元素必须要覆盖在合成层之上，那应该尽量避免无法层压缩情况的出现。针对上述示例中，无法层压缩的情况（squashingClippingContainerMismatch），我们可以将 <code>.box</code> 的 <code>overflow: hidden</code> 去掉，这样就可以利用浏览器的层压缩了。修改后 <a href="http://taobaofed.github.io/demo/performance-composite-demo/memory/layer-explode-squash.html" target="_blank" rel="noopener">demo</a></p>
+<p>此时，由于第一个 <code>.box</code> 因为 squashingLayerIsAnimating 的原因无法压缩，其他的都被压缩到了一起。</p>
+<p><img src="https://img.alicdn.com/tps/TB1OE6uMXXXXXc8XFXXXXXXXXXX-1368-774.jpg_720x720.jpg" alt></p>
+<p>同时，内存占用比起之前也降低了很多。</p>
+<p><img src="https://img.alicdn.com/tps/TB1eYvqMXXXXXbJXVXXXXXXXXXX-936-480.jpg" alt></p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>之前无线开发时，大多数人都很喜欢使用 <code>translateZ(0)</code> 来进行所谓的硬件加速，以提升性能，但是性能优化并没有所谓的“银弹”，<code>translateZ(0)</code> 不是，本文列出的优化建议也不是。抛开了对页面的具体分析，任何的性能优化都是站不住脚的，盲目的使用一些优化措施，结果可能会适得其反。因此切实的去分析页面的实际性能表现，不断的改进测试，才是正确的优化途径。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/core/paint/PaintLayer.h" target="_blank" rel="noopener">PaintLayer.h</a></li>
+<li><a href="https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/core/paint/PaintLayer.cpp" target="_blank" rel="noopener">PaintLayer.cpp</a></li>
+<li><a href="https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/platform/graphics/CompositingReasons.cpp" target="_blank" rel="noopener">CompositingReasons.cpp</a></li>
+<li><a href="https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/platform/graphics/CompositingReasons.h" target="_blank" rel="noopener">CompositingReasons.h</a></li>
+<li><a href="https://code.google.com/p/chromium/codesearch#chromium/src/third_party/WebKit/Source/core/layout/compositing/CompositingRequirementsUpdater.cpp&amp;q=CompositingRequirementsUpdater&amp;sq=package:chromium&amp;type=cs&amp;l=212" target="_blank" rel="noopener">CompositingRequirementsUpdater.cpp</a></li>
+<li><a href="https://www.chromium.org/developers/testing/webkit-layout-tests" target="_blank" rel="noopener">chrome layout test</a></li>
+<li><a href="https://www.chromium.org/blink/slimming-paint" target="_blank" rel="noopener">Slimming Paint</a></li>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/Guide/CSS/Understanding_z_index/The_stacking_context" target="_blank" rel="noopener">The stacking contest</a></li>
+<li><a href="https://docs.google.com/presentation/d/1WOhbWLkhMyo4vZUaHq-FO-mt0B2sejXw-lMwohD5iUo/edit?pref=2&amp;pli=1#slide=id.g2a949df15_00" target="_blank" rel="noopener">Blink Compositing Update: Recap and Squashing</a></li>
+<li><a href="http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome" target="_blank" rel="noopener">GPU Accelerated Compositing in Chrome</a></li>
+<li><a href="http://csstriggers.com/" target="_blank" rel="noopener">CSS Triggers</a></li>
+<li><a href="https://developers.google.com/web/fundamentals/performance/rendering/?hl=zh-cn" target="_blank" rel="noopener">google render performance</a></li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2016/04/25/performance-composite/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2016/04/25/performance-composite/" data-id="cjt6lby0q0092jeu17nk3ru2u" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2016/04/25/performance-composite/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能/">性能</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/05/04/promise-anti-patterns/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Promise 反模式
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2016/04/16/how-to-find-memory-leak/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">如何定位 Node.js 的内存泄漏</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

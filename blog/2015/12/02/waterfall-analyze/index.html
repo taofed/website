@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>页面白屏与瀑布流分析方法 | Taobao FED | 淘宝前端团队</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="baidu-site-verification" content="OTHOW5vFFG">
+  <meta name="uyan_auth" content="5c52f7795a">
+  <meta name="description" content="无线页面的开发在我们的日常工作中越来越重要，无线的性能也是我们需要重点关注的，而加载的性能又是无线性能中的一个重要问题。那么，今天我们一起来看下如何去评估、测试无线页面的加载性能。 为了方便分析页面的加载过程，这里将网络设置成最慢的 GPRS，并将加载过程录制下来，通常你可以通过 Chrome 自带的 timeline， 勾选 screenhot，可以得到详尽的过程，如下图：  这里为了和请求一">
+<meta name="keywords" content="无线,性能,Mobile">
+<meta property="og:type" content="article">
+<meta property="og:title" content="页面白屏与瀑布流分析方法">
+<meta property="og:url" content="http://taobaofed.org/blog/2015/12/02/waterfall-analyze/index.html">
+<meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
+<meta property="og:description" content="无线页面的开发在我们的日常工作中越来越重要，无线的性能也是我们需要重点关注的，而加载的性能又是无线性能中的一个重要问题。那么，今天我们一起来看下如何去评估、测试无线页面的加载性能。 为了方便分析页面的加载过程，这里将网络设置成最慢的 GPRS，并将加载过程录制下来，通常你可以通过 Chrome 自带的 timeline， 勾选 screenhot，可以得到详尽的过程，如下图：  这里为了和请求一">
+<meta property="og:locale" content="zh-cn">
+<meta property="og:image" content="https://gw.alicdn.com/tps/TB1YuEEKFXXXXcJXFXXXXXXXXXX-900-500.jpg">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1_SA1KFXXXXboXXXXXXXXXXXX-1736-794.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1MiUYKFXXXXcYXXXXXXXXXXXX-1513-640.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1UI31KFXXXXbdXXXXXXXXXXXX-1517-643.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1i9QUKFXXXXXZXpXXXXXXXXXX-1515-634.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1eOsUKFXXXXagXpXXXXXXXXXX-1513-631.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1mW7SKFXXXXbDXpXXXXXXXXXX-1516-745.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB19C3VKFXXXXXtXpXXXXXXXXXX-1514-629.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1sg7GKFXXXXXuXVXXXXXXXXXX-1518-644.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1eEZQKFXXXXb1XpXXXXXXXXXX-1515-629.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1nvgrKFXXXXc_aXXXXXXXXXXX-1520-628.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1d_.NKFXXXXXBXFXXXXXXXXXX-1509-628.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1c6MMKFXXXXaqXFXXXXXXXXXX-1517-636.png">
+<meta property="og:image" content="http://img.alicdn.com/tps/TB1ymcLKFXXXXaxXFXXXXXXXXXX-1631-626.png">
+<meta property="og:image" content="https://img.alicdn.com/tps/TB1OmAWKFXXXXXbXpXXXXXXXXXX-1439-638.png">
+<meta property="og:updated_time" content="2019-03-13T02:32:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="页面白屏与瀑布流分析方法">
+<meta name="twitter:description" content="无线页面的开发在我们的日常工作中越来越重要，无线的性能也是我们需要重点关注的，而加载的性能又是无线性能中的一个重要问题。那么，今天我们一起来看下如何去评估、测试无线页面的加载性能。 为了方便分析页面的加载过程，这里将网络设置成最慢的 GPRS，并将加载过程录制下来，通常你可以通过 Chrome 自带的 timeline， 勾选 screenhot，可以得到详尽的过程，如下图：  这里为了和请求一">
+<meta name="twitter:image" content="https://gw.alicdn.com/tps/TB1YuEEKFXXXXcJXFXXXXXXXXXX-900-500.jpg">
+  
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
+    <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/rss+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+
+  <link rel="stylesheet" href="/css/style.css">
+  
+    <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  
+    <link rel="stylesheet" href="/scrollLoading/style.css">
+  
+
+  
+    <style type="text/css">
+      .logo { background-image:url(//img.alicdn.com/tps/TB1Nv_wKXXXXXbmXVXXXXXXXXXX-295-195.png); }
+    </style>
+  
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <script src="/js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript">
+    window.zhuge = window.zhuge || [];window.zhuge.methods = "_init debug identify track trackLink trackForm page".split(" ");
+    window.zhuge.factory = function(b) {return function() {var a = Array.prototype.slice.call(arguments);a.unshift(b);
+      window.zhuge.push(a);return window.zhuge;}};for (var i = 0; i < window.zhuge.methods.length; i++) {
+      var key = window.zhuge.methods[i];window.zhuge[key] = window.zhuge.factory(key);}window.zhuge.load = function(b, x) {
+      if (!document.getElementById("zhuge-js")) {var a = document.createElement("script");var verDate = new Date();
+        var verStr = verDate.getFullYear().toString()+ verDate.getMonth().toString() + verDate.getDate().toString();
+        a.type = "text/javascript";a.id = "zhuge-js";a.async = !0;a.src = (location.protocol == 'http:' ? "http://sdk.zhugeio.com/zhuge.min.js?v=" : 'https://zgsdk.zhugeio.com/zhuge.min.js?v=') + verStr;
+        a.onerror = function(){window.zhuge.identify = window.zhuge.track = function(ename, props, callback){if(callback && Object.prototype.toString.call(callback) === '[object Function]')callback();};};
+        var c = document.getElementsByTagName("script")[0];c.parentNode.insertBefore(a, c);window.zhuge._init(b, x)}};
+    window.zhuge.load('0ee24dc9de724f48915476a903b32794');//配置应用的AppKey
+  </script>
+
+</head>
+</html>
+<body>
+  <img src="//img.alicdn.com/tps/TB1GKckKXXXXXXIXpXXXXXXXXXX-400-400.png" alt="Taobao FED" style="position:absolute;left:-9999px">
+  <div id="wrap">
+    <header id="header">
+  <div id="header-outer" class="outer">
+    <div class="container">
+      <div class="container-inner">
+        <div id="header-title">
+          <h1 class="logo-wrap">
+            <a href="/" class="logo"></a>
+          </h1>
+          
+            <h2 class="subtitle-wrap">
+              <p class="subtitle">淘宝前端团队（FED）</p>
+              <p class="description">用技术为体验提供无限可能</p>
+            </h2>
+          
+        </div>
+        <div id="header-inner" class="nav-container">
+          <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+          <div class="nav-container-inner">
+            <ul id="main-nav">
+              <li class="main-nav-list-item"><a class="main-nav-list-link" href="/">主页</a></li>
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Web开发/">Web开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/Node-js/">Node.js</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/无线开发/">无线开发</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/工具-平台/">工具&amp;平台</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/categories/团队生活/">团队生活</a>
+                </li>
+                
+              
+                
+                <li class="main-nav-list-item">
+                  <a class="main-nav-list-link" href="/about/">关于我们</a>
+                </li>
+                
+              
+            </ul>
+            <nav id="sub-nav">
+              <div id="search-form-wrap">
+                <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><input type="hidden" name="sitesearch" value="http://taobaofed.org"></form>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="container">
+      <div class="main-body container-inner">
+        <div class="main-body-inner">
+          <section id="main">
+            <div class="main-body-header">
+
+              <h1 class="header"><a class="page-title-link" href="/categories/无线开发/">无线开发</a></h1>
+            </div>
+            <div class="main-body-content">
+              
+  <article id="post-waterfall-analyze" class="article article-single article-type-post" itemprop="blogPost" itemscope>
+    <div class="article-inner">
+      <!--  -->
+      
+        <header class="article-header">
+          
+  
+    <h1 class="article-title" itemprop="name">
+      页面白屏与瀑布流分析方法
+    </h1>
+  
+
+        </header>
+      
+      <p class="article-byline">
+        
+        <span>作者: 妙净</span>
+        
+        <span>发表于: <a href="/blog/2015/12/02/waterfall-analyze/" class="article-date">
+  <time datetime="2015-12-02T11:27:18.000Z" itemprop="datePublished">2015-12-02</time>
+</a></span>
+      </p>
+      <div class="article-entry" itemprop="articleBody">
+        <p><img src="https://gw.alicdn.com/tps/TB1YuEEKFXXXXcJXFXXXXXXXXXX-900-500.jpg" alt="页面白屏与瀑布流分析方法"></p>
+<p>无线页面的开发在我们的日常工作中越来越重要，无线的性能也是我们需要重点关注的，而加载的性能又是无线性能中的一个重要问题。那么，今天我们一起来看下如何去评估、测试无线页面的加载性能。</p>
+<p>为了方便分析页面的加载过程，这里将网络设置成最慢的 GPRS，并将加载过程录制下来，通常你可以通过 Chrome 自带的 timeline， 勾选 screenhot，可以得到详尽的过程，如下图：</p>
+<p><img src="http://img.alicdn.com/tps/TB1_SA1KFXXXXboXXXXXXXXXXXX-1736-794.png" alt></p>
+<p>这里为了和请求一一清晰对照，用额外录屏工具（ licecap ）录制下来。下文以淘宝双 11 男装分会场的预发页面作为测试，录制 <a href="https://img.alicdn.com/tps/TB1ljGIKXXXXXcdXXXXXXXXXXXX-1315-840.gif" target="_blank" rel="noopener">结果 gif </a> 如下，录制的 FPS 为 8。</p>
+<p>帧分析如下：</p>
+<p>第一帧：重新刷新页面，发起 HTML 请求，中间完整页面是刷新前的，请无视之。</p>
+<p><img src="http://img.alicdn.com/tps/TB1MiUYKFXXXXcYXXXXXXXXXXXX-1513-640.png" alt></p>
+<p>终于等到第 7 帧，HTML 加载并解析完成，发出页面中的请求，同时 CSS/JS 的地址都收敛在 //g.alicdn.com 同一个域名下， Chrome 下 HTTP 1.1 协议下一个域名下支持 6 个并发。</p>
+<p>1 年前，PC 上以前还有多个域名分区（img01－04.tbcdn.cn），PC 上首屏图片多，这样可并发更多，但更多的域名引入，也加大了域名解析的成本，权衡之下淘宝之前图片域名选择了 4 个；后来集团经过轰轰烈烈的 HTTPS 改造，图片推荐收敛到 gw.alicdn.com ；手淘下现在使用 SPDY + HTTPS，相比 HTTP 1.1 ，更安全且可以多路复用。</p>
+<p><img src="http://img.alicdn.com/tps/TB1UI31KFXXXXbdXXXXXXXXXXXX-1517-643.png" alt></p>
+<p>到第 20 帧， CSS 下载完，DOM 和 <a href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-blocking-css?hl=zh-cn" target="_blank" rel="noopener">CSSOM</a> 都准备 OK 了，页面则开始渲染了；这是在 Chrome 下面看到的情况，但在 iOS 上并非如此，它需要 JS 加载并执行完才渲染页面。</p>
+<p><img src="http://img.alicdn.com/tps/TB1i9QUKFXXXXXZXpXXXXXXXXXX-1515-634.png" alt></p>
+<p>第 21 帧，紧接着，CSS 中的背景图开始相继渲染，可见 CSS 中渲染图片也是有点耗时的。</p>
+<p><img src="http://img.alicdn.com/tps/TB1eOsUKFXXXXagXpXXXXXXXXXX-1513-631.png" alt></p>
+<p>第 23 帧，前面并行下载的 JS 都下载完，也开始执行了，看“疯狂 top 榜”是 JS 抽取出来的。同时 aplus 请求也开始请求，这是个 getScript 的异步请求，可见异步请求真没有阻塞页面的渲染。</p>
+<p><img src="http://img.alicdn.com/tps/TB1mW7SKFXXXXbDXpXXXXXXXXXX-1516-745.png" alt></p>
+<p>第 25 帧，JS 还在继续执行，第一张图片是 JS 根据当前 dpr、强弱网络、设备宽度等算出最适合的图片开始加载这张大 banner 了，并且开始发送数据请求了。</p>
+<p><img src="http://img.alicdn.com/tps/TB19C3VKFXXXXXtXpXXXXXXXXXX-1514-629.png" alt></p>
+<p>到 27 帧，终于数据请求回来了，并且把文字和图片渲染到页面上了。</p>
+<p><img src="https://img.alicdn.com/tps/TB1sg7GKFXXXXXuXVXXXXXXXXXX-1518-644.png" alt></p>
+<p>然后下一帧 28，开始请求商品图片了。</p>
+<p><img src="https://img.alicdn.com/tps/TB1eEZQKFXXXXb1XpXXXXXXXXXX-1515-629.png" alt></p>
+<p>到 45 帧，6 个图片都在并发请求，同上 gw.alicdn.com 同一个域下并发 6 个请求。但首屏除了大图外只有 4 张图（2 张商家 logo 被底部 bar 挡住了），这里发出了 6 个图片请求，可见这个页面的懒加载的 buffer 值可以设置得更小。</p>
+<p><img src="http://img.alicdn.com/tps/TB1nvgrKFXXXXc_aXXXXXXXXXXX-1520-628.png" alt></p>
+<p>从 28 帧到 50 帧，经历了很长的时间，第一张图片终于显示出来了。另外看到 aplus_v2 执行完后，又发起了 spm 等请求，后面 3 个请求（ aplus-proxy.html/isproxy.js/m.gif ）还是串行的。</p>
+<p><img src="http://img.alicdn.com/tps/TB1d_.NKFXXXXXBXFXXXXXXXXXX-1509-628.png" alt></p>
+<p>最后到第 61 帧，终于所有的图片都加载完了，最后看下，最后下载完的是大 banner 图，因为有 46.9k ，这张图的大小可能成为此页面的 load 时间的关键；如果这张图没有这么大，最后下载完的可能是用于埋点的 m.gif。</p>
+<p><img src="https://img.alicdn.com/tps/TB1c6MMKFXXXXaqXFXXXXXXXXXX-1517-636.png" alt></p>
+<p>从上面整个请求的瀑布流分析下来，我们来回顾下页面的关键时间点：</p>
+<h3 id="页面可见时间"><a href="#页面可见时间" class="headerlink" title="页面可见时间"></a>页面可见时间</h3><p>在第 20 帧页面可见，CSS 完成之后，当然前提是这里没有外链 JS 在页面中间因为网络请求严重阻塞页面。这里分析的仅仅是 Chrome 浏览器，不是真机，在 iOS 上，就算 JS 在底部，直接 <code>&lt;script src=&quot;xx&quot;&gt;</code> 也是会阻塞页面。可以通过加 async 属性，通知渲染引擎这是不影响页面渲染的 JS，可以异步加载，iOS 下添加此属性可实现和 Android 或 PC Chrome 一样的效果。</p>
+<h3 id="重要内容可见时间"><a href="#重要内容可见时间" class="headerlink" title="重要内容可见时间"></a>重要内容可见时间</h3><p>重要内容可见，这里可以认为是商品数据，商品数据可见要等 JS 执行完并且异步请求发送出去回来后才可见。</p>
+<p>TMS<sup>[1]</sup> 的异步请求大多走招商数据平台（TCE<sup>[2]</sup>）的接口，测试其单个请求在真机的耗时约为 110ms（样本较少，未大量测试）。</p>
+<h3 id="白屏时间和补救方法"><a href="#白屏时间和补救方法" class="headerlink" title="白屏时间和补救方法"></a>白屏时间和补救方法</h3><p>在 Wi-Fi 下，这 60 多帧的过程一眨眼就过去了，但在弱网络下，如这里最极端的网络 GPRS 下，整个首屏含图片全部加载完成需要 41.25s。当然这 40 多秒过程能尽早出现内容，并渐进和谐地呈现出来是比较好的。</p>
+<p>男装频道是修改过后的，对比之前的未处理的猜你喜欢页面，出现长时间的白屏，如下：</p>
+<p><img src="http://img.alicdn.com/tps/TB1ymcLKFXXXXaxXFXXXXXXXXXX-1631-626.png" alt></p>
+<p>以下为本地生活修复后的效果：</p>
+<p><img src="https://img.alicdn.com/tps/TB1OmAWKFXXXXXbXpXXXXXXXXXX-1439-638.png" alt></p>
+<p>白屏处理只要稍微注意下就可以，修复的方便也简单，尽量同步输出，异步输出请尽量 mock 出现在首屏的模板。如果是基于 Cake<sup>[3]</sup> 工具开发的，也可以直接用首屏填充伪标签。</p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>以上在 Chrome 上的测试，但实际在手淘里面，在 spdy、https、离线包内置资源等的影响下，它的瀑布流还是这样的吗？</p>
+<h3 id="注："><a href="#注：" class="headerlink" title="注："></a>注：</h3><ul>
+<li>[1]: TMS 为淘宝内部运营活动系统。</li>
+<li>[2]: TCE 为淘宝内部数据接口系统。</li>
+<li>[3]: Cake 为淘宝内部前端开发套件。</li>
+</ul>
+
+      <script>
+        window.disqusProxy={
+          shortname: 'taobaofed',
+          username: 'taobaofed',
+          server: '184.170.213.204',
+          port: 8999,
+          adminAvatar: '/avatars/admin-avatar.jpg',
+          identifier: 'blog/2015/12/02/waterfall-analyze/',
+        };
+        window.disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = window.disqusProxy.identifier;
+        };
+      </script>
+      </div>
+      <footer class="article-footer">
+        <a data-url="http://taobaofed.org/blog/2015/12/02/waterfall-analyze/" data-id="cjt6lby1w00cbjeu1dylrj4k6" class="article-share-link">
+          <i class="fa fa-share"></i>
+          分享到
+        </a>
+        
+          <a href="http://taobaofed.org/blog/2015/12/02/waterfall-analyze/#comments" class="article-comment-link">
+            <i class="fa fa-comments"></i>
+            评论
+          </a>
+        
+        
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mobile/">Mobile</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性能/">性能</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/无线/">无线</a></li></ul>
+
+      </footer>
+    </div>
+  </article>
+  <script>
+    window.disqusProxy = {
+      shortname: 'taobaofed',
+      username: 'taobaofed',
+      server: '45.32.165.111',
+      port: 8999,
+      identifier: location.pathname
+    };
+    window.disqus_config = function () {
+      this.page.url = window.location.href;
+      this.page.identifier = window.disqusProxy.identifier;
+    };
+  </script>
+  
+  <section id="comments">
+    
+      <script src="//cdn.bootcss.com/react/16.0.0/umd/react.production.min.js"></script>
+      <script src="//cdn.bootcss.com/react-dom/16.0.0/umd/react-dom.production.min.js"></script>
+      <script src="//cdn.bootcss.com/fetch/2.0.3/fetch.min.js"></script>
+      <script src="//cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+      <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <div id="disqus_proxy_thread"><script src="/scripts/hexo-disqus-proxy-primary.js" async></script>
+      <div id="pre-loading-comments" style="margin: 0 auto; text-align: center;">
+        <img style="width: 107px;display: inline-block;vertical-align: middle;" src="//gw.alicdn.com/tfs/TB1Ey8Ba21TBuNjy0FjXXajyXXa-638-117.png">
+        <span style="
+            box-sizing: border-box;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: rgba(51, 54, 58, .4) transparent;
+            border-radius: 13px;
+            transform-origin: 50% 50% 0;
+            transition: transform 700s linear;
+            display: inline-block;
+            transform: rotate(360000deg);
+            vertical-align: middle;">
+          </span>
+        <p style="line-height: 35px;color: #cccccc;font-size: 12px;">正在使用 Disqus 评论，请保持网络畅通</p>
+      </div>
+    </div>
+    
+  </section>
+  
+
+
+            </div>
+          </section>
+          <aside id="sidebar">
+  <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+  <div class="sidebar-top">
+    <p>关注我们 :</p>
+    <ul class="social-links">
+      
+        <li><a class="social-tooltip" title="github" href="https://github.com/taobaofed" target="_blank"><i class="icon fa fa-github"></i></a></li>
+      
+        <li><a class="social-tooltip" title="weibo" href="http://weibo.com/taobaofed" target="_blank"><i class="icon fa fa-weibo"></i></a></li>
+      
+        <li><a class="social-tooltip" title="rss" href="/atom.xml" target="_blank"><i class="icon fa fa-rss"></i></a></li>
+      
+    </ul>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/12/03/deep-into-node-2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <p class="article-nav-title">
+        
+          Node.js 探秘：求异存同
+        
+      </p>
+      <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+  
+  
+    <a href="/blog/2015/12/01/kissy-badminton-open/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <p class="article-nav-title">首届 KISSY 杯羽毛球双打公开赛赛况</p>
+      <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+    </a>
+  
+</nav>
+
+  
+  <div class="widgets-container">
+    
+      <div class="widget-wrap widget-open-source">
+  <h3 class="widget-title">开源产品</h3>
+  <ul class="open-source-list">
+    <!--<h3 class="widget-title">开源产品</h3>-->
+    
+    <li>
+      <a href="https://alibaba.github.io/rax/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/L1/461/1/40137b64ab73a123e78d8246cd81c8379358c999_200x200.jpg)" title="A universal React-compatible render engine"></span>
+        <span class="title">Rax</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/ice/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1JuqQcAyWBuNjy0FpXXassXXa-1079-1013.png)" title="赋能中后台建设"></span>
+        <span class="title">飞冰</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="http://www.midwayjs.org/pandora/zh-cn/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1QxmQcAyWBuNjy0FpXXassXXa-157-157.png)" title="Ready to launch Node.js application"></span>
+        <span class="title">Pandora.js</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/bindingx/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1GLGCcrGYBuNjy0FoXXciBFXa-1293-1291.png)" title="Bind actions to effects"></span>
+        <span class="title">BindingX</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/GCanvas/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1iYPgcxGYBuNjy0FnXXX5lpXa-130-130.png)" title="Draw to your device directly"></span>
+        <span class="title">GCanvas</span>
+      </a>
+    </li>
+    
+    <li>
+      <a href="https://alibaba.github.io/G3D/" target="_blank">
+        <span class="img" style="background-image: url(//gw.alicdn.com/tfs/TB1zxCZcuSSBuNjy0FlXXbBpVXa-136-136.png)" title="A pure WebGL-compatible 3d render engine"></span>
+        <span class="title">G3D</span>
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    
+      
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul id="recent-post" class>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/03/13/fed-2019/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg
+)" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/团队生活/">团队生活</a></p>
+              <p class="item-title"><a href="/blog/2019/03/13/fed-2019/" class="title">淘宝前端团队 2019 年实习生内部推荐通道已开启</a></p>
+              
+              <p class="item-author">by 梧忌</p>
+              
+              <p class="item-date">at <time datetime="2019-03-13T02:22:25.000Z" itemprop="datePublished">2019-03-13</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2019/01/07/imgcook/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png
+)" alt="imgcook 体验版发布" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2019/01/07/imgcook/" class="title">imgcook 体验版发布</a></p>
+              
+              <p class="item-author">by 波本</p>
+              
+              <p class="item-date">at <time datetime="2019-01-07T09:09:12.000Z" itemprop="datePublished">2019-01-07</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/12/17/webgl-texture/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png
+)" alt="WebGL 纹理详解" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/12/17/webgl-texture/" class="title">WebGL 纹理详解</a></p>
+              
+              <p class="item-author">by 叶斋</p>
+              
+              <p class="item-date">at <time datetime="2018-12-17T07:35:29.000Z" itemprop="datePublished">2018-12-17</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/11/27/hooks-and-function-component/" class="thumbnail">
+  
+    <span style="background-image:url(https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png
+)" alt="前端架构杂思录：议 Function Component 与 Hooks" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/11/27/hooks-and-function-component/" class="title">前端架构杂思录：议 Function Component 与 Hooks</a></p>
+              
+              <p class="item-author">by 元彦</p>
+              
+              <p class="item-date">at <time datetime="2018-11-27T03:18:33.000Z" itemprop="datePublished">2018-11-27</time></p>
+            </div>
+          </li>
+        
+          <li>
+            
+            <div class="item-thumbnail">
+              
+<a href="/blog/2018/10/31/a-tag/" class="thumbnail">
+  
+    <span style="background-image:url(https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg
+)" alt="Atag - Web Components 最佳实践" class="thumbnail-image"></span>
+  
+</a>
+
+            </div>
+            
+            <div class="item-inner">
+              <p class="item-category"><a class="article-category-link" href="/categories/Web开发/">Web开发</a></p>
+              <p class="item-title"><a href="/blog/2018/10/31/a-tag/" class="title">Atag - Web Components 最佳实践</a></p>
+              
+              <p class="item-author">by 卓凌</p>
+              
+              <p class="item-date">at <time datetime="2018-10-31T08:09:15.000Z" itemprop="datePublished">2018-10-31</time></p>
+            </div>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-wechat">
+    <h3 class="widget-title">微信公众号</h3>
+    <a href="javascript:void(0) ">
+      <img src="//img.alicdn.com/tfs/TB12fzTMVXXXXafaXXXXXXXXXXX-280-280.jpg" width="280" alt="淘宝前端团队微信公众号（taobaofed）" title="淘宝前端团队微信公众号（taobaofed）">
+    </a>
+  </div>
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Node-js/">Node.js</a><span class="category-list-count">52</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Web开发/">Web开发</a><span class="category-list-count">69</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/团队生活/">团队生活</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/工具-平台/">工具&平台</a><span class="category-list-count">13</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/无线开发/">无线开发</a><span class="category-list-count">23</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/">2019</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017</a><span class="archive-list-count">18</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/">2016</a><span class="archive-list-count">57</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/">2015</a><span class="archive-list-count">51</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/">2014</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/">2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/">2012</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/">2010</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/">2009</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/">2008</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/">2007</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+    
+      
+  <div class="widget-wrap widget-list">
+    <h3 class="widget-title">链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://nodejs.club/">Node 地下铁</a>
+          </li>
+        
+          <li>
+            <a href="http://alinode.aliyun.com/">alinode</a>
+          </li>
+        
+          <li>
+            <a href="http://fex.baidu.com/">百度 FEX</a>
+          </li>
+        
+          <li>
+            <a href="http://www.75team.com/">奇舞团</a>
+          </li>
+        
+          <li>
+            <a href="http://aotu.io/notes/">凹凸实验室</a>
+          </li>
+        
+          <li>
+            <a href="http://www.alloyteam.com/">腾讯 AlloyTeam</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+    
+  </div>
+</aside>
+        </div>
+      </div>
+    </div>
+    <footer id="footer">
+  
+  <div class="container">
+    <div class="container-inner">
+      <!--<a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>-->
+      <a href="#" class="scrollToTop"><i class="icon fa fa-arrow-up"></i></a>
+      <div class="credit">
+        <p>Copyright &copy; 2019 Taobao FED. All rights reserved.</p>
+        <a href="/terms">版权声明</a>
+        <!-- <p>Powered by <a href="//hexo.io/" target="_blank">Hexo</a>. Theme by <a href="//github.com/ppoffice" target="_blank">PPOffice</a> Redesigned by <a href="http://barretlee.com/" target="_blank">barretlee</a></p> -->
+      </div>
+    </div>
+  </div>
+</footer>
+  
+<!-- Google Analytics -->
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65944345-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+<!-- End Google Analytics -->
+
+
+<script>
+// for baidu spider
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+// for baidu analysis
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?33dd75d7b88de8722970ea06fa5f06b0";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+    
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+  <script src="/scrollLoading/jquery.scrollLoading.js"></script>
+  <script src="/scrollLoading/main.js"></script>
+
+
+<script src="/js/html-patch.js"></script>
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
