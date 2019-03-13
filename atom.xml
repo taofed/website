@@ -4,7 +4,7 @@
   <subtitle><![CDATA[淘宝前端团队（FED）]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://taobaofed.org/"/>
-  <updated>2019-03-13T03:00:36.000Z</updated>
+  <updated>2019-03-13T07:33:52.000Z</updated>
   <id>http://taobaofed.org/</id>
   
   <author>
@@ -19,7 +19,7 @@
     <link href="http://taobaofed.org/blog/2019/03/13/fed-2019/"/>
     <id>http://taobaofed.org/blog/2019/03/13/fed-2019/</id>
     <published>2019-03-13T02:22:25.000Z</published>
-    <updated>2019-03-13T03:00:36.000Z</updated>
+    <updated>2019-03-13T07:33:52.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启"></p>
 <p>随着阿里巴巴 2019 年实习生招聘的启动，淘宝前端团队（Taobao FED）实习生内部推荐也已经拉开序幕。这是一个有着十多年历史与荣耀的团队，相信你已经从各个渠道听到过我们的名字。选择一家公司进行实习，对于大学生来说是一个关键的抉择；找到有潜力的实习生进行培养，对于一个团队来说更是求贤若渴。</p>
 <p>在这里，请让我向你介绍我的小伙伴们以及我们在做的一些事情。如果你感到有兴趣，并且认为自己足够优秀，不要吝啬你的才华，直接邮件简历给他们，也许他们将会成为你职业生涯的第一个老板，以及你全新人生阶段的良师益友。</p>
@@ -39,23 +39,26 @@
 <p><img src="https://img.alicdn.com/tfs/TB12rnzLFzqK1RjSZFoXXbfcXXa-750-150.jpg" alt="正豪"></p>
 <p>我们尝试 Weex 在跨端应用开发的最佳实践，推进 IDE 在工程链路中的集成，还有面向商家装修的中后台应用，面向 ISV 的开放平台。服务用户广，技术不设限，等你来挑战！欢迎投递简历至：<a href="mailto:zhenghao.zmw@taobao.com" target="_blank" rel="noopener">zhenghao.zmw@taobao.com</a></p>
 <p><img src="https://img.alicdn.com/tfs/TB198VFLOrpK1RjSZFhXXXSdXXa-750-150.jpg" alt="二同"></p>
-<p>2020 年毕业热爱图形渲染的你一定不要错过这班车，这里有一群致力于 WebGL/WebGPU 跨端标准化实现的小伙伴，诞生了为极致渲染而生的图形渲染引擎 GCanvas，正在面向 5G/IoT 发力创造新一代渲染框架的路上邀你同行，欢迎投递简历至：<a href="mailto:yuantong.xyt@alibaba-inc.com" target="_blank" rel="noopener">yuantong.xyt@alibaba-inc.com</a>。</p>
+<p>2020 年毕业热爱图形渲染的你一定不要错过这班车，这里有一群致力于 WebGL/WebGPU 跨端标准化实现的小伙伴，诞生了为极致渲染而生的图形渲染引擎 GCanvas，正在面向 5G/IoT 发力创造新一代渲染框架的路上邀你同行，欢迎投递简历至：<a href="mailto:yuantong.xyt@alibaba-inc.com" target="_blank" rel="noopener">yuantong.xyt@alibaba-inc.com</a></p>
+<p><img src="https://img.alicdn.com/tfs/TB16LMbLNnaK1RjSZFtXXbC2VXa-750-150.jpg" alt="阿大"></p>
+<p>如果你想打造整个阿里前端开发的工程化基础底层体系，参与业内领先的前端工程底层系统开发，掌握从项目初始化到线上编译、扫描、发布的全链路体系架构设计与实现。欢迎投递简历至: <a href="mailto:ada@taobao.com" target="_blank" rel="noopener">ada@taobao.com</a></p>
 <p>了解完将要可能与你一起共事的小伙伴，再来给大家介绍你将会工作的阿里西溪园区。在我看来它拥有国内最好的办公环境。</p>
 <p><img src="https://img.alicdn.com/tfs/TB1J9l1LSzqK1RjSZFLXXcn2XXa-1000-664.jpg" alt></p>
 <p><img src="https://img.alicdn.com/tfs/TB1VbV9LFzqK1RjSZFoXXbfcXXa-1000-650.jpg" alt></p>
 <p><img src="https://img.alicdn.com/tfs/TB1hHJ7LSzqK1RjSZFjXXblCFXa-750-750.jpg" alt></p>
 <p><img src="https://img.alicdn.com/tfs/TB1Pd9cLMHqK1RjSZFkXXX.WFXa-3992-2242.jpg" alt></p>
+<p><img src="https://img.alicdn.com/tfs/TB1TRFEeDZmx1VjSZFGXXax2XXa-3992-2242.jpg" alt></p>
 <p>而至于招聘的要求，千篇一律，不再赘述。相信你已有信心和耐心接受接下来的挑战。</p>
 <p>敲黑板，以下是工作地点和内推时间：</p>
 <ul>
 <li>工作地点：杭州、北京</li>
-<li>毕业时间：2019.11.01 ~ 2020.10.31    </li>
+<li>毕业时间：2019.11.01 ~ 2020.10.31  </li>
 <li>内推时间：2019.03.12 ~ 2019.04.23</li>
 </ul>
 <p>任何疑问，可邮件联系：<a href="mailto:xwt.wuji@alibaba-inc.com" target="_blank" rel="noopener">xwt.wuji@alibaba-inc.com</a> 。亦可通过下面的二维码进入内推流程：</p>
 <p><img src="https://img.alicdn.com/tfs/TB1jEi2LNnaK1RjSZFtXXbC2VXa-150-150.png" alt="二维码"></p>
 <blockquote>
-<p>题图出处，阿里巴巴五年陈活动现场：<a href="http://alvinhui.lofter.com/post/1cb252a0_12bf2c4e3" target="_blank" rel="noopener">http://alvinhui.lofter.com/post/1cb252a0_12bf2c4e3</a></p>
+<p>题图：阿里巴巴五年陈现场，出处自 <a href="http://alvinhui.lofter.com/post/1cb252a0_12bf2c4e3" target="_blank" rel="noopener">http://alvinhui.lofter.com/post/1cb252a0_12bf2c4e3</a>。</p>
 </blockquote>
 ]]></content>
     <summary type="html">
