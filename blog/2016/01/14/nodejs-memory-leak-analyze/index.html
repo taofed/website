@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://img.alicdn.com/tps/TB1LphILpXXXXb5XVXXXXXXXXXX-900-500.jpg">
 <meta property="og:image" content="http://img3.tbcdn.cn/L1/461/1/03cb3e71cc79fd137ddc8b813d096edab0469e2f.jpeg">
 <meta property="og:image" content="http://img2.tbcdn.cn/L1/461/1/1c03a75601acbe234a04bb17f235dc6977b1881e.jpeg">
-<meta property="og:updated_time" content="2019-03-19T08:20:37.000Z">
+<meta property="og:updated_time" content="2019-03-19T09:18:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次 Node.js 应用内存暴涨分析">
 <meta name="twitter:description" content="起因之前 TMS 在运行时 CPU 中占用率和内存占用一直很高，导致应用运行状态不是很良好，需要频繁重启。经过排查，找出了部分原因：  使用的 html-minifier 模块有问题，如果输入的内容是一个有错误的 HTML 结构，会使解析进入死循环，导致 CPU 占用率 100%。  在使用 vm 模块时，使用姿势错误，导致内存占用无法释放，使内存占用暴涨。   第一个问题我们今天不予讨论，主要">
@@ -285,7 +285,7 @@
       </script>
       </div>
       <footer class="article-footer">
-        <a data-url="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/" data-id="cjtfiek3e007tueu1t225ccie" class="article-share-link">
+        <a data-url="http://taobaofed.org/blog/2016/01/14/nodejs-memory-leak-analyze/" data-id="cjtfkgb10007simu1eejm0thb" class="article-share-link">
           <i class="fa fa-share"></i>
           分享到
         </a>

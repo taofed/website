@@ -7,26 +7,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="baidu-site-verification" content="OTHOW5vFFG">
   <meta name="uyan_auth" content="5c52f7795a">
-  <meta name="description" content="音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，本团队在多媒体领域深耕两年多，才算是有一定产出，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务Q">
+  <meta name="description" content="音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务QoE的目的），真正做到了h265解码播放的全域覆">
 <meta name="keywords" content="player,h265,WebAssembly">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Web端H.265播放器研发解密">
 <meta property="og:url" content="http://taobaofed.org/blog/2019/03/18/web-player-h265/index.html">
 <meta property="og:site_name" content="Taobao FED | 淘宝前端团队">
-<meta property="og:description" content="音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，本团队在多媒体领域深耕两年多，才算是有一定产出，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务Q">
+<meta property="og:description" content="音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务QoE的目的），真正做到了h265解码播放的全域覆">
 <meta property="og:locale" content="zh-cn">
 <meta property="og:image" content="https://gw.alicdn.com/tfs/TB1lEw2MwHqK1RjSZFgXXa7JXXa-900-500.png">
-<meta property="og:image" content="https://img.alicdn.com/tfs/TB15IM4LYrpK1RjSZTEXXcWAVXa-1617-856.png">
 <meta property="og:image" content="https://img.alicdn.com/tfs/TB1rDSbJgHqK1RjSZFgXXa7JXXa-1178-442.png">
 <meta property="og:image" content="https://img.alicdn.com/tfs/TB1yUiiJcbpK1RjSZFyXXX_qFXa-545-509.jpg">
 <meta property="og:image" content="https://gw.alicdn.com/tfs/TB1OP1lJhjaK1RjSZFAXXbdLFXa-1256-378.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1uRatJhYaK1RjSZFnXXa80pXa-600-341.gif">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB15IM4LYrpK1RjSZTEXXcWAVXa-1617-856.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1VaB_JmzqK1RjSZFLXXcn2XXa-1024-768.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1aridJkvoK1RjSZFDXXXY3pXa-1055-524.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1UxCyJhjaK1RjSZKzXXXVwXXa-1502-1008.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB17KKAJiLaK1RjSZFxXXamPFXa-1024-768.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1_emeJkvoK1RjSZFDXXXY3pXa-1024-768.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1HgiaJb2pK1RjSZFsXXaNlXXa-1024-768.jpg">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB1zsS3JhnaK1RjSZFtXXbC2VXa-1024-768.png">
+<meta property="og:image" content="https://img.alicdn.com/tfs/TB10qJ.JkvoK1RjSZPfXXXPKFXa-1024-768.png">
 <meta property="og:image" content="https://img.alicdn.com/tfs/TB1uyl9JbPpK1RjSZFFXXa5PpXa-1224-436.png">
 <meta property="og:image" content="https://img.alicdn.com/tfs/TB1bHp.JkvoK1RjSZPfXXXPKFXa-1226-411.png">
-<meta property="og:image" content="https://img.alicdn.com/tfs/TB1QswKMgHqK1RjSZJnXXbNLpXa-750-3356.jpg">
-<meta property="og:updated_time" content="2019-03-19T08:20:37.000Z">
+<meta property="og:updated_time" content="2019-03-19T09:18:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Web端H.265播放器研发解密">
-<meta name="twitter:description" content="音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，本团队在多媒体领域深耕两年多，才算是有一定产出，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务Q">
+<meta name="twitter:description" content="音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务QoE的目的），真正做到了h265解码播放的全域覆">
 <meta name="twitter:image" content="https://gw.alicdn.com/tfs/TB1lEw2MwHqK1RjSZFgXXa7JXXa-900-500.png">
   
     <link rel="alternative" href="http://taobaofed.org/atom.xml" title="Taobao FED | 淘宝前端团队" type="application/atom+xml">
@@ -174,10 +182,7 @@
       </p>
       <div class="article-entry" itemprop="articleBody">
         <p><img src="https://gw.alicdn.com/tfs/TB1lEw2MwHqK1RjSZFgXXa7JXXa-900-500.png" alt="Web端H.265播放器研发解密"></p>
-<p>音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，本团队在多媒体领域深耕两年多，才算是有一定产出，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务QoE的目的），真正做到了h265解码播放的全域覆盖。</p>
-<h1 id="播放器整体架构"><a href="#播放器整体架构" class="headerlink" title="播放器整体架构"></a>播放器整体架构</h1><p>我们播放器整体架构设计如下：</p>
-<p><img src="https://img.alicdn.com/tfs/TB15IM4LYrpK1RjSZTEXXcWAVXa-1617-856.png" alt></p>
-<p>本文主要分享了我们基于WebAssembly实现H.265格式的解封装、解码和播放。</p>
+<p>音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务QoE的目的），真正做到了h265解码播放的全域覆盖。本文主要分享了我们基于WebAssembly实现H.265格式的解封装、解码和播放。</p>
 <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><strong>H.265</strong>又称HEVC(全称<strong>High Efficiency Video Coding</strong>，高效率视频编码)，是ITU-T H.264/MPEG-4 AVC标准的继任者。相比H.264，H.265拥有更高的压缩率，也就意味着同样<strong>码率</strong>（又称比特率是指每秒传送的比特(bit)数。单位为bps(Bit Per Second)，比特率越高，每秒传送数据就越多，画质就越清晰），H.265的画质会更清晰，更高的压缩率就能使用更低的存储和传输成本。</p>
 <ul>
 <li><strong>带宽成本</strong>：在有限带宽下H.265能传输更高质量的网络视频，理论上，H.265最高只需H.264编码的一半带宽即可传输相同质量视频。更低的带宽可以更好的降低存储及传输成本，并为未来基于短视频及直播领域更多更复杂好玩的互动玩法做铺垫。</li>
@@ -186,8 +191,80 @@
 <h2 id="H-264-vs-H-265"><a href="#H-264-vs-H-265" class="headerlink" title="H.264 vs H.265"></a>H.264 vs H.265</h2><p>H.264是当下用的最为广泛的视频编码格式，H.265标准围绕着现有的视频编码标准H.264，保留原来的某些技术，同时对一些相关的技术加以改进。新技术使用先进的技术用以改善码流、编码质量、延时和算法复杂度之间的关系，达到最优化设置。H.265和H.264都是基于块的视频编码技术，主要的差别在于<strong>编码单元的大小</strong>以及一些编码算法细节，H.265将图像划分为“编码树单元(coding tree Unit, CTU)”，而不是像H.264那样的16×16的宏块。根据不同的编码设置，编码树单元的尺寸可以被设置为64×64或有限的32×32或16×16。一般来说区块尺寸越大，压缩效率就越好。具体的算法及相关细节这里不具体展开了，还有一些其他的压缩算法如因为H.265专利限制而生的开放编码格式如AV1等，读者可以参考其他相关文章。<br><img src="https://img.alicdn.com/tfs/TB1rDSbJgHqK1RjSZFgXXa7JXXa-1178-442.png" alt="h264vsh265.png"> </p>
 <p>如下图，可以看到同样主观画面质量，H.265(500K)仅需H.264(800K)一半左右的带宽码率。<br><img src="https://img.alicdn.com/tfs/TB1yUiiJcbpK1RjSZFyXXX_qFXa-545-509.jpg" alt="h264vsh265.png"> </p>
 <h2 id="浏览器现状"><a href="#浏览器现状" class="headerlink" title="浏览器现状"></a>浏览器现状</h2><p>如下图，因为H.265专利及硬解支持情况不完善的原因，主流现代浏览器均不兼容H.265编码的视频播放（Edge新版本以插件方式支持），但是因为Apple对H.265的支持（这里作者认为这可能是一个很重要的标志，因为技术的发展很多时候不光是这个技术本身所决定的，而是很多因素共同作用的结果，<strong>商业</strong>也是其中很重要的一个因素），移动端ios safari在11.0版本以上支持原生播放。<br><img src="https://gw.alicdn.com/tfs/TB1OP1lJhjaK1RjSZFAXXbdLFXa-1256-378.png" alt="h265comp"> </p>
-<p>想要在浏览器端播放H.265视频原生的<figure class="highlight plain"><figcaption><span>/>```标签没有办法支持，但是因为视频格式本身是**连续图像画面**和**音频**的集合，参考了chromium的源码及video标签内部的实现原理，可以通过```<canvas< span><a href="/>">+ Web Audio API``` 的结合来模拟实现一个虚拟的video标签来实现播放器功能。</a></canvas<></span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## demo</span><br><span class="line">因为直播流时效性的缘故，发布了一个播放[H.265 mp4视频](https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4)（该视频地址直接在浏览器中播放只有声音而没有画面）的在线demo，读者可以有一个直观感受。</span><br><span class="line">地址：https://g.alicdn.com/videox/mp4-h265/1.0.2/index.html</span><br><span class="line">效果：</span><br><span class="line">![demo.gif](https://img.alicdn.com/tfs/TB1uRatJhYaK1RjSZFnXXa80pXa-600-341.gif)</span><br><span class="line"></span><br><span class="line"># 前期调研</span><br><span class="line">## 视音频基础</span><br><span class="line">因为前端领域对视频领域的涉及场景不多，一个```&lt;video /&gt;```标签就可以满足大部分场景，但是经历了这几年直播和短视频的爆发，视频的需求和功能也变得越来越复杂，开发之前阅读了很多视音频领域相关的书籍和文章，在此先对视音频基础进行一个简单的介绍。</span><br><span class="line"></span><br><span class="line">视频中我们通常说的视频的格式，比如 .mp4, .mov, .wmv, .m3u8, .flv 等等被称为```container```。在一个视频文件中音频、视频数据是分开存储的，使用的压缩算法也不一样。其中container作为容器主要包含了video数据、audio数据、metadata（用于检索视音频payload格式等信息）。每个格式的封装格式不一样，比如FLV格式的基本单元是Tag，而MP4格式的基本单元是Box，辅助的meta信息用于检索找到对应的原始数据。</span><br><span class="line"></span><br><span class="line">而平时听到的H.264, H.265等视频编码标准被称为```codec``` (COmpress and DECompress )。一个视频格式比如mp4可以使用任何标准化的压缩算法，这些信息都会被包含在一个视频文件的meta信息中来告诉播放器该用什么编解码算法来播放。</span><br><span class="line"></span><br><span class="line">## 客户端播放器</span><br><span class="line">一个传统的客户端播放器播放一个视频流经过了如下各个环节：</span><br><span class="line"></span><br><span class="line">拉取数据 =&gt; 解封装 =&gt; 音视频解码 =&gt; 采样/像素数据发送到设备进行渲染。</span><br><span class="line">![client](https://img.alicdn.com/tfs/TB1VaB_JmzqK1RjSZFLXXcn2XXa-1024-768.png)</span><br><span class="line"></span><br><span class="line">对于流媒体，播放器客户端通过拉流以数据源（音视频流）为中心，进行管道式的传输。在此期间，对视频流的读取，转换，分类，复制等一系列操作处理，以封装的mp4流为例，需要对流进行解封装、解码、渲染等步骤：</span><br><span class="line">![stream](https://img.alicdn.com/tfs/TB1aridJkvoK1RjSZFDXXXY3pXa-1055-524.png)</span><br><span class="line"></span><br><span class="line">## 浏览器video标签</span><br><span class="line">在探究的过程中，为了了解主流浏览器不支持H.265视频播放的原因，以及浏览器端实现播放器原理的了解，通过对Chromium浏览器[官方文档](https://github.com/chromium/chromium/tree/master/media#playback)及video标签实现源码的阅读，整理了一个流程图。</span><br><span class="line">![chromium](https://img.alicdn.com/tfs/TB1UxCyJhjaK1RjSZKzXXXVwXXa-1502-1008.png)</span><br><span class="line"></span><br><span class="line">可以看到浏览器内部对视频流播放的实现，在经过了PipelineController等数据传输管道的处理后利用FFmpeg软解或者Gpu硬解之后交给视频设备及音频设备进行同步及渲染。其中H.265的视频因为硬解支持情况不完善，软解可能有性能风险，所以在chrome中被关闭了不支持，在chromium中可以通过参数打开。我们就依照这个思路，利用浏览器提供的接口来实现一个模拟的video标签。</span><br><span class="line"></span><br><span class="line"># 设计过程</span><br><span class="line">## 开发思路</span><br><span class="line">开发思路按照从简单到复杂的过程，对任务进行拆分，来完成H.265视频点播及直播等各个场景的覆盖，以mp4短视频出发完成播放流程，再覆盖直播场景，考虑如网络抖动、内存控制等复杂因素，再针对直播m3u8等回放文件进行播放并开发视频seek、倍速等功能。</span><br><span class="line"></span><br><span class="line">mp4播放=&gt;flv播放=&gt;hls播放=&gt;加入seek、倍速等功能</span><br><span class="line"></span><br><span class="line">## 可行性分析</span><br><span class="line">* 思路：在最开始进行可行性分析时，参考结合了已有工具videoconverter.js和libde265.js对H.265视频ffmpeg的编译提取了hevc文件及mp3音频文件在浏览器端进行了播放。</span><br><span class="line">* demo地址：https://sparkmorry.github.io/mse-learning/h265/</span><br><span class="line">* 表现：将720P的mp4视频进行视频和音频的分离，通过 `&lt;canvas /&gt;` 绘制图像，通过 `&lt;audio /&gt;` 标签播放音频，画面在Macbook Pro上Chrome浏览器下在23fps左右。</span><br><span class="line">* 问题：</span><br><span class="line">	* **不能达到解码性能标准**: 720P的视频在Macbook Pro上仅在**23fps**左右，而原视频是**25fps**，不能达到解码性能标准，无法流畅播放。</span><br><span class="line">	* **无法做到音画同步**: 该方案因为直接提取了hevc裸流文件，无法获取视频和音频每帧的pts时间戳，无法做到严格的音画同步。</span><br><span class="line">* 解决方案：</span><br><span class="line">	* 性能：因为libde265.js是asm.js，通过对libde265.js开源库的改造，打包WebAssembly测试性能情况</span><br><span class="line">	* 音画同步：参考flv.js、hls.js等开源视频库的方案，根据曾经的实践经历，js在解封装方面的性能能够完成视频流文件解封装，获取每帧视频、音频播放的pts及原始数据交给解码器进行解码再渲染。</span><br><span class="line">* 方案调整：</span><br><span class="line">![1](https://img.alicdn.com/tfs/TB17KKAJiLaK1RjSZFxXXamPFXa-1024-768.jpg)</span><br><span class="line"></span><br><span class="line">## MP4点播流播放</span><br><span class="line">* 思路：根据上一过程调整的解决方案，通过js对mp4流进行解封装，因为音频解码的复杂度不高，也先用js进行解码，仅将视频解码模块用已有的三方模块libde265并替换为wasm解决性能问题，音视频解码模块都自身维护一段缓存区，负责存储解封装模块传过来的packet数据，解决音画同步的问题。</span><br><span class="line">* 表现：通过开源libde265实现的视频解码模块，针对于720p的视频流，平均解码时间是45ms，不能满足每一帧音频播放时间间隔（40ms）。</span><br><span class="line">* 问题：视频解码性能仍然不够。</span><br><span class="line">* 解决方案：</span><br><span class="line">	* **丢帧**：保证了音频同步，丢掉部分非参考帧，但损失了部分体验。所以提升解码性能和改善播放策略才能有可能满足当前方案的可行性。提升解码性能和改善播放策略。</span><br><span class="line">	* **提升解码性能**：用解码性能更好的ffmpeg替换掉libde265。</span><br><span class="line">	* **改善播放流程**：因为每个requestAnimationFrame循环任务都是同步的，边解码边播放。引入用WebWorker线程。通过改善视频解码模块，解码器内部开启循环解码，当外部的视频播放设备需要播放下一帧时，直接从解码器解码完的帧缓存中读取下一帧数据。实现了worker和主线程并行执行。</span><br><span class="line">* 方案调整：</span><br><span class="line">	* demo地址：https://static-assets.cyt-rain.cn/h265/index.html</span><br><span class="line">	* 设计流程</span><br><span class="line">![2](https://img.alicdn.com/tfs/TB1_emeJkvoK1RjSZFDXXXY3pXa-1024-768.jpg)</span><br><span class="line"></span><br><span class="line">## FLV直播流播放</span><br><span class="line">* 思路：mp4视频流畅播放，但在直播场景（如FLV视频流）中，客户端需要和服务端建立长链接，不断接收流消息，借用FFmpeg本身对流媒体的支持，对视频数据进行解封装及解码。</span><br><span class="line">* 表现：无法编译FFmpeg网络库，TCP无法建立连接。</span><br><span class="line">* 问题：</span><br><span class="line">无法编译FFmpeg网络库：TCP建立连接创建Socket时报错，Emscripten工具无法编译TCP连接相关配置</span><br><span class="line">codec不支持：FLV官方协议不支持H.265。</span><br><span class="line">* 解决方案：</span><br><span class="line">	* 无法编译FFmpeg网络库：主线程利用fetch方法进行拉流，放到FFmpeg自定义缓冲区进行解封装及解码。因为直播流长时间播放需要不停的开辟、释放内存空间，采用环形的数据缓冲区。</span><br><span class="line">	* FLV官方协议不支持H.265：对FFmpeg及编码端对H.265进行扩展，因为FFmpeg内部数据结构嵌套较深，替换js解封装函数直接用FFmpeg的解封装函数。</span><br><span class="line">* 方案调整：</span><br><span class="line">	* 设计流程</span><br><span class="line">![3](https://img.alicdn.com/tfs/TB1HgiaJb2pK1RjSZFsXXaNlXXa-1024-768.jpg)</span><br><span class="line"></span><br><span class="line"># 当前方案</span><br><span class="line">## 播放流程</span><br><span class="line">![current](https://img.alicdn.com/tfs/TB1zsS3JhnaK1RjSZFtXXbC2VXa-1024-768.png)</span><br><span class="line"></span><br><span class="line">1. 因为FFmpeg支持多种格式解封装，只需要在在主线程中通过浏览器API（通常是fetch方法）拉取原始流数据并放到缓存中，等初始缓存到一个阈值时开启Worker进行解封装及解码；</span><br><span class="line">2. 在子线程（Worker）中通过主线程fetch方法触发的数据回调接收数据存入环形缓冲区（内存环）中；</span><br><span class="line">3. 子线程将读取到的音频帧输送到主线程中，通过Web Audio API缓存音频数据，根据已解码的视频帧缓存队列循环解码保证缓存中一直缓存10帧rgba图像数据；</span><br><span class="line">4. 主线程中canvas根据音频播放回调的pts消费并渲染视频图像；</span><br><span class="line">5. 循环以上操作直到fetch接口返回流已结束。</span><br><span class="line"></span><br><span class="line">## 解码器编译</span><br><span class="line">通过Emscripten工具可以把C语言编写的FFmpeg库编译成wasm并在浏览器中应用到视音频解码中。</span><br><span class="line">我们的视频解码场景和通常的播放器一样，通过依赖FFmpeg的通用接口来实现解封装和解码的工作。先通过emscripten编译ffmpeg库，再通过静态库的方式依赖到解封装和解码入口程序中。</span><br><span class="line">![compile](https://img.alicdn.com/tfs/TB10qJ.JkvoK1RjSZPfXXXPKFXa-1024-768.png)</span><br><span class="line"></span><br><span class="line"># 测试表现</span><br><span class="line">## 性能测试</span><br><span class="line">### 测试视频</span><br><span class="line">因为flv直播视频受时效性影响较大，拿720P高清的H.265 mp4视频作为**稳定输入**测试</span><br><span class="line">* 地址：https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4</span><br><span class="line">* 视频参数：</span><br></pre></td></tr></table></figure></p>
-<p>Input #0, mov,mp4,m4a,3gp,3g2,mj2, from ‘<a href="https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4&#39;" target="_blank" rel="noopener">https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4&#39;</a>:<br>  Metadata:<br>    major_brand     : isom<br>    minor_version   : 512<br>    compatible_brands: isomiso2mp41<br>    encoder         : <a href="http://www.aliyun.com" target="_blank" rel="noopener">www.aliyun.com</a> - Media Transcoding<br>  Duration: 00:01:00.10, start: 0.000000, bitrate: 907 kb/s<br>    Stream #0:0(und): Video: hevc (Main) (hvc1 / 0x31637668), yuv420p(tv, bt709, progressive), 1280x720, 854 kb/s, 25 fps, 25 tbr, 12800 tbn, 25 tbc (default)<br>    Metadata:<br>      handler_name    : VideoHandler<br>    Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 48 kb/s (default)<br>    Metadata:<br>      handler_name    : SoundHandler<br><code>`</code></p>
+<p>想要在浏览器端播放H.265视频原生的 <code>&lt;video /&gt;</code> 标签没有办法支持，但是因为视频格式本身是<strong>连续图像画面</strong>和<strong>音频</strong>的集合，参考了chromium的源码及video标签内部的实现原理，可以通过 <code>&lt;canvas /&gt; + Web Audio API</code> 的结合来模拟实现一个虚拟的video标签来实现播放器功能。</p>
+<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><p>因为直播流时效性的缘故，发布了一个播放<a href="https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4" target="_blank" rel="noopener">H.265 mp4视频</a>（该视频地址直接在浏览器中播放只有声音而没有画面）的在线demo，读者可以有一个直观感受。<br>地址：<a href="https://g.alicdn.com/videox/mp4-h265/1.0.2/index.html" target="_blank" rel="noopener">https://g.alicdn.com/videox/mp4-h265/1.0.2/index.html</a><br>效果：<br><img src="https://img.alicdn.com/tfs/TB1uRatJhYaK1RjSZFnXXa80pXa-600-341.gif" alt="demo.gif"></p>
+<h1 id="前期调研"><a href="#前期调研" class="headerlink" title="前期调研"></a>前期调研</h1><h1 id="播放器整体架构"><a href="#播放器整体架构" class="headerlink" title="播放器整体架构"></a>播放器整体架构</h1><p>基于传统播放器的架构，我们设计的播放器架构如下：<br><img src="https://img.alicdn.com/tfs/TB15IM4LYrpK1RjSZTEXXcWAVXa-1617-856.png" alt></p>
+<h2 id="视音频基础"><a href="#视音频基础" class="headerlink" title="视音频基础"></a>视音频基础</h2><p>因为前端领域对视频领域的涉及场景不多，一个 <code>&lt;video /&gt;</code> 标签就可以满足大部分场景，但是经历了这几年直播和短视频的爆发，视频的需求和功能也变得越来越复杂，开发之前阅读了很多视音频领域相关的书籍和文章，在此先对视音频基础进行一个简单的介绍。</p>
+<p>视频中我们通常说的视频的格式，比如 .mp4, .mov, .wmv, .m3u8, .flv 等等被称为 <code>container</code>。在一个视频文件中音频、视频数据是分开存储的，使用的压缩算法也不一样。其中container作为容器主要包含了video数据、audio数据、metadata（用于检索视音频payload格式等信息）。每个格式的封装格式不一样，比如FLV格式的基本单元是Tag，而MP4格式的基本单元是Box，辅助的meta信息用于检索找到对应的原始数据。</p>
+<p>而平时听到的H.264, H.265等视频编码标准被称为 <code>codec</code> (COmpress and DECompress )。一个视频格式比如mp4可以使用任何标准化的压缩算法，这些信息都会被包含在一个视频文件的meta信息中来告诉播放器该用什么编解码算法来播放。</p>
+<h2 id="客户端播放器"><a href="#客户端播放器" class="headerlink" title="客户端播放器"></a>客户端播放器</h2><p>一个传统的客户端播放器播放一个视频流经过了如下各个环节：</p>
+<p>拉取数据 =&gt; 解封装 =&gt; 音视频解码 =&gt; 采样/像素数据发送到设备进行渲染。<br><img src="https://img.alicdn.com/tfs/TB1VaB_JmzqK1RjSZFLXXcn2XXa-1024-768.png" alt="client"></p>
+<p>对于流媒体，播放器客户端通过拉流以数据源（音视频流）为中心，进行管道式的传输。在此期间，对视频流的读取，转换，分类，复制等一系列操作处理，以封装的mp4流为例，需要对流进行解封装、解码、渲染等步骤：<br><img src="https://img.alicdn.com/tfs/TB1aridJkvoK1RjSZFDXXXY3pXa-1055-524.png" alt="stream"></p>
+<h2 id="浏览器video标签"><a href="#浏览器video标签" class="headerlink" title="浏览器video标签"></a>浏览器video标签</h2><p>在探究的过程中，为了了解主流浏览器不支持H.265视频播放的原因，以及浏览器端实现播放器原理的了解，通过对Chromium浏览器<a href="https://github.com/chromium/chromium/tree/master/media#playback" target="_blank" rel="noopener">官方文档</a>及video标签实现源码的阅读，整理了一个流程图。<br><img src="https://img.alicdn.com/tfs/TB1UxCyJhjaK1RjSZKzXXXVwXXa-1502-1008.png" alt="chromium"></p>
+<p>可以看到浏览器内部对视频流播放的实现，在经过了PipelineController等数据传输管道的处理后利用FFmpeg软解或者Gpu硬解之后交给视频设备及音频设备进行同步及渲染。其中H.265的视频因为硬解支持情况不完善，软解可能有性能风险，所以在chrome中被关闭了不支持，在chromium中可以通过参数打开。我们就依照这个思路，利用浏览器提供的接口来实现一个模拟的video标签。</p>
+<h1 id="设计过程"><a href="#设计过程" class="headerlink" title="设计过程"></a>设计过程</h1><h2 id="开发思路"><a href="#开发思路" class="headerlink" title="开发思路"></a>开发思路</h2><p>开发思路按照从简单到复杂的过程，对任务进行拆分，来完成H.265视频点播及直播等各个场景的覆盖，以mp4短视频出发完成播放流程，再覆盖直播场景，考虑如网络抖动、内存控制等复杂因素，再针对直播m3u8等回放文件进行播放并开发视频seek、倍速等功能。</p>
+<p>mp4播放=&gt;flv播放=&gt;hls播放=&gt;加入seek、倍速等功能</p>
+<h2 id="可行性分析"><a href="#可行性分析" class="headerlink" title="可行性分析"></a>可行性分析</h2><ul>
+<li>思路：在最开始进行可行性分析时，参考结合了已有工具videoconverter.js和libde265.js对H.265视频ffmpeg的编译提取了hevc文件及mp3音频文件在浏览器端进行了播放。</li>
+<li>demo地址：<a href="https://sparkmorry.github.io/mse-learning/h265/" target="_blank" rel="noopener">https://sparkmorry.github.io/mse-learning/h265/</a></li>
+<li>表现：将720P的mp4视频进行视频和音频的分离，通过 <code>&lt;canvas /&gt;</code> 绘制图像，通过 <code>&lt;audio /&gt;</code> 标签播放音频，画面在Macbook Pro上Chrome浏览器下在23fps左右。</li>
+<li>问题：<ul>
+<li><strong>不能达到解码性能标准</strong>: 720P的视频在Macbook Pro上仅在<strong>23fps</strong>左右，而原视频是<strong>25fps</strong>，不能达到解码性能标准，无法流畅播放。</li>
+<li><strong>无法做到音画同步</strong>: 该方案因为直接提取了hevc裸流文件，无法获取视频和音频每帧的pts时间戳，无法做到严格的音画同步。</li>
+</ul>
+</li>
+<li>解决方案：<ul>
+<li>性能：因为libde265.js是asm.js，通过对libde265.js开源库的改造，打包WebAssembly测试性能情况</li>
+<li>音画同步：参考flv.js、hls.js等开源视频库的方案，根据曾经的实践经历，js在解封装方面的性能能够完成视频流文件解封装，获取每帧视频、音频播放的pts及原始数据交给解码器进行解码再渲染。</li>
+</ul>
+</li>
+<li>方案调整：<br><img src="https://img.alicdn.com/tfs/TB17KKAJiLaK1RjSZFxXXamPFXa-1024-768.jpg" alt="1"></li>
+</ul>
+<h2 id="MP4点播流播放"><a href="#MP4点播流播放" class="headerlink" title="MP4点播流播放"></a>MP4点播流播放</h2><ul>
+<li>思路：根据上一过程调整的解决方案，通过js对mp4流进行解封装，因为音频解码的复杂度不高，也先用js进行解码，仅将视频解码模块用已有的三方模块libde265并替换为wasm解决性能问题，音视频解码模块都自身维护一段缓存区，负责存储解封装模块传过来的packet数据，解决音画同步的问题。</li>
+<li>表现：通过开源libde265实现的视频解码模块，针对于720p的视频流，平均解码时间是45ms，不能满足每一帧音频播放时间间隔（40ms）。</li>
+<li>问题：视频解码性能仍然不够。</li>
+<li>解决方案：<ul>
+<li><strong>丢帧</strong>：保证了音频同步，丢掉部分非参考帧，但损失了部分体验。所以提升解码性能和改善播放策略才能有可能满足当前方案的可行性。提升解码性能和改善播放策略。</li>
+<li><strong>提升解码性能</strong>：用解码性能更好的ffmpeg替换掉libde265。</li>
+<li><strong>改善播放流程</strong>：因为每个requestAnimationFrame循环任务都是同步的，边解码边播放。引入用WebWorker线程。通过改善视频解码模块，解码器内部开启循环解码，当外部的视频播放设备需要播放下一帧时，直接从解码器解码完的帧缓存中读取下一帧数据。实现了worker和主线程并行执行。</li>
+</ul>
+</li>
+<li>方案调整：<ul>
+<li>demo地址：<a href="https://static-assets.cyt-rain.cn/h265/index.html" target="_blank" rel="noopener">https://static-assets.cyt-rain.cn/h265/index.html</a></li>
+<li>设计流程<br><img src="https://img.alicdn.com/tfs/TB1_emeJkvoK1RjSZFDXXXY3pXa-1024-768.jpg" alt="2"></li>
+</ul>
+</li>
+</ul>
+<h2 id="FLV直播流播放"><a href="#FLV直播流播放" class="headerlink" title="FLV直播流播放"></a>FLV直播流播放</h2><ul>
+<li>思路：mp4视频流畅播放，但在直播场景（如FLV视频流）中，客户端需要和服务端建立长链接，不断接收流消息，借用FFmpeg本身对流媒体的支持，对视频数据进行解封装及解码。</li>
+<li>表现：无法编译FFmpeg网络库，TCP无法建立连接。</li>
+<li>问题：<br>无法编译FFmpeg网络库：TCP建立连接创建Socket时报错，Emscripten工具无法编译TCP连接相关配置<br>codec不支持：FLV官方协议不支持H.265。</li>
+<li>解决方案：<ul>
+<li>无法编译FFmpeg网络库：主线程利用fetch方法进行拉流，放到FFmpeg自定义缓冲区进行解封装及解码。因为直播流长时间播放需要不停的开辟、释放内存空间，采用环形的数据缓冲区。</li>
+<li>FLV官方协议不支持H.265：对FFmpeg及编码端对H.265进行扩展，因为FFmpeg内部数据结构嵌套较深，替换js解封装函数直接用FFmpeg的解封装函数。</li>
+</ul>
+</li>
+<li>方案调整：<ul>
+<li>设计流程<br><img src="https://img.alicdn.com/tfs/TB1HgiaJb2pK1RjSZFsXXaNlXXa-1024-768.jpg" alt="3"></li>
+</ul>
+</li>
+</ul>
+<h1 id="当前方案"><a href="#当前方案" class="headerlink" title="当前方案"></a>当前方案</h1><h2 id="播放流程"><a href="#播放流程" class="headerlink" title="播放流程"></a>播放流程</h2><p><img src="https://img.alicdn.com/tfs/TB1zsS3JhnaK1RjSZFtXXbC2VXa-1024-768.png" alt="current"></p>
+<ol>
+<li>因为FFmpeg支持多种格式解封装，只需要在在主线程中通过浏览器API（通常是fetch方法）拉取原始流数据并放到缓存中，等初始缓存到一个阈值时开启Worker进行解封装及解码；</li>
+<li>在子线程（Worker）中通过主线程fetch方法触发的数据回调接收数据存入环形缓冲区（内存环）中；</li>
+<li>子线程将读取到的音频帧输送到主线程中，通过Web Audio API缓存音频数据，根据已解码的视频帧缓存队列循环解码保证缓存中一直缓存10帧rgba图像数据；</li>
+<li>主线程中canvas根据音频播放回调的pts消费并渲染视频图像；</li>
+<li>循环以上操作直到fetch接口返回流已结束。</li>
+</ol>
+<h2 id="解码器编译"><a href="#解码器编译" class="headerlink" title="解码器编译"></a>解码器编译</h2><p>通过Emscripten工具可以把C语言编写的FFmpeg库编译成wasm并在浏览器中应用到视音频解码中。<br>我们的视频解码场景和通常的播放器一样，通过依赖FFmpeg的通用接口来实现解封装和解码的工作。先通过emscripten编译ffmpeg库，再通过静态库的方式依赖到解封装和解码入口程序中。<br><img src="https://img.alicdn.com/tfs/TB10qJ.JkvoK1RjSZPfXXXPKFXa-1024-768.png" alt="compile"></p>
+<h1 id="测试表现"><a href="#测试表现" class="headerlink" title="测试表现"></a>测试表现</h1><h2 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h2><h3 id="测试视频"><a href="#测试视频" class="headerlink" title="测试视频"></a>测试视频</h3><p>因为flv直播视频受时效性影响较大，拿720P高清的H.265 mp4视频作为<strong>稳定输入</strong>测试</p>
+<ul>
+<li>地址：<a href="https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4" target="_blank" rel="noopener">https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4</a></li>
+<li>视频参数：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Input #0, mov,mp4,m4a,3gp,3g2,mj2, from &apos;https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4&apos;:</span><br><span class="line">  Metadata:</span><br><span class="line">    major_brand     : isom</span><br><span class="line">    minor_version   : 512</span><br><span class="line">    compatible_brands: isomiso2mp41</span><br><span class="line">    encoder         : www.aliyun.com - Media Transcoding</span><br><span class="line">  Duration: 00:01:00.10, start: 0.000000, bitrate: 907 kb/s</span><br><span class="line">    Stream #0:0(und): Video: hevc (Main) (hvc1 / 0x31637668), yuv420p(tv, bt709, progressive), 1280x720, 854 kb/s, 25 fps, 25 tbr, 12800 tbn, 25 tbc (default)</span><br><span class="line">    Metadata:</span><br><span class="line">      handler_name    : VideoHandler</span><br><span class="line">    Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 48 kb/s (default)</span><br><span class="line">    Metadata:</span><br><span class="line">      handler_name    : SoundHandler</span><br></pre></td></tr></table></figure>
 <h3 id="测试机器"><a href="#测试机器" class="headerlink" title="测试机器"></a>测试机器</h3><ul>
 <li>lenovo ThinkPad T430<ul>
 <li>CPU: Intel(R) Core(TM) i5-3230M <a href="mailto:CPU@2.60GHz" target="_blank" rel="noopener">CPU@2.60GHz</a>  x64处理器</li>
@@ -330,8 +407,7 @@
 </ul>
 <h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>本文介绍了我们在Web端H.265播放器上研发的过程和进展，后续还有很多继续优化和深入的点。对相关知识感兴趣的同学欢迎沟通交流，附上我们前端团队的介绍：</p>
 <p>淘宝技术部内容与开放平台前端团队是淘系核心的商业变革阵地，相对于横向资源前端团队，我们更深入在内容电商、音视频技术领域，探寻创新商业模式及业界领先技术。</p>
-<p>本团队目前正火热招聘20届优秀毕业生，欢迎有志之士加入！<br><img src="https://img.alicdn.com/tfs/TB1QswKMgHqK1RjSZJnXXbNLpXa-750-3356.jpg" alt="img"></p>
-<p>或者直接联系团队负责人： 灵玉 <a href="mailto:lingyu.csh@taobao.com" target="_blank" rel="noopener">lingyu.csh@taobao.com</a></p>
+<p>本团队目前正火热招聘20届优秀毕业生，欢迎有志之士加入！<br>有意向者可直接联系团队负责人： 灵玉 <a href="mailto:lingyu.csh@taobao.com" target="_blank" rel="noopener">lingyu.csh@taobao.com</a></p>
 <blockquote>
 <p>题图出处：<a href="https://unsplash.com/photos/oTjFWTHDRZQ" target="_blank" rel="noopener">https://unsplash.com/photos/oTjFWTHDRZQ</a></p>
 </blockquote>
@@ -352,7 +428,7 @@
       </script>
       </div>
       <footer class="article-footer">
-        <a data-url="http://taobaofed.org/blog/2019/03/18/web-player-h265/" data-id="cjtfiek9f00cpueu1hf46u24b" class="article-share-link">
+        <a data-url="http://taobaofed.org/blog/2019/03/18/web-player-h265/" data-id="cjtfkgb3400cjimu1ye9uqcbn" class="article-share-link">
           <i class="fa fa-share"></i>
           分享到
         </a>
