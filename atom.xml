@@ -4,7 +4,7 @@
   <subtitle><![CDATA[淘宝前端团队（FED）]]></subtitle>
   <link href="/atom.xml" rel="self"/>
   <link href="http://taobaofed.org/"/>
-  <updated>2019-03-15T07:15:58.000Z</updated>
+  <updated>2019-03-19T08:20:37.000Z</updated>
   <id>http://taobaofed.org/</id>
   
   <author>
@@ -15,11 +15,195 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title><![CDATA[Web端H.265播放器研发解密]]></title>
+    <link href="http://taobaofed.org/blog/2019/03/18/web-player-h265/"/>
+    <id>http://taobaofed.org/blog/2019/03/18/web-player-h265/</id>
+    <published>2019-03-18T08:59:39.000Z</published>
+    <updated>2019-03-19T08:20:37.000Z</updated>
+    <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1lEw2MwHqK1RjSZFgXXa7JXXa-900-500.png" alt="Web端H.265播放器研发解密"></p>
+<p>音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流媒体技术中的文本、图形、图像、音频和视频多种理论知识的学习，才能够应用到具体实践中，本团队在多媒体领域深耕两年多，才算是有一定产出，我们自研web播放器并支持h.265解码，在码率优化的大背景下（保持画质不变情况下，应用图像增强、roi区域检测、智能场景分类和h265编解码等多种技术能力，将码流降低50%。达到减少带宽成本，提升视频服务QoE的目的），真正做到了h265解码播放的全域覆盖。</p>
+<h1 id="播放器整体架构"><a href="#播放器整体架构" class="headerlink" title="播放器整体架构"></a>播放器整体架构</h1><p>我们播放器整体架构设计如下：</p>
+<p><img src="https://img.alicdn.com/tfs/TB15IM4LYrpK1RjSZTEXXcWAVXa-1617-856.png" alt></p>
+<p>本文主要分享了我们基于WebAssembly实现H.265格式的解封装、解码和播放。</p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><strong>H.265</strong>又称HEVC(全称<strong>High Efficiency Video Coding</strong>，高效率视频编码)，是ITU-T H.264/MPEG-4 AVC标准的继任者。相比H.264，H.265拥有更高的压缩率，也就意味着同样<strong>码率</strong>（又称比特率是指每秒传送的比特(bit)数。单位为bps(Bit Per Second)，比特率越高，每秒传送数据就越多，画质就越清晰），H.265的画质会更清晰，更高的压缩率就能使用更低的存储和传输成本。</p>
+<ul>
+<li><strong>带宽成本</strong>：在有限带宽下H.265能传输更高质量的网络视频，理论上，H.265最高只需H.264编码的一半带宽即可传输相同质量视频。更低的带宽可以更好的降低存储及传输成本，并为未来基于短视频及直播领域更多更复杂好玩的互动玩法做铺垫。</li>
+<li><strong>转码成本</strong>：但是当前主流浏览器均不支持H.265原生视频播放，因此通常视频生产端需要针对浏览器做一次H.264视频的转码来适配浏览器端如PC场景的播放，而增加了<strong>转码成本</strong>。如在淘宝直播中，假设以每天5万场直播计算，每场直播转码成本20元，一天就是100万的转码成本。<br>为此，我们团队对浏览器端H.265视频播放的可行性及兼容性进行了一次探索，为移动端及PC端全量H.265做准备，也对浏览器端视音频处理、WebAssembly实践进行一次深入的尝试。</li>
+</ul>
+<h2 id="H-264-vs-H-265"><a href="#H-264-vs-H-265" class="headerlink" title="H.264 vs H.265"></a>H.264 vs H.265</h2><p>H.264是当下用的最为广泛的视频编码格式，H.265标准围绕着现有的视频编码标准H.264，保留原来的某些技术，同时对一些相关的技术加以改进。新技术使用先进的技术用以改善码流、编码质量、延时和算法复杂度之间的关系，达到最优化设置。H.265和H.264都是基于块的视频编码技术，主要的差别在于<strong>编码单元的大小</strong>以及一些编码算法细节，H.265将图像划分为“编码树单元(coding tree Unit, CTU)”，而不是像H.264那样的16×16的宏块。根据不同的编码设置，编码树单元的尺寸可以被设置为64×64或有限的32×32或16×16。一般来说区块尺寸越大，压缩效率就越好。具体的算法及相关细节这里不具体展开了，还有一些其他的压缩算法如因为H.265专利限制而生的开放编码格式如AV1等，读者可以参考其他相关文章。<br><img src="https://img.alicdn.com/tfs/TB1rDSbJgHqK1RjSZFgXXa7JXXa-1178-442.png" alt="h264vsh265.png"> </p>
+<p>如下图，可以看到同样主观画面质量，H.265(500K)仅需H.264(800K)一半左右的带宽码率。<br><img src="https://img.alicdn.com/tfs/TB1yUiiJcbpK1RjSZFyXXX_qFXa-545-509.jpg" alt="h264vsh265.png"> </p>
+<h2 id="浏览器现状"><a href="#浏览器现状" class="headerlink" title="浏览器现状"></a>浏览器现状</h2><p>如下图，因为H.265专利及硬解支持情况不完善的原因，主流现代浏览器均不兼容H.265编码的视频播放（Edge新版本以插件方式支持），但是因为Apple对H.265的支持（这里作者认为这可能是一个很重要的标志，因为技术的发展很多时候不光是这个技术本身所决定的，而是很多因素共同作用的结果，<strong>商业</strong>也是其中很重要的一个因素），移动端ios safari在11.0版本以上支持原生播放。<br><img src="https://gw.alicdn.com/tfs/TB1OP1lJhjaK1RjSZFAXXbdLFXa-1256-378.png" alt="h265comp"> </p>
+<p>想要在浏览器端播放H.265视频原生的<figure class="highlight plain"><figcaption><span>/>```标签没有办法支持，但是因为视频格式本身是**连续图像画面**和**音频**的集合，参考了chromium的源码及video标签内部的实现原理，可以通过```<canvas< span><a href="/>">+ Web Audio API``` 的结合来模拟实现一个虚拟的video标签来实现播放器功能。</a></canvas<></span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## demo</span><br><span class="line">因为直播流时效性的缘故，发布了一个播放[H.265 mp4视频](https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4)（该视频地址直接在浏览器中播放只有声音而没有画面）的在线demo，读者可以有一个直观感受。</span><br><span class="line">地址：https://g.alicdn.com/videox/mp4-h265/1.0.2/index.html</span><br><span class="line">效果：</span><br><span class="line">![demo.gif](https://img.alicdn.com/tfs/TB1uRatJhYaK1RjSZFnXXa80pXa-600-341.gif)</span><br><span class="line"></span><br><span class="line"># 前期调研</span><br><span class="line">## 视音频基础</span><br><span class="line">因为前端领域对视频领域的涉及场景不多，一个```&lt;video /&gt;```标签就可以满足大部分场景，但是经历了这几年直播和短视频的爆发，视频的需求和功能也变得越来越复杂，开发之前阅读了很多视音频领域相关的书籍和文章，在此先对视音频基础进行一个简单的介绍。</span><br><span class="line"></span><br><span class="line">视频中我们通常说的视频的格式，比如 .mp4, .mov, .wmv, .m3u8, .flv 等等被称为```container```。在一个视频文件中音频、视频数据是分开存储的，使用的压缩算法也不一样。其中container作为容器主要包含了video数据、audio数据、metadata（用于检索视音频payload格式等信息）。每个格式的封装格式不一样，比如FLV格式的基本单元是Tag，而MP4格式的基本单元是Box，辅助的meta信息用于检索找到对应的原始数据。</span><br><span class="line"></span><br><span class="line">而平时听到的H.264, H.265等视频编码标准被称为```codec``` (COmpress and DECompress )。一个视频格式比如mp4可以使用任何标准化的压缩算法，这些信息都会被包含在一个视频文件的meta信息中来告诉播放器该用什么编解码算法来播放。</span><br><span class="line"></span><br><span class="line">## 客户端播放器</span><br><span class="line">一个传统的客户端播放器播放一个视频流经过了如下各个环节：</span><br><span class="line"></span><br><span class="line">拉取数据 =&gt; 解封装 =&gt; 音视频解码 =&gt; 采样/像素数据发送到设备进行渲染。</span><br><span class="line">![client](https://img.alicdn.com/tfs/TB1VaB_JmzqK1RjSZFLXXcn2XXa-1024-768.png)</span><br><span class="line"></span><br><span class="line">对于流媒体，播放器客户端通过拉流以数据源（音视频流）为中心，进行管道式的传输。在此期间，对视频流的读取，转换，分类，复制等一系列操作处理，以封装的mp4流为例，需要对流进行解封装、解码、渲染等步骤：</span><br><span class="line">![stream](https://img.alicdn.com/tfs/TB1aridJkvoK1RjSZFDXXXY3pXa-1055-524.png)</span><br><span class="line"></span><br><span class="line">## 浏览器video标签</span><br><span class="line">在探究的过程中，为了了解主流浏览器不支持H.265视频播放的原因，以及浏览器端实现播放器原理的了解，通过对Chromium浏览器[官方文档](https://github.com/chromium/chromium/tree/master/media#playback)及video标签实现源码的阅读，整理了一个流程图。</span><br><span class="line">![chromium](https://img.alicdn.com/tfs/TB1UxCyJhjaK1RjSZKzXXXVwXXa-1502-1008.png)</span><br><span class="line"></span><br><span class="line">可以看到浏览器内部对视频流播放的实现，在经过了PipelineController等数据传输管道的处理后利用FFmpeg软解或者Gpu硬解之后交给视频设备及音频设备进行同步及渲染。其中H.265的视频因为硬解支持情况不完善，软解可能有性能风险，所以在chrome中被关闭了不支持，在chromium中可以通过参数打开。我们就依照这个思路，利用浏览器提供的接口来实现一个模拟的video标签。</span><br><span class="line"></span><br><span class="line"># 设计过程</span><br><span class="line">## 开发思路</span><br><span class="line">开发思路按照从简单到复杂的过程，对任务进行拆分，来完成H.265视频点播及直播等各个场景的覆盖，以mp4短视频出发完成播放流程，再覆盖直播场景，考虑如网络抖动、内存控制等复杂因素，再针对直播m3u8等回放文件进行播放并开发视频seek、倍速等功能。</span><br><span class="line"></span><br><span class="line">mp4播放=&gt;flv播放=&gt;hls播放=&gt;加入seek、倍速等功能</span><br><span class="line"></span><br><span class="line">## 可行性分析</span><br><span class="line">* 思路：在最开始进行可行性分析时，参考结合了已有工具videoconverter.js和libde265.js对H.265视频ffmpeg的编译提取了hevc文件及mp3音频文件在浏览器端进行了播放。</span><br><span class="line">* demo地址：https://sparkmorry.github.io/mse-learning/h265/</span><br><span class="line">* 表现：将720P的mp4视频进行视频和音频的分离，通过 `&lt;canvas /&gt;` 绘制图像，通过 `&lt;audio /&gt;` 标签播放音频，画面在Macbook Pro上Chrome浏览器下在23fps左右。</span><br><span class="line">* 问题：</span><br><span class="line">	* **不能达到解码性能标准**: 720P的视频在Macbook Pro上仅在**23fps**左右，而原视频是**25fps**，不能达到解码性能标准，无法流畅播放。</span><br><span class="line">	* **无法做到音画同步**: 该方案因为直接提取了hevc裸流文件，无法获取视频和音频每帧的pts时间戳，无法做到严格的音画同步。</span><br><span class="line">* 解决方案：</span><br><span class="line">	* 性能：因为libde265.js是asm.js，通过对libde265.js开源库的改造，打包WebAssembly测试性能情况</span><br><span class="line">	* 音画同步：参考flv.js、hls.js等开源视频库的方案，根据曾经的实践经历，js在解封装方面的性能能够完成视频流文件解封装，获取每帧视频、音频播放的pts及原始数据交给解码器进行解码再渲染。</span><br><span class="line">* 方案调整：</span><br><span class="line">![1](https://img.alicdn.com/tfs/TB17KKAJiLaK1RjSZFxXXamPFXa-1024-768.jpg)</span><br><span class="line"></span><br><span class="line">## MP4点播流播放</span><br><span class="line">* 思路：根据上一过程调整的解决方案，通过js对mp4流进行解封装，因为音频解码的复杂度不高，也先用js进行解码，仅将视频解码模块用已有的三方模块libde265并替换为wasm解决性能问题，音视频解码模块都自身维护一段缓存区，负责存储解封装模块传过来的packet数据，解决音画同步的问题。</span><br><span class="line">* 表现：通过开源libde265实现的视频解码模块，针对于720p的视频流，平均解码时间是45ms，不能满足每一帧音频播放时间间隔（40ms）。</span><br><span class="line">* 问题：视频解码性能仍然不够。</span><br><span class="line">* 解决方案：</span><br><span class="line">	* **丢帧**：保证了音频同步，丢掉部分非参考帧，但损失了部分体验。所以提升解码性能和改善播放策略才能有可能满足当前方案的可行性。提升解码性能和改善播放策略。</span><br><span class="line">	* **提升解码性能**：用解码性能更好的ffmpeg替换掉libde265。</span><br><span class="line">	* **改善播放流程**：因为每个requestAnimationFrame循环任务都是同步的，边解码边播放。引入用WebWorker线程。通过改善视频解码模块，解码器内部开启循环解码，当外部的视频播放设备需要播放下一帧时，直接从解码器解码完的帧缓存中读取下一帧数据。实现了worker和主线程并行执行。</span><br><span class="line">* 方案调整：</span><br><span class="line">	* demo地址：https://static-assets.cyt-rain.cn/h265/index.html</span><br><span class="line">	* 设计流程</span><br><span class="line">![2](https://img.alicdn.com/tfs/TB1_emeJkvoK1RjSZFDXXXY3pXa-1024-768.jpg)</span><br><span class="line"></span><br><span class="line">## FLV直播流播放</span><br><span class="line">* 思路：mp4视频流畅播放，但在直播场景（如FLV视频流）中，客户端需要和服务端建立长链接，不断接收流消息，借用FFmpeg本身对流媒体的支持，对视频数据进行解封装及解码。</span><br><span class="line">* 表现：无法编译FFmpeg网络库，TCP无法建立连接。</span><br><span class="line">* 问题：</span><br><span class="line">无法编译FFmpeg网络库：TCP建立连接创建Socket时报错，Emscripten工具无法编译TCP连接相关配置</span><br><span class="line">codec不支持：FLV官方协议不支持H.265。</span><br><span class="line">* 解决方案：</span><br><span class="line">	* 无法编译FFmpeg网络库：主线程利用fetch方法进行拉流，放到FFmpeg自定义缓冲区进行解封装及解码。因为直播流长时间播放需要不停的开辟、释放内存空间，采用环形的数据缓冲区。</span><br><span class="line">	* FLV官方协议不支持H.265：对FFmpeg及编码端对H.265进行扩展，因为FFmpeg内部数据结构嵌套较深，替换js解封装函数直接用FFmpeg的解封装函数。</span><br><span class="line">* 方案调整：</span><br><span class="line">	* 设计流程</span><br><span class="line">![3](https://img.alicdn.com/tfs/TB1HgiaJb2pK1RjSZFsXXaNlXXa-1024-768.jpg)</span><br><span class="line"></span><br><span class="line"># 当前方案</span><br><span class="line">## 播放流程</span><br><span class="line">![current](https://img.alicdn.com/tfs/TB1zsS3JhnaK1RjSZFtXXbC2VXa-1024-768.png)</span><br><span class="line"></span><br><span class="line">1. 因为FFmpeg支持多种格式解封装，只需要在在主线程中通过浏览器API（通常是fetch方法）拉取原始流数据并放到缓存中，等初始缓存到一个阈值时开启Worker进行解封装及解码；</span><br><span class="line">2. 在子线程（Worker）中通过主线程fetch方法触发的数据回调接收数据存入环形缓冲区（内存环）中；</span><br><span class="line">3. 子线程将读取到的音频帧输送到主线程中，通过Web Audio API缓存音频数据，根据已解码的视频帧缓存队列循环解码保证缓存中一直缓存10帧rgba图像数据；</span><br><span class="line">4. 主线程中canvas根据音频播放回调的pts消费并渲染视频图像；</span><br><span class="line">5. 循环以上操作直到fetch接口返回流已结束。</span><br><span class="line"></span><br><span class="line">## 解码器编译</span><br><span class="line">通过Emscripten工具可以把C语言编写的FFmpeg库编译成wasm并在浏览器中应用到视音频解码中。</span><br><span class="line">我们的视频解码场景和通常的播放器一样，通过依赖FFmpeg的通用接口来实现解封装和解码的工作。先通过emscripten编译ffmpeg库，再通过静态库的方式依赖到解封装和解码入口程序中。</span><br><span class="line">![compile](https://img.alicdn.com/tfs/TB10qJ.JkvoK1RjSZPfXXXPKFXa-1024-768.png)</span><br><span class="line"></span><br><span class="line"># 测试表现</span><br><span class="line">## 性能测试</span><br><span class="line">### 测试视频</span><br><span class="line">因为flv直播视频受时效性影响较大，拿720P高清的H.265 mp4视频作为**稳定输入**测试</span><br><span class="line">* 地址：https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4</span><br><span class="line">* 视频参数：</span><br></pre></td></tr></table></figure></p>
+<p>Input #0, mov,mp4,m4a,3gp,3g2,mj2, from ‘<a href="https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4&#39;" target="_blank" rel="noopener">https://gw.alicdn.com/bao/uploaded/LB1l2iXISzqK1RjSZFjXXblCFXa.mp4?file=LB1l2iXISzqK1RjSZFjXXblCFXa.mp4&#39;</a>:<br>  Metadata:<br>    major_brand     : isom<br>    minor_version   : 512<br>    compatible_brands: isomiso2mp41<br>    encoder         : <a href="http://www.aliyun.com" target="_blank" rel="noopener">www.aliyun.com</a> - Media Transcoding<br>  Duration: 00:01:00.10, start: 0.000000, bitrate: 907 kb/s<br>    Stream #0:0(und): Video: hevc (Main) (hvc1 / 0x31637668), yuv420p(tv, bt709, progressive), 1280x720, 854 kb/s, 25 fps, 25 tbr, 12800 tbn, 25 tbc (default)<br>    Metadata:<br>      handler_name    : VideoHandler<br>    Stream #0:1(und): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 48 kb/s (default)<br>    Metadata:<br>      handler_name    : SoundHandler<br><code>`</code></p>
+<h3 id="测试机器"><a href="#测试机器" class="headerlink" title="测试机器"></a>测试机器</h3><ul>
+<li>lenovo ThinkPad T430<ul>
+<li>CPU: Intel(R) Core(TM) i5-3230M <a href="mailto:CPU@2.60GHz" target="_blank" rel="noopener">CPU@2.60GHz</a>  x64处理器</li>
+<li>内存: 8 GB</li>
+<li>系统: windows 10</li>
+</ul>
+</li>
+<li>MacBook Pro (Retina, 15-inch, Mid 2015)<ul>
+<li>CPU: 2.2 GHz Intel Core i7</li>
+<li>内存: 16 GB</li>
+<li>系统: macOS 10.14.2</li>
+</ul>
+</li>
+</ul>
+<h3 id="性能情况"><a href="#性能情况" class="headerlink" title="性能情况"></a>性能情况</h3><ul>
+<li>MBP下表现</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>decoder.wasm大小</th>
+<th>decoder.js大小</th>
+<th>平均每帧解码时长</th>
+<th>内存占用</th>
+<th>cpu占用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.4M</td>
+<td>168K</td>
+<td>26.79ms</td>
+<td>27M</td>
+<td>17～25%</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>针对两个pc笔记本进行了测试，平均每帧解码（包含yuv420转rgba）时长在各个浏览器的表现情况如下：<br><strong><em>注：此处Native（原生）表示针对mac系统原生编译的FFmpeg作为依赖的解码器（相对不考虑具体如x86、arm等计算机架构的WebAssembly的跨平台方案而言）</em></strong>。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>Chrome</th>
+<th>Safari</th>
+<th>FireFox</th>
+<th>Edge</th>
+<th>Native</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MacOS(i7)</td>
+<td>26.79ms</td>
+<td>22.19ms</td>
+<td>24.77ms</td>
+<td>-</td>
+<td>5.08ms</td>
+</tr>
+<tr>
+<td>windows(i5)</td>
+<td>33.51ms</td>
+<td>-</td>
+<td>36.74ms</td>
+<td>86.72ms</td>
+<td>未测试</td>
+</tr>
+</tbody>
+</table>
+<p>意味着最高能提供720P高清视频如下帧率视频流畅播放的能力：</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>Chrome</th>
+<th>Safari</th>
+<th>FireFox</th>
+<th>Edge</th>
+<th>视频基准</th>
+<th>Native</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MacOS(i7)</td>
+<td>37fps</td>
+<td>45fps</td>
+<td>40fps</td>
+<td>-</td>
+<td><strong>25fps</strong></td>
+<td>196fps</td>
+</tr>
+<tr>
+<td>windows(i5)</td>
+<td>30fps</td>
+<td>-</td>
+<td>27fps</td>
+<td>12fps</td>
+<td><strong>25fps</strong></td>
+<td>未测试</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到这两台机器中，在非高速运动等普通的如电商场景25fps帧率的高清720p视频已经能达到生产环境的标准，但是距离原生的速度还有一定距离。</p>
+<h2 id="浏览器兼容性"><a href="#浏览器兼容性" class="headerlink" title="浏览器兼容性"></a>浏览器兼容性</h2><p>主要用到了WebAssembly及WebWorker的支持，实际测试中主流浏览器Chrome、Safari、Firefox、Edge均能通过兼容性测试。</p>
+<ul>
+<li><p>WebAssembly<br><img src="https://img.alicdn.com/tfs/TB1uyl9JbPpK1RjSZFFXXa5PpXa-1224-436.png" alt="wasm"></p>
+</li>
+<li><p>WebWorker<br><img src="https://img.alicdn.com/tfs/TB1bHp.JkvoK1RjSZPfXXXPKFXa-1226-411.png" alt="worker"></p>
+</li>
+</ul>
+<h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><p>当前的技术方案已经能在大部分机器的主流浏览器上流畅的播放720P的高清直播流，但是在Edge浏览器及性能稍差的机器上还是存在高清视频解码性能不能满足流畅播放的风险，针对WebAssembly达到native速度的目标还有一定距离，尤其是汇编并行计算的支持，在视音频及大规模数据处理中是很常见的性能优化策略，作者整理了几个优化的方向，在未来还有更多探索的空间：</p>
+<ul>
+<li><p>汇编<br>FFmpeg中解码有较多利用汇编进行并行计算的优化，但是汇编指令是cpu specific的（比如x86指令和arm指令），而wasm是跨平台的基于栈的虚拟机。Emscripten不支持汇编的编译，考虑用clang等llvm前端将FFmpeg的.c和汇编.asm文件编译成LLVM IR（LLVM Intermediate Representation），然后通过fastcomp或者其他后端来编译测试。</p>
+</li>
+<li><p>硬解<br>FFmpeg3.3以上开始支持自动硬解探测，支持的硬件设备根据不同操作系统及硬件会有不同的支持，具体参考：<a href="https://trac.ffmpeg.org/wiki/HWAccelIntro" target="_blank" rel="noopener">https://trac.ffmpeg.org/wiki/HWAccelIntro</a> 。因为wasm是跨平台的虚拟指令集，支持程度还要待进一步探究。</p>
+</li>
+<li><p>多线程<br>FFmpeg内部解码有多线程来提高解码性能，通过pthread可以支持跨平台的多线程支持的，但是如果不支持共享内存，则线程之间的数据传输会有很多性能消耗（深拷贝或者Transfered Object）。浏览器端共享内存通过SharedArrayBuffer来实现，因为有安全隐患，大部分主流浏览器关闭了SharedArrayBuffer、Chrome67+开始恢复。考虑到兼容性多线程的支持还要再进行尝试。</p>
+</li>
+<li><p>WebGL渲染<br>解码平均时长中有4ms左右(15%)在yuv转rgba上，通过WebGL可以用gpu加速图像的计算，但是同时与WebGL的数据交换又会产生一定的性能损耗，需要再测试查看性能结果</p>
+</li>
+</ul>
+<h1 id="未来展望"><a href="#未来展望" class="headerlink" title="未来展望"></a>未来展望</h1><p>通过H.265视频播放将开源视音频库<strong>FFmpeg</strong>的能力<strong>及WebAssembly</strong>性能的优势在浏览器端视音频处理上有了一次深入的尝试。视频作为一种多媒体形式，相比现有的文字、图像、音频都能有更生动及更丰富信息的表现。尤其经过了直播和短视频的爆发增长后，成为了一种基础的多媒体形式，也是网络及移动端手机性能等技术发展的体现。未来随着5G及更高性能的硬件设备的发展会被更广泛的应用到各个领域。浏览器在这场视频革命中也是不可或缺的一个环节，通过这次的探索，为未来浏览器端扩展视音频处理的通用能力提供了想象的空间，同时也在浏览器端通过WebAssembly向native性能及能力靠近的路上做了一个落地的尝试，虽然从测试情况看现在的表现还不如native，但是随着标准及技术的演进，为未来对性能要求比较高的图形图像及人工智能等相关方向在浏览器端处理一定会渐渐被广泛的应用起来，比如如下几个方向：</p>
+<ul>
+<li><p><strong>扩展浏览器端视频播放能力</strong><br>借助FFmpeg强大的编解码能力，除了H.265视频的播放，未来还可以在浏览器端兼容各种格式及编码类型的视频播放。如不同的编码格式AV1、不同的容器格式mov格式等等。</p>
+</li>
+<li><p><strong>扩展浏览器端视音频处理能力</strong><br>借助FFmpeg及其他语言框架的现有能力，还可以在视音频领域做更多复杂的操作如视频滤镜、视频剪切、视频格式转换等功能，减少网络传输及存储的成本。</p>
+</li>
+<li><p><strong>基于WebAssembly的高性能web应用</strong><br>借助WebAssembly的跨平台优势，可以将传统的其他语言的开源框架如图形相关开源库OpenGL、SDL等的能力移植到浏览器上来。借助性能上的优势也可以将传统的图像、3D等运算能力要求较高的应用扩展到浏览器端。</p>
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li>Chromium媒体元素源码: <a href="https://github.com/chromium/chromium/tree/master/media" target="_blank" rel="noopener">https://github.com/chromium/chromium/tree/master/media</a></li>
+<li>WebAssembly: <a href="https://webassembly.org/" target="_blank" rel="noopener">https://webassembly.org/</a></li>
+<li>优秀的开源视音频处理框架FFmpeg: <a href="https://www.ffmpeg.org/" target="_blank" rel="noopener">https://www.ffmpeg.org/</a></li>
+<li>基于LLVM编译的WebAssembly打包工具集Emscripten：<a href="https://emscripten.org/index.html" target="_blank" rel="noopener">https://emscripten.org/index.html</a></li>
+<li>基于WebAssembly的ogg播放器：<a href="https://github.com/brion/ogv.js" target="_blank" rel="noopener">https://github.com/brion/ogv.js</a></li>
+<li>基于FFmpeg的简单播放器：<a href="https://github.com/leixiaohua1020/simplest_ffmpeg_player" target="_blank" rel="noopener">https://github.com/leixiaohua1020/simplest_ffmpeg_player</a></li>
+</ul>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>本文介绍了我们在Web端H.265播放器上研发的过程和进展，后续还有很多继续优化和深入的点。对相关知识感兴趣的同学欢迎沟通交流，附上我们前端团队的介绍：</p>
+<p>淘宝技术部内容与开放平台前端团队是淘系核心的商业变革阵地，相对于横向资源前端团队，我们更深入在内容电商、音视频技术领域，探寻创新商业模式及业界领先技术。</p>
+<p>本团队目前正火热招聘20届优秀毕业生，欢迎有志之士加入！<br><img src="https://img.alicdn.com/tfs/TB1QswKMgHqK1RjSZJnXXbNLpXa-750-3356.jpg" alt="img"></p>
+<p>或者直接联系团队负责人： 灵玉 <a href="mailto:lingyu.csh@taobao.com" target="_blank" rel="noopener">lingyu.csh@taobao.com</a></p>
+<blockquote>
+<p>题图出处：<a href="https://unsplash.com/photos/oTjFWTHDRZQ" target="_blank" rel="noopener">https://unsplash.com/photos/oTjFWTHDRZQ</a></p>
+</blockquote>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1lEw2MwHqK1RjSZFgXXa7JXXa-900-500.png" alt="Web端H.265播放器研发解密"></p>
+<p>音视频编解码对于前端工程师是一个比较少涉足的领域，涉及到流]]>
+    </summary>
+    
+      <category term="player" scheme="http://taobaofed.org/tags/player/"/>
+    
+      <category term="h265" scheme="http://taobaofed.org/tags/h265/"/>
+    
+      <category term="WebAssembly" scheme="http://taobaofed.org/tags/WebAssembly/"/>
+    
+      <category term="Web开发" scheme="http://taobaofed.org/categories/Web%E5%BC%80%E5%8F%91/"/>
+    
+  </entry>
+  
+  <entry>
     <title><![CDATA[淘宝前端团队 2019 年实习生内部推荐通道已开启]]></title>
     <link href="http://taobaofed.org/blog/2019/03/13/fed-2019/"/>
     <id>http://taobaofed.org/blog/2019/03/13/fed-2019/</id>
     <published>2019-03-13T02:22:25.000Z</published>
-    <updated>2019-03-15T07:15:58.000Z</updated>
+    <updated>2019-03-19T08:21:25.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB1uzLwLQzoK1RjSZFlXXai4VXa-900-500.jpg" alt="淘宝前端团队 2019 年实习生内部推荐通道已开启"></p>
 <p>随着阿里巴巴 2019 年实习生招聘的启动，淘宝前端团队（Taobao FED）实习生内部推荐也已经拉开序幕。这是一个有着十多年历史与荣耀的团队，相信你已经从各个渠道听到过我们的名字。选择一家公司进行实习，对于大学生来说是一个关键的抉择；找到有潜力的实习生进行培养，对于一个团队来说更是求贤若渴。</p>
 <p>在这里，请让我向你介绍我们在做的一些事情以及我的小伙伴们。如果你感到有兴趣，并且认为自己足够优秀，不要吝啬你的才华，直接邮件简历给他们，也许他们将会成为你职业生涯的第一个老板，以及你全新人生阶段的良师益友。</p>
@@ -79,7 +263,7 @@
     <link href="http://taobaofed.org/blog/2019/01/07/imgcook/"/>
     <id>http://taobaofed.org/blog/2019/01/07/imgcook/</id>
     <published>2019-01-07T09:09:12.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB19QQxApYqK1RjSZLeXXbXppXa-900-500.png" alt="imgcook 体验版发布"></p>
 <h1 id="imgcook-体验版发布"><a href="#imgcook-体验版发布" class="headerlink" title="imgcook 体验版发布"></a>imgcook 体验版发布</h1><p>经过淘宝前端团队内部近一年半的打磨，imgcook 迎来了社区体验版发布，欢迎试用～。</p>
 <h2 id="imgcook-是什么？"><a href="#imgcook-是什么？" class="headerlink" title="imgcook 是什么？"></a>imgcook 是什么？</h2><p>imgcook 是专注以各种图像（Sketch/PSD/静态图片）为原材料烹饪的匠心大厨，通过智能化手段将各种图像一键生成可维护的 UI 视图代码，期望此 imgcook (图像大厨) 未来能够成为一位 P5 级别的重构工程师，能切实提高开发的开发效率，并助力开发、设计师、测试的高效协作，我们期望做到：</p>
@@ -142,7 +326,7 @@
     <link href="http://taobaofed.org/blog/2018/12/17/webgl-texture/"/>
     <id>http://taobaofed.org/blog/2018/12/17/webgl-texture/</id>
     <published>2018-12-17T07:35:29.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB1ng7ewCzqK1RjSZFLXXcn2XXa-900-500.png" alt="WebGL 纹理详解"></p>
 <h1 id="WebGL-纹理详解"><a href="#WebGL-纹理详解" class="headerlink" title="WebGL 纹理详解"></a>WebGL 纹理详解</h1><p>Buffer（数据缓冲区）与 Texture（纹理）是 WebGL 程序的两大数据来源。Buffer 可以通过 ArrayBuffer 或更语义化的 TypedArray 来构造；而 Texture 在大多数情况下，是通过 Image 对象来构造的。在构造和使用 Texture 的过程中，需要确定很多<strong>选项</strong>来以不同的方式构造 Texture；这些选项之间有着各种各样的关系，或互相依赖，或互相排斥，或互相影响。最近，我又重新梳理了一遍我所用到的 WebGL 纹理各种参数的影响，稍作整理，以防遗忘。</p>
 <p>为此，我专门编写了一个 Demo，如下所示。Demo 页的右上角有一个使用 <a href="https://github.com/dataarts/dat.gui" target="_blank" rel="noopener">dat.GUI</a> 生成的控件，其中列举了影响纹理的一些选项。这篇文章将逐个讨论这些选项的作用和相互关系。</p>
@@ -260,7 +444,7 @@
     <link href="http://taobaofed.org/blog/2018/11/27/hooks-and-function-component/"/>
     <id>http://taobaofed.org/blog/2018/11/27/hooks-and-function-component/</id>
     <published>2018-11-27T03:18:33.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB11clIsgHqK1RjSZFkXXX.WFXa-900-500.png" alt="前端架构杂思录：议 Function Component 与 Hooks"></p>
 <p>最近团队里 @大果 分享了 React Hooks，也尝试讨论下 Function Component 与 React Hooks，技术的发展路径总是逐步降低其门槛，简单从轻量级角度我们做一个排序：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">createClass Component &gt; Class Component &gt; Function Component</span><br></pre></td></tr></table></figure>
@@ -314,7 +498,7 @@
     <link href="http://taobaofed.org/blog/2018/10/31/a-tag/"/>
     <id>http://taobaofed.org/blog/2018/10/31/a-tag/</id>
     <published>2018-10-31T08:09:15.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1Q3Y4l4TpK1RjSZFGXXcHqFXa-900-500.jpg" alt="Atag - Web Components 最佳实践"></p>
 <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>上一次社区中谈论起 Web Components 已经可以追溯到三四年前了，彼时 Web Components 仍处于不稳定的草案阶段，Polymer 的出世使大家似乎看到了新一代的前端技术，但直到今天，在今年五月 Google I/O 发布 Polymer 3 之后， Web Components 的规模化应用才看似成为了可能。</p>
 <p>过去一段时间，我一直在使用 Web Components 构建淘宝小程序的 <a href="https://github.com/alibaba/rax/tree/master/packages/atag" target="_blank" rel="noopener">基础组件 Atag</a>。MDN 上对 Web Components 这个名词的解释是</p>
@@ -608,7 +792,7 @@
     <link href="http://taobaofed.org/blog/2018/08/08/workbox3/"/>
     <id>http://taobaofed.org/blog/2018/08/08/workbox3/</id>
     <published>2018-08-08T08:35:49.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB19EDcJMmTBuNjy1XbXXaMrVXa-900-500.jpg" alt="Workbox 3：Service Worker 可以如此简单"></p>
 <p>如果你追求极致的 Web 体验，你一定在站点中使用过 PWA，也一定面临过在编写 Service Worker 代码时的犹豫不决，因为 Service Worker 太重要了，一旦注册在用户的浏览器，全站的请求都会被 Service Worker 控制，一不留神，小问题也成了大问题了。不过到了现在有了 Workbox 3，一切关于 Service Worker 的担心都不再是问题。</p>
 <h2 id="科普-Service-Worker"><a href="#科普-Service-Worker" class="headerlink" title="科普 Service Worker"></a>科普 Service Worker</h2><p>如果你已经熟悉 Service Worker，可以跳过此段。</p>
@@ -666,7 +850,7 @@
     <link href="http://taobaofed.org/blog/2018/05/31/a-rich-interaction-solution-based-on-bindingx/"/>
     <id>http://taobaofed.org/blog/2018/05/31/a-rich-interaction-solution-based-on-bindingx/</id>
     <published>2018-05-31T04:22:18.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB15lFuuGmWBuNjy1XaXXXCbXXa-900-500.jpg" alt="基于 BindingX 的富交互解决方案"></p>
 <h1 id="基于-BindingX-的富交互解决方案"><a href="#基于-BindingX-的富交互解决方案" class="headerlink" title="基于 BindingX 的富交互解决方案"></a>基于 BindingX 的富交互解决方案</h1><p>BindingX 官网: <a href="https://alibaba.github.io/bindingx/" target="_blank" rel="noopener">https://alibaba.github.io/bindingx/</a><br>BindingX 项目地址: <a href="https://github.com/alibaba/bindingx" target="_blank" rel="noopener">https://github.com/alibaba/bindingx</a></p>
 <h3 id="一-背景"><a href="#一-背景" class="headerlink" title="一. 背景"></a>一. 背景</h3><p>在 Weex 环境下实现一些复杂的手势交互效果可能会产生卡顿，这是因为每次手势交互都会产生两次 JS-native 通信。第一次是 native call JS，将手势事件传递到 JS 层交给前端处理，当 JS 层接收到回调后，会产生第二次通信，JS call native，用来驱动界面变化。与此同时，手势回调事件触发的频率是非常高的，频繁通信带来的时间成本很可能导致界面无法在 16ms 中完成绘制，因而产生卡顿。</p>
@@ -756,7 +940,7 @@
     <link href="http://taobaofed.org/blog/2018/05/07/optimizing-page-performance-with-shader/"/>
     <id>http://taobaofed.org/blog/2018/05/07/optimizing-page-performance-with-shader/</id>
     <published>2018-05-07T08:21:04.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1zdJ_qeOSBuNjy0FdXXbDnVXa-900-500.jpg" alt="活用 Shader，让你的页面更小，更炫，更快"></p>
 <p>可编程着色器（shader）是运行在 GPU 中的程序，是现代图形渲染技术的基础。shader 赋予了开发者「逐像素着色」的能力。桌面/移动设备的图形程序 API 诸如 OpenGL，OpenGL ES，DirectX 以及新一代的 Vulkan，shader 都是重中之重，核心中的核心。</p>
 <p>WebGL 的出现，使得在浏览器环境中渲染 3D 场景变得轻而易举。但是 WebGL 和 shader 不仅可以用来渲染 3D 场景，还可以做一些其他酷酷的事情。前两天，我用 shader 技术改造 / 复刻了之前开发的一个业务页面，颇有心得和启发，不妨记录下来。</p>
@@ -862,7 +1046,7 @@
     <link href="http://taobaofed.org/blog/2018/03/12/long-list-in-rax/"/>
     <id>http://taobaofed.org/blog/2018/03/12/long-list-in-rax/</id>
     <published>2018-03-12T08:46:38.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1GMRPdKOSBuNjy0FdXXbDnVXa-900-500.jpg" alt="Rax 系列教程（长列表）"></p>
 <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>Rax 提供的长列表标签有很多，在什么场景下使用什么列表组件，怎样选择列表组件性能会更好，这些问题可能会给刚接触 Rax 的同学带来困扰。本文结合 Rax 0.5 发布版本对列表能力进行一次详细的梳理。</p>
 <h2 id="如何让页面滚动"><a href="#如何让页面滚动" class="headerlink" title="如何让页面滚动"></a>如何让页面滚动</h2><p>在开始正题之前先说说为什么要有长列表的概念，以及如何让页面可以滚动。</p>
@@ -980,7 +1164,7 @@
     <link href="http://taobaofed.org/blog/2018/03/05/intro-to-g3d/"/>
     <id>http://taobaofed.org/blog/2018/03/05/intro-to-g3d/</id>
     <published>2018-03-05T08:36:31.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB1Df1Ab1OSBuNjy0FdXXbDnVXa-900-500.png" alt="G3D —— Hybrid 环境下的 WebGL 3D 渲染引擎"></p>
 <p>G3D 是一款基于 WebGL 的 JavaScript 3D 渲染引擎，借助 GCanvas，G3D 可以运行在 Weex，ReactNative 等 hybrid 环境下。G3D 由淘宝终端团队推出，并于 2018 年 3 月与 GCanvas 同时宣布正式开源。</p>
 <p>那么就会有同学问了，G3D 和 three.js 有什么不同呀？G3D 和 GCanvas 究竟是什么关系啊？这篇文章，就聊一聊 G3D 这个产品的来龙去脉。</p>
@@ -1033,7 +1217,7 @@
     <link href="http://taobaofed.org/blog/2018/02/27/2018-intern-recruitment/"/>
     <id>http://taobaofed.org/blog/2018/02/27/2018-intern-recruitment/</id>
     <published>2018-02-27T10:31:55.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://img.alicdn.com/tfs/TB106aubntYBeNjy1XdXXXXyVXa-900-500.jpg" alt="淘宝技术部 2018 实习生内部推荐启动啦"></p>
 <h2 id="我们是谁？"><a href="#我们是谁？" class="headerlink" title="我们是谁？"></a>我们是谁？</h2><p>我们是淘宝终端技术与基础业务团队，包含 前端、客户端、后端 三个团队有 150+ 同学。</p>
 <h3 id="前端团队"><a href="#前端团队" class="headerlink" title="前端团队"></a>前端团队</h3><p>我们负责：导购业务、内容业务、商家业务、基础交易业务、创新业务、店铺业务等大多数淘宝内的前端开发，在过程中不断沉淀，并借助团队具备前端和客户端两个职能岗位的优势，建立起了强大的终端技术体系：</p>
@@ -1102,7 +1286,7 @@
     <link href="http://taobaofed.org/blog/2018/02/06/rax-native-guide/"/>
     <id>http://taobaofed.org/blog/2018/02/06/rax-native-guide/</id>
     <published>2018-02-06T11:28:12.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1nuoFXTtYBeNjy1XdXXXXyVXa-900-500.jpg" alt="Rax 系列教程（native 扫盲）"></p>
 <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>Rax 天生就是一个跨容器的解决方案，这让我们不必单独了解 iOS 和 安卓背后做了什么，让我们的开发变得很省心。但真实情况是我们的业务往往同时跑在 web 和 native 两端，web 我们轻车熟路是前端天生的优势，native 对很多人来说就会有些陌生，native 上出现的各种问题用 web 的路子去解释往往会解释不通。据 2017 年底粗略统计 Rax 的用户 70% 是前端同学，本文面向前端，简单介绍一下 Rax 背后的 native 端在做的一些事情。本文吸取了大量前人的经验，对于过深的 native 概念进行了剔除，以求前端同学更好理解，如果想更深入了解的同学可以参考下面附件内容。</p>
 <h2 id="Rax-＝-RN-语法-Weex-能力"><a href="#Rax-＝-RN-语法-Weex-能力" class="headerlink" title="Rax ＝ RN 语法 + Weex 能力"></a>Rax ＝ RN 语法 + Weex 能力</h2><p>Rax 是一套基于 React 写法的 Weex 上层 DSL，很自然的我们就会拿来和 RN 进行对比。实际上 Rax 的设计上也是在尽量靠拢 RN。下面我们先来了解一下。</p>
@@ -1228,7 +1412,7 @@
     <link href="http://taobaofed.org/blog/2018/01/23/implement-javascriptcore-debugger-ios/"/>
     <id>http://taobaofed.org/blog/2018/01/23/implement-javascriptcore-debugger-ios/</id>
     <published>2018-01-23T03:30:45.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1c7mhoh6I8KJjy0FgXXXXzVXa-900-500.jpg" alt="实现一个 JavaScriptCore 的 debugger —— iOS 篇"></p>
 <p>JSC 的 debugger 是个神奇的东西，在网上资料甚少，几乎完全搜索不到，尤其是 iOS 上，OC 接口没有暴露任何 debugger 信息。</p>
 <p>不过好在 JSC 是开源的，通过分析源代码可以找到 JSC::Debugger 这个抽象类，我们继承这个抽象类，然后实现掉虚函数，创建实例并且把它挂载到 global object 即可开启 debug 能力了。</p>
@@ -1312,7 +1496,7 @@
     <link href="http://taobaofed.org/blog/2018/01/18/rax-in-action/"/>
     <id>http://taobaofed.org/blog/2018/01/18/rax-in-action/</id>
     <published>2018-01-18T08:30:44.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1IYdCnBHH8KJjy0FbXXcqlpXa-900-500.jpg" alt="Rax 系列教程（上手）"></p>
 <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>这篇文章针对初学 Rax 的同学，主要介绍 Rax 是什么，开发体验的梳理，以及遇到 Rax 的开发问题如何寻求解决。本文配合 Rax 的 0.5 发布版本推出，结合新版 Rax 对于旧版的教程内容做出部分修正。</p>
 <h2 id="1、什么是-Rax"><a href="#1、什么是-Rax" class="headerlink" title="1、什么是 Rax"></a>1、什么是 Rax</h2><p><img src="https://gw.alicdn.com/tfs/TB1CU6ofb_I8KJjy1XaXXbsxpXa-867-203.jpg" alt></p>
@@ -1535,7 +1719,7 @@
     <link href="http://taobaofed.org/blog/2018/01/12/pandora-information-channel/"/>
     <id>http://taobaofed.org/blog/2018/01/12/pandora-information-channel/</id>
     <published>2018-01-12T05:05:26.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1rRShmBfH8KJjy1XbXXbLdXXa-900-500.jpg" alt="构筑未来数据网 - Pandora.js 的信息通路"></p>
 <p>上一篇我们介绍了 Pandora.js 度量体系中的 Metrics，通过 Metrics 我们能将应用运行中的数据生成出来，但是有时候我们不仅仅需要这些指标数据，更可能需要信息数据。</p>
 <blockquote>
@@ -1625,7 +1809,7 @@
     <link href="http://taobaofed.org/blog/2018/01/05/pandora-metrics/"/>
     <id>http://taobaofed.org/blog/2018/01/05/pandora-metrics/</id>
     <published>2018-01-05T03:14:24.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1UpNqlBfH8KJjy1XbXXbLdXXa-900-500.jpg" alt="跨越时代的度量衡 - Pandora.js 的 Metrics 介绍"></p>
 <p>自秦始皇统一六国，天下归一，推行“一法度衡石丈尺，车同轨 ，书同文”，颁发统一度量衡诏书，制定了一套严格的管理制度，天底下的度量衡就变成了一套。而如今程序世界也是天下分崩离析，不同编程语言各占一隅，不过即使语法不同，但是分分合合，思路终归一致，想要度量代码的心情依旧是一样的。</p>
 <h2 id="度量的作用"><a href="#度量的作用" class="headerlink" title="度量的作用"></a>度量的作用</h2><p>很多同学表示怀疑，为什么要度量？</p>
@@ -1739,7 +1923,7 @@
     <link href="http://taobaofed.org/blog/2017/12/21/pandora-ipc/"/>
     <id>http://taobaofed.org/blog/2017/12/21/pandora-ipc/</id>
     <published>2017-12-21T03:35:12.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB1GSQ3jf6H8KJjy0FjXXaXepXa-900-500.jpg" alt="让进程间通信更容易 - Pandora.js 的 IPC-Hub"></p>
 <p>我们前面的两篇介绍了怎么定义多个进程，怎么利用进程这一资源。我们在淘宝业务中也是这样实践的，有一个问题也越发明显，进程间如何通信呢？</p>
 <p>起初我们有一个比较简单的 IPC 实现，通过 Domain Socket 进行通信。也是传统的 C/S 架构的，两个进程间进行比较基础的消息通信（比较类似 <a href="https://www.npmjs.com/package/node-ipc" target="_blank" rel="noopener">Node-IPC</a> 这个包）。</p>
@@ -1824,7 +2008,7 @@
     <link href="http://taobaofed.org/blog/2017/12/19/pandora-service/"/>
     <id>http://taobaofed.org/blog/2017/12/19/pandora-service/</id>
     <published>2017-12-19T08:19:29.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB17ocZiY_I8KJjy1XaXXbsxpXa-900-500.jpg" alt="Pandora.js 的 Service 机制"></p>
 <blockquote>
 <p>这篇依然是介绍 Pandora.js 的系列文章之一<br>项目地址：<a href="https://github.com/midwayjs/pandora" target="_blank" rel="noopener">https://github.com/midwayjs/pandora</a> 欢迎社会各界前来 Star ~</p>
@@ -1939,7 +2123,7 @@
     <link href="http://taobaofed.org/blog/2017/12/13/pandora/"/>
     <id>http://taobaofed.org/blog/2017/12/13/pandora/</id>
     <published>2017-12-13T11:19:30.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
+    <updated>2019-03-19T08:20:37.000Z</updated>
     <content type="html"><![CDATA[<p><img src="https://gw.alicdn.com/tfs/TB198F2ifDH8KJjy1XcXXcpdXXa-900-500.jpg" alt="管理 Node.js 进程从未如此优雅"></p>
 <p>说到 Node.js 的进程模型，脑子里第一个闪现的可能是 Cluster 模块，亦或是 Master / Worker 进程模型，在长期的使用过程中，我们逐渐发现，这样在应用的开发早晚会有局限性，除了不够优雅之外，每次增减进程或者自定义进程都会产生不可预知的问题。</p>
 <p>在一些特定的场景下，我们甚至在 Master 下面加入了一个 Agent 进程用来运行一些中间件 SDK 。在这些修修补补的过程中，传统的进程间通信，数据交换都变的困难，甚至 Worker 到 Agent 之间通信都无法很优雅的进行。</p>
@@ -1995,145 +2179,6 @@
       <category term="Pandora" scheme="http://taobaofed.org/tags/Pandora/"/>
     
       <category term="应用管理" scheme="http://taobaofed.org/tags/%E5%BA%94%E7%94%A8%E7%AE%A1%E7%90%86/"/>
-    
-      <category term="Node.js" scheme="http://taobaofed.org/categories/Node-js/"/>
-    
-  </entry>
-  
-  <entry>
-    <title><![CDATA[机器学习，Hello World from Javascript!]]></title>
-    <link href="http://taobaofed.org/blog/2017/12/07/machine-learning/"/>
-    <id>http://taobaofed.org/blog/2017/12/07/machine-learning/</id>
-    <published>2017-12-06T18:17:45.000Z</published>
-    <updated>2019-03-13T02:32:26.000Z</updated>
-    <content type="html"><![CDATA[<p><img src="//gw.alicdn.com/tfs/TB1vGErhhPI8KJjSspfXXcCFXXa-900-500.jpg" alt="机器学习，Hello World from Javascript!"></p>
-<h2 id="导语"><a href="#导语" class="headerlink" title="导语"></a>导语</h2><p>JavaScript 适合做机器学习吗？这是一个问号。但每一位开发者都应该了解机器学习解决问题的思维和方法，并思考：它将会给我们的工作带来什么？同样，算法能力可能会是下一阶段工程师的标配。</p>
-<p>本文旨在通过讲解识别手写字的处理过程，带读者了解机器学习解决问题的一般过程。本文适合以下背景的读者阅读：</p>
-<ul>
-<li>你不需要具备 Python、C++ 的编程能力：全文使用 JavaScript 作为编程语言，且不依赖任何第三方库实现机器学习算法。</li>
-<li>你不需要具备算法能力和高数的背景，本文机器学习算法的实现不过 20 行代码。</li>
-</ul>
-<p>作者学识有限，文章中难免会有疏漏，欢迎指正。</p>
-<h2 id="机器学习中的-Hello-World"><a href="#机器学习中的-Hello-World" class="headerlink" title="机器学习中的 Hello World"></a>机器学习中的 Hello World</h2><p>就像我们学习编程语言一样，我们的第一个尝试就是在终端命令行中输出的 “Hello World”。机器学习中的 “Hello World” 便是<strong>识别手写字数据集</strong>。手写字是形如下面的图像：</p>
-<p><img src="https://img.alicdn.com/tfs/TB160wzd5qAXuNjy1XdXXaYcVXa-636-159.png" alt="手写字图"></p>
-<p>我们可以编写一个网页程序，提供手写板的功能来捕获用户的输入，并返回我们识别的数字：用户在手写板内写下 0 到 9 中的任意一个数字，另一侧则显示我们识别的结果。正如 Keras.js 提供的示例那样[1]：</p>
-<p><img src="https://img.alicdn.com/tfs/TB1ReAtd5qAXuNjy1XdXXaYcVXa-1614-754.png" alt="Keras.js - MNIST 示例截图"></p>
-<p>如何编写出这样的手写识别程序来获取用户的手写输入不是我们这篇文章的重点。我们的重点是，当我们的程序得到这样一张图像的数据后，如何识别出这组数据表示的数字？</p>
-<h3 id="数据的表示和收集"><a href="#数据的表示和收集" class="headerlink" title="数据的表示和收集"></a>数据的表示和收集</h3><p>人类能够从图像中获得信息，但程序如何知道 A 图是表示 1，B 图是表示 2 ？因此我们需要确定<strong>数据的表示方式</strong>：用怎样的一种方式来在程序中表达一张白底黑字的图像它的像素点分布及点的黑白度？</p>
-<p>观察 Keras.js 的示例，你会发现手写板的面积是 240px * 240px。即手写板内有 57,600 个像素点。我们可以把它们平铺开来，并且用 0 到 1 的数值表示每个点的黑白度，其中越接近 1 则表示该像素点越黑，那么就可以用一个数值矩阵来表示手写字：</p>
-<p><img src="https://img.alicdn.com/tfs/TB190wzd5qAXuNjy1XdXXaYcVXa-982-387.png" alt="手写字的数据表示"></p>
-<p>手写板程序获得用户的输入并生成图像后，识别程序将图像转换成我们需要的数据格式。图像识别是另一个广泛的课题，在这里不再展开。我们会直接使用 MNIST 数据集[2]，它的数据表示方式正如上面所描述的那样，只是 MNIST 数据集中每一张图片是包含 28 * 28 个像素点的。</p>
-<p>确定了数据的表示方式，接下来我们还需要对每个数据的实际含义进行标识。</p>
-<p>回想一下我们自己是如何认识这些数字的？即我们是怎样认定图像中的 1 形状表示的就是数字 1？————事物的认识。认知是由他人教育的。</p>
-<p>同样，在机器学习中，我们也需要“教育”机器：A 这样的像素点排序就是 1， B 这样的像素点排序是 2。这就是<strong>训练数据</strong>。</p>
-<p>为了收集训练数据，我们可以随机找人在手写识别程序中画数字，然后标识它的结果，最终以任何的形式（文本、表格…）储存。以手写字为例，我们可以用文本的方式存储，格式可以是这样：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0 0 0.3 0 1 0 ... n(=28) | 4</span><br><span class="line">1 0 0.1 0 0 0 ... n(=28) | 6</span><br><span class="line">....</span><br><span class="line">n(=1000)</span><br></pre></td></tr></table></figure>
-<p>其中每一行代表一个训练数据，使用 “|” 分割数据的表示和它对应的数字。</p>
-<p>在本文中我们将直接使用 MNIST 数据集，因此如何收集数据在这里不再展开。<strong>在机器学习中经常会使用公开的数据集来进行训练和测试</strong>。</p>
-<p>通过确定数据的表示和收集，我们可以了解到的是：</p>
-<ul>
-<li>数据是一切机器学习的基础；</li>
-<li>训练数据的好坏将会影响到我们机器学习算法预测的准确率：<ul>
-<li>想象一下如果某些数据我们标识错误，把 1 标识成 2；</li>
-<li>想象一下如果训练数据中有大量的重复值，或某个数字的数据量特别大而另外一些数字的数据量很小。</li>
-</ul>
-</li>
-</ul>
-<h3 id="准备数据"><a href="#准备数据" class="headerlink" title="准备数据"></a>准备数据</h3><p>我们收集到的数据可能会以任何的一种形式存储，例如文本、表格、二进制文件等等。MNIST 数据集是使用二进制存储的，因此在程序中我们需要将它转换为 Javascript 比较容易操作的的数据格式，例如数组。</p>
-<p>本文中我们将使用一个 NPM 包 mnist[3] 提供的，已经转换好的数据，它的格式如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    input: [0, 0.4, 0.5, 0, 0.1, 0, 0, 0, 0, ..., n], // n = 728</span><br><span class="line">    output: [0, 1, 0, 0, 0, 0, 0, 0, 0, 0], // 1</span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    input: [1, 0.4, 0.5, 0, 0.8, 0, 0.1, 0, 1, ..., n], // n = 728</span><br><span class="line">    output: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], // 2</span><br><span class="line">  &#125;,</span><br><span class="line">  ....</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-<p>其中 input 是图像的数据表示，output 是图像实际代表的数字。output 使用了一种叫做 One-Hot 的编码方式，它一共有 10 个项，为 1 的项就是它表示的数字（第一项为 1 则代表是 0，第二项为 1 则代表是 2 ，以此类推）。</p>
-<h3 id="选择一种算法"><a href="#选择一种算法" class="headerlink" title="选择一种算法"></a>选择一种算法</h3><p>通过上面的数据准备，我们已经把一个现实中的问题转化成了一个数学问题：给定 728 个 0 到 1 之间数值的特征，应该将它分类到 0 ~ 9 哪个数字中？</p>
-<p>这就是机器学习中的主要任务——<strong>分类</strong>。有很多的机器学习算法可以用来解决分类问题，文本将使用 k-近邻算法(k-NN)[4]来解决这个问题，因为它非常有效且容易理解。</p>
-<h4 id="k-近邻算法概述"><a href="#k-近邻算法概述" class="headerlink" title="k-近邻算法概述"></a>k-近邻算法概述</h4><p>在一个 10 * 10 的二维平面内画一条线把它分成 2 个区域(A/B)。假设我们不知道线是如何画的，但现已知有 4 个点，a 点坐标是 (1, 1) 属于区域 A，b 点坐标是 (2, 2) 属于区域 A，c 点坐标是 (9, 9) 属于区域 B，d 点坐标是 (8, 8) 属于区域 B。这时候再给定一个 e 点坐标是 (8.5, 8.5) ，请问它最有可能在哪个区域内？</p>
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Point 1</th>
-<th>Point 2</th>
-<th>Area</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>a</td>
-<td>1</td>
-<td>1</td>
-<td>A</td>
-</tr>
-<tr>
-<td>b</td>
-<td>2</td>
-<td>2</td>
-<td>A</td>
-</tr>
-<tr>
-<td>c</td>
-<td>9</td>
-<td>9</td>
-<td>B</td>
-</tr>
-<tr>
-<td>d</td>
-<td>8</td>
-<td>8</td>
-<td>B</td>
-</tr>
-<tr>
-<td>e</td>
-<td>8.5</td>
-<td>8.5</td>
-<td><strong>?</strong></td>
-</tr>
-</tbody>
-</table>
-<p><img src="https://img.alicdn.com/tfs/TB1tqEzd5qAXuNjy1XdXXaYcVXa-1280-960.png" alt="二维平面图示例"></p>
-<p>绝大多数人都会说“可能是 B”。我们是如何得出这个答案的？——因为它和 c, d “看起来更接近一些，更有可能在同一个区域”。同样的推论可以延伸至三维、四维甚至更多维度的数据中。MNIST 的数据表示就是 728 个特征的多纬数据，k-近邻算法同样适用。</p>
-<blockquote>
-<p>存在一个训练样本集，并且样本集中每个数据都存在标签，即我们知道样本集中每一数据与所属分类的对应关系。输入没有标签的新数据后，将新数据的每个特征与样本集中数据对应的特征进行比较，然后算法提取样本特征最近邻的分类标签。一般来说，我们只选择样本数据集中前 k 个最相似的数据，这就是 k-近邻算法的 k 的出处。<br>          ——《机器学习实战》k 近邻算法</p>
-</blockquote>
-<p>两个向量之间的距离可以通过欧几里得距离公式求得：</p>
-<p><img src="https://img.alicdn.com/tfs/TB12gMzd5qAXuNjy1XdXXaYcVXa-1096-126.png" alt="欧几里得距离公式"></p>
-<p>于是实现一个 k-NN 算法就很简单了：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">function classify(x, trainingData, labels, k) &#123;</span><br><span class="line"></span><br><span class="line">  // 确定目标点 x 与训练数据中每个点的距离（欧几里得距离公式）</span><br><span class="line">  const distances =[];</span><br><span class="line">  trainingData.forEach(element =&gt; &#123;</span><br><span class="line">    let distance = 0;</span><br><span class="line">    element.forEach((value, index) =&gt; &#123;</span><br><span class="line">      const diff = x[index] - value;</span><br><span class="line">      distance += (diff * diff);</span><br><span class="line">    &#125;);</span><br><span class="line">    distances.push(Math.sqrt(distance));</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  // 将训练数据按照与 x 点的距离从近到远排序</span><br><span class="line">  const sortedDistIndicies = distances</span><br><span class="line">    .map((value, index) =&gt; &#123;</span><br><span class="line">      return &#123;value, index&#125;;</span><br><span class="line">    &#125;)</span><br><span class="line">    .sort((a, b) =&gt; a.value - b.value );</span><br><span class="line"></span><br><span class="line">  // 确定前 k 个点类别的出现频率</span><br><span class="line">  const classCount = &#123;&#125;;</span><br><span class="line">  for (let i = 0; k &gt; i; i++) &#123;</span><br><span class="line">    const voteLabel = labels[sortedDistIndicies[i].index];</span><br><span class="line">    classCount[voteLabel] = (classCount[voteLabel] || 0) + 1;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // 返回出现频率最高的类别作为当前点的预测分类</span><br><span class="line">  let predictedClass = &apos;&apos;;</span><br><span class="line">  let topCount = 0;</span><br><span class="line">  for (const voteLabel in classCount) &#123;</span><br><span class="line">    if (classCount[voteLabel] &gt; topCount) &#123;</span><br><span class="line">      predictedClass = voteLabel;</span><br><span class="line">      topCount = classCount[voteLabel];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return predictedClass;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="测试算法"><a href="#测试算法" class="headerlink" title="测试算法"></a>测试算法</h4><p>为了验证我们的算法的效果，我们需要对其进行测试。这就需要引入<strong>测试数据</strong>。在机器学习中通常会将收集到的数据通过一定的方法划分为训练数据和测试数据然后用于训练和测试。如何划分数据在这里不展开，在本示例中，我们按照 80:20 的比例来划分训练和测试数据，互斥性和随机性由 MNIST 库进行保证。</p>
-<p>拿到训练和测试数据后我们就可以对上一步编写的算法进行测试了，我们用错误率来评估算法的可靠性，错误率越低则越可靠：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">const classify = require(&apos;./kNN&apos;);</span><br><span class="line"></span><br><span class="line">// 1. 收集数据：忽略，直接使用 MNIST</span><br><span class="line">const mnist = require(&apos;mnist&apos;);</span><br><span class="line"></span><br><span class="line">// 2. 准备数据</span><br><span class="line">let trainingImages = [];</span><br><span class="line">let labels = [];</span><br><span class="line"></span><br><span class="line">// 划分数据</span><br><span class="line">const trainingCount = 8000;</span><br><span class="line">const testCount = 2000;</span><br><span class="line">const set = mnist.set(trainingCount, testCount);</span><br><span class="line">const trainingSet = set.training;</span><br><span class="line">const testSet = set.test;</span><br><span class="line"></span><br><span class="line">// 为我们的 k-NN 算法准备特定的数据格式</span><br><span class="line">trainingSet.forEach((&#123;input, output&#125;) =&gt; &#123;</span><br><span class="line"></span><br><span class="line">  // One-Hot to number</span><br><span class="line">  const number = output.indexOf(output.reduce((max, activation) =&gt; Math.max(max, activation), 0));</span><br><span class="line">  trainingImages.push(input);</span><br><span class="line">  labels.push(number);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 3. 分析数据：在命令行中检查数据，确保它的格式符合要求</span><br><span class="line">console.log(&apos;trainingImages&apos;, JSON.stringify(trainingImages));</span><br><span class="line">console.log(&apos;labels&apos;, JSON.stringify(labels));</span><br><span class="line"></span><br><span class="line">// 4. 测试算法</span><br><span class="line">let errorCount = 0;</span><br><span class="line">const startTime = Date.now();</span><br><span class="line">testSet.forEach((&#123;input, output&#125;, key) =&gt; &#123;</span><br><span class="line">  const number = output.indexOf(output.reduce((max, activation) =&gt; Math.max(max, activation), 0));</span><br><span class="line">  const predicted = classify(input, trainingImages, labels, 3);</span><br><span class="line">  const result = predicted == number;</span><br><span class="line">  console.log(`$&#123;key&#125;. number is $&#123;number&#125;, predicted is $&#123;predicted&#125;, result is $&#123;result&#125;`);</span><br><span class="line"></span><br><span class="line">  if (!result) &#123;</span><br><span class="line">    errorCount++;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">console.log(`The total number of errors is: $&#123;errorCount&#125;`);</span><br><span class="line">console.log(`The total error rate is: $&#123;errorCount/testCount&#125;`);</span><br><span class="line">console.log(`Spend: $&#123;(Date.now() - startTime) / 1000&#125;s`);</span><br></pre></td></tr></table></figure>
-<p>如无意外，你的终端将会输出这样的结果：</p>
-<p><img src="https://img.alicdn.com/tfs/TB1U4nlgvDH8KJjy1XcXXcpdXXa-730-126.png" alt="kNN运行结果"></p>
-<p>最终错误率的值大约是 5%。这个结果好吗？并不好。我们可以通过改变 k 的值、改变训练样本的数目影响 k-近邻算法的错误率，读者可以尝试改变这些变量值观察错误率的变化。实际上，只要将 k-近邻算法稍加改良，我们就能够把错误率降到 1% 以下！</p>
-<p><img src="https://img.alicdn.com/tfs/TB1qK3Ad5qAXuNjy1XdXXaYcVXa-1894-920.png" alt="MNIST数据集中kNN算法的效率"></p>
-<blockquote>
-<p>表格中列出了一些 k-近邻算法对 MNIST 数据集进行测试的错误率，图片来自 <a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener">http://yann.lecun.com/exdb/mnist/</a></p>
-</blockquote>
-<p>我们也应该注意到的是，我们的算法在 8000 条训练数据集和 2000 条测试数据集上进行测试，运行了 325 秒！这是一个很差的结果。在实际生产环境中，我们不仅应该关注准确率也应该关注算法的执行效率。</p>
-<h4 id="使用算法"><a href="#使用算法" class="headerlink" title="使用算法"></a>使用算法</h4><p>只要测试的算法效果符合预期，我们就可以将算法部署到生产环境进行使用了。我们可以将算法和手写识别程序结合起来，完成一整套获取输入 -&gt; 算法预测 -&gt; 输出结果的流程：首先手写识别程序将用户输入的图像转换为我们期望的数据格式，然后执行我们的算法获取预测的分类。代码可能是这样：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 手写识别程序将用户输入的图像转换为我们期望的数据格式</span><br><span class="line">const input = [0, 0.3, 1, 1, 0, 0, 0.2, ...];</span><br><span class="line"></span><br><span class="line">// 执行算法</span><br><span class="line">classify(input, trainingImages, labels, 3);</span><br></pre></td></tr></table></figure>
-<p>很遗憾，在执行算法时我们还是看到了 <code>trainingImages</code> 的存在。这意味着每次预测我们的机器都需要给训练数据准备格外的存储空间。假设训练数据很大（这很常见），则会给我们的生产环境机器造成巨大的内存压力。</p>
-<p>每次调用算法还需要传入训练数据的方式即浪费存储空间也不优雅，它只能作为我们的示例进行使用。</p>
-<h2 id="进一步思考"><a href="#进一步思考" class="headerlink" title="进一步思考"></a>进一步思考</h2><p>本文我们使用 Javascript 实现了一个非常简单的机器学习算法，并用其来测试 MNIST 数据集，完整代码实现在<a href="https://github.com/alvinhui/machine_learning/tree/master/01_kNN" target="_blank" rel="noopener">这个仓库</a>中。这只是一个简单的示例，但从中我们了解到了机器学习的基本概念和解决问题的一般过程。进一步思考，上面的流程中每一步都可能被优化：</p>
-<ul>
-<li>对于手写字，还有没有其他的数据表示方式？例如我们非要用 0 到 1 的数值来表示点的黑白度吗？</li>
-<li>训练数据集是越大越好吗？例如我们将手写字所有的特征排列组合 (28^28) 个数据量作为训练数据集；</li>
-<li>如何调整算法参数以获得最佳的收益（准确率和效率）？</li>
-</ul>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
-<li><a href="https://transcranial.github.io/keras-js/#/mnist-cnn" target="_blank" rel="noopener">Keras.js - MNIST 示例</a></li>
-<li><a href="http://yann.lecun.com/exdb/mnist/" target="_blank" rel="noopener">MNIST 数据集</a></li>
-<li><a href="https://github.com/cazala/mnist" target="_blank" rel="noopener">mnist - NPM</a></li>
-<li><a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" target="_blank" rel="noopener">k-NN</a></li>
-</ol>
-<blockquote>
-<p>题图：<a href="https://unsplash.com/photos/OFpzBycm3u0" target="_blank" rel="noopener">https://unsplash.com/photos/OFpzBycm3u0</a> By @jens johnsson</p>
-</blockquote>
-]]></content>
-    <summary type="html">
-    <![CDATA[<p><img src="//gw.alicdn.com/tfs/TB1vGErhhPI8KJjSspfXXcCFXXa-900-500.jpg" alt="机器学习，Hello World from Javascript!"></p>
-<h2 id="导语"><a href="]]>
-    </summary>
-    
-      <category term="Machine Learning" scheme="http://taobaofed.org/tags/Machine-Learning/"/>
     
       <category term="Node.js" scheme="http://taobaofed.org/categories/Node-js/"/>
     
