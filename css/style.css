@@ -45,13 +45,14 @@
 .widget cite,
 .article-entry cite {
   font-style: italic;
+  font-weight: bold;
 }
 .widget sup,
 .article-entry sup,
 .widget sub,
 .article-entry sub {
   font-size: 0.75em;
-  line-height: 0;
+  line-height: 0px;
   position: relative;
   vertical-align: baseline;
 }
@@ -89,8 +90,8 @@
 .article-entry ul ol,
 .widget ol ol,
 .article-entry ol ol {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 .widget ul,
 .article-entry ul {
@@ -185,7 +186,7 @@ ul {
 }
 table {
   border-collapse: separate;
-  border-spacing: 0;
+  border-spacing: 0px;
   vertical-align: middle;
 }
 caption,
